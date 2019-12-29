@@ -1,0 +1,1056 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "basics settings text block",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the Check Point CloudGuard IaaS Scale Set Administration Guide.",
+          "link": {
+            "label": "Administration Guide",
+            "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/html_frameset.htm"
+          }
+        }
+      },
+      {
+        "name": "gatewayScaleSetNameUi",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Gateway scale set name",
+        "toolTip": "The name of the Check Point Security Gateway Scale Set.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9A-Z]{1,30}$",
+          "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+        }
+      },
+      {
+        "name": "auth",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "authenticationType": "Authentication type",
+          "password": "Password",
+          "confirmPassword": "Confirm password",
+          "sshPublicKey": "SSH public key"
+        },
+        "toolTip": {
+          "authenticationType": "",
+          "password": "The user 'admin' password",
+          "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
+        },
+        "constraints": {
+          "required": true
+        },
+        "options": {
+          "hideConfirmation": false,
+          "hidePassword": false
+        },
+        "osPlatform": "Linux"
+      }
+    ],
+    "steps": [
+      {
+        "name": "autoprovision",
+        "label": "Check Point VMSS settings",
+        "subLabel": {
+          "preValidation": "Configure CloudGuard VMSS settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "CloudGuard VMSS settings",
+        "elements": [
+          {
+            "name": "CloudGuard VMSS settings text block",
+            "type": "Microsoft.Common.TextBlock",
+            "visible": true,
+            "options": {
+              "text": "Please provide the configuration values according to the Deployment Guide.",
+              "link": {
+                "label": "Deployment Guide",
+                "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/html_frameset.htm"
+              }
+            }
+          },
+          {
+            "name": "upgrading",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Are you upgrading your CloudGuard VMSS solution?",
+            "defaultValue": "No",
+            "toolTip": "Select 'Yes' if you are upgrading your CloudGuard VMSS solution.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ]
+            }
+          },
+          {
+            "name": "upgradeVmssInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('autoprovision').upgrading, 'yes')]",
+            "options": {
+              "icon": "Warning",
+              "text": "All the configurations below must be similar to the existing CloudGuard VMSS solution.\n\nNote that the target load balancers are the ones connected to your existing CloudGuard VMSS solution.\n\nSee the Deployment Guide for more information."
+            }
+          },
+          {
+            "name": "vmCount",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Initial number of gateways",
+            "defaultValue": "2",
+            "toolTip": "The initial number of gateways",
+            "constraints": {
+              "required": true,
+              "regex": "^[1-9][0-9]{0,1}$",
+              "validationMessage": "Please enter a number in the range 1-99."
+            }
+          },
+          {
+            "name": "maxVmCount",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Maximum number of gateways",
+            "defaultValue": "10",
+            "toolTip": "The maximum number of gateways",
+            "constraints": {
+              "required": true,
+              "regex": "^[1-9][0-9]{0,1}$",
+              "validationMessage": "Please enter a number in the range 1-99."
+            }
+          },
+          {
+            "name": "numGwsValidation",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[greater(steps('autoprovision').vmCount, steps('autoprovision').maxVmCount)]",
+            "options": {
+              "icon": "Error",
+              "text": "Maximum number of gateways is lower than initial number of gateways"
+            }
+          },
+          {
+            "name": "managementServer",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Management name",
+            "toolTip": "The name of the management server as it appears in the configuration file",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-]{1,30}$",
+              "validationMessage": "Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long."
+            }
+          },
+          {
+            "name": "configurationTemplateInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('autoprovision').upgrading, 'yes')]",
+            "options": {
+              "icon": "Info",
+              "text": "Use a different configuration template name than in your existing CloudGuard VMSS solution."
+            }
+          },
+          {
+            "name": "configurationTemplate",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Configuration template name",
+            "toolTip": "The configuration template name as it appears in the configuration file",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-]{1,30}$",
+              "validationMessage": "Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long."
+            }
+          },
+          {
+            "name": "adminEmail",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Administrator email address",
+            "defaultValue": "",
+            "toolTip": "An email address to notify about scaling operations",
+            "constraints": {
+              "required": false,
+              "regex": "^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$",
+              "validationMessage": "Leave empty or enter a valid email address."
+            }
+          },
+          {
+            "name": "deploymentMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Load balancers deployment",
+            "defaultValue": "Standard (External & Internal)",
+            "toolTip": "Defines which load balancers will be deployed. Note: For outbound inspection it is mandatory to deploy an external load balancer and/or instance level public IP addresses.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard (External & Internal)",
+                  "value": "Standard"
+                },
+                {
+                  "label": "External only (Inbound inspection only)",
+                  "value": "ELBOnly"
+                },
+                {
+                  "label": "Internal only (Outbound & E-W inspection only - see tooltip)",
+                  "value": "ILBOnly"
+                }
+              ]
+            }
+          },
+          {
+            "name": "appLoadDistribution",
+            "type": "Microsoft.Common.DropDown",
+            "label": "External Load Balancer session persistence",
+            "defaultValue": "None (5-tuple)",
+            "toolTip": "The load balancing distribution method for the External Load Balancer.",
+            "visible": "[not(equals(steps('autoprovision').deploymentMode, 'ILBOnly'))]",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "None (5-tuple)",
+                  "value": "Default"
+                },
+                {
+                  "label": "Client IP (2-tuple)",
+                  "value": "SourceIP"
+                },
+                {
+                  "label": "Client IP and protocol (3-tuple)",
+                  "value": "SourceIPProtocol"
+                }
+              ]
+            }
+          },
+          {
+            "name": "ilbLoadDistribution",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Internal Load Balancer session persistence",
+            "defaultValue": "None (5-tuple)",
+            "toolTip": "The load balancing distribution method for the Internal Load Balancer.",
+            "visible": "[not(equals(steps('autoprovision').deploymentMode, 'ELBOnly'))]",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "None (5-tuple)",
+                  "value": "Default"
+                },
+                {
+                  "label": "Client IP (2-tuple)",
+                  "value": "SourceIP"
+                },
+                {
+                  "label": "Client IP and protocol (3-tuple)",
+                  "value": "SourceIPProtocol"
+                }
+              ]
+            }
+          },
+          {
+            "name": "instanceLevelPublicIP",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Deploy the VMSS with instance level Public IP address",
+            "defaultValue": "No",
+            "toolTip": "If selected 'Yes', then each VMSS instance will have its own public IP address.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ]
+            }
+          },
+          {
+            "name": "externalCommunicationInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('autoprovision').instanceLevelPublicIP, 'no'), equals(steps('autoprovision').deploymentMode, 'ILBOnly'))]",
+            "options": {
+              "icon": "Warning",
+              "text": "For outbound inspection it is mandatory to deploy an external load balancer and/or instance level public IP addresses."
+            }
+          },
+          {
+            "name": "lbsTargetRGName",
+            "type": "Microsoft.Common.TextBox",
+            "visible": "[equals(steps('autoprovision').upgrading, 'yes')]",
+            "label": "Target load balancers resource group name",
+            "defaultValue": "",
+            "toolTip": "The name of the Target Load Balancers Resource Group.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
+              "validationMessage": "Resource Group only allow alphanumeric characters, periods, underscores, hyphens, slash, and parenthesis"
+            }
+          },
+          {
+            "name": "elbResourceId",
+            "type": "Microsoft.Common.TextBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ILBOnly')))]",
+            "label": "Target external load balancer resource ID",
+            "defaultValue": "",
+            "toolTip": "The Resource ID of the Target External Load Balancer.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
+              "validationMessage": "Resource Id only allow alphanumeric characters, periods, underscores, hyphens, slash, and parenthesis"
+            }
+          },
+          {
+            "name": "elbInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ILBOnly')))]",
+            "options": {
+              "icon": "Info",
+              "text": "Make sure you have created a new backend address pool for the target external load balancer."
+            }
+          },
+          {
+            "name": "elbBEAddressPoolName",
+            "type": "Microsoft.Common.TextBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ILBOnly')))]",
+            "label": "External load balancer's new backend pool name",
+            "toolTip": "The name of the new Target External Load Balancer's Backend Pool.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
+              "validationMessage": "Only alphanumeric characters, periods, underscores, hyphens, slash, and parenthesis are allowed"
+            }
+          },
+          {
+            "name": "ilbResourceId",
+            "type": "Microsoft.Common.TextBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ELBOnly')))]",
+            "label": "Target internal load balancer resource ID",
+            "defaultValue": "",
+            "toolTip": "The Resource ID of the Target Internal Load Balancer.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
+              "validationMessage": "Resource Id only allow alphanumeric characters, periods, underscores, hyphens, slash, and parenthesis"
+            }
+          },
+          {
+            "name": "ilbInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ELBOnly')))]",
+            "options": {
+              "icon": "Info",
+              "text": "Make sure you have created a new backend address pool for the target internal load balancer."
+            }
+          },
+          {
+            "name": "ilbBEAddressPoolName",
+            "type": "Microsoft.Common.TextBox",
+            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ELBOnly')))]",
+            "label": "Internal load balancer's new backend pool name",
+            "toolTip": "The name of the new target internal load balancer's backend pool.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
+              "validationMessage": "Only alphanumeric characters, periods, underscores, hyphens, slash, and parenthesis are allowed"
+            }
+          },
+          {
+            "name": "mgmtInterfaceOpt1",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Management interface and IP address",
+            "defaultValue": "Backend NIC's private IP address",
+            "visible": "[equals(steps('autoprovision').instanceLevelPublicIP, 'yes')]",
+            "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC and with public or private IP.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Backend NIC's private IP address",
+                  "value": "eth1-private"
+                },
+                {
+                  "label": "Frontend NIC's public IP address",
+                  "value": "eth0-public"
+                },
+                {
+                  "label": "Frontend NIC's private IP address",
+                  "value": "eth0-private"
+                }
+              ]
+            }
+          },
+          {
+            "name": "mgmtInterfaceOpt2",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Management interface and IP address",
+            "defaultValue": "Backend NIC's private IP address",
+            "visible": "[equals(steps('autoprovision').instanceLevelPublicIP, 'no')]",
+            "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC's private IP address.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Backend NIC's private IP address",
+                  "value": "eth1-private"
+                },
+                {
+                  "label": "Frontend NIC's private IP address",
+                  "value": "eth0-private"
+                }
+              ]
+            }
+          },
+          {
+            "name": "mgmtIPaddress",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Management Server IP address",
+            "toolTip": "The IP address used to manage the VMSS instances.",
+            "visible": "[or(equals(steps('autoprovision').mgmtInterfaceOpt1, 'eth0-private'), equals(steps('autoprovision').mgmtInterfaceOpt2, 'eth0-private'))]",
+            "constraints": {
+              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+              "required": true,
+              "validationMessage": "Please enter a valid IP address"
+            }
+          },
+          {
+            "name": "availabilityZonesNum",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Number of Availability Zones to use",
+            "defaultValue": "None",
+            "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
+            "visible": "[contains(' centralus eastus2 francecentral northeurope southeastasia westeurope westus2 eastus uksouth ', concat(' ', location(), ' '))]",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "None",
+                  "value": 0
+                },
+                {
+                  "label": "One zone",
+                  "value": 1
+                },
+                {
+                  "label": "Two zones",
+                  "value": 2
+                },
+                {
+                  "label": "Three zones",
+                  "value": 3
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "chkp",
+        "label": "Check Point CloudGuard settings",
+        "subLabel": {
+          "preValidation": "Configure CloudGuard settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "CloudGuard settings",
+        "elements": [
+          {
+            "name": "cloudGuardVersion",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Check Point CloudGuard version",
+            "defaultValue": "R80.20",
+            "toolTip": "The version of Check Point CloudGuard. For R80.20 license is BYOL.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "R80.10",
+                  "value": "R80.10"
+                },
+                {
+                  "label": "R80.20",
+                  "value": "R80.20"
+                }
+              ]
+            }
+          },
+          {
+            "name": "R80Offer",
+            "type": "Microsoft.Common.DropDown",
+            "label": "License type",
+            "toolTip": "The type of license.",
+            "defaultValue": "Bring Your Own License",
+            "visible": true,
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Bring Your Own License",
+                  "value": "Bring Your Own License"
+                },
+                {
+                  "label": "Pay As You Go (NGTP)",
+                  "value": "Pay As You Go (NGTP)"
+                },
+                {
+                  "label": "Pay As You Go (NGTX)",
+                  "value": "Pay As You Go (NGTX)"
+                }
+              ]
+            }
+          },
+          {
+            "name": "R8010vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.10'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_G1",
+                "Standard_GS1",
+                "Standard_H8",
+                "Standard_H16",
+                "Standard_H8m",
+                "Standard_H16m",
+                "Standard_NV6",
+                "Standard_NV12",
+                "Standard_NV24",
+                "Standard_NC6",
+                "Standard_NC12",
+                "Standard_NC24"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-vsec-r80-blink-v2",
+              "sku": "sg-byol"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "R8010vmSizeUiNGTP",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.10'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_G1",
+                "Standard_GS1",
+                "Standard_H8",
+                "Standard_H16",
+                "Standard_H8m",
+                "Standard_H16m",
+                "Standard_NV6",
+                "Standard_NV12",
+                "Standard_NV24",
+                "Standard_NC6",
+                "Standard_NC12",
+                "Standard_NC24"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-vsec-r80-blink-v2",
+              "sku": "sg-ngtp-v2"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "R8010vmSizeUiNGTX",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.10'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_G1",
+                "Standard_GS1",
+                "Standard_H8",
+                "Standard_H16",
+                "Standard_H8m",
+                "Standard_H16m",
+                "Standard_NV6",
+                "Standard_NV12",
+                "Standard_NV24",
+                "Standard_NC6",
+                "Standard_NC12",
+                "Standard_NC24"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-vsec-r80-blink-v2",
+              "sku": "sg-ngtx"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "R8020vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.20'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8020-blink-v2",
+              "sku": "sg-byol"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "R8020vmSizeUiNGTP",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.20'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8020-blink-v2",
+              "sku": "sg-ngtp"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "R8020vmSizeUiNGTX",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.20'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8020-blink-v2",
+              "sku": "sg-ngtx"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "sicKeyUi",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "SIC Key",
+              "confirmPassword": "Confirm SIC Key"
+            },
+            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{8,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 8-30 characters long."
+            },
+            "options": {
+              "hideConfirmation": true
+            }
+          },
+          {
+            "name": "bootstrapScript",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "Bootstrap script",
+            "toolTip": "An optional script to run on the initial boot",
+            "constraints": {
+              "required": false,
+              "accept": ".sh,text/plain"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "text",
+              "encoding": "UTF-8"
+            }
+          },
+          {
+            "name": "allowUploadDownload",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Allow download from/upload to Check Point",
+            "defaultValue": "Yes",
+            "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "true"
+                },
+                {
+                  "label": "No",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[or(contains(steps('chkp').R8010vmSizeUiBYOL, 'DS'), contains(steps('chkp').R8010vmSizeUiNGTP, 'DS'), contains(steps('chkp').R8010vmSizeUiNGTX, 'DS'), contains(steps('chkp').R8020vmSizeUiBYOL, 'DS'), contains(steps('chkp').R8020vmSizeUiNGTP, 'DS'), contains(steps('chkp').R8020vmSizeUiNGTX, 'DS'))]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "useCustomImageUri",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Use development image uri",
+            "defaultValue": "No",
+            "toolTip": "",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "Yes"
+                },
+                {
+                  "label": "No",
+                  "value": "No"
+                }
+              ],
+              "required": true
+            },
+            "visible": false
+          },
+          {
+            "name": "sourceImageVhdUri",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Development Image URI",
+            "toolTip": "The URI of the blob containing the development image",
+            "constraints": {
+              "required": "[equals(steps('chkp').useCustomImageUri, 'Yes')]",
+              "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
+              "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
+            },
+            "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+          }
+        ]
+      },
+      {
+        "name": "network",
+        "label": "Network settings",
+        "subLabel": {
+          "preValidation": "Configure network settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Network settings",
+        "elements": [
+          {
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "Virtual Network Name",
+              "subnets": "The subnets to deploy into"
+            },
+            "defaultValue": {
+              "name": "vnet01",
+              "addressPrefixSize": "/16"
+            },
+            "constraints": {
+              "minAddressPrefixSize": "/28"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "VMSS Frontend subnet",
+                "defaultValue": {
+                  "name": "VMSS-Frontend",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": "[steps('autoprovision').maxVmCount]",
+                  "requireContiguousAddresses": false
+                }
+              },
+              "subnet2": {
+                "label": "VMSS Backend subnet",
+                "defaultValue": {
+                  "name": "VMSS-Backend",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": "[steps('autoprovision').maxVmCount]",
+                  "requireContiguousAddresses": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "location": "[location()]",
+      "authenticationType": "[basics('auth').authenticationType]",
+      "adminPassword": "[basics('auth').password]",
+      "sshPublicKey": "[basics('auth').sshPublicKey]",
+      "upgrading": "[steps('autoprovision').upgrading]",
+      "vmName": "[basics('gatewayScaleSetNameUi')]",
+      "instanceCount": "[steps('autoprovision').vmCount]",
+      "maxInstanceCount": "[steps('autoprovision').maxVmCount]",
+      "managementServer": "[steps('autoprovision').managementServer]",
+      "configurationTemplate": "[steps('autoprovision').configurationTemplate]",
+      "adminEmail": "[steps('autoprovision').adminEmail]",
+      "deploymentMode": "[steps('autoprovision').deploymentMode]",
+      "instanceLevelPublicIP": "[steps('autoprovision').instanceLevelPublicIP]",
+      "lbsTargetRGName": "[steps('autoprovision').lbsTargetRGName]",
+      "elbResourceId": "[steps('autoprovision').elbResourceId]",
+      "elbTargetBEAddressPoolName": "[steps('autoprovision').elbBEAddressPoolName]",
+      "ilbResourceId": "[steps('autoprovision').ilbResourceId]",
+      "ilbTargetBEAddressPoolName": "[steps('autoprovision').ilbBEAddressPoolName]",
+      "mgmtInterfaceOpt1": "[steps('autoprovision').mgmtInterfaceOpt1]",
+      "mgmtInterfaceOpt2": "[steps('autoprovision').mgmtInterfaceOpt2]",
+      "mgmtIPaddress": "[steps('autoprovision').mgmtIPaddress]",
+      "appLoadDistribution": "[steps('autoprovision').appLoadDistribution]",
+      "ilbLoadDistribution": "[steps('autoprovision').ilbLoadDistribution]",
+      "availabilityZonesNum": "[coalesce(steps('autoprovision').availabilityZonesNum, int('0'))]",
+      "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+      "vmSize": "[coalesce(steps('chkp').R8010vmSizeUiBYOL, steps('chkp').R8010vmSizeUiNGTP, steps('chkp').R8010vmSizeUiNGTX, steps('chkp').R8020vmSizeUiBYOL, steps('chkp').R8020vmSizeUiNGTP, steps('chkp').R8020vmSizeUiNGTX)]",
+      "sicKey": "[steps('chkp').sicKeyUi]",
+      "bootstrapScript": "[steps('chkp').bootstrapScript]",
+      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
+      "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
+      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
+      "virtualNetworkName": "[steps('network').virtualNetwork.name]",
+      "virtualNetworkAddressPrefixes": "[steps('network').virtualNetwork.addressPrefixes]",
+      "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
+      "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
+      "subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
+      "subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
+      "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
+      "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
+      "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]"
+    }
+  }
+}
