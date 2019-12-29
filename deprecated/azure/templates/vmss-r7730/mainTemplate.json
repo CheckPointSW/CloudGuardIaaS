@@ -1,0 +1,678 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment location"
+      }
+    },
+    "vsecVersion": {
+      "type": "string",
+      "allowedValues": [
+        "R77.30 - Bring Your Own License",
+        "R77.30 - Pay As You Go (NGTP)"
+      ],
+      "defaultValue": "R77.30 - Bring Your Own License",
+      "metadata": {
+        "description": "Version of Check Point vSEC"
+      }
+    },
+    "instanceCount": {
+      "defaultValue": "2",
+      "type": "string",
+      "metadata": {
+        "description": "Number of VM instances"
+      }
+    },
+    "maxInstanceCount": {
+      "defaultValue": "10",
+      "type": "string",
+      "metadata": {
+        "description": "Maximum number of VM instances"
+      }
+    },
+    "managementServer": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the management server as it appears in the configuration file"
+      }
+    },
+    "configurationTemplate": {
+      "type": "string",
+      "metadata": {
+        "description": "A name of a template as it appears in the configuration file"
+      }
+    },
+    "adminEmail": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Email address to notify if there are any scaling operations"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Administrator password"
+      },
+      "defaultValue": ""
+    },
+    "authenticationType": {
+      "type": "string",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "defaultValue": "password",
+      "metadata": {
+        "description": "Authentication type"
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Administrator SSH public key"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the Check Point Security Gateway scale set"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "Size of the VM"
+      }
+    },
+    "sicKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "One time key for Secure Internal Communication"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "[concat(resourceGroup().name, '-vn')]"
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the virtual network"
+      },
+      "defaultValue": "10.0.0.0/16"
+    },
+    "subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the subnet"
+      },
+      "defaultValue": "vSEC"
+    },
+    "subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 1st subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "baseUrl": {
+      "type": "string",
+      "metadata": {
+        "artifactsBaseUrl": ""
+      },
+      "defaultValue": "https://s3-us-west-2.amazonaws.com/azure.templates/marketplace-vmss-r7730"
+    },
+    "bootstrapScript": {
+      "type": "string",
+      "metadata": {
+        "description": "Bootstrap script"
+      },
+      "defaultValue": ""
+    },
+    "allowDownloadFromUploadToCheckPoint": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "true",
+      "metadata": {
+        "description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
+      }
+    },
+    "diskType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The type of the OS disk. Premium is applicable only to DS machine sizes"
+      },
+      "allowedValues": [
+        "Standard_LRS",
+        "Premium_LRS"
+      ]
+    },
+    "preview": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Deploy the staged image"
+      },
+      "allowedValues": [
+        "",
+        "-preview"
+      ]
+    }
+  },
+  "variables": {
+    "templateName": "vmss",
+    "templateVersion": "",
+    "location": "[parameters('location')]",
+    "govCloud": "[or(startsWith(variables('location'), 'usgov'), startsWith(variables('location'), 'usdod'))]",
+    "offers": {
+      "R77.30 - Bring Your Own License": "BYOL",
+      "R77.30 - Pay As You Go (NGTP)": "NGTP",
+      "R80.10 - Bring Your Own License": "BYOL",
+      "R80.10 - Pay As You Go (NGTP)": "NGTP-V2",
+      "R80.10 - Pay As You Go (NGTX)": "NGTX"
+    },
+    "offer": "[variables('offers')[parameters('vsecVersion')]]",
+    "osVersions": {
+      "R77.30 - Bring Your Own License": "R7730",
+      "R77.30 - Pay As You Go (NGTP)": "R7730",
+      "R80.10 - Bring Your Own License": "R8010",
+      "R80.10 - Pay As You Go (NGTP)": "R8010",
+      "R80.10 - Pay As You Go (NGTX)": "R8010"
+    },
+    "osVersion": "[variables('osVersions')[parameters('vsecVersion')]]",
+    "isBlink": "[bool('false')]",
+    "computeApiVersion": "2017-03-30",
+    "storageApiVersion": "2016-01-01",
+    "networkApiVersion": "2016-06-01",
+    "deploymentsApiVersion": "2016-02-01",
+    "insightsApiVersion": "2015-04-01",
+    "storageAccountName": "[concat('bootdiag', uniqueString(resourceGroup().id, deployment().name))]",
+    "storageAccountType": "Standard_LRS",
+    "customData": "[concat('#!/bin/bash\\n', '\\n', 'LOG_FILE=/var/log/custom-data.log\\n', 'exec >>$LOG_FILE 2>&1\\n', '\\n', '# description: echo instance metadata\\n', '# args :\\n', '# optional: string contatining api version date.\\n', '# default is to \\\"2017-08-01\\\".\\n', '# usage :\\n', '# getInstanceMetadata \\\"2017-12-01\\\"\\n', 'function getInstanceMetadata {\\n', '    # get instance metadata using Azure Instance Metadata service:\\n', '    if test -z \\\"$#\\\" ; then\\n', '        api_version=\\\"$1\\\"\\n', '    else\\n', '        api_version=\\\"2017-08-01\\\"\\n', '    fi\\n', '    metadata=\\\"$(get-cloud-data.sh         \\\"metadata/instance/?api-version=$api_version\\\" |         jq \\\".\\\")\\\"\\n', '\\n', '\\n', '    echo \\\"$metadata\\\"\\n', '    log-data \\\"Instance metadata retrieved using api version: $api_version\\\" >&2\\n', '}\\n', '\\n', '# description: echo $@ to std output wrapped with date and additional data\\n', '# args :\\n', '# add \\\"-w\\\" before the content to log warning message.\\n', '# add \\\"-e\\\" before the content to log error message.\\n', '# default is to log info message.\\n', '# usage :\\n', '# log-data \\\"-w\\\" \\\"my message\\\"\\n', 'function log-data {\\n', '    test -z \\\"$1\\\" && echo \\\"$(date +\\\"%F %T\\\") CUSTOM-DATA [INFO]\\\" || {\\n', '        if [[ \\\"$1\\\" == \\\"-w\\\" ]] ; then\\n', '            prefix=\\\"[WARNING] \\\"\\n', '            shift\\n', '        elif [[ \\\"$1\\\" == \\\"-e\\\" ]] ; then\\n', '            prefix=\\\"[ERROR] \\\"\\n', '            shift\\n', '        else\\n', '            prefix=\\\"[INFO] \\\"\\n', '        fi\\n', '        for i in \\\"$@\\\"; do\\n', '            echo -e \\\"$(date +\\\"%F %T\\\") CUSTOM-DATA $prefix$i\\\"\\n', '            shift\\n', '        done\\n', '    }\\n', '}\\n', '\\n', '# description: wrapper to command to enable retries\\n', '# args :\\n', '# To specify return codes:\\n', '# \\\"-rc\\\" followed by string of numbers seperated by a space: \\\"int1 int2\\\".\\n', '# default is \\\"0\\\".\\n', '# To specify maximum duration for retries:\\n', '# \\\"-md\\\" followed by a number: 5.\\n', '# default is 8.\\n', '# To specift sleep time between retries:\\n', '# \\\"-st\\\" followed by a number: 1.\\n', '# default is 2.\\n', '# usage :\\n', '# runcmd -rc \\\"19 0 3\\\" \\\"-md\\\" 6 \\\"-st\\\" 1 my-command\\n', 'function runcmd {\\n', '    expected_returnval=()\\n', '    if [ \\\"$1\\\" == \\\"-rc\\\" ] ; then\\n', '        shift\\n', '        for val in $1\\n', '        do\\n', '            expected_returnval[\\\"$val\\\"]=\\\"1\\\"\\n', '        done\\n', '        shift\\n', '    else\\n', '        expected_returnval[\\\"0\\\"]=\\\"1\\\"\\n', '    fi\\n', '    if [ \\\"$1\\\" == \\\"-md\\\" ] ; then\\n', '        shift\\n', '        MAX_DURATION=$1\\n', '        shift\\n', '    else\\n', '        MAX_DURATION=8\\n', '    fi\\n', '    if [ \\\"$1\\\" == \\\"-st\\\" ] ; then\\n', '        shift\\n', '        SLEEP_TIME=$1\\n', '        shift\\n', '    else\\n', '        SLEEP_TIME=2\\n', '    fi\\n', '    cmd=\\\"$@\\\"\\n', '    log-data \\\"Executing $cmd\\\" \\\"    Allowed return values     : $(echo ${!expected_returnval[@]})\\\" \\\"    Maximum retries duration  : $MAX_DURATION\\\" \\\"    Sleep time between retries: $SLEEP_TIME\\\" >&2\\n', '\\n', '\\n', '\\n', '    SECONDS=0\\n', '    while [ \\\"$SECONDS\\\" -lt \\\"$MAX_DURATION\\\" ] ; do\\n', '        returnmsg=\\\"$(\\\"$@\\\" 2>&1)\\\"\\n', '        returnval=\\\"$?\\\"\\n', '        if [[ ${expected_returnval[$returnval]} ]] ; then\\n', '            log-data \\\"Success executing: $cmd\\n', '\\\\\\\\tReturn Value : $(echo $returnval)\\n', '\\\\\\\\tReturn message: $(echo $returnmsg)\\\" >&2\\n', '            return 0\\n', '        fi\\n', '        log-data \\\"-w\\\" \\\"Retrying to execute command: $cmd\\n', '\\\\\\\\tReturn Value : $(echo $returnval)\\n', '\\\\\\\\tReturn message: $(echo $returnmsg)\\\" >&2\\n', '        sleep \\\"$SLEEP_TIME\\\"\\n', '    done\\n', '    log-data \\\"-e\\\" \\\"Failed to execute command: $cmd\\n', '\\\\\\\\tReturn Value : $(echo $returnval) (expected: $expected_returnval)\\n', '\\\\\\\\tReturn message: $(echo $returnmsg)\\n', '\\\\\\\\tTotal run time: $SECONDS [seconds]\\\" >&2\\n', '    return 1\\n', '}\\n', '\\n', 'log-data \\\"Start of custom-data.sh\\\"\\n', 'log-data \\\"Time Zone: $(date +\\\"%Z %:z\\\")\\\"\\n', 'log-data \\\"Instance metadata at beginning: \\\\\\\\n$(getInstanceMetadata)\\\"\\n', 'log-data \\\"Contents of $FWDIR/boot/modules/fwkern.conf at beginning: \\\\\\\\n$(cat \\\"$FWDIR/boot/modules/fwkern.conf\\\")\\\"\\n', '\\n', 'installationType=\\\"', variables('installationType'), '\\\"', '\\n', 'allowUploadDownload=\\\"', variables('allowUploadDownload'), '\\\"', '\\n', 'osVersion=\\\"', variables('osVersion'), '\\\"', '\\n', 'templateName=\\\"', variables('templateName'), '\\\"', '\\n', 'isBlink=\\\"', variables('isBlink'), '\\\"', '\\n', 'templateVersion=\\\"', variables('templateVersion'), '\\\"', '\\n', '\\n', 'if [ -z \\\"${isBlink}\\\" ]; then\\n', '    isBlink=\\\"False\\\"\\n', 'fi\\n', '\\n', 'log-data \\\"isBlink val: $isBlink\\\"\\n', '\\n', 'log-data \\\"templateName: $templateName\\\" \\\"templateVersion: $templateVersion\\\" \\\"installationType: $installationType\\\" \\\"osVersion: $osVersion\\\"\\n', '\\n', '\\n', '\\n', '\\n', 'echo \\\"template_name: $templateName\\\" >> /etc/cloud-version\\n', 'echo \\\"template_version: $templateVersion\\\" >> /etc/cloud-version\\n', '\\n', 'log-data \\\"Executing bootstrap script:\\\"\\n', 'bootstrap=\\\"$(dirname \\\"$0\\\")/bootstrap\\\"\\n', 'cat <<<\\\"', variables('bootstrapScript64'), '\\\" | tr -d \\\"\\\\n\\\" | base64 -d >\\\"$bootstrap\\\"', '\\n', 'dos2unix \\\"$bootstrap\\\"\\n', 'chmod +x \\\"$bootstrap\\\"\\n', 'cp \\\"$bootstrap\\\" \\\"/var/log/custom-data-bootstrap\\\"\\n', '\\\"$bootstrap\\\"\\n', '\\n', 'function has_iam {\\n', '    local url\\n', '    local out\\n', '    url=\\\"http://169.254.169.254/metadata/identity/oauth2/token\\\"\\n', '    url=\\\"$url?api-version=2018-02-01&resource=https://no-such-domain/\\\"\\n', '    for i in 1 2 3 ; do\\n', '        out=\\\"$(curl_cli --header metadata:true --url \\\"$url\\\" --max-time 10)\\\"\\n', '        if test \\\"$(echo \\\"$out\\\" | jq -r .error)\\\" = \\\"invalid_resource\\\" ; then\\n', '            echo true\\n', '            return\\n', '        fi\\n', '        if test \\\"$(echo \\\"$out\\\" | jq -r .error_description)\\\" = \\\"Identity not found\\\" ; then\\n', '\\n', '            break\\n', '        fi\\n', '    done\\n', '    echo false\\n', '}\\n', '\\n', '# description: create file $FWDIR/conf/azure-ha.json\\n', '# args : no args\\n', '# usage : cluster\\n', 'function cluster {\\n', '    log-data \\\"Cluster - Executing cluster function\\\"\\n', '    subscriptionId=\\\"', subscription().subscriptionId, '\\\"', '\\n', '    tenantId=\\\"', subscription().tenantId, '\\\"', '\\n', '    resourceGroup=\\\"', resourceGroup().name, '\\\"', '\\n', '    virtualNetwork=\\\"', parameters('virtualNetworkName'), '\\\"', '\\n', '    clusterName=\\\"', parameters('vmName'), '\\\"', '\\n', '    lbName=\\\"frontend-lb\\\"\\n', '    location=\\\"', variables('location'), '\\\"', '\\n', '    has_iam=false\\n', '\\n', '    case \\\"$location\\\" in\\n', '    us*)\\n', '        environment=\\\"AzureUSGovernment\\\"\\n', '        ;;\\n', '    china*)\\n', '        environment=\\\"AzureChinaCloud\\\"\\n', '        ;;\\n', '    germany*)\\n', '        environment=\\\"AzureGermanCloud\\\"\\n', '        ;;\\n', '    *)\\n', '        environment=\\\"AzureCloud\\\"\\n', '        has_iam=\\\"$(has_iam)\\\"\\n', '        ;;\\n', '    esac\\n', '\\n', '    cat <<EOF >\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '{\\n', '  \\\"subscriptionId\\\": \\\"$subscriptionId\\\",\\n', '  \\\"location\\\": \\\"$location\\\",\\n', '  \\\"environment\\\": \\\"$environment\\\",\\n', '  \\\"resourceGroup\\\": \\\"$resourceGroup\\\",\\n', 'EOF\\n', '    if $has_iam ; then\\n', '        cat <<EOF >>\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '  \\\"credentials\\\": \\\"IAM\\\",\\n', '  \\\"tenant\\\": \\\"$tenantId\\\",\\n', 'EOF\\n', '    else\\n', '        cat <<EOF >>\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '  \\\"credentials\\\": {\\n', '    \\\"tenant\\\": \\\"$tenantId\\\",\\n', '    \\\"grant_type\\\": \\\"client_credentials\\\",\\n', '    \\\"client_id\\\": \\\"\\\",\\n', '    \\\"client_secret\\\": \\\"\\\"\\n', '  },\\n', 'EOF\\n', '    fi\\n', '    cat <<EOF >>\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '  \\\"proxy\\\": \\\"\\\",\\n', '  \\\"virtualNetwork\\\": \\\"$virtualNetwork\\\",\\n', '  \\\"clusterName\\\": \\\"$clusterName\\\",\\n', '  \\\"templateName\\\": \\\"$templateName\\\",\\n', 'EOF\\n', '    cat <<EOF >>\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '  \\\"lbName\\\": \\\"$lbName\\\",\\n', 'EOF\\n', '\\n', '\\n', '    cat <<EOF >>\\\"$FWDIR/conf/azure-ha.json\\\"\\n', '  \\\"debug\\\": false\\n', '}\\n', 'EOF\\n', '\\n', '    log-data \\\"Cluster - Write cluster values to $FWDIR/conf/azure-ha.json\\\"\\n', '    log-data \\\"File content: \\\\\\\\n$(cat \\\"$FWDIR/conf/azure-ha.json\\\")\\\"\\n', '}\\n', '\\n', '# description:\\n', '# check if an alias exists on VM, in case there is no alias,\\n', '# try to retrieve it from instance metadata & add it\\n', '# args : no args.\\n', '# usage : pub_addr=\\\"$(checkPublicAddress)\\\"\\n', 'function checkPublicAddress {\\n', '    log-data \\\"Executing checkPublicAddress function\\\" >&2\\n', '    ipaddr=\\\"$(ip addr show dev eth0)\\\"\\n', '    pub_addr=\\\"$(echo \\\"$ipaddr\\\" |         sed -n -e \\\"s|^ *inet \\\\\\\\([^/]*\\\\\\\\)/.* eth0:1\\\\$|\\\\\\\\1|p\\\")\\\"\\n', '\\n', '    log-data \\\"At start - \\\" \\\"ip addr show dev eth0: \\\\\\\\n$ipaddr\\\" \\\"pub_addr: $pub_addr\\\" >&2\\n', '    if test -z \\\"$pub_addr\\\" ; then\\n', '        log-data \\\"Trying to set alias for public ip address\\\" >&2\\n', '        pub_addr=\\\"$(get-cloud-data.sh             \\\"metadata/instance/network/interface?api-version=2017-04-02\\\" |             jq -r \\\".[].ipv4.ipAddress[].publicIpAddress\\\" |             grep --max-count 1 .)\\\"\\n', '\\n', '\\n', '\\n', '        log-data \\\"Public Address from instance metadata: $pub_addr\\\" >&2\\n', '        test -z \\\"$pub_addr\\\" || {\\n', '            runcmd -rc \\\"1 0\\\" clish -c \\\"lock database override\\\" >&2\\n', '            runcmd clish -s -c \\\"add interface eth0 alias $pub_addr/32\\\" >&2\\n', '            if [ \\\"$?\\\" -eq \\\"0\\\" ] ; then\\n', '                log-data \\\"Setting alias for eth0 completed successfuly\\\" >&2\\n', '            else\\n', '                log-data \\\"Failed to set alias for eth0\\\" >&2\\n', '            fi\\n', '        }\\n', '    fi\\n', '    log-data \\\"Interfaces at end: \\\\\\\\n$(ifconfig)\\\" >&2\\n', '    test -z \\\"$pub_addr\\\" || echo \\\"$pub_addr\\\"\\n', '}\\n', '\\n', 'case \\\"$installationType\\\" in\\n', 'gateway)\\n', '    installSecurityGateway=true\\n', '    gateway_cluster_member=false\\n', '    installSecurityManagement=false\\n', '    sicKey=\\\"', variables('sicKey'), '\\\"', '\\n', '    ;;\\n', 'cluster)\\n', '    installSecurityGateway=true\\n', '    gateway_cluster_member=true\\n', '    installSecurityManagement=false\\n', '    sicKey=\\\"', variables('sicKey'), '\\\"', '\\n', '    cluster\\n', '    ;;\\n', 'vmss)\\n', '    installSecurityGateway=true\\n', '    gateway_cluster_member=false\\n', '    installSecurityManagement=false\\n', '    sicKey=\\\"', variables('sicKey'), '\\\"', '\\n', '    ;;\\n', 'management)\\n', '    installSecurityGateway=false\\n', '    installSecurityManagement=true\\n', '    sicKey=notused\\n', '    ;;\\n', 'custom)\\n', '    pub_addr=\\\"$(checkPublicAddress)\\\"\\n', '    log-data \\\"Instance metadata at end: \\\\\\\\n$(getInstanceMetadata)\\\"\\n', '    exit 0\\n', '    ;;\\n', 'standalone | *)\\n', '    installSecurityGateway=true\\n', '    installSecurityManagement=true\\n', '    gateway_cluster_member=false\\n', '    sicKey=notused\\n', '    ;;\\n', 'esac\\n', '\\n', 'log-data \\\"installSecurityGateway: $installSecurityGateway\\\" \\\"gateway_cluster_member: $gateway_cluster_member\\\" \\\"installSecurityManagement: $installSecurityManagement\\\"\\n', '\\n', '\\n', '\\n', 'if [ \\\"$isBlink\\\" == \\\"True\\\" ]; then\\n', ' if \\\"$installSecurityManagement\\\"; then\\n', '  conf=\\\"mgmt_admin_radio=gaia_admin\\\"\\n', ' else\\n', '  conf=\\\"gateway_cluster_member=$gateway_cluster_member\\\"\\n', ' fi\\n', ' conf=\\\"${conf}&download_info=$allowUploadDownload\\\"\\n', ' conf=\\\"${conf}&upload_info=$allowUploadDownload\\\"\\n', ' log-data \\\"conf: $conf\\\"\\n', '\\n', ' conf=\\\"${conf}&ftw_sic_key=$sicKey\\\"\\n', ' # temporary variable as blink config demands password (for now) this way the blink_config command works and does not override admin password\\n', ' if [ \\\"$osVersion\\\" == \\\"R8010\\\" ]; then\\n', '  conf=\\\"${conf}&admin_password_regular=1\\\"\\n', ' fi\\n', ' log-data \\\"Running blink config\\\"\\n', ' blink_config -s \\\"$conf\\\"\\n', 'else\\n', ' conf=\\\"install_security_gw=$installSecurityGateway\\\"\\n', ' if \\\"$installSecurityGateway\\\"; then\\n', '  conf=\\\"${conf}&install_ppak=true\\\"\\n', '  conf=\\\"${conf}&gateway_cluster_member=$gateway_cluster_member\\\"\\n', ' fi\\n', ' conf=\\\"${conf}&install_security_managment=$installSecurityManagement\\\"\\n', ' if \\\"$installSecurityManagement\\\"; then\\n', '  if [ \\\"R7730\\\" == \\\"$osVersion\\\" ]; then\\n', '   managementAdminPassword=\\\"$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)\\\"\\n', '   conf=\\\"${conf}&mgmt_admin_name=admin\\\"\\n', '   conf=\\\"${conf}&mgmt_admin_passwd=${managementAdminPassword}\\\"\\n', '  else\\n', '   conf=\\\"${conf}&mgmt_admin_radio=gaia_admin\\\"\\n', '  fi\\n', '\\n', '  managementGUIClientNetwork=\\\"', variables('managementGUIClientNetwork'), '\\\"', '\\n', '  conf=\\\"${conf}&install_mgmt_primary=true\\\"\\n', '\\n', '  if [ \\\"0.0.0.0/0\\\" = \\\"$managementGUIClientNetwork\\\" ]; then\\n', '   conf=\\\"${conf}&mgmt_gui_clients_radio=any\\\"\\n', '  else\\n', '   conf=\\\"${conf}&mgmt_gui_clients_radio=network\\\"\\n', '   ManagementGUIClientBase=\\\"$(echo \\\"$managementGUIClientNetwork\\\" | cut -d / -f 1)\\\"\\n', '   ManagementGUIClientMaskLength=\\\"$(echo \\\"$managementGUIClientNetwork\\\" | cut -d / -f 2)\\\"\\n', '   conf=\\\"${conf}&mgmt_gui_clients_ip_field=$ManagementGUIClientBase\\\"\\n', '   conf=\\\"${conf}&mgmt_gui_clients_subnet_field=$ManagementGUIClientMaskLength\\\"\\n', '  fi\\n', ' fi\\n', '\\n', ' conf=\\\"${conf}&download_info=$allowUploadDownload\\\"\\n', ' conf=\\\"${conf}&upload_info=$allowUploadDownload\\\"\\n', ' log-data \\\"conf: $conf\\\"\\n', ' # add sicKey value after loging the rest of conf parameters in order not to save the SIC key.\\n', ' conf=\\\"${conf}&ftw_sic_key=$sicKey\\\"\\n', '\\n', ' #since DA process is running parallel to FTW and may cause to problems like SIM (TaskId=72815)\\n', ' #the DA is being stoped before FTW is running, and restart again after FTW is finished.\\n', ' log-data \\\"Stop DA process: $(/opt/CPda/bin/dastop)\\\"\\n', '\\n', ' log-data \\\"Running first time wizard\\\"\\n', ' config_system -s \\\"$conf\\\"\\n', '\\n', ' log-data \\\"Start DA process: $(/opt/CPda/bin/dastart)\\\"\\n', 'fi\\n', '\\n', 'pub_addr=\\\"$(checkPublicAddress)\\\"\\n', 'log-data \\\"VM public address is: $pub_addr\\\"\\n', '\\n', '# set the main IP of the management object in SmartConsole to be the public IP:\\n', 'if [ \\\"$installationType\\\" = \\\"management\\\" ] && [ \\\"R7730\\\" != \\\"$osVersion\\\" ]; then\\n', '    until mgmt_cli -r true discard ; do\\n', '        sleep 30\\n', '    done\\n', '    addr=\\\"$(ip addr show dev eth0 |         sed -n -e \\\"s|^ *inet \\\\\\\\([^/]*\\\\\\\\)/.* eth0\\\\$|\\\\\\\\1|p\\\")\\\"\\n', '\\n', '    uid=\\\"$(mgmt_cli -r true show-generic-objects         class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp         details-level full -f json |             jq -r \\\".objects[] | select(.ipaddr == \\\\\\\"$addr\\\\\\\") | .uid\\\")\\\"\\n', '\\n', '\\n', '\\n', '    test -z \\\"$uid\\\" || test -z \\\"$pub_addr\\\" || mgmt_cli -r true set-generic-object uid \\\"$uid\\\" ipaddr \\\"$pub_addr\\\"\\n', '\\n', '        log-data \\\"Management - Set management object in SmartConsole IP address to $pub_addr\\\"\\n', 'fi\\n', 'if \\\"$installSecurityManagement\\\" && [ \\\"R7730\\\" != \\\"$osVersion\\\" ]; then\\n', '    chkconfig --add autoprovision\\n', '    log-data \\\"Add autoprovision service to chkconfig\\\"\\n', 'fi\\n', '\\n', 'if [ \\\"$installationType\\\" = \\\"vmss\\\" ] || [ \\\"$installationType\\\" = \\\"cluster\\\" ]; then\\n', '    # add dynamic objects to represent the GWs external NICs in management:\\n', '    dynamic_object_names=\\\"$(dynamic_objects -l | awk \\\"/object/{print \\\\$4}\\\")\\\"\\n', '    log-data \\\"dynamic object names before are: $dynamic_object_names\\\"\\n', '    ExtAddr=\\\"$(ip addr show dev eth0 | awk \\\"/inet/{print \\\\$2; exit}\\\" | cut -d / -f 1)\\\"\\n', '    runcmd -rc \\\"19 0 3\\\" dynamic_objects -n LocalGatewayExternal -r \\\"$ExtAddr\\\" \\\"$ExtAddr\\\" -a\\n', '    if [ \\\"$?\\\" -eq \\\"0\\\" ] ; then\\n', '        log-data \\\"Created dynamic object for eth0\\\"\\n', '    else\\n', '        log-data \\\"Failed to create dynamic object for eth0\\\"\\n', '    fi\\n', '    log-data \\\"Set dynamic objects: (Ext: $ExtAddr) \\\\\\\\n$(dynamic_objects -l)\\\"\\n', '\\n', '    # Disable anti-spoofing feature in SecureXL for unknown connections.\\n', '    # To prevent anti-spoofing on eth1 to drop the health probe queries.\\n', '    if [ \\\"R7730\\\" != \\\"$osVersion\\\" ]; then\\n', '        if [ -f /opt/CPshared/5.0/tmp/.CPprofile.sh ]; then\\n', '            log-data \\\"/opt/CPshared/5.0/tmp/.CPprofile.sh exists and is a regular file.\\\"\\n', '            . /opt/CPshared/5.0/tmp/.CPprofile.sh\\n', '            log-data \\\"add sim_anti_spoofing_enabled=0 to $PPKDIR/boot/modules/simkern.conf\\\"\\n', '            echo \\\"sim_anti_spoofing_enabled=0\\\" >> \\\"$PPKDIR/boot/modules/simkern.conf\\\"\\n', '            log-data \\\"\\\\$PPKDIR/boot/modules/simkern.conf: \\\\\\\\n$(cat $PPKDIR/boot/modules/simkern.conf)\\\"\\n', '        fi\\n', '    fi\\n', 'fi\\n', '\\n', 'if [ \\\"$installationType\\\" == \\\"vmss\\\" ]; then\\n', '    # add dynamic objects to represent the GWs internal NICs in management:\\n', '    IntAddr=\\\"$(ip addr show dev eth1 | awk \\\"/inet/{print \\\\$2; exit}\\\" | cut -d / -f 1)\\\"\\n', '    runcmd -rc \\\"19 0 3\\\" dynamic_objects -n LocalGatewayInternal -r \\\"$IntAddr\\\" \\\"$IntAddr\\\" -a\\n', '    if [ \\\"$?\\\" -eq \\\"0\\\" ] ; then\\n', '        log-data \\\"VMSS - created dynamic object for eth1\\\"\\n', '    else\\n', '        log-data \\\"VMSS - failed to create dynamic object for eth1\\\"\\n', '    fi\\n', '    log-data \\\"VMSS - Set dynamic objects: (Int: $IntAddr) \\\\\\\\n$(dynamic_objects -l)\\\"\\n', '\\n', '    # add static route for all vnet but Frontend to use eth1:\\n', '    subnet2Prefix=\\\"$(getInstanceMetadata | jq -r \\\".network.interface[1].ipv4.subnet[].address\\\")\\\"\\n', '    firstThreeOctats=\\\"$(echo $subnet2Prefix | cut -d / -f 1 | cut -d . -f 1,2,3)\\\"\\n', '    forthOctats=\\\"$(echo $subnet2Prefix | cut -d / -f 1 | cut -d . -f 4)\\\"\\n', '    forthOctats=\\\"$(( forthOctats + 1 ))\\\"\\n', '    router=\\\"$firstThreeOctats.$forthOctats\\\"\\n', '    log-data \\\"Vnet CIDR: $vnet\\\" \\\"Internal subnet CIDR: $subnet2Prefix\\\" \\\"Internal subnet gateway: $router\\\"\\n', '    vnets=(\\\"$vnet\\\" \\\"10.0.0.0/8\\\" \\\"172.16.0.0/12\\\" \\\"192.168.0.0/16\\\")\\n', '    runcmd -rc \\\"1 0\\\" clish -c \\\"lock database override\\\" >&2\\n', '    for vnet in \\\"${vnets[@]}\\\"; do\\n', '        runcmd clish -s -c \\\"set static-route $vnet nexthop gateway address $router on\\\"\\n', '        if [ \\\"$?\\\" == \\\"0\\\" ] ; then\\n', '            log-data \\\"Set static-route for vnet: $vnet to router: $router\\\"\\n', '        else\\n', '            log-data \\\"Failed to set static-route for vnet: $vnet to router: $router\\\"\\n', '        fi\\n', '    done\\n', 'fi\\n', '\\n', 'log-data \\\"VM static routes: \\\\\\\\n$(route)\\\"\\n', 'log-data \\\"Contents of $FWDIR/boot/modules/fwkern.conf at end: \\\\\\\\n$(cat \\\"$FWDIR/boot/modules/fwkern.conf\\\")\\\"\\n', '\\n', 'if \\\"$installSecurityGateway\\\"; then\\n', '    log-data \\\"Instance metadata at end: \\\\\\\\n$(getInstanceMetadata)\\\"\\n', ' if [ \\\"$isBlink\\\" == \\\"False\\\" ] || [ \\\"$installationType\\\" == \\\"cluster\\\" ]; then\\n', '  log-data \\\"VM is shuting down\\\"\\n', '  shutdown -r now\\n', ' fi\\n', 'else\\n', '    if \\\"$installSecurityManagement\\\" && [ \\\"R7730\\\" != \\\"$osVersion\\\" ]; then\\n', '        service autoprovision start\\n', '        log-data \\\"Instance metadata at end: \\\\\\\\n$(getInstanceMetadata)\\\"\\n', '        log-data \\\"Start service autoprovision\\\"\\n', '    fi\\n', 'fi\\n')]",
+    "imageOfferR7730": "check-point-r77-10",
+    "imageOfferR8010": "check-point-vsec-r80",
+    "imageOffer": "[concat(variables(concat('imageOffer', variables('osVersion'))), parameters('preview'))]",
+    "imagePublisher": "checkpoint",
+    "imageReferenceBYOL": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-byol",
+      "version": "latest"
+    },
+    "imageReferenceNGTP": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-ngtp",
+      "version": "latest"
+    },
+    "imageReferenceNGTP-V2": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-ngtp-v2",
+      "version": "latest"
+    },
+    "imageReferenceNGTX": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-ngtx",
+      "version": "latest"
+    },
+    "imageReference": "[variables(concat('imageReference', variables('offer')))]",
+    "lbName": "[concat(parameters('vmName'), '-lb')]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "proxySubnet": "[parameters('subnet1Name')]",
+    "lbBEAddressPool": "[concat(parameters('vmName'), '-pool')]",
+    "lbBEAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/',variables('lbBEAddressPool'))]",
+    "linuxConfigurationpassword": {},
+    "linuxConfigurationsshPublicKey": {
+      "disablePasswordAuthentication": "true",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "[parameters('sshPublicKey')]",
+            "path": "/home/notused/.ssh/authorized_keys"
+          }
+        ]
+      }
+    },
+    "linuxConfiguration": "[variables(concat('linuxConfiguration', parameters('authenticationType')))]",
+    "planBYOL": {
+      "name": "sg-byol",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planNGTP": {
+      "name": "sg-ngtp",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planNGTP-V2": {
+      "name": "sg-ngtp-v2",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planNGTX": {
+      "name": "sg-ngtx",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "plan": "[variables(concat('plan', variables('offer')))]",
+    "appName": "[concat(parameters('vmName'), '-app-1')]",
+    "appAddressName": "[variables('appName')]",
+    "appAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('appAddressName'))]",
+    "appProtocol": "http",
+    "appFrontEndPort": 80,
+    "appBackEndPort": 8081,
+    "appFEName": "[variables('appName')]",
+    "appFEIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/',variables('appFEName'))]",
+    "appProbeName": "[variables('appName')]",
+    "appProbeID": "[concat(variables('lbID'),'/probes/',variables('appProbeName'))]",
+    "proxyName": "[concat(parameters('vmName'), '-proxy')]",
+    "proxyID": "[resourceId('Microsoft.Network/loadBalancers', variables('proxyName'))]",
+    "proxyBEAddressPool": "[concat(parameters('vmName'), '-proxy')]",
+    "proxyBEAddressPoolID": "[concat(variables('proxyID'), '/backendAddressPools/', variables('proxyBEAddressPool'))]",
+    "proxyPort": 8080,
+    "proxyFEIPConfigID": "[concat(variables('proxyID'), '/frontendIPConfigurations/', variables('proxyName'))]",
+    "proxyProbeName": "[variables('proxyName')]",
+    "proxyProbeID": "[concat(variables('proxyID'), '/probes/', variables('proxyProbeName'))]",
+    "vmssID": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmName'))]",
+    "emailSelector": [
+      [],
+      [
+        "[parameters('adminEmail')]"
+      ]
+    ],
+    "customEmails": "[variables('emailSelector')[length(take(parameters('adminEmail'), 1))]]",
+    "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
+    "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
+    "networkSetupURL": "[concat(parameters('baseUrl'),'/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json')]",
+    "sicKey": "[parameters('sicKey')]",
+    "managementGUIClientNetwork": "",
+    "installationType": "vmss"
+  },
+  "resources": [
+    {
+      "apiVersion": "2018-02-01",
+      "name": "pid-dec47419-7c4a-5b38-94eb-1fd4e71be091",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
+      "name": "networkSetup",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "[variables('deploymentsApiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "apiVersion": {
+            "value": "[variables('networkApiVersion')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressPrefix": {
+            "value": "[parameters('virtualNetworkAddressPrefix')]"
+          },
+          "subnet1Name": {
+            "value": "[parameters('subnet1Name')]"
+          },
+          "subnet1Prefix": {
+            "value": "[parameters('subnet1Prefix')]"
+          },
+          "vnetNewOrExisting": {
+            "value": "[parameters('vnetNewOrExisting')]"
+          },
+          "virtualNetworkExistingRGName": {
+            "value": "[parameters('virtualNetworkExistingRGName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('appAddressName')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "name": "[variables('lbName')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('appAddressId')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('appFEName')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('appAddressId')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('lbBEAddressPool')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('appName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('appFEIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('appProbeID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('appFrontEndPort')]",
+              "backendPort": "[variables('appBackEndPort')]",
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('appProbeName')]",
+            "properties": {
+              "protocol": "[variables('appProtocol')]",
+              "port": "[variables('appBackEndPort')]",
+              "intervalInSeconds": "15",
+              "numberOfProbes": "5",
+              "requestPath": "/"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "name": "[variables('proxyName')]",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[variables('location')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('proxyName')]",
+            "properties": {
+              "subnet": {
+                "id": "[concat(reference('networkSetup').outputs.vnetId.value, '/subnets/', variables('proxySubnet'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('proxyBEAddressPool')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('proxyName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('proxyFEIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('proxyBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('proxyProbeID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": "[variables('proxyPort')]",
+              "backendPort": "[variables('proxyPort')]",
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('proxyProbeName')]",
+            "properties": {
+              "protocol": "tcp",
+              "port": "[variables('proxyPort')]",
+              "intervalInSeconds": "15",
+              "numberOfProbes": "5"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "[variables('storageApiVersion')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "apiVersion": "[variables('computeApiVersion')]",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "tags": {
+        "x-chkp-management": "[parameters('managementServer')]",
+        "x-chkp-template": "[parameters('configurationTemplate')]",
+        "x-chkp-ip-address": "private"
+      },
+      "dependsOn": [
+        "[variables('lbID')]",
+        "[variables('proxyID')]",
+        "[resourceId('Microsoft.Resources/deployments', 'networkSetup')]",
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+      ],
+      "sku": {
+        "name": "[parameters('vmSize')]",
+        "tier": "Standard",
+        "capacity": "[parameters('instanceCount')]"
+      },
+      "plan": "[variables('plan')]",
+      "properties": {
+        "upgradePolicy": {
+          "mode": "Manual"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "osDisk": {
+              "caching": "ReadWrite",
+              "createOption": "FromImage",
+              "managedDisk": {
+                "storageAccountType": "[parameters('diskType')]"
+              }
+            },
+            "imageReference": "[variables('imageReference')]"
+          },
+          "osProfile": {
+            "adminPassword": "[parameters('adminPassword')]",
+            "adminUsername": "notused",
+            "computerNamePrefix": "[toLower(parameters('vmName'))]",
+            "customData": "[base64(variables('customData'))]",
+            "linuxConfiguration": "[variables('linuxConfiguration')]"
+          },
+          "networkProfile": {
+            "networkInterfaceConfigurations": [
+              {
+                "name": "eth0",
+                "properties": {
+                  "primary": true,
+                  "ipConfigurations": [
+                    {
+                      "name": "ipconfig1",
+                      "properties": {
+                        "subnet": {
+                          "id": "[concat(reference('networkSetup').outputs.vnetId.value, '/subnets/', parameters('subnet1Name'))]"
+                        },
+                        "loadBalancerBackendAddressPools": [
+                          {
+                            "id": "[variables('lbBEAddressPoolID')]"
+                          },
+                          {
+                            "id": "[variables('proxyBEAddressPoolID')]"
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": "true",
+              "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), variables('storageApiVersion')).primaryEndpoints.blob]"
+            }
+          }
+        },
+        "overprovision": false
+      }
+    },
+    {
+      "type": "Microsoft.Insights/autoscaleSettings",
+      "apiVersion": "[variables('insightsApiVersion')]",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('vmssID')]"
+      ],
+      "properties": {
+        "name": "[parameters('vmName')]",
+        "targetResourceUri": "[variables('vmssID')]",
+        "notifications": [
+          {
+            "operation": "Scale",
+            "email": {
+              "sendToSubscriptionAdministrator": false,
+              "sendToSubscriptionCoAdministrators": false,
+              "customEmails": "[variables('customEmails')]"
+            }
+          }
+        ],
+        "enabled": true,
+        "profiles": [
+          {
+            "name": "Profile1",
+            "capacity": {
+              "minimum": "[parameters('instanceCount')]",
+              "maximum": "[parameters('maxInstanceCount')]",
+              "default": "[parameters('instanceCount')]"
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "Percentage CPU",
+                  "metricNamespace": "",
+                  "metricResourceUri": "[variables('vmssID')]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 80
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "Percentage CPU",
+                  "metricNamespace": "",
+                  "metricResourceUri": "[variables('vmssID')]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 60
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "ApplicationAddress": {
+      "type": "string",
+      "value": "[reference(variables('appAddressId')).IpAddress]"
+    },
+    "ApplicationFQDN": {
+      "type": "string",
+      "value": "[reference(variables('appAddressId')).dnsSettings.fqdn]"
+    }
+  }
+}
