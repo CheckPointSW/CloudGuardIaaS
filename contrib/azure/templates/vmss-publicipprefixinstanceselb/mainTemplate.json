@@ -536,6 +536,7 @@
 		}	
     },
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
+	"elbUsePublic": "[equals(parameters('elbUsePublicIP'), 'yes')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "networkSetupId": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Resources/deployments', 'networkSetup')]",
@@ -694,7 +695,7 @@
             "value": "[variables('upgrading')]"
           },
 		  "elbUsePublicIP": {
-			"value": "yes"
+			"value": "[variables('elbUsePublic')]"
 		  },
 		  "elbPublicIPAddressGroupName": {
 	        "value": "parameters(elbPublicIPAddressGroupName)"

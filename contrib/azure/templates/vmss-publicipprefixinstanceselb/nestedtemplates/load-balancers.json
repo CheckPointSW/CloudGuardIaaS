@@ -48,7 +48,7 @@
       "type": "string"
     },
 	"elbUsePublicIP": {
-      "type": "string"
+      "type": "bool"
     },
 	"elbPublicIPAddressGroupName": {
 	  "type": "string"
