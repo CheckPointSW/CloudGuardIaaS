@@ -699,7 +699,7 @@
 			"value": "[variables('elbUsePublic')]"
 		  },
           "elbPublicIPAddressId": {
-	        "value": "variables('existingPublicIPaddressResID')"
+	        "value": "[variables('existingPublicIPaddressResID')]"
 	      }
         }
       }
