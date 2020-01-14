@@ -72,7 +72,7 @@
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressName": "[variables('appName')]",
     "newAppAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
-	"existingAppAddressId": "[resourceId(variables('elbPubIPGroupName'), 'Microsoft.Network/publicIPAddresses', variables('elbPublicIPName'))]",
+	"existingAppAddressId": "[concat(variables('elbPubIPGroupName').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('elbPublicIPName'))]",
     "appAddressId": "[if(not(parameters('elbUsePublicIP')), variables('newAppAddressId'), variables('existingAppAddressId'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
