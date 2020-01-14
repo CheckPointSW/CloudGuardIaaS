@@ -536,8 +536,8 @@
 		}	
     },
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
-    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-    "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('load-balancers.json', parameters('_artifactsLocationSasToken')))]",
+    "networkSetupURL": "[uri(concat('https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/', 'vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json')))]",
+    "loadBalacerSetupURL": "[uri(concat('https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/', 'load-balancers.json')))]",
     "networkSetupId": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Resources/deployments', 'networkSetup')]",
     "lbRGName": "[if(variables('upgrading'), parameters('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
