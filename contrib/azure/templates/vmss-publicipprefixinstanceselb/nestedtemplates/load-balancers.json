@@ -65,7 +65,7 @@
   },
   "variables": {
     "resourceGroup": "[resourceGroup()]",
-	"elbPublicIPName": "parameters('elbPublicIPAddressName')",
+	"elbPublicIPName": "vmssFELBPub",
     "deployELB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ELBOnly'))]",
     "deployILB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ILBOnly'))]",
     "appName": "[concat(parameters('vmName'), '-app-1')]",
