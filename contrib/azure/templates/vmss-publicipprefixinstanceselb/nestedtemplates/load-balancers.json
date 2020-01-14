@@ -50,10 +50,7 @@
 	"elbUsePublicIP": {
       "type": "bool"
     },
-	"elbPublicIPAddressGroupName": {
-	  "type": "string"
-	},
-	"elbPublicIPAddressName": {
+	"elbPublicIPAddressId": {
 	  "type": "string"
 	},
     "Check_PointTags": {
@@ -70,8 +67,7 @@
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressName": "[variables('appName')]",
     "newAppAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
-	"existingAppAddressId": "[parameters('elbPublicIPAddressName')]",
-    "appAddressId": "[if(parameters('elbUsePublicIP'), variables('existingAppAddressId'), variables('newAppAddressId'))]",
+    "appAddressId": "[if(parameters('elbUsePublicIP'), parameters('elbPublicIPAddressId'), variables('newAppAddressId'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
