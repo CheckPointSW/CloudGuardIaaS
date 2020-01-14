@@ -6,19 +6,19 @@ The VM scale set is deployed in the same existing resource group which includes 
 
 ## Changes from Marketplace template
 * added parameters:
--- `existingPublicIPprefixGroupName`
--- `existingPublicIPprefixName`
+  - `existingPublicIPprefixGroupName`
+  - `existingPublicIPprefixName`
 
 * added variables:
--- `existingPublicIPprefixResID` : constructs the public IP prefix ID from the parameters declared above, ID to be referenced in `publicIPProperties` existing variable
+  - `existingPublicIPprefixResID` : constructs the public IP prefix ID from the parameters declared above, ID to be referenced in `publicIPProperties` existing variable
 
 * changed declarations:
--- `publicIPProperties`
--- hardcoded nested templates locations
+  - `publicIPProperties`
+  - hardcoded main template URL in existing parameter `_artifactsLocation` referenced by `networkSetupURL` and `loadBalacerSetupURL` to locate the nested templates
 
-# How to deploy the template:
+## How to deploy the template:
 
-## Local deployment: download this template, construct a parameters.json file and run your deployment tool of choice, e. g.
+Local deployment: download this template, construct a parameters.json file and run your deployment tool of choice, e. g.
 
 ```
 az group deployment create -g <existing-resource-group-name> --template-file vmss-publicipprefix-instances.json --parameters @parameters.json --debug
