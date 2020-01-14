@@ -72,8 +72,8 @@
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressName": "[variables('appName')]",
     "newAppAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
-	"existingAppAddressId": "[concat(variables('elbPubIPGroupName').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('elbPublicIPName'))]",
-    "appAddressId": "[if(not(parameters('elbUsePublicIP')), variables('newAppAddressId'), variables('existingAppAddressId'))]",
+	"existingAppAddressId": "[resourceId(variables('elbPubIPGroupName'), 'Microsoft.Network/publicIPAddresses', variables('elbPublicIPName'))]",
+    "appAddressId": "[if(parameters('elbUsePublicIP'), variables('existingAppAddressId'), variables('newAppAddressId'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
@@ -280,14 +280,6 @@
     "elbBEAddressPoolProperties": {
       "value": "[variables('elbBEAddressPoolProperties')]",
       "type": "array"
-    },
-    "ApplicationAddress": {
-      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), parameters('networkApiVersion')).IpAddress, 'no public ip')]",
-      "type": "string"
-    },
-    "ApplicationFQDN": {
-      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), parameters('networkApiVersion')).dnsSettings.fqdn, 'no public ip')]",
-      "type": "string"
     }
   }
 }
