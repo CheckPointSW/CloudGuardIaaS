@@ -39,6 +39,29 @@
         "description": "The name of existing Public IP Prefix for instance-level public IPs"
       }
 	},
+	"elbUsePublicIP": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "yes",
+      "metadata": {
+        "description": "Assign an existing public IP address to the external load balancer"
+      }
+    },
+	"elbPublicIPAddressGroupName": {
+	  "type": "string",
+	  "metadata": {
+        "description": "The name of the group where an existing Public IP address to be assigned to external load balancer is declared"
+      }
+	},
+	"elbPublicIPAddressName": {
+	  "type": "string",
+	  "metadata": {
+        "description": "The name of existing Public IP address to be assign to external load balancer"
+      }
+	},
     "instanceCount": {
       "defaultValue": "1",
       "type": "string",
@@ -261,29 +284,6 @@
         "description": "Deploy the VMSS with instance level Public IP address"
       }
     },
-	"elbUsePublicIP": {
-      "type": "string",
-      "allowedValues": [
-        "no",
-        "yes"
-      ],
-      "defaultValue": "yes",
-      "metadata": {
-        "description": "Assign an existing public IP address to the external load balancer"
-      }
-    },
-	"elbPublicIPAddressGroupName": {
-	  "type": "string",
-	  "metadata": {
-        "description": "The name of the group where an existing Public IP address to be assigned to external load balancer is declared"
-      }
-	},
-	"elbPublicIPAddressName": {
-	  "type": "string",
-	  "metadata": {
-        "description": "The name of existing Public IP address to be assign to external load balancer"
-      }
-	},
     "mgmtInterfaceOpt1": {
       "type": "string",
       "allowedValues": [
@@ -536,8 +536,8 @@
 		}	
     },
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
-    "networkSetupURL": "[uri(concat('https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/', 'vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json')))]",
-    "loadBalacerSetupURL": "[uri(concat('https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/', 'load-balancers.json')))]",
+    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "networkSetupId": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Resources/deployments', 'networkSetup')]",
     "lbRGName": "[if(variables('upgrading'), parameters('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
@@ -692,17 +692,9 @@
           },
           "upgrading": {
             "value": "[variables('upgrading')]"
-          },
-		  "elbUsePublicIP": {
-			"value": "[parameters('elbUsePublicIP')]"
-		  },
-		  "elbPublicIPAddressGroupName": {
-		    "value": "[parameters('elbPublicIPAddressGroupName')]"
-		  },
-		  "elbPublicIPAddressName": {
-	        "type": "[parameters('elbPublicIPAddressGroupName')]"
           }
         }
+      }
     },
     {
       "type": "Microsoft.Storage/storageAccounts",

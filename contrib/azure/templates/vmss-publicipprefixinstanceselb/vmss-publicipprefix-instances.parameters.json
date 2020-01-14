@@ -9,10 +9,10 @@
             "value": "sshPublicKey"
         },
 		"existingPublicIPprefixGroupName": {
-	      "value": "CPSM-OMV",
+	      "value": "CPSM-OMV"
 	    },
 	    "existingPublicIPprefixName": {
-	      "value": "RoOMVslash29",
+	      "value": "RoOMVslash29"
 	    },
         "adminPassword": {
 			"reference": {
