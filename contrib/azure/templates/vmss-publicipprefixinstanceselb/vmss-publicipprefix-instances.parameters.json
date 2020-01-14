@@ -1,0 +1,121 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "westeurope"
+        },
+		"authenticationType": {
+            "value": "sshPublicKey"
+        },
+		"existingPublicIPprefixGroupName": {
+	      "value": "CPSM-OMV",
+	    },
+	    "existingPublicIPprefixName": {
+	      "value": "RoOMVslash29",
+	    },
+        "adminPassword": {
+			"reference": {
+				"keyVault": {
+					"id": "/subscriptions/ec232fcc-276e-4cb8-a066-afd11792129b/resourceGroups/CPSM-OMV/providers/Microsoft.KeyVault/vaults/ro-omv-keyvault"
+				},
+				"secretName": "CPSG-Admin-Pw"
+			} 
+		},
+		"sshPublicKey": {
+			"value": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDEzUbmpM9BjQvfRl6mvNK8HM2gRqiJuMhOkFfEuvVYA+36GUb8ZL8tx96FnByaP0MaLITZ7IQRIAxKy05ElyvcMW5vmty/gYMl7aw5E7WgZvq5ye1CUfJ7ftgFPuVOPrmkDyjZ/wP0fj2cFAhDBoJ8NG7QcuA+JoiLXZBibeta/eWP+4ECWhbxW9H930MFeCDeS94tyb/IOMz2D5lkCSvp6m81+6hJKHKSzHq2S8Elj5TaQYSfhShnkzGfluG0E+fXjodhXShpBhkyGRRVJ4QKjf/tFzEcmJ43pSupJ/+O3MDKnO6ofVB6Eh1UOC7kHq6exNSbLY5YjvWRiHlZ4ooL apopisteru@apopisteru-7480"
+		},
+        "upgrading": {
+            "value": "no"
+        },
+		"elbUsePublicIP": {
+			"value": "yes"
+		},
+		"elbPublicIPAddressGroupName": {
+			"value": "CPSM-OMV"
+		},
+		"elbPublicIPAddressName": {
+			"value": "vmssFELBPub"
+		},
+        "vmName": {
+            "value": "OMVss"
+        },
+        "instanceCount": {
+            "value": "1"
+        },
+        "maxInstanceCount": {
+            "value": "2"
+        },
+        "managementServer": {
+            "value": "epm-91"
+        },
+        "configurationTemplate": {
+            "value": "Standard"
+        },
+        "adminEmail": {
+            "value": "apopisteru@checkpoint.com"
+        },
+        "deploymentMode": {
+            "value": "ELBOnly"
+        },
+        "instanceLevelPublicIP": {
+            "value": "yes"
+        },
+        "mgmtInterfaceOpt1": {
+            "value": "eth0-public"
+        },
+        "appLoadDistribution": {
+            "value": "Default"
+        },
+        "availabilityZonesNum": {
+            "value": 0
+        },
+        "cloudGuardVersion": {
+            "value": "R80.30 - Bring Your Own License"
+        },
+        "vmSize": {
+            "value": "Standard_D2_v2"
+        },
+        "sicKey": {
+            "value": "Cpwins12345678"
+        },
+        "allowDownloadFromUploadToCheckPoint": {
+            "value": "true"
+        },
+        "diskType": {
+            "value": "Standard_LRS"
+        },
+        "sourceImageVhdUri": {
+            "value": "noCustomUri"
+        },
+        "virtualNetworkName": {
+            "value": "vmss-vnet-198-51-100-0-mask-24"
+        },
+        "virtualNetworkAddressPrefixes": {
+            "value": [
+                "198.51.100.0/24"
+            ]
+        },
+        "vnetNewOrExisting": {
+            "value": "existing"
+        },
+        "virtualNetworkExistingRGName": {
+            "value": "CPSM-OMV"
+        },
+        "subnet1Name": {
+            "value": "Frontend"
+        },
+        "subnet1Prefix": {
+            "value": "198.51.100.0/28"
+        },
+        "subnet2Name": {
+            "value": "Backend"
+        },
+        "subnet2Prefix": {
+            "value": "198.51.100.128/28"
+        },
+        "subnet2StartAddress": {
+            "value": "198.51.100.132"
+        }
+    }
+}
