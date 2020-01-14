@@ -59,7 +59,7 @@
 	"elbPublicIPAddressName": {
 	  "type": "string",
 	  "metadata": {
-        "description": "The name of existing Public IP address to be assign to external load balancer"
+        "description": "The resource ID of existing Public IP address to be assign to external load balancer"
       }
 	},
     "instanceCount": {
