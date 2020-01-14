@@ -71,7 +71,7 @@
     "appAddressName": "[variables('appName')]",
     "newAppAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
 	"existingAppAddressId": "[resourceId(parameters('elbPublicIPAddressGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('elbPublicIPAddressName'))]",
-    "appAddressId": "[if(equals(parameters('elbUsePublicIP'), 'yes'), variables('existingAppAddressId'), variables('newAppAddressId'))]",
+    "appAddressId": "[if(not(parameters('elbUsePublicIP')), variables('newAppAddressId'), variables('existingAppAddressId'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
