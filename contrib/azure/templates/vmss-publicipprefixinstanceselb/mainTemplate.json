@@ -692,7 +692,16 @@
           },
           "upgrading": {
             "value": "[variables('upgrading')]"
-          }
+          },
+		  "elbUsePublicIP": {
+			"value": "yes"
+		  },
+		  "elbPublicIPAddressGroupName": {
+	        "value": "parameters(elbPublicIPAddressGroupName)"
+		  },
+          "elbPublicIPAddressName": {
+	        "value": "parameters(elbPublicIPAddressName)"
+	      }
         }
       }
     },
