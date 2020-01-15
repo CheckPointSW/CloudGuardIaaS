@@ -16,11 +16,10 @@ The VM scale set deployment was tested in the same existing resource group which
     - `elbPublicIPAddressName`
   * `load-balancers.json` nested template:
 	- `elbUsePublicIP`
-    - `elbPublicIPAddressGroupName`
-    - `elbPublicIPAddressName`
+    - `elbPublicIPAddressId`
 * new variables:
   *  `mainTemplate.json`:
-    - `existingPublicIPprefixResID` : constructs the public IP prefix ID from the parameters declared above, ID to be referenced in `publicIPProperties` existing variable
+    - `existingPublicIPaddressResID` : constructs the public IP prefix ID from the parameters declared above, ID to be referenced in `publicIPProperties` existing variable
   *  `load-balancers.json`:
     - `newAppAddressId`: automatically constructs external load balancer public IP if existing public IP is not used - previous declaration of `appAddressId` variable
 	- `existingAppAddressId`: existing public IP address Id, referenced from resource group and public IP address names passed as parameters
@@ -29,6 +28,7 @@ The VM scale set deployment was tested in the same existing resource group which
   - `load-balancers.json`: `appAddressId`: conditionally resolves the external load balancer public IP id based on utilization of existing public IP address
   - hardcoded main template URL in existing parameter `_artifactsLocation` referenced by `networkSetupURL` and `loadBalacerSetupURL` to locate the nested templates
   *Please verify and change accordingly to the raw github URI the `_artifactsLocation` value before deployment !*
+  - removed `dependsOn: [variables('appAddressId')]` in `load-balancers.json` to allow reference to resorce not declared in template
 
 ## How to deploy the template:
 
@@ -48,3 +48,4 @@ az group deployment create -g CPSM-OMV --template-uri https://raw.githubusercont
     } 
 },
 ```
+Additional logic have to be implemented to select admin password source.
