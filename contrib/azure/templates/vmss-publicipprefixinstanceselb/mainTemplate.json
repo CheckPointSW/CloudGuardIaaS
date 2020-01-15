@@ -386,7 +386,7 @@
       "metadata": {
         "description": "The base URI where artifacts required by this template are located including a trailing '/'"
       },
-      "defaultValue": "https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/mainTemplate.json"
+      "defaultValue": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/mainTemplate.json"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",

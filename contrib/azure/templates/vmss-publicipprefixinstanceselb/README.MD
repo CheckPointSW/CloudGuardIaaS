@@ -32,10 +32,10 @@ The VM scale set deployment was tested in the same existing resource group which
 
 ## How to deploy the template:
 
-Local deployment: construct a parameters.json file and run your deployment tool of choice, e. g.
+Construct a parameters.json file and run your deployment tool of choice, e. g.
 
 ```
-az group deployment create -g CPSM-OMV --template-uri https://raw.githubusercontent.com/chkp-apopisteru/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/mainTemplate.json --parameters @parameters.json --debug
+az group deployment create -g CPSM-OMV --template-uri https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/contrib/azure/templates/vmss-publicipprefixinstanceselb/mainTemplate.json --parameters @parameters.json --debug
 ```
 
 ### *Extra*: to load the administrator password from an existing keyvault (provided that you declared appropriate permissions), include in the parameters.json file in the parameters section:
