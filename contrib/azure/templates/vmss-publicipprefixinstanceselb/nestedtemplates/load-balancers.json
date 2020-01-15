@@ -133,9 +133,6 @@
       "sku": {
         "name": "Standard"
       },
-      "dependsOn": [
-        "[variables('appAddressId')]"
-      ],
       "properties": {
         "frontendIPConfigurations": [
           {
