@@ -107,8 +107,7 @@
   "resources": [
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-	  "condition": "[and(variables('deployELB'), not(parameters('elbUsePublicIP')))]",
+      "condition": "[and(variables('deployELB'), not(parameters('upgrading')), not(parameters('elbUsePublicIP')))]",
       "apiVersion": "[parameters('networkApiVersion')]",
       "location": "[parameters('location')]",
       "name": "[variables('appAddressName')]",
@@ -143,7 +142,7 @@
             "name": "[variables('appFEName')]",
             "properties": {
               "publicIPAddress": {
-                "id": "[variables('appAddressId')]"
+                "id": "/subscriptions/ec232fcc-276e-4cb8-a066-afd11792129b/resourceGroups/CPSM-OMV/providers/Microsoft.Network/publicIPAddresses/vmssFELBPub"
               }
             }
           }
