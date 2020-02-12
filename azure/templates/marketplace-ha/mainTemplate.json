@@ -208,7 +208,7 @@
         "description": "The URI of the blob containing the development image"
       }
     },
-    "availabilityOptions":{
+    "availabilityOptions": {
       "type": "string",
       "allowedValues": [
         "Availability Set",
@@ -232,11 +232,17 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
     }
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "",
+    "templateVersion": "20200212",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -425,7 +431,10 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
     },
     {
       "name": "networkSetup",
@@ -473,7 +482,7 @@
     },
     {
       "type": "Microsoft.Compute/availabilitySets",
-      "condition":"[not(variables('useAZ'))]",
+      "condition": "[not(variables('useAZ'))]",
       "apiVersion": "2018-10-01",
       "location": "[variables('location')]",
       "name": "[concat(variables('availabilitySetName'))]",
@@ -482,6 +491,9 @@
       },
       "sku": {
         "name": "Aligned"
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -498,6 +510,9 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -518,6 +533,9 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -534,6 +552,9 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-vip-', uniquestring(resourceGroup().id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -586,6 +607,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -623,6 +647,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -660,6 +687,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -677,6 +707,9 @@
             "storageAccountType": "Standard_LRS"
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -691,7 +724,7 @@
       ],
       "location": "[variables('location')]",
       "name": "[concat(parameters('vmName'), copyIndex(1))]",
-      "zones":"[if(variables('useAZ'), array(copyIndex(1)), json('null'))]",
+      "zones": "[if(variables('useAZ'), array(copyIndex(1)), json('null'))]",
       "copy": {
         "name": "virtualMachineCopy",
         "count": "[variables('count')]"
@@ -744,6 +777,9 @@
             }
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -784,6 +820,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -802,6 +841,9 @@
         "roleDefinitionId": "[variables('roleDefinitionId')]",
         "scope": "[resourceGroup().id]",
         "principalId": "[reference(concat('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2018-10-01', 'Full').identity.principalId]"
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -862,6 +904,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

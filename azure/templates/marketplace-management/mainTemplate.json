@@ -196,11 +196,17 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
     }
   },
   "variables": {
     "templateName": "management",
-    "templateVersion": "",
+    "templateVersion": "20200212",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -304,7 +310,10 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
     },
     {
       "name": "networkSetup",
@@ -352,6 +361,9 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -474,6 +486,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -506,6 +521,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -523,6 +541,9 @@
             "storageAccountType": "Standard_LRS"
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -576,6 +597,9 @@
             }
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

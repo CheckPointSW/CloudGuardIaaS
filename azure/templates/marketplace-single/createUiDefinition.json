@@ -415,7 +415,7 @@
             "osPlatform": "Linux",
             "imageReference": {
               "publisher": "checkpoint",
-              "offer": "check-point-cg-r8040,
+              "offer": "check-point-cg-r8040",
               "sku": "sg-byol"
             },
             "count": 1
