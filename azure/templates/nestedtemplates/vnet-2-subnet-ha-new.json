@@ -46,13 +46,6 @@
       },
       "defaultValue": "10.0.2.0/24"
     },
-    "virtualNetworkExistingRGName": {
-      "type": "string",
-      "metadata": {
-        "description": "Resource Group of the existing virtual network"
-      },
-      "defaultValue": ""
-    },
     "vmName": {
       "type": "string"
     },
