@@ -6,7 +6,6 @@ The repository contains:
 * Solution/CloudFormation templates
 * Tools and scripts that can be used with CloudGuard for Public Cloud solutions
 * Deprecated Solution/CloudFormation templates
-* Deprecated tools and scripts that can be used with python2 only
 * Community-supported content
 
 ## Related Products and Solutions
