@@ -1,5 +1,5 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
@@ -12,7 +12,8 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.30 - Bring Your Own License"
+        "R80.30 - Bring Your Own License",
+        "R80.40 - Bring Your Own License"
       ],
       "defaultValue": "R80.30 - Bring Your Own License",
       "metadata": {
@@ -121,8 +122,7 @@
       "type": "securestring",
       "metadata": {
         "description": "One time key for Secure Internal Communication"
-      },
-      "defaultValue": "notused"
+      }
     },
     "installationType": {
       "type": "string",
@@ -174,17 +174,6 @@
         "Premium_LRS"
       ]
     },
-    "preview": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "Deploy the staged image"
-      },
-      "allowedValues": [
-        "",
-        "-preview"
-      ]
-    },
     "msi": {
       "type": "bool",
       "defaultValue": false,
@@ -198,25 +187,31 @@
       "metadata": {
         "description": "The URI of the blob containing the development image"
       }
-     },
-     "_artifactsLocation": {
-       "type": "string",
-       "metadata": {
-           "description": "The base URI where artifacts required by this template are located including a trailing '/'"
-       },
-       "defaultValue": "[deployment().properties.templateLink.uri]"
-     },
-     "_artifactsLocationSasToken": {
-       "type": "securestring",
-       "metadata": {
-           "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-       },
-       "defaultValue": ""
-     }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+      },
+      "defaultValue": "[deployment().properties.templateLink.uri]"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+      },
+      "defaultValue": ""
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "",
+    "templateVersion": "20200212",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -228,6 +223,7 @@
       "R80.40 - Bring Your Own License": "R8040"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
+    "adminUsername": "notused",
     "isBlink": "[bool('false')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
@@ -237,10 +233,10 @@
     "diskSizeGBR8030": 100,
     "diskSizeGBR8040": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables(concat('diskSizeGB', variables('osVersion'))))]",
-    "customData": "[concat('#!/usr/bin/python /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n')]",
     "imageOfferR8030": "check-point-cg-r8030",
     "imageOfferR8040": "check-point-cg-r8040",
-    "imageOffer": "[concat(variables(concat('imageOffer', variables('osVersion'))), parameters('preview'))]",
+    "imageOffer": "[concat(variables(concat('imageOffer', variables('osVersion'))))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
@@ -306,7 +302,10 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
     },
     {
       "name": "networkSetup",
@@ -354,6 +353,9 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -476,6 +478,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -508,12 +513,15 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
-      "apiVersion": "2017-12-01",
+      "apiVersion": "2018-10-01",
       "name": "[variables('customImage')]",
       "location": "[variables('location')]",
       "properties": {
@@ -525,6 +533,9 @@
             "storageAccountType": "Standard_LRS"
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -561,7 +572,7 @@
         },
         "osProfile": {
           "adminPassword": "[parameters('adminPassword')]",
-          "adminUsername": "notused",
+          "adminUsername": "[variables('adminUsername')]",
           "computerName": "[toLower(parameters('vmName'))]",
           "customData": "[base64(variables('customData'))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
@@ -578,6 +589,9 @@
             }
           }
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
