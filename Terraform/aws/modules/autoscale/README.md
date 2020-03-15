@@ -151,7 +151,7 @@ proxy_elb_type= "none"
 | Name  | Description |
 | ------------- | ------------- |
 | autoscale-autoscaling_group_id  | The id of the deployed AutoScaling Group  |
-| autoscale-autoscaling_group_id  | The name of the deployed AutoScaling Group  |
+| autoscale-autoscaling_group_name  | The name of the deployed AutoScaling Group  |
 | autoscale-autoscaling_group_arn  | The ARN for the deployed AutoScaling Group  |
 | autoscale-autoscaling_group_availability_zones  | The AZs on which the Autoscaling Group is configured  |
 | autoscale-autoscaling_group_desired_capacity  | The deployed AutoScaling Group's desired capacity of instances |
