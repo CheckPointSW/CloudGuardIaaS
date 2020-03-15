@@ -122,27 +122,27 @@ proxy_elb_type= "none"
 | vpc_id | The VPC id in which to deploy | string | n/a | n/a | yes |
 | subnet_ids | List of subnet IDs to launch resources into. Recommended at least 2 | list(string) | n/a | n/a | yes |
 |  |  |  |  |  |
-| gateways_provision_address_type | Determines if the gateways are provisioned using their private or public address.| string | private <br/> public | "private" | no |
+| gateways_provision_address_type | Determines if the gateways are provisioned using their private or public address.| string | - private <br/> - public | "private" | no |
 | managementServer | The name that represents the Security Management Server in the CME configuration | string | n/a | n/a | yes |
 | configurationTemplate | Name of the provisioning template in the CME configuration | string  | n/a | n/a | yes |
 |  |  |  |  |  |
 | instances_name | AWS Name tag of the ASG's instances | string | n/a | "CP-ASG-gateway-tf" | no |
-| instance_type | AWS instance type. | string | c5.large <br/> c5.xlarge <br/> c5.2xlarge <br/> c5.4xlarge <br/> c5.9xlarge <br/> c5.18xlarge | "c5.xlarge" | no |
+| instance_type | AWS instance type. | string | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge | "c5.xlarge" | no |
 | key_name | The EC2 Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
 |  |  |  |  |  |
 | minimum_group_size | The minimum number of instances in the Auto Scaling group | number | n/a | 2 | no |
 | maximum_group_size | The maximum number of instances in the Auto Scaling group | number | n/a | 10 | no |
 | target_groups | (Optional) List of Target Group ARNs to associate with the Auto Scaling group | list(string) | n/a | [] | no |
 |  |  |  |  |  |
-| version_license | Version and license of the Check Point Security Gateways. | string | R80.30-BYOL-GW <br/> R80.30-PAYG-NGTP-GW <br/> R80.30-PAYG-NGTX-GW <br/> R80.40-BYOL-GW <br/> R80.40-PAYG-NGTP-GW <br/> R80.40-PAYG-NGTX-GW | "R80.30-PAYG-NGTP-GW" | no |
-| admin_shell | Set the admin shell to enable advanced command line configuration. | string | /etc/cli.sh <br/> /bin/bash <br/> /bin/csh <br/> /bin/tcsh | "/etc/cli.sh" | no |
+| version_license | Version and license of the Check Point Security Gateways. | string | - R80.30-BYOL-GW <br/> - R80.30-PAYG-NGTP-GW <br/> - R80.30-PAYG-NGTX-GW <br/> - R80.40-BYOL-GW <br/> - R80.40-PAYG-NGTP-GW <br/> - R80.40-PAYG-NGTX-GW | "R80.30-PAYG-NGTP-GW" | no |
+| admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
 | password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
 | SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | n/a | true | no |
 | enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | n/a | false | no |
 | bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
 |  |  |  |  |  |
-| proxy_elb_type | Type of ELB to create as an HTTP/HTTPS outbound proxy. | string | none <br/> internal <br/> internet-facing | "none" | no |
+| proxy_elb_type | Type of ELB to create as an HTTP/HTTPS outbound proxy. | string | - none <br/> - internal <br/> - internet-facing | "none" | no |
 | proxy_elb_port | The TCP port on which the proxy will be listening | number | n/a | 8080 | no |
 | proxy_elb_clients | The CIDR range of the clients of the proxy | string | n/a | "0.0.0.0/0" | no |
 
