@@ -1,5 +1,5 @@
 {
-  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deploymentMode": {
@@ -17,9 +17,6 @@
     "Subnet2StartAddress": {
       "type": "string"
     },
-    "subnet2Name": {
-      "type": "string"
-    },
     "subnet2Id": {
       "type": "string"
     },
@@ -28,9 +25,6 @@
     },
     "upgrading": {
       "type": "bool"
-    },
-    "lbsTargetRGName": {
-      "type": "string"
     },
     "elbResourceId": {
       "type": "string"
@@ -51,16 +45,13 @@
     "deployILB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ILBOnly'))]",
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressName": "[variables('appName')]",
-    "appAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
+    "appAddressId": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
     "elbBEAddressPool": "[concat(variables('elbName'), '-pool')]",
     "elbBEAddressPoolName": "[if(parameters('upgrading'), parameters('elbTargetBEAddressPoolName'), variables('elbBEAddressPool'))]",
-    "elbBEAddressPoolID": "[concat(variables('elbID'), '/backendAddressPools/', variables('elbBEAddressPoolName'))]",
-    "appFEIPConfigID": "[concat(variables('elbID'), '/frontendIPConfigurations/', variables('appFEName'))]",
     "appProbeName": "[variables('appName')]",
-    "appProbeID": "[concat(variables('elbID'),'/probes/',variables('appProbeName'))]",
     "appFrontEndProtocol": "tcp",
     "appFrontEndPort": 80,
     "appBackEndPort": 8081,
@@ -70,20 +61,17 @@
     "ilbName": "['backend-lb']",
     "ilbID": "[if(parameters('upgrading'), parameters('ilbResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('ilbName')))]",
     "ilbBEAddressPool": "[concat(variables('ilbName'), '-pool')]",
-    "ilbFEIPConfigID": "[concat(variables('ilbID'), '/frontendIPConfigurations/', variables('ilbName'))]",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
     "ilbBEAddressPoolName": "[if(parameters('upgrading'), parameters('ilbTargetBEAddressPoolName'), variables('ilbBEAddressPool'))]",
-    "ilbBEAddressPoolID": "[concat(variables('ilbID'), '/backendAddressPools/', variables('ilbBEAddressPoolName'))]",
     "ilbProbeName": "[variables('ilbName')]",
-    "ilbProbeID": "[concat(variables('ilbID'), '/probes/', variables('ilbProbeName'))]",
     "ilbBEAddressPoolProperties": [
       {
-        "id": "[variables('ilbBEAddressPoolID')]"
+        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbName'), variables('ilbBEAddressPoolName'))]"
       }
     ],
     "elbBEAddressPoolProperties": [
       {
-        "id": "[variables('elbBEAddressPoolID')]"
+        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbName'), variables('elbBEAddressPoolName'))]"
       }
     ]
   },
@@ -122,7 +110,7 @@
             "name": "[variables('appFEName')]",
             "properties": {
               "publicIPAddress": {
-                "id": "[variables('appAddressId')]"
+                "id": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]"
               }
             }
           }
@@ -137,13 +125,13 @@
             "name": "[variables('appName')]",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[variables('appFEIPConfigID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbName'), variables('appFEName'))]"
               },
               "backendAddressPool": {
-                "id": "[variables('elbBEAddressPoolID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbName'), variables('elbBEAddressPoolName'))]"
               },
               "probe": {
-                "id": "[variables('appProbeID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbName'), variables('appProbeName'))]"
               },
               "protocol": "[variables('appFrontEndProtocol')]",
               "frontendPort": "[variables('appFrontEndPort')]",
@@ -198,13 +186,13 @@
             "name": "[variables('ilbName')]",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[variables('ilbFEIPConfigID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('ilbName'),  variables('ilbName'))]"
               },
               "backendAddressPool": {
-                "id": "[variables('ilbBEAddressPoolID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbName'), variables('ilbBEAddressPoolName'))]"
               },
               "probe": {
-                "id": "[variables('ilbProbeID')]"
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('ilbName'), variables('ilbProbeName'))]"
               },
               "protocol": "All",
               "frontendPort": 0,
