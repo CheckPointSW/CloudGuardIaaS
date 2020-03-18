@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import contextlib
 import json
 import os
@@ -7,9 +7,8 @@ import socket
 import subprocess
 import sys
 import traceback
+import urlparse
 import collections
-import urllib.parse as _urllib
-
 import rest
 
 ARM_VERSIONS = {
@@ -179,7 +178,7 @@ def interfaces_test_rw(interface_id):
 
 def test_cluster_parameters():
     path = "/var/opt/fw.boot/modules/fwkern.conf"
-    text1 = "fwha_dead_timeout_multiplier=20"
+    text1 = "fwha_dead_timeout_multiplier=200"
     text2 = "fwha_if_problem_tolerance=200"
     flags = dict.fromkeys(["fwkern_timeout_multiplier",
                            "fwkern_problem_tolerance",
@@ -201,7 +200,8 @@ def test_cluster_parameters():
             command, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         out, err = proc.communicate()
-        if out.decode('utf-8').strip() == 'fwha_dead_timeout_multiplier = 20':
+
+        if out.strip() == 'fwha_dead_timeout_multiplier = 200':
             flags['output_timeout_multiplier'] = True
 
         command = ['fw', 'ctl', 'get', 'int', 'fwha_if_problem_tolerance']
@@ -210,10 +210,10 @@ def test_cluster_parameters():
             stderr=subprocess.PIPE)
         out, err = proc.communicate()
 
-        if out.decode('utf-8').strip() == 'fwha_if_problem_tolerance = 200':
+        if out.strip() == 'fwha_if_problem_tolerance = 200':
             flags['output_problem_tolerance'] = True
 
-        if not all(value is True for value in list(flags.values())):
+        if not all(value is True for value in flags.values()):
             raise Exception(error)
 
 
@@ -307,7 +307,7 @@ def test():
     log('Testing if DNS is configured...\n')
     try:
         dns = subprocess.check_output(
-            ['/bin/clish', '-c', 'show dns primary']).decode('utf-8').strip()
+            ['/bin/clish', '-c', 'show dns primary']).strip()
     except:
         traceback.print_exc()
         raise
@@ -318,13 +318,13 @@ def test():
 
     log('Testing if DNS is working...\n')
     if proxy:
-        host = _urllib.urlparse(proxy).hostname
+        host = urlparse.urlparse(proxy).hostname
         if host is None:
             raise Exception('Failed to get hostname from proxy: %s\n' % proxy)
 
-        port = _urllib.urlparse(proxy).port
+        port = urlparse.urlparse(proxy).port
         if not port:
-            if _urllib.urlparse(proxy).scheme == 'https':
+            if urlparse.urlparse(proxy).scheme == 'https':
                 port = 443
             else:
                 port = 80

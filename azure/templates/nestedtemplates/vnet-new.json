@@ -57,24 +57,6 @@
       "metadata": {
         "description": "The first avaialable address on the 2nd subnet"
       }
-    },
-    "vnetNewOrExisting": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ],
-      "metadata": {
-        "Description": "Indicates whether the virtual network is new or existing"
-      }
-    },
-    "virtualNetworkExistingRGName": {
-      "type": "string",
-      "metadata": {
-        "description": "Resource Group of the existing virtual network"
-      },
-      "defaultValue": ""
     }
   },
   "variables": {},

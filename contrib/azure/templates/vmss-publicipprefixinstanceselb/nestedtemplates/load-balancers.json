@@ -1,8 +1,11 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "deploymentMode": {
+      "type": "string"
+    },
+    "networkApiVersion": {
       "type": "string"
     },
     "location": {
@@ -17,6 +20,9 @@
     "Subnet2StartAddress": {
       "type": "string"
     },
+    "subnet2Name": {
+      "type": "string"
+    },
     "subnet2Id": {
       "type": "string"
     },
@@ -25,6 +31,9 @@
     },
     "upgrading": {
       "type": "bool"
+    },
+    "lbsTargetRGName": {
+      "type": "string"
     },
     "elbResourceId": {
       "type": "string"
@@ -37,6 +46,18 @@
     },
     "ilbTargetBEAddressPoolName": {
       "type": "string"
+    },
+	"elbUsePublicIP": {
+      "type": "bool"
+    },
+	"elbPublicIPAddressId": {
+	  "type": "string"
+	},
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
     }
   },
   "variables": {
@@ -45,13 +66,17 @@
     "deployILB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ILBOnly'))]",
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressName": "[variables('appName')]",
-    "appAddressId": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
+    "newAppAddressId": "[concat(variables('resourceGroup').id, '/providers/Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
+	"appAddressId": "[if(parameters('elbUsePublicIP'), parameters('elbPublicIPAddressId'), variables('newAppAddressId'))]",
     "appFEName": "[variables('appName')]",
     "elbName": "frontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
     "elbBEAddressPool": "[concat(variables('elbName'), '-pool')]",
     "elbBEAddressPoolName": "[if(parameters('upgrading'), parameters('elbTargetBEAddressPoolName'), variables('elbBEAddressPool'))]",
+    "elbBEAddressPoolID": "[concat(variables('elbID'), '/backendAddressPools/', variables('elbBEAddressPoolName'))]",
+    "appFEIPConfigID": "[concat(variables('elbID'), '/frontendIPConfigurations/', variables('appFEName'))]",
     "appProbeName": "[variables('appName')]",
+    "appProbeID": "[concat(variables('elbID'),'/probes/',variables('appProbeName'))]",
     "appFrontEndProtocol": "tcp",
     "appFrontEndPort": 80,
     "appBackEndPort": 8081,
@@ -61,25 +86,28 @@
     "ilbName": "['backend-lb']",
     "ilbID": "[if(parameters('upgrading'), parameters('ilbResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('ilbName')))]",
     "ilbBEAddressPool": "[concat(variables('ilbName'), '-pool')]",
+    "ilbFEIPConfigID": "[concat(variables('ilbID'), '/frontendIPConfigurations/', variables('ilbName'))]",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
     "ilbBEAddressPoolName": "[if(parameters('upgrading'), parameters('ilbTargetBEAddressPoolName'), variables('ilbBEAddressPool'))]",
+    "ilbBEAddressPoolID": "[concat(variables('ilbID'), '/backendAddressPools/', variables('ilbBEAddressPoolName'))]",
     "ilbProbeName": "[variables('ilbName')]",
+    "ilbProbeID": "[concat(variables('ilbID'), '/probes/', variables('ilbProbeName'))]",
     "ilbBEAddressPoolProperties": [
       {
-        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbName'), variables('ilbBEAddressPoolName'))]"
+        "id": "[variables('ilbBEAddressPoolID')]"
       }
     ],
     "elbBEAddressPoolProperties": [
       {
-        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbName'), variables('elbBEAddressPoolName'))]"
+        "id": "[variables('elbBEAddressPoolID')]"
       }
     ]
   },
   "resources": [
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "condition": "[and(variables('deployELB'), not(parameters('upgrading')), not(parameters('elbUsePublicIP')))]",
+      "apiVersion": "[parameters('networkApiVersion')]",
       "location": "[parameters('location')]",
       "name": "[variables('appAddressName')]",
       "sku": {
@@ -90,27 +118,27 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(variables('resourceGroup').id, deployment().name))]"
         }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "[parameters('networkApiVersion')]",
       "name": "[variables('elbName')]",
       "location": "[parameters('location')]",
       "sku": {
         "name": "Standard"
       },
-      "dependsOn": [
-        "[variables('appAddressId')]"
-      ],
       "properties": {
         "frontendIPConfigurations": [
           {
             "name": "[variables('appFEName')]",
             "properties": {
               "publicIPAddress": {
-                "id": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]"
+                "id": "[variables('appAddressId')]"
               }
             }
           }
@@ -125,13 +153,13 @@
             "name": "[variables('appName')]",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbName'), variables('appFEName'))]"
+                "id": "[variables('appFEIPConfigID')]"
               },
               "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbName'), variables('elbBEAddressPoolName'))]"
+                "id": "[variables('elbBEAddressPoolID')]"
               },
               "probe": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbName'), variables('appProbeName'))]"
+                "id": "[variables('appProbeID')]"
               },
               "protocol": "[variables('appFrontEndProtocol')]",
               "frontendPort": "[variables('appFrontEndPort')]",
@@ -152,12 +180,15 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployILB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "[parameters('networkApiVersion')]",
       "name": "[variables('ilbName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -186,13 +217,13 @@
             "name": "[variables('ilbName')]",
             "properties": {
               "frontendIPConfiguration": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('ilbName'),  variables('ilbName'))]"
+                "id": "[variables('ilbFEIPConfigID')]"
               },
               "backendAddressPool": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbName'), variables('ilbBEAddressPoolName'))]"
+                "id": "[variables('ilbBEAddressPoolID')]"
               },
               "probe": {
-                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('ilbName'), variables('ilbProbeName'))]"
+                "id": "[variables('ilbProbeID')]"
               },
               "protocol": "All",
               "frontendPort": 0,
@@ -213,6 +244,9 @@
             }
           }
         ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
@@ -238,12 +272,12 @@
       "type": "array"
     },
     "ApplicationAddress": {
-      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), '2018-11-01').IpAddress, 'no public ip')]",
+      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), parameters('networkApiVersion')).IpAddress, 'no public ip')]",
       "type": "string"
     },
     "ApplicationFQDN": {
-      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), '2018-11-01').dnsSettings.fqdn, 'no public ip')]",
+      "value": "[if(and(variables('deployELB'), not(parameters('upgrading'))), reference(variables('appAddressId'), parameters('networkApiVersion')).dnsSettings.fqdn, 'no public ip')]",
       "type": "string"
-    }
+    }	
   }
 }
