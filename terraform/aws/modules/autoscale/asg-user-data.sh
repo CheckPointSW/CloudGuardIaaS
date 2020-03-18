@@ -6,7 +6,7 @@ exec 1>/var/log/aws-user-data.log 2>&1
 echo -e "\nStarting user data...\n"
 
 echo template_name: autoscale_tf >> /etc/cloud-version
-echo template_version: __VERSION__ >> /etc/cloud-version
+echo template_version: 20200318 >> /etc/cloud-version
 
 echo "Configuring admin password hash"
 if [[ -n ${PasswordHash} ]]; then
