@@ -1,4 +1,4 @@
-# CheckPoint Autoscale Terraform module for AWS
+# Check Point Autoscale Terraform module for AWS
 
 Terrafrom module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC on AWS.
 
