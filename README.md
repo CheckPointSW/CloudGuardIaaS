@@ -1,6 +1,8 @@
 # Check Point CloudGuard IaaS Repository Overview
 Check Point CloudGuard IaaS repository.
 
+sarig AWS password 112233AAVVCC
+
 The repository contains:
 
 * Solution/CloudFormation templates
