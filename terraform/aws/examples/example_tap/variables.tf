@@ -33,7 +33,7 @@ variable "registration_key" {
 variable "vxlan_ids" {
   type = list(number)
   description = "(Optional) list of VXLAN IDs (numbers) for mirroring sessions - Predefine VTEP numbers"
-  default = []
+  default = [1]
 }
 variable "blacklist_tags" {
   type = map(string)

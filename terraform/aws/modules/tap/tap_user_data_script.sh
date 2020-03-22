@@ -31,7 +31,12 @@ fi
 
 echo "Pulling NOW install script..."
 INSTALLER=/var/log/now_installer
-while true; do
+
+runtime="10 minute"
+endtime=$(date -ud "$runtime" +%s)
+
+while [[ $(date -u +%s) -le $endtime ]]
+do
   curl_cli -s -S --cacert "$CPDIR/conf/ca-bundle.crt" https://portal.now.checkpoint.com/static/configure.aws.sh -o $INSTALLER
   if [[ $? == 0 ]]; then
     break
