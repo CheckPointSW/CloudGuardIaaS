@@ -38,7 +38,7 @@ This service principal will be used by Terraform in order to deploy the solution
  | ------------- | ------------- | ------------- | -------------  |
  | **client_secret** | passwordThe client secret of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
- | **client_secret** | The client ID of the Service Principal used to deploy the solution | string |
+ | **client_id** | The client ID of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
  | **tenant_id** | The tenant ID of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
