@@ -54,7 +54,7 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **address_space** | The address prefixes of the virtual network | string | Valid CIDR block |
  |  |  |  |  |  |
- | **subnet_prefixes** | The address prefixes to be used for created subnets | string | The subnets need to contain within the address space for this virtual network(defined by address_space variable) |
+ | **subnet_prefixes** | The address prefixes to be used for the 2 created subnets | string | The subnets need to be contained within the address space for this virtual network(defined by address_space variable) |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
