@@ -7,17 +7,37 @@ As part of the deployment the following resources are created:
 See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
 
 This solution uses the following modules:
-- /cgi-terraform/azure/modules/common - used for creating a resource group and defining common variables.
+- /terraform/azure/modules/common - used for creating a resource group and defining common variables.
 
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
-- In order to use ssh connection to VMs, add a public key to the /cgi-terraform/azure/vmss-existing-vnet/azure_public_key file
-
+- In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-existing-vnet/azure_public_key file
+<br>In case there is no need in ssh key usage next lines in the main.tf file need to be deleted or commented:
+    <br>ssh_keys {
+      <br>&emsp;path = "/home/notused/.ssh/authorized_keys"
+      <br>&emsp;key_data = file("${path.module}/azure_public_key")
+    <br>}
 ## Usage
-- Create a Service Principal with the following permissions to the Azure subscription. 
-This service principal will be used by Terraform in order to deploy the solution.
-- Fill all variables in the /cgi-terraform/azure/vmss-existing-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
+- Choose the preferred login method to the Azure in order to deploy the solution:
+    <br>1. Using Service Principal:
+    - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
+    - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
+
+    <br>2. Using **az** commands from a command-line:
+    - Run  **az login** command 
+    - Sign in with your account credentials in the browser
+    - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running **az vm image terms accept --urn publisher:offer:sku:version**:
+        - publisher = checkpoint;
+        - offer = vm_os_offer(see accepted values in the table below);
+        - sku = vm_os_sku(see accepted values in the table below);
+        - version = latest<br/>
+    <br>Example:<br>
+    az vm image terms accept --urn checkpoint:check-point-cg-r8040:sg-byol:latest
+    
+    - In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables. 
+ 
+- Fill all variables in the /terraform/azure/vmss-existing-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
 
         terraform init
@@ -53,7 +73,7 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **backend_subnet_name** | Specifies the name of the internal subnet | string | The exact name of the existing internal subnet |
  |  |  |  |  |  |
- | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| number | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
+ | **backend_lb_IP_address** | is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
@@ -130,6 +150,18 @@ This service principal will be used by Terraform in order to deploy the solution
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
     
+
+##Revision History
+In order to get template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource; |
+| | | |
+| 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
+| | | |
+
+
 ## License
 
 See the [LICENSE](../../LICENSE) file for details
