@@ -12,7 +12,7 @@ See the [Check Point CloudGuard IaaS High Availability for Azure Administration 
 This solution uses the following modules:
 - /cgi-terraform/azure/modules/common - used for creating a resource group and defining common variables.
 - /cgi-terraform/azure/modules/vnet - used for creating new virtual network and subnets.
-- /cgi-terraform/azure/modules/cgi-terraform/azure/modules/ - used for creating new network security groups and rules.
+- /cgi-terraform/azure/modules/network-security-group - used for creating new network security groups and rules.
 
 
 ## Configurations
@@ -38,7 +38,7 @@ This service principal will be used by Terraform in order to deploy the solution
  | ------------- | ------------- | ------------- | -------------  |
  | **client_secret** | passwordThe client secret of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
- | **client_secret** | The client ID of the Service Principal used to deploy the solution | string |
+ | **client_id** | The client ID of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
  | **tenant_id** | The tenant ID of the Service Principal used to deploy the solution | string |
  |  |  |  |  |  |
