@@ -70,7 +70,6 @@ resource "azurerm_public_ip" "public-ip-lb" {
     location = module.common.resource_group_location
     resource_group_name = module.common.resource_group_name
     allocation_method = module.vnet.allocation_method
-    domain_name_label = "${var.vmss_name}-frontend-lb"
     sku = var.sku
 }
 
