@@ -14,10 +14,11 @@ This solution uses the following modules:
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
 - In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-existing-vnet/azure_public_key file
 <br>In case there is no need in the ssh key usage, next lines in the main.tf file need to be deleted or commented:
-    <br>ssh_keys {
-      <br>&emsp;path = "/home/notused/.ssh/authorized_keys"
-      <br>&emsp;key_data = file("${path.module}/azure_public_key")
-    <br>}
+
+        ssh_keys {
+          path = "/home/notused/.ssh/authorized_keys"
+          key_data = file("${path.module}/azure_public_key")
+        }
 ## Usage
 - Choose the preferred login method to the Azure in order to deploy the solution:
     <br>1. Using Service Principal:
