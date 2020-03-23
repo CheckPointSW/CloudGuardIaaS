@@ -32,7 +32,8 @@ This solution uses the following modules:
     <br>2. Using **az** commands from a command-line:
     - Run  **az login** command 
     - Sign in with your account credentials in the browser
-    - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running **az vm image terms accept --urn publisher:offer:sku:version**:
+    - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running:
+     <br>**az vm image terms accept --urn publisher:offer:sku:version**, where:
         - publisher = checkpoint;
         - offer = vm_os_offer(see accepted values in the table below);
         - sku = vm_os_sku(see accepted values in the table below);
