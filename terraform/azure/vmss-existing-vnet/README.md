@@ -13,14 +13,14 @@ This solution uses the following modules:
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
 - In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-existing-vnet/azure_public_key file
-<br>In case there is no need in the ssh key usage, next lines in the main.tf file need to be deleted or commented:
+<br>In case there is no need in the ssh key usage, the next lines in the main.tf file need to be deleted or commented:
 
         ssh_keys {
           path = "/home/notused/.ssh/authorized_keys"
           key_data = file("${path.module}/azure_public_key")
         }
 ## Usage
-- Choose the preferred login method to the Azure in order to deploy the solution:
+- Choose the preferred login method to Azure in order to deploy the solution:
     <br>1. Using Service Principal:
     - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
     - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
@@ -31,8 +31,8 @@ This solution uses the following modules:
     - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running:
      <br>**az vm image terms accept --urn publisher:offer:sku:version**, where:
         - publisher = checkpoint;
-        - offer = vm_os_offer(see accepted values in the table below);
-        - sku = vm_os_sku(see accepted values in the table below);
+        - offer = vm_os_offer (see accepted values in the table below);
+        - sku = vm_os_sku (see accepted values in the table below);
         - version = latest<br/>
     <br>Example:<br>
     az vm image terms accept --urn checkpoint:check-point-cg-r8040:sg-byol:latest
@@ -75,7 +75,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **backend_subnet_name** | Specifies the name of the internal subnet | string | The exact name of the existing internal subnet |
  |  |  |  |  |  |
- | **backend_lb_IP_address** | is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
+ | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
@@ -87,7 +87,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 only; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 only |
  |  |  |  |  |  |
- | **vm_os_offer** | Storage data disk size size(GB) | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
  |  |  |  |  |  |
  | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; |
  |  |  |  |  |  |
@@ -154,7 +154,7 @@ This solution uses the following modules:
     
 
 ##Revision History
-In order to get template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
