@@ -152,11 +152,14 @@ This solution uses the following modules:
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
 
-##Known limitations
+## Known limitations
 
-1.  Deploy the VMSS with instance level Public IP address is not supported    
+1.  Deploy the VMSS with instance level Public IP address is not supported
+2.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
+3.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
 
-##Revision History
+## Revision History
+
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
