@@ -17,7 +17,7 @@ This solution uses the following modules:
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
 - In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-new-vnet/azure_public_key file
-<br>In case there is no need in the ssh key usage, next lines in the main.tf file need to be deleted or commented:
+<br>In case there is no need in the ssh key usage, the next lines in the main.tf file need to be deleted or commented:
 
         ssh_keys {
           path = "/home/notused/.ssh/authorized_keys"
