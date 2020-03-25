@@ -152,7 +152,10 @@ This solution uses the following modules:
     notification_email              = ""
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
-    
+
+##Known limitations
+
+1.  Deploy the VMSS with instance level Public IP address is not supported     
 
 ##Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
