@@ -168,4 +168,5 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     internal-network1-name: "vpc-internal2"
     internal-network1-subnetwork-name: "vpc-internal2"
 
-
+## Notes
+In order to check the template version refer to the [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032)
