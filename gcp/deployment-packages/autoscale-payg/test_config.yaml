@@ -1,0 +1,42 @@
+imports:
+- path: check-point-autoscale--payg.py
+- path: common.py
+- path: default.py
+- path: password.py
+- path: images.py
+
+resources:
+- name: check-point-autoscale--payg
+  type: check-point-autoscale--payg.py
+  properties:
+    autoscalingVersion: "PLEASE ENTER AUTOSCALE VERSION"
+    managementName: "PLEASE ENTER MANAGEMENT NAME"
+    AutoProvTemplate: "PLEASE ENTER AUTOPROVISION TEMPLATE NAME"
+    instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
+    mgmtNIC: "PLEASE ENTER MANAGEMENT NIC TYPE"
+    networkDefinedByRoutes: "PLEASE ENTER true or false"
+    shell: "PLEASE ENTER A SHELL"
+    allowUploadDownload: "PLEASE ENTER true or false"
+    externalZone: "PLEASE ENTER AN EXTERNAL ZONE"
+    externalNetwork: "PLEASE ENTER AN EXTERNAL NETWORK ID"
+    externalSubnet: "PLEASE ENTER AN EXTERNAL SUBNETWORK ID"
+    enableIcmp: "PLEASE ENTER true or false"
+    icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableTcp: "PLEASE ENTER true or false"
+    tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableUdp: "PLEASE ENTER true or false"
+    udpSourceRanges: "PLEASE ENTER UDP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableSctp: "PLEASE ENTER true or false"
+    sctpSourceRanges: "PLEASE ENTER SCTP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableEsp: "PLEASE ENTER true or false"
+    espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    internalZone: "PLEASE ENTER AN INTERNAL ZONE"
+    internalNetwork: "PLEASE ENTER AN INTERNAL NETWORK ID"
+    internalSubnet: "PLEASE ENTER AN INTERNAL SUBNETWORK ID"
+    machineType: "PLEASE ENTER A MACHINE TYPE"
+    cpuUsage: "PLEASE ENTER CPU USAGE (%)"
+    minInstances: "PLEASE ENTER MINIMUM NUMBER OF INSTANCES"
+    maxInstances: "PLEASE ENTER MAXIMUM NUMBER OF INSTANCES"
+    diskType: "PLEASE ENTER A DISK TYPE"
+    bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
+    enableMonitoring: "PLEASE ENTER true or false"
