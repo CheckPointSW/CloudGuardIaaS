@@ -57,7 +57,6 @@ resource "aws_network_interface" "internal-eni" {
   }
 }
 resource "aws_eip" "eip" {
-  count = var.is_allocate_and_associate_elastic_ip == true ? 1 : 0 // create only if [var.is_allocate_and_associate_eip == true]
   vpc = true
   network_interface = aws_network_interface.external-eni.id
 }
@@ -78,7 +77,7 @@ resource "aws_instance" "tap_gateway" {
   ebs_block_device {
     device_name = "/dev/xvda"
     volume_type = "gp2"
-    volume_size = var.volume_size
+    volume_size = 100
   }
   network_interface { // external
     network_interface_id = aws_network_interface.external-eni.id
@@ -92,11 +91,8 @@ resource "aws_instance" "tap_gateway" {
   user_data = templatefile("${path.module}/tap_user_data_script.sh", {
     // script's arguments
     RegistrationKey = var.registration_key
-    VxlanIds = join(" ", var.vxlan_ids)
-    Enable_instance_connect = var.is_enable_instance_connect
+    VxlanIds = var.vxlan_id
     Password_hash = var.password_hash
-    AllocatePublicAddress = var.is_allocate_and_associate_elastic_ip
-
   })
 }
 
@@ -112,7 +108,7 @@ resource "aws_cloudformation_stack" "tap_target_and_filter" {
     MirroringNetworkInterfaceId = aws_network_interface.internal-eni.id
     EnvironmentPrefix = var.resources_tag_name
   }
-  template_url = "https://marlenbd-bucket.s3.ap-east-1.amazonaws.com/tap_target_and_filter.yaml"
+  template_url = "https://cgi-cfts.s3.amazonaws.com/utils/tap_target_and_filter.yaml"
 }
 locals {
   trafficMirrorTargetId = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorTargetId"]
@@ -138,7 +134,11 @@ data "aws_iam_policy_document" "tap_lambda_policy_doc" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "ec2:*"
+      "ec2:DescribeInstances",
+      "ec2:CreateTags",
+      "ec2:DeleteTrafficMirrorSession",
+      "ec2:CreateTrafficMirrorSession",
+      "ec2:DescribeTrafficMirrorSessions"
     ]
     resources = ["*"]
   }
@@ -166,7 +166,7 @@ locals {
 resource "aws_lambda_function" "tap_lambda" {
   depends_on = [aws_instance.tap_gateway]
   function_name = format("chkp_tap_lambda-%s", random_id.tap_lambda_uuid.hex)
-  description = "The TAP lambda creates traffic mirror sessions with the TAP gateway instance and removes them for blacklisted instances in the VPC."
+  description = "The TAP lambda creates traffic mirror sessions with the TAP gateway instance, and removes them for blacklisted instances in the VPC."
 
   filename = "${path.module}/tap_lambda.zip"
 
@@ -181,7 +181,7 @@ resource "aws_lambda_function" "tap_lambda" {
       GW_ID = aws_instance.tap_gateway.id
       TM_TARGET_ID = local.trafficMirrorTargetId
       TM_FILTER_ID = local.trafficMirrorFilterId
-      VNI = var.vxlan_ids[0]
+      VNI = var.vxlan_id
       TAP_BLACKLIST = local.blacklisted_tag_pairs_joined
     }
   }
@@ -189,7 +189,7 @@ resource "aws_lambda_function" "tap_lambda" {
 // CloudWatch event - EC2 state change to Running
 resource "aws_cloudwatch_event_rule" "on_ec2_running_state" {
   name_prefix = "tap_ec2_running_rule"
-  description = "Fires When an instance changes its state to Running"
+  description = "Invoked when an instance changes its state to Running"
   event_pattern = <<PATTERN
   {
     "source": [
@@ -220,8 +220,8 @@ resource "aws_lambda_permission" "allow_ec2_rule_to_call_tap_lambda" {
 // CloudWatch event - Scheduled
 resource "aws_cloudwatch_event_rule" "on_schedule" {
   name_prefix = "tap_schedule_rule"
-  description = "Fires every <schedule_scan_period> minutes"
-  schedule_expression = format("rate(%d minutes)", var.schedule_scan_period)
+  description = "Invoked every <schedule_scan_interval> minutes"
+  schedule_expression = format("rate(%d minutes)", var.schedule_scan_interval)
 }
 resource "aws_cloudwatch_event_target" "associate_schedule_rule" {
   rule = aws_cloudwatch_event_rule.on_schedule.name
@@ -245,7 +245,7 @@ data "aws_lambda_invocation" "tap_lambda_invocation" {
   JSON
 }
 
-// --- Terminate TAP gw Lambda ---
+// --- Terminate TAP Lambda ---
 data "aws_iam_policy_document" "tap_termination_policy_doc" {
   statement {
     effect = "Allow"
@@ -253,7 +253,8 @@ data "aws_iam_policy_document" "tap_termination_policy_doc" {
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
       "logs:PutLogEvents",
-      "ec2:*"
+      "ec2:DeleteTrafficMirrorSession",
+      "ec2:DescribeTrafficMirrorSessions"
     ]
     resources = ["*"]
   }
@@ -277,7 +278,7 @@ data "archive_file" "tap_termination_lambda_zip" {
 }
 resource "aws_lambda_function" "tap_termination_lambda" {
   function_name = format("chkp_tap_termination_lambda-%s", random_id.tap_termination_lambda_uuid.hex)
-  description = "Manually invoke the termination lambda before destroying the TAP environment. The termination lambda deletes all created mirror sessions with the TAP gateway to allow destruction."
+  description = "Manually invoke the termination lambda before destroying the TAP environment. The termination lambda deletes all mirror sessions to the TAP gateway in order to allow destruction."
 
   filename = "${path.module}/tap_termination_lambda.zip"
 

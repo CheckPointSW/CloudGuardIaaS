@@ -1,26 +1,25 @@
-region = "us-east-1"
+region = "ap-east-1"
 
 // --- VPC Network Configuration ---
-vpc_id = "vpc-12345678"
-external_subnet_id = "subnet-abc123"
-internal_subnet_id = "subnet-def456"
-resources_tag_name = "env1"
+vpc_id = "vpc-048eeb284b845ef72"
+external_subnet_id = "subnet-0dbc66fd0d99448ff"
+internal_subnet_id = "subnet-03a39ad28a7122323"
+resources_tag_name = "mbd-tap"
 
 // --- TAP Configuration ---
 registration_key = "10:10:10:10:10:10"
-vxlan_ids = [10]
+vxlan_id = 10
 blacklist_tags = {
   env = "staging"
-  state = "stable"
+  mood = "hungry"
 }
+schedule_scan_interval = 10
 
 // --- EC2 Instance Configuration ---
-instance_name = "tap-gateway"
-instance_type = "c5.xlarge"
-key_name = "privatekey"
-password_hash = "12345678"
-is_allocate_and_associate_elastic_ip = true
-is_enable_instance_connect = false
+instance_name = "mbd-tap-instance"
+instance_type = "c5.large"
+key_name = "marlenbd"
+password_hash = "$1$hhdwDdRG$5NOrisaYtANfeCl1zK3EX1"
 
 // --- Check Point Settings ---
-version_license = "R80.30-PAYG-NGTP-GW"
+version_license = "R80.40-PAYG-NGTP-GW"

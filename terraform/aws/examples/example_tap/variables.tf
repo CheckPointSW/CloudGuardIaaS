@@ -28,22 +28,22 @@ variable "resources_tag_name" {
 // --- TAP Configuration ---
 variable "registration_key" {
   type = string
-  description = "The gateway registration key to the TAP cloud"
+  description = "The gateway registration key to Check Point NOW cloud"
 }
-variable "vxlan_ids" {
-  type = list(number)
-  description = "(Optional) list of VXLAN IDs (numbers) for mirroring sessions - Predefine VTEP numbers"
-  default = [1]
+variable "vxlan_id" {
+  type = number
+  description = "(Optional) VXLAN ID (number) for mirroring sessions - Predefined VTEP number"
+  default = 1
 }
 variable "blacklist_tags" {
   type = map(string)
-  description = "<key,value> map: each pair represents a tag which will blacklist an instance from TAP creation"
+  description = "Key value pairs of tag key and tag value. Instances with any of these tag pairs will not be TAPed"
   default = {}
 }
-variable "schedule_scan_period" {
+variable "schedule_scan_interval" {
   type = number
-  description = "(minutes) Lambda will scan the VPC every X minutes for tap status"
-  default = 10
+  description = "(minutes) Lambda will scan the VPC every X minutes for TAP updates"
+  default = 60
 }
 
 // --- EC2 Instance Configuration ---
@@ -64,25 +64,10 @@ variable "password_hash" {
   type = string
   description = "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash)"
 }
-variable "is_allocate_and_associate_elastic_ip" {
-  type = bool
-  description = "If set to TRUE, an elastic IP will be allocated and associated with the launched instance"
-  default = true
-}
-variable "volume_size" {
-  type = number
-  description = "Root volume size (GB) - minimum 100"
-  default = 100
-}
-variable "is_enable_instance_connect" {
-  type = bool
-  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
-  default = false
-}
 
 // --- Check Point Settings ---
 variable "version_license" {
   type = string
   description =  "version and license"
-  default = "R80.30-PAYG-NGTP-GW"
+  default = "R80.40-PAYG-NGTP-GW"
 }

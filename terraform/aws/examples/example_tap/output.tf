@@ -8,9 +8,6 @@ output "tap-gateway_instance_id" {
 output "gateway_instance_name" {
   value = module.tap.tap-gateway_instance_name
 }
-output "security_group" {
-  value = module.tap.tap-security_group
-}
 output "gateway_instance_public_ip" {
   value = module.tap.tap-gateway_instance_public_ip
 }

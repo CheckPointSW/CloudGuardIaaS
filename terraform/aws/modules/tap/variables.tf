@@ -20,22 +20,22 @@ variable "resources_tag_name" {
 // --- TAP Configuration ---
 variable "registration_key" {
   type = string
-  description = "The gateway registration key to the TAP cloud"
+  description = "The gateway registration key to Check Point NOW cloud"
 }
-variable "vxlan_ids" {
-  type = list(number)
-  description = "(Optional) list of VXLAN IDs (numbers) for mirroring sessions - Predefine VTEP numbers"
-  default = []
+variable "vxlan_id" {
+  type = number
+  description = "(Optional) VXLAN ID (number) for mirroring sessions - Predefined VTEP number"
+  default = 1
 }
 variable "blacklist_tags" {
   type = map(string)
-  description = "<key,value> map: each pair represents a tag which will blacklist an instance from TAP creation"
+  description = "Key value pairs of tag key and tag value. Instances with any of these tag pairs will not be TAPed"
   default = {}
 }
-variable "schedule_scan_period" {
+variable "schedule_scan_interval" {
   type = number
-  description = "(minutes) Lambda will scan the VPC every X minutes for tap status"
-  default = 10
+  description = "(minutes) Lambda will scan the VPC every X minutes for TAP updates"
+  default = 60
 }
 
 // --- EC2 Instance Configuration ---
@@ -67,37 +67,15 @@ variable "password_hash" {
   type = string
   description = "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash)"
 }
-variable "is_allocate_and_associate_elastic_ip" {
-  type = bool
-  description = "If set to TRUE, an elastic IP will be allocated and associated with the launched instance"
-  default = true
-}
-variable "volume_size" {
-  type = number
-  description = "Root volume size (GB) - minimum 100"
-  default = 100
-}
-resource "null_resource" "volume_size_too_small" {
-  // Volume Size validation - resource will not be created if the volume size is smaller than 100
-  count = var.volume_size >= 100 ? 0 : "volume_size must be at least 100"
-}
-variable "is_enable_instance_connect" {
-  type = bool
-  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
-  default = false
-}
 
 // --- Check Point Settings ---
 variable "version_license" {
   type = string
   description =  "version and license"
-  default = "R80.30-BYOL-GW"
+  default = "R80.40-PAYG-NGTP-GW"
 }
 locals { // locals for 'version and license' allowed values
   version_license_allowed_values = [
-    "R80.30-BYOL-GW",
-    "R80.30-PAYG-NGTP-GW",
-    "R80.30-PAYG-NGTX-GW",
     "R80.40-BYOL-GW",
     "R80.40-PAYG-NGTP-GW",
     "R80.40-PAYG-NGTX-GW"

@@ -13,17 +13,15 @@ module "tap" {
 
   // --- TAP Configuration ---
   registration_key = var.registration_key
-  vxlan_ids = var.vxlan_ids
+  vxlan_id = var.vxlan_id
   blacklist_tags = var.blacklist_tags
-  schedule_scan_period = var.schedule_scan_period
+  schedule_scan_interval = var.schedule_scan_interval
 
   // --- EC2 Instance Configuration ---
   instance_name = var.instance_name
   instance_type = var.instance_type
   key_name = var.key_name
   password_hash = var.password_hash
-  is_allocate_and_associate_elastic_ip = var.is_allocate_and_associate_elastic_ip
-  is_enable_instance_connect = var.is_enable_instance_connect
 
   // --- Check Point Settings ---
   version_license = var.version_license
