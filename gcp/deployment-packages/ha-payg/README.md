@@ -20,18 +20,25 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
         Waiting for create [operation-1585150261645-5a1af8e42d0ba-6b3d4618-5856e790]...done.
         Create operation operation-1585150261645-5a1af8e42d0ba-6b3d4618-5856e790 completed successfully.
         NAME                                        TYPE                          STATE      ERRORS  INTENT
-        cluster2-cluster-network-icmp               compute.v1.firewall           COMPLETED  []
-        cluster2-cluster-network-tcp                compute.v1.firewall           COMPLETED  []
-        cluster2-config                             runtimeconfig.v1beta1.config  COMPLETED  []
-        cluster2-member-a                           compute.v1.instance           COMPLETED  []
-        cluster2-member-a-address                   compute.v1.address            COMPLETED  []
-        cluster2-member-b                           compute.v1.instance           COMPLETED  []
-        cluster2-member-b-address                   compute.v1.address            COMPLETED  []
-        cluster2-mgmt-network-esp                   compute.v1.firewall           COMPLETED  []
-        cluster2-mgmt-network-sctp                  compute.v1.firewall           COMPLETED  []
-        cluster2-primary-cluster-address            compute.v1.address            COMPLETED  []
-        cluster2-secondary-cluster-address          compute.v1.address            COMPLETED  []
-        cluster2-software                           runtimeconfig.v1beta1.waiter  COMPLETED  []
+        cluster-cluster-network-icmp               compute.v1.firewall           COMPLETED  []
+        cluster-cluster-network-tcp                compute.v1.firewall           COMPLETED  []
+        cluster-config                             runtimeconfig.v1beta1.config  COMPLETED  []
+        cluster-member-a                           compute.v1.instance           COMPLETED  []
+        cluster-member-a-address                   compute.v1.address            COMPLETED  []
+        cluster-member-b                           compute.v1.instance           COMPLETED  []
+        cluster-member-b-address                   compute.v1.address            COMPLETED  []
+        cluster-mgmt-network-esp                   compute.v1.firewall           COMPLETED  []
+        cluster-mgmt-network-sctp                  compute.v1.firewall           COMPLETED  []
+        cluster-primary-cluster-address            compute.v1.address            COMPLETED  []
+        cluster-secondary-cluster-address          compute.v1.address            COMPLETED  []
+        cluster-software                           runtimeconfig.v1beta1.waiter  COMPLETED  []
+        OUTPUTS                      VALUE
+        Deployment                   cluster1
+        Cluster IP external address  35.201.201.163
+        Member A                     cluster-member-a
+        Member A external IP         104.199.168.141
+        Member B                     cluster1-member-b
+        Member B external IP         35.221.178.173
 
 ## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
