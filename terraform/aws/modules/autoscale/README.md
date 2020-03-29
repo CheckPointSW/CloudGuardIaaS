@@ -138,8 +138,9 @@ proxy_elb_type= "none"
 | admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
 | password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
 | SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |
+| enable_instance_connect | Enable AWS Instance Connect - not supported with versions prior to R80.40 | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | n/a | true | no |
-| enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | n/a | false | no |
+| enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | true/false | false | no |
 | bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
 |  |  |  |  |  |
 | proxy_elb_type | Type of ELB to create as an HTTP/HTTPS outbound proxy. | string | - none <br/> - internal <br/> - internet-facing | "none" | no |

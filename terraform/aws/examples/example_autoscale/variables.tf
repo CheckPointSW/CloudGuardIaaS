@@ -97,6 +97,11 @@ variable "SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters)"
 }
+variable "enable_instance_connect" {
+  type = bool
+  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
+  default = false
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"

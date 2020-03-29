@@ -20,6 +20,16 @@ clish -c "set user admin password-hash $pwd_hash" -s
 echo "Configuring user admin shell to ${Shell}"
 clish -c "set user admin shell ${Shell}" -s
 
+if ${EnableInstanceConnect} ; then
+  echo "enabling ec2 instance connect"
+  if [[ -d "/etc/ec2-instance-connect" ]]; then
+    ec2-instance-connect-config on
+    echo "enabled ec2 instance connect"
+  else
+    echo "Could not enable eic, not supported in versions R80.30 and below"
+  fi
+fi
+
 echo "Running FTW..."
 blink_config -s "gateway_cluster_member=false&ftw_sic_key='${SICKey}'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'"
 
@@ -30,6 +40,7 @@ dynamic_objects -n LocalGateway -r "$addr" "$addr" -a || true
 
 if ${EnableCloudWatch}; then
   echo "Starting cloudwatch"
+  echo '{\"version\":\"1\"}' > $FWDIR/conf/cloudwatch.json
   cloudwatch start
 fi
 

@@ -138,6 +138,11 @@ locals {
   // Will fail if var.SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.SICKey) == var.SICKey ? 0 : "Variable [SICKey] must be at least 8 alphanumeric characters"
 }
+variable "enable_instance_connect" {
+  type = bool
+  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
+  default = false
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
