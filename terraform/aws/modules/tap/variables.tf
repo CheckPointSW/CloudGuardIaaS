@@ -48,16 +48,11 @@ variable "instance_type" {
   type = string
   default = "c5.xlarge"
 }
-locals { // locals for 'instance_type' allowed values
-  instance_type_allowed_values = [
-    "c5.large",
-    "c5.xlarge",
-    "c5.2xlarge",
-    "c5.4xlarge",
-    "c5.9xlarge",
-    "c5.18xlarge"
-  ]
-  validate_instance_type = index(local.instance_type_allowed_values, var.instance_type) // will fail if var.instance_type is invalid
+module "validate_instance_type" {
+  source = "../../modules/instance_type"
+
+  gateway_or_management = "gateway"
+  instance_type = var.instance_type
 }
 variable "key_name" {
   type = string

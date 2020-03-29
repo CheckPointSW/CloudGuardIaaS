@@ -56,17 +56,11 @@ variable "instance_type" {
   description = ""
   default = "c5.xlarge"
 }
-locals {
-  instance_type_allowed_values = [
-    "c5.large",
-    "c5.xlarge",
-    "c5.2xlarge",
-    "c5.4xlarge",
-    "c5.9xlarge",
-    "c5.18xlarge"
-  ]
-  // Will fail if var.instance_type is invalid
-  validate_instance_type = index(local.instance_type_allowed_values, var.instance_type)
+module "validate_instance_type" {
+  source = "../../modules/instance_type"
+
+  gateway_or_management = "gateway"
+  instance_type = var.instance_type
 }
 variable "key_name" {
   type = string
@@ -84,7 +78,6 @@ variable "maximum_group_size" {
   description = "The maximum number of instances in the Auto Scaling group"
   default = 10
 }
-
 variable "target_groups" {
   type = list(string)
   description = "(Optional) List of Target Group ARNs to associate with the Auto Scaling group"
