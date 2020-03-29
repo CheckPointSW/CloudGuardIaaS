@@ -2,6 +2,7 @@ import boto3
 import json
 from os import environ
 
+
 tmt_id = environ['TM_TARGET_ID']
 tmf_id = environ['TM_FILTER_ID']
 vpc_id = environ['VPC_ID']
@@ -44,8 +45,6 @@ def get_mirrorable_instance_tuples():
     return [(instance_id, get_eth0_eni(instance_id))
             for instance_id in mirrorable_instances_ids]
 
-
-# ------ Create Traffic Access Points ------
 
 def get_tap_if_exists(instance_eni):
     tm_sessions = ec2_client.describe_traffic_mirror_sessions(
