@@ -45,6 +45,7 @@ version_license = "R80.30-PAYG-NGTP-GW"
 admin_shell = "/bin/bash"
 password_hash = "12345678"
 SICKey = "12345678"
+enable_instance_connect = false
 allow_upload_download = true
 enable_cloudwatch = false
 bootstrap_script = "echo 12345678"
@@ -92,6 +93,7 @@ module "autoscale" {
   admin_shell = var.admin_shell
   password_hash = var.password_hash
   SICKey = var.SICKey
+  enable_instance_connect = var.enable_instance_connect
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
   bootstrap_script = var.bootstrap_script
