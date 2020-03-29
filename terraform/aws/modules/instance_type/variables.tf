@@ -8,7 +8,7 @@ locals {
     "gateway",
     "management"
   ]
-  // Will fail if var.instance_type is invalid
+  // Will fail if var.gateway_or_management is invalid
   validate_instance_type = index(local.type_allowed_values, var.gateway_or_management)
 }
 
