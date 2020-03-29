@@ -1,21 +1,20 @@
 # GCP Deployment Manager package for Management, Gateway and Standalone BYOL solutions
-This directory contains the CloudGuard IaaS deployment package for Management, Gateway and Standalone BYOL solution published in the [GCP Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/checkpoint.vsec?tab=Overview).
+This directory contains CloudGuard IaaS deployment package for Management, Gateway and Standalone BYOL solution published in the [GCP Marketplace](https://console.cloud.google.com/marketplace/details/checkpoint-public/check-point-cloudguard-byol).
 
 # How to deploy the package manually
 To deploy the Deployment Manager's package manually, without using the GCP Marketplace, follow these instructions:
-1. [Download](https://github.com/CheckPointSW/CloudGuardIaaS/archive/master.zip) the CloudGuardIaaS repository
-2. Browse to the CloudGuardIaaS/gcp/deployment-packages/single-byol/ directory
-3. Fill variables in the test_config.yaml(see below for variables descriptions).
-4. Log in into [Google Cloud Platform](https://console.cloud.google.com)
-5. [Activate Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
-6. Set your Cloud Platform project in the Cloud Shell session use:
+1. Clone or download the files in this directory
+2. Fill variables in the config.yaml(see below for variables descriptions).
+3. Log into [Google Cloud Platform Console](https://console.cloud.google.com)
+4. [Activate Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
+5. Set your Cloud Platform project in the Cloud Shell session use:
         
         gcloud config set project [PROJECT_ID]
-7. Upload content of the CloudGuardIaaS/gcp/deployment-packages/single-byol/ directory  to the [cloud shell](https://cloud.google.com/shell/docs/uploading-and-downloading-files) 
-8. Launch deployment by running:
+6. Upload the content of the CloudGuardIaaS/gcp/deployment-packages/single-byol/ directory to the [cloud shell](https://cloud.google.com/shell/docs/uploading-and-downloading-files) 
+7. Launch deployment by running:
         
-         gcloud deployment-manager deployments create [DEPLOYMENT_NAME] --config test_config.yaml
-9. Make sure the deployment finished successfully. <br>Example of successful deployment output:
+         gcloud deployment-manager deployments create [DEPLOYMENT_NAME] --config config.yaml
+8. Make sure the deployment finished successfully. <br>Example of successful deployment output:
         
         The fingerprint of the deployment is NEBnvNbqOItDoLZrhYNo5Q==
         Waiting for create [operation-1585065238276-5a19bc2792a32-becd058d-67862f39]...done.
@@ -25,8 +24,11 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
         gateway-software            runtimeconfig.v1beta1.waiter  COMPLETED  []
         gateway-vm                  compute.v1.instance           COMPLETED  []
         gateway-vm-address          compute.v1.address            COMPLETED  []
-
-## test_config.yaml variables
+        OUTPUTS     VALUE
+        Deployment  gateway
+        Instance    gateway-single-vm
+        
+## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
 | ------------- | ------------- | ------------- | -------------  |
 | **zone** | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
@@ -40,6 +42,10 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 | **network_enableTcp** | Allow TCP traffic from the Internet | boolean | true; <br/>false;  |
 |  |  |  |  |  |
 | **network_tcpSourceRanges** | Allow TCP traffic from the Internet | string | Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. For gateway all ports are allowed. For management allowed ports are: 257,18191,18210,18264,22,443,18190,19009 [Learn more](https://cloud.google.com/vpc/docs/vpc?_ga=2.36703144.-962483654.1585043745#firewalls) |
+|  |  |  |  |  |
+| **network_enableGwNetwork** | This is relevant for **Management** only. The network in which managed gateways reside | boolean | true; <br/>false;  |
+|  |  |  |  |  |
+| **network_gwNetworkSourceRanges** | Allow TCP traffic from the Internet | string | Enter a valid IPv4 network CIDR (e.g. 0.0.0.0/0) |
 |  |  |  |  |  |
 | **network_enableIcmp** | Allow ICMP traffic from the Internet | boolean | true; <br/>false;  |
 |  |  |  |  |  |
@@ -88,7 +94,9 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     network: "frontend-vpc"
     subnetwork: "frontend"
     network_enableTcp: true
-    network_tcpSourceRanges: "0.0.0.0/0"					  							 
+    network_tcpSourceRanges: "0.0.0.0/0"
+    network_enableGwNetwork: true
+    network_gwNetworkSourceRanges: "0.0.0.0/0"					  							 
     network_enableIcmp: true
     network_icmpSourceRanges: "0.0.0.0/0"
     network_enableUdp: true
@@ -119,3 +127,5 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 
 
 
+## Notes
+See [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032) for revision history

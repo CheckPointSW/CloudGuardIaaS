@@ -1,13 +1,13 @@
 imports:
-- path: check-point-vsec--payg.py
+- path: check-point-vsec--byol.py
 - path: common.py
 - path: default.py
 - path: password.py
 - path: images.py
 
 resources:
-- name: check-point-vsec--payg
-  type: check-point-vsec--payg.py
+- name: check-point-vsec--byol
+  type: check-point-vsec--byol.py
   properties:
     zone: "PLEASE ENTER A ZONE"
     machineType: "PLEASE ENTER A MACHINE TYPE"
@@ -15,6 +15,8 @@ resources:
     subnetwork: "PLEASE ENTER A SUBNETWORK ID"
     network_enableTcp: "PLEASE ENTER true or false"
     network_tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    network_enableGwNetwork: "PLEASE ENTER true or false"
+    network_gwNetworkSourceRanges: "PLEASE ENTER GATEWAY NETWORK SOURCE RANGES FOR MANAGEMENT, AND STANDALONE. LEAVE EMPTY DOUBLE QUOTES FOR GW"
     network_enableIcmp: "PLEASE ENTER true or false"
     network_icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
     network_enableUdp: "PLEASE ENTER true or false"
@@ -39,3 +41,8 @@ resources:
     #If there is no need in additional NICs remove additionalNetwork1 and additionalSubnetwork1 variables
     additionalNetwork1: "PLEASE ENTER AN ADDITIONAL NETWORK1 ID"
     additionalSubnetwork1: "PLEASE ENTER AN ADDITIONAL SUBNETWORK1 ID"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-vsec--byol.deployment)
+- name: "Instance"
+  value: $(ref.check-point-vsec--byol.vmName)

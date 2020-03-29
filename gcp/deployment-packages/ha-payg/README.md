@@ -1,21 +1,20 @@
 # GCP Deployment Manager package for Check Point High Availability PAYG solution
-This directory contains CloudGuard IaaS deployment package for Check Point High Availability (PAYG) solution published in the [GCP Marketplace](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/checkpoint.vsec?tab=Overview).
+This directory contains CloudGuard IaaS deployment package for Check Point High Availability (PAYG) solution published in the [GCP Marketplace](https://console.cloud.google.com/marketplace/details/checkpoint-public/check-point-ha--ngtp).
 
 # How to deploy the package manually
 To deploy the Deployment Manager's package manually, without using the GCP Marketplace, follow these instructions:
-1. [Download](https://github.com/CheckPointSW/CloudGuardIaaS/archive/master.zip) the CloudGuardIaaS repository
-2. Browse to the CloudGuardIaaS/gcp/deployment-packages/ha-payg/ directory
-3. Fill variables in the test_config.yaml(see below for variables descriptions).
-4. Log in into [Google Cloud Platform](https://console.cloud.google.com)
-5. [Activate Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
-6. Set your Cloud Platform project in the Cloud Shell session use:
+1. Clone or download the files in this directory
+2. Fill variables in the config.yaml(see below for variables descriptions).
+3. Log into [Google Cloud Platform Console](https://console.cloud.google.com)
+4. [Activate Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
+5. Set your Cloud Platform project in the Cloud Shell session use:
         
         gcloud config set project [PROJECT_ID]
-7. Upload content of the CloudGuardIaaS/gcp/deployment-packages/ha-payg/ directory  to the [cloud shell](https://cloud.google.com/shell/docs/uploading-and-downloading-files) 
-8. Launch deployment by running:
+6. Upload the content of the CloudGuardIaaS/gcp/deployment-packages/ha-payg/ directory to the [cloud shell](https://cloud.google.com/shell/docs/uploading-and-downloading-files) 
+7. Launch deployment by running:
         
-         gcloud deployment-manager deployments create [DEPLOYMENT_NAME] --config test_config.yaml
-9. Make sure the deployment finished successfully. <br>Example of successful deployment output:
+         gcloud deployment-manager deployments create [DEPLOYMENT_NAME] --config config.yaml
+8. Make sure the deployment finished successfully. <br>Example of successful deployment output:
         
         The fingerprint of the deployment is CgwkIUxcTnI5_eZY1g9SFw==
         Waiting for create [operation-1585150261645-5a1af8e42d0ba-6b3d4618-5856e790]...done.
@@ -34,7 +33,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
         cluster2-secondary-cluster-address          compute.v1.address            COMPLETED  []
         cluster2-software                           runtimeconfig.v1beta1.waiter  COMPLETED  []
 
-## test_config.yaml variables
+## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
 | ------------- | ------------- | ------------- | -------------  |
 | **ha_version** | High Availability Version | string | R80.30 Cluster;<br/>R80.40 Cluster; |
@@ -169,4 +168,4 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     internal-network1-subnetwork-name: "vpc-internal2"
 
 ## Notes
-In order to check the template version refer to the [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032)
+See [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032) for revision history

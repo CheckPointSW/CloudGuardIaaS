@@ -1,13 +1,13 @@
 imports:
-- path: check-point-vsec--byol.py
+- path: check-point-vsec--payg.py
 - path: common.py
 - path: default.py
 - path: password.py
 - path: images.py
 
 resources:
-- name: check-point-vsec--byol
-  type: check-point-vsec--byol.py
+- name: check-point-vsec--payg
+  type: check-point-vsec--payg.py
   properties:
     zone: "PLEASE ENTER A ZONE"
     machineType: "PLEASE ENTER A MACHINE TYPE"
@@ -39,3 +39,8 @@ resources:
     #If there is no need in additional NICs remove additionalNetwork1 and additionalSubnetwork1 variables
     additionalNetwork1: "PLEASE ENTER AN ADDITIONAL NETWORK1 ID"
     additionalSubnetwork1: "PLEASE ENTER AN ADDITIONAL SUBNETWORK1 ID"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-vsec--payg.deployment)
+- name: "Instance"
+  value: $(ref.check-point-vsec--payg.vmName)

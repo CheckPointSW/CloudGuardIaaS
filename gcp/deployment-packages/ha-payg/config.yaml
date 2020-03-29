@@ -1,13 +1,13 @@
 imports:
-- path: check-point-cluster--byol.py
+- path: check-point-cluster--payg.py
 - path: common.py
 - path: default.py
 - path: password.py
 - path: images.py
 
 resources:
-- name: check-point-cluster--byol
-  type: check-point-cluster--byol.py
+- name: check-point-cluster--payg
+  type: check-point-cluster--payg.py
   properties:
       ha_version: "PLEASE ENTER HA VERSION"
       zoneA: "PLEASE ENTER ZONE A"
@@ -54,3 +54,16 @@ resources:
       internal-network1-cidr: "PLEASE ENTER 1ST INTERNAL NETWORK CIDR"
       internal-network1-name: "PLEASE ENTER 1ST INTERNAL NETWORK ID"
       internal-network1-subnetwork-name: "PLEASE ENTER INTERNAL SUBNETWORK ID"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-cluster--payg.deployment)
+- name: "Cluster IP external address"
+  value: $(ref.check-point-cluster--payg.clusterIP)
+- name: "Member A"
+  value: $(ref.check-point-cluster--payg.vmAName)
+- name: "Member A external IP"
+  value: $(ref.check-point-cluster--payg.vmAExternalIP)
+- name: "Member B"
+  value: $(ref.check-point-cluster--payg.vmBName)
+- name: "Member B external IP"
+  value: $(ref.check-point-cluster--payg.vmBExternalIP)

@@ -40,3 +40,14 @@ resources:
     diskType: "PLEASE ENTER A DISK TYPE"
     bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
     enableMonitoring: "PLEASE ENTER true or false"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-autoscale--byol.deployment)
+- name: "Managed instance group"
+  value: $(ref.check-point-autoscale--byol.IGMLink)
+- name: "Minimum instances"
+  value: $(ref.check-point-autoscale--byol.minInstancesInt)
+- name: "Maximum instances"
+  value: $(ref.check-point-autoscale--byol.maxInstancesInt)
+- name: "Target CPU usage"
+  value: $(ref.check-point-autoscale--byol.cpuUsagePercentage)
