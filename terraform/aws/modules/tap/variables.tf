@@ -75,5 +75,6 @@ locals { // locals for 'version and license' allowed values
     "R80.40-PAYG-NGTP-GW",
     "R80.40-PAYG-NGTX-GW"
   ]
-  validate_version_license = index(local.version_license_allowed_values, var.version_license) // will fail if var.version_license is invalid
+  // Will fail if var.version_license is invalid
+  validate_version_license = index(local.version_license_allowed_values, var.version_license)
 }
