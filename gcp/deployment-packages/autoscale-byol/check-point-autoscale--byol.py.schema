@@ -1,0 +1,215 @@
+imports:
+  - path: check-point-autoscale--byol.py
+
+info:
+  version: 1.0
+  title: Check Point CloudGuard IaaS Autoscaling - BYOL Template
+
+required:
+  - autoscalingVersion
+  - externalNetwork
+  - externalZone
+  - mgmtNIC
+  - internalNetwork
+  - internalZone
+  - machineType
+  - cpuUsage
+  - minInstances
+  - maxInstances
+  - diskType
+  - bootDiskSizeGb
+  - managementName
+  - AutoProvTemplate
+  - allowUploadDownload
+  - networkDefinedByRoutes
+  - shell
+  - enableMonitoring
+
+properties:
+  externalNetwork:
+    type: string
+    default: default
+    x-googleProperty:
+      type: GCE_NETWORK
+  externalZone:
+    type: string
+    default: us-central1-a
+    x-googleProperty:
+      type: GCE_ZONE
+  externalSubnet:
+    type: string
+    default: default
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: externalZone
+      gceSubnetwork:
+        networkProperty: externalNetwork
+  enableIcmp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: externalNetwork
+  icmpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: enableIcmp
+  enableTcp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: externalNetwork
+  tcpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: enableTcp
+  enableUdp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: externalNetwork
+  udpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: enableUdp
+  enableSctp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: externalNetwork
+  sctpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: enableSctp
+  enableEsp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: externalNetwork
+  espSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: enableEsp
+  mgmtNIC:
+    type: string
+    default: Ephemeral Public IP (eth0)
+    enum:
+      - Ephemeral Public IP (eth0)
+      - Private IP (eth1)
+  internalNetwork:
+    type: string
+    default: default2
+    x-googleProperty:
+      type: GCE_NETWORK
+  internalZone:
+    type: string
+    default: us-central1-a
+    x-googleProperty:
+      type: GCE_ZONE
+  internalSubnet:
+    type: string
+    default: default2
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: internalZone
+      gceSubnetwork:
+        networkProperty: internalNetwork
+  machineType:
+    type: string
+    default: n1-standard-4
+    x-googleProperty:
+      type: GCE_MACHINE_TYPE
+      zoneProperty: externalZone
+      gceMachineType:
+        minCpu: 2
+        minRamGb: 1.843000054359436
+  cpuUsage:
+    type: integer
+    minimum: 10
+    maximum: 90
+    default: 60
+  minInstances:
+    type: integer
+    minimum: 1
+    maximum: 16384
+    default: 2
+  maxInstances:
+    type: integer
+    minimum: 1
+    maximum: 32768
+    default: 10
+  instanceSSHKey:
+    type: string
+    pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$
+    default: ''
+  diskType:
+    type: string
+    default: pd-ssd
+    x-googleProperty:
+      type: GCE_DISK_TYPE
+      zoneProperty: externalZone
+  bootDiskSizeGb:
+    type: integer
+    default: 100
+    minimum: 100
+    maximum: 4096
+    x-googleProperty:
+      type: GCE_DISK_SIZE
+      gceDiskSize:
+        diskTypeProperty: diskType
+  autoscalingVersion:
+    type: string
+    default: R80.30 Autoscaling
+    enum:
+      - R80.30 Autoscaling
+      - R80.40 Autoscaling
+  managementName:
+    type: string
+    default: 'checkpoint-management'
+    pattern: ^([ -~]+)$
+  AutoProvTemplate:
+    type: string
+    default: 'gcp-asg-autoprov-tmplt'
+    pattern: ^([ -~]+)$
+  enableMonitoring:
+    type: boolean
+    default: False
+  networkDefinedByRoutes:
+    type: boolean
+    default: True
+  allowUploadDownload:
+    type: boolean
+    default: True
+  shell:
+    type: string
+    default: /etc/cli.sh
+    enum:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+
+outputs:
+  deployment:
+    type: string
+  project:
+    type: string

@@ -33,11 +33,11 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
         cluster-secondary-cluster-address          compute.v1.address            COMPLETED  []
         cluster-software                           runtimeconfig.v1beta1.waiter  COMPLETED  []
         OUTPUTS                      VALUE
-        Deployment                   cluster1
+        Deployment                   cluster
         Cluster IP external address  35.201.201.163
         Member A                     cluster-member-a
         Member A external IP         104.199.168.141
-        Member B                     cluster1-member-b
+        Member B                     cluster-member-b
         Member B external IP         35.221.178.173
 
 ## config.yaml variables

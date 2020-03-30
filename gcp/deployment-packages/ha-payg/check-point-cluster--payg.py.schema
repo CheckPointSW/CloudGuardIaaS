@@ -1,0 +1,377 @@
+imports:
+  - path: check-point-cluster--payg.py
+
+info:
+  version: 1.0
+  title: Check Point CloudGuard IaaS Cluster - PAYG Template
+
+required:
+  - zoneA
+  - zoneB
+  - machineType
+  - diskType
+  - bootDiskSizeGb
+  - sicKey
+  - managementNetwork
+  - allowUploadDownload
+  - shell
+  - generatePassword
+  - enableMonitoring
+  - numInternalNetworks
+
+properties:
+  zoneA:
+    type: string
+    default: us-central1-a
+    x-googleProperty:
+      type: GCE_ZONE
+  zoneB:
+    type: string
+    default: us-central1-a
+    x-googleProperty:
+      type: GCE_ZONE
+  machineType:
+    type: string
+    default: n1-standard-4
+    x-googleProperty:
+      type: GCE_MACHINE_TYPE
+      zoneProperty: zoneA
+      gceMachineType:
+        minCpu: 2
+        minRamGb: 1.843000054359436
+  instanceSSHKey:
+    type: string
+    pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$
+    default: ''
+  diskType:
+    type: string
+    default: pd-ssd
+    x-googleProperty:
+      type: GCE_DISK_TYPE
+      zoneProperty: zoneA
+  bootDiskSizeGb:
+    type: integer
+    maximum: 1000
+    default: 100
+    minimum: 100
+    x-googleProperty:
+      type: GCE_DISK_SIZE
+      gceDiskSize:
+        diskTypeProperty: diskType
+  ha_version:
+    type: string
+    default: R80.30 Cluster
+    enum:
+      - R80.30 Cluster
+      - R80.40 Cluster
+  enableMonitoring:
+    type: boolean
+    default: False
+  sicKey:
+    type: string
+    pattern: ^([a-z0-9A-Z]{8,30})$
+    default: ''
+  managementNetwork:
+    type: string
+    default: ''
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$
+  generatePassword:
+    type: boolean
+    default: False
+  allowUploadDownload:
+    type: boolean
+    default: False
+  shell:
+    type: string
+    default: /etc/cli.sh
+    enum:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  cluster-network-cidr:
+    type: string
+    default: '10.0.0.0/24'
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+  cluster-network-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  cluster-network-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: cluster-network-name
+  cluster-network_enableIcmp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: cluster-network-name
+  cluster-network_icmpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: cluster-network_enableIcmp
+  cluster-network_enableTcp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: cluster-network-name
+  cluster-network_tcpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: cluster-network_enableTcp
+  cluster-network_enableUdp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: cluster-network-name
+  cluster-network_udpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: cluster-network_enableUdp
+  cluster-network_enableSctp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: cluster-network-name
+  cluster-network_sctpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: cluster-network_enableSctp
+  cluster-network_enableEsp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: cluster-network-name
+  cluster-network_espSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: cluster-network_enableEsp
+  mgmt-network-cidr:
+    type: string
+    default: '10.0.1.0/24'
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+  mgmt-network-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  mgmt-network-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: mgmt-network-name
+  mgmt-network_enableIcmp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: mgmt-network-name
+  mgmt-network_icmpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: mgmt-network_enableIcmp
+  mgmt-network_enableTcp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: mgmt-network-name
+  mgmt-network_tcpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: mgmt-network_enableTcp
+  mgmt-network_enableUdp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: mgmt-network-name
+  mgmt-network_udpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: mgmt-network_enableUdp
+  mgmt-network_enableSctp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: mgmt-network-name
+  mgmt-network_sctpSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: mgmt-network_enableSctp
+  mgmt-network_enableEsp:
+    type: boolean
+    default: False
+    x-googleProperty:
+      type: GCE_FIREWALL
+      gceFirewall:
+        networkProperty: mgmt-network-name
+  mgmt-network_espSourceRanges:
+    type: string
+    x-googleProperty:
+      type: GCE_FIREWALL_RANGE
+      gceFirewallRange:
+        firewallProperty: mgmt-network_enableEsp
+  numInternalNetworks:
+    type: integer
+    enum:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    minimum: 1
+    maximum: 6
+    default: 1
+  internal-network1-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: '10.0.2.0/24'
+  internal-network1-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network1-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network1-name
+  internal-network2-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: ''
+  internal-network2-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network2-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network2-name
+  internal-network3-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: ''
+  internal-network3-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network3-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network3-name
+  internal-network4-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: ''
+  internal-network4-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network4-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network4-name
+  internal-network5-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: ''
+  internal-network5-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network5-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network5-name
+  internal-network6-cidr:
+    type: string
+    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])|$
+    default: ''
+  internal-network6-name:
+    type: string
+    x-googleProperty:
+      type: GCE_NETWORK
+  internal-network6-subnetwork-name:
+    type: string
+    x-googleProperty:
+      type: GCE_SUBNETWORK
+      zoneProperty: zoneA
+      gceSubnetwork:
+        networkProperty: internal-network6-name
+
+outputs:
+  deployment:
+    type: string
+  project:
+    type: string
+  clusterIP:
+    type: string
+  vmAName:
+    type: string
+  vmAExternalIP:
+    type: string
+  vmASelfLink:
+    type: string
+  vmBName:
+    type: string
+  vmBExternalIP:
+    type: string
+  vmBSelfLink:
+    type: string
+  password:
+    type: string
+  ha_version:
+    type: string
