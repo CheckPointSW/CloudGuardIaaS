@@ -1,10 +1,10 @@
 provider "azurerm" {
   version = "=1.44.0"
 
-  subscription_id = var.subscription_id
+  /*subscription_id = var.subscription_id
   client_id = var.client_id
   client_secret = var.client_secret
-  tenant_id = var.tenant_id
+  tenant_id = var.tenant_id */
 }
 
 provider "random" {
@@ -62,6 +62,26 @@ module "network-security-group" {
         destination_address_prefix = "*"
       }
     ]
+}
+
+//***************************vNET Peering ************************//
+resource "azurerm_virtual_network_peering" "peering" {
+  name = "vmss2mgmt"
+  resource_group_name=module.common.resource_group_name
+  virtual_network_name=module.vnet.vnet_name
+  remote_virtual_network_id="/subscriptions/82c0718c-e8d4-4270-ac87-4ffbab62df88/resourceGroups/management/providers/Microsoft.Network/virtualNetworks/mgmt-vnet"
+  allow_virtual_network_access=true
+  allow_forwarded_traffic=true
+  allow_gateway_transit=false
+}
+resource "azurerm_virtual_network_peering" "peering2" {
+  name = "mgmt2vmss"
+  resource_group_name="management"
+  virtual_network_name="mgmt-vnet"
+  remote_virtual_network_id="/subscriptions/82c0718c-e8d4-4270-ac87-4ffbab62df88/resourceGroups/checkpoint-vmss-terraform/providers/Microsoft.Network/virtualNetworks/checkpoint-vmss-vnet"
+  allow_virtual_network_access=true
+  allow_forwarded_traffic=true
+  allow_gateway_transit=false
 }
 
 //********************** Load Balancers **************************//
@@ -204,10 +224,10 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   os_profile_linux_config {
     disable_password_authentication = module.common.disable_password_authentication
 
-    ssh_keys {
+    /*ssh_keys {
       path = "/home/notused/.ssh/authorized_keys"
       key_data = file("${path.module}/azure_public_key")
-    }
+    }*/
   }
 
   boot_diagnostics {
