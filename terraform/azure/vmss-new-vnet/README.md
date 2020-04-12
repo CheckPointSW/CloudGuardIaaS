@@ -35,14 +35,6 @@ This service principal will be used by Terraform in order to deploy the solution
 ### terraform.tfvars variables:
  | Name          | Description   | Type          | Allowed values |
  | ------------- | ------------- | ------------- | -------------  |
- | **client_secret** | passwordThe client secret of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **client_id** | The client ID of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **tenant_id** | The tenant ID of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
- |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
