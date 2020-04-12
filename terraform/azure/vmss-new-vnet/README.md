@@ -91,10 +91,6 @@ This service principal will be used by Terraform in order to deploy the solution
 
 
 ## Example
-    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     resource_group_name             = "checkpoint-vmss-terraform"
     location                        = "eastus"
     vmss_name                       = "checkpoint-vmss-terraform"
