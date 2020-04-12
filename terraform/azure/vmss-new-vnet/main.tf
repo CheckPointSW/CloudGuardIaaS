@@ -10,6 +10,15 @@ provider "azurerm" {
 provider "random" {
   version = "= 2.2.1"
 }
+data "azurerm_virtual_network" "mgmt" {
+  name 			= "mgmt-vnet"
+  resource_group_name 	= "management"
+}
+data "azurerm_virtual_network" "vmss" {
+  name                  = var.vnet_name
+  resource_group_name   = var.resource_group_name
+  depends_on		= [module.vnet]
+}
 
 //********************** Basic Configuration **************************//
 module "common" {
@@ -42,7 +51,6 @@ module "vnet" {
   address_space = var.address_space
   subnet_prefixes = var.subnet_prefixes
 }
-
 module "network-security-group" {
     source = "../modules/network-security-group"
     resource_group_name = module.common.resource_group_name
@@ -69,7 +77,7 @@ resource "azurerm_virtual_network_peering" "peering" {
   name = "vmss2mgmt"
   resource_group_name=module.common.resource_group_name
   virtual_network_name=module.vnet.vnet_name
-  remote_virtual_network_id="/subscriptions/82c0718c-e8d4-4270-ac87-4ffbab62df88/resourceGroups/management/providers/Microsoft.Network/virtualNetworks/mgmt-vnet"
+  remote_virtual_network_id=data.azurerm_virtual_network.mgmt.id
   allow_virtual_network_access=true
   allow_forwarded_traffic=true
   allow_gateway_transit=false
@@ -78,7 +86,7 @@ resource "azurerm_virtual_network_peering" "peering2" {
   name = "mgmt2vmss"
   resource_group_name="management"
   virtual_network_name="mgmt-vnet"
-  remote_virtual_network_id="/subscriptions/82c0718c-e8d4-4270-ac87-4ffbab62df88/resourceGroups/checkpoint-vmss-terraform/providers/Microsoft.Network/virtualNetworks/checkpoint-vmss-vnet"
+  remote_virtual_network_id=data.azurerm_virtual_network.vmss.id
   allow_virtual_network_access=true
   allow_forwarded_traffic=true
   allow_gateway_transit=false
