@@ -62,7 +62,6 @@ data "aws_instances" "asg_instances" {
   }
 }
 
-
 output "autoscale_instances" {
   value = data.aws_instances.asg_instances
 }
