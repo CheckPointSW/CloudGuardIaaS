@@ -59,7 +59,7 @@ variable "instance_type" {
 module "validate_instance_type" {
   source = "../../modules/instance_type"
 
-  gateway_or_management = "gateway"
+  chkp_type = "gateway"
   instance_type = var.instance_type
 }
 variable "key_name" {

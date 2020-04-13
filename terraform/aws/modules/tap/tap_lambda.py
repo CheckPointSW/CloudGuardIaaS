@@ -9,7 +9,7 @@ vpc_id = environ['VPC_ID']
 gw_id = environ['GW_ID']
 vni = environ['VNI']
 
-NITRO_PREFIXES = ['a1', 'c5', 'i3en', 'm5', 'p3dn.24xlarge', 'r5', 't3', 'z1d']
+NITRO_PREFIXES = ['a1', 'c5', 'g4', 'i3en', 'inf1', 'm5', 'p3dn.24xlarge', 'r5', 't3', 'z1d']
 
 ec2_client = boto3.client('ec2')
 

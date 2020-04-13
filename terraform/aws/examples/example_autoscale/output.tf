@@ -55,13 +55,14 @@ output "autoscale-autoscaling_group_target_group_arns" {
   value = module.autoscale.autoscale-autoscaling_group_target_group_arns
 }
 
-data "aws_instances" "asg_instances" {
+/*data "aws_instances" "asg_instances" {
   filter {
     name = "tag:aws:autoscaling:groupName"
     values = [module.autoscale.autoscale-autoscaling_group_name]
   }
-}
+}*/
 
+/*
 output "autoscale_instances" {
   value = data.aws_instances.asg_instances
-}
+}*/

@@ -1,15 +1,16 @@
-variable "gateway_or_management" {
+variable "chkp_type" {
   type = string
-  description = "gateway/management"
+  description = "The Check Point machine type"
   default = "gateway"
 }
 locals {
   type_allowed_values = [
     "gateway",
-    "management"
+    "management",
+    "standalone"
   ]
-  // Will fail if var.gateway_or_management is invalid
-  validate_instance_type = index(local.type_allowed_values, var.gateway_or_management)
+  // Will fail if var.chkp_type is invalid
+  validate_instance_type = index(local.type_allowed_values, var.chkp_type)
 }
 
 variable "instance_type" {

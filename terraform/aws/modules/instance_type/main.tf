@@ -1,5 +1,5 @@
 locals {
-  gw_side = [
+  gw_types = [
     "c5.large",
     "c5.xlarge",
     "c5.2xlarge",
@@ -13,7 +13,7 @@ locals {
     "c5n.9xlarge",
     "c5n.18xlarge"
   ]
-  mgmt_side = [
+  mgmt_types = [
     "m5.large",
     "m5.xlarge",
     "m5.2xlarge",
@@ -24,6 +24,9 @@ locals {
 }
 
 locals {
-  allowed_values = var.gateway_or_management == "gateway" ? local.gw_side : local.mgmt_side
-  is_variable_in_allowed-values = index(local.allowed_values, var.instance_type)
+  gw_values = var.chkp_type == "gateway" ? local.gw_types : []
+  mgmt_values = var.chkp_type == "management" ? local.mgmt_types : []
+  sa_values = var.chkp_type == "standalone" ? conca(local.gw_types, local.mgmt_types) : []
+  allowed_values = coalesce(local.gw_values, local.mgmt_values, local.sa_values)
+  is_allowed_type = index(local.allowed_values, var.instance_type)
 }

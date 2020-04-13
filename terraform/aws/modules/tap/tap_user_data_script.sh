@@ -3,7 +3,7 @@
 exec 1>/var/log/aws-user-data.log 2>&1
 
 echo template_name: TAP_tf >> /etc/cloud-version
-echo template_version: __VERSION__ >> /etc/cloud-version
+echo template_version: 20200413 >> /etc/cloud-version
 
 hname="CP-TAP"
 instance_id="$(curl_cli -s -S 169.254.169.254/latest/meta-data/instance-id)"
@@ -13,9 +13,8 @@ cat "$CPDIR/conf/ca-bundle.crt" >>"$CPDIR/tmp/wait-handle.crt"
 
 echo "Generating SIC password"
 sic=$(tr -dc "0-9a-zA-Z" < /dev/urandom | head -c 8)
-pwd_hash=${Password_hash}
 
-blink_config -s "hostname='$hname'&gateway_cluster_member=false&ftw_sic_key='$sic'&upload_info=true&download_info=true&admin_hash='$pwd_hash'"
+blink_config -s "hostname='$hname'&gateway_cluster_member=false&ftw_sic_key='$sic'&upload_info=true&download_info=true"
 rc=$?
 
 echo "Pulling NOW install script..."

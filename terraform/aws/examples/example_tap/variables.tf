@@ -60,14 +60,3 @@ variable "key_name" {
   type = string
   description = "The EC2 Key Pair name to allow SSH access to the instance"
 }
-variable "password_hash" {
-  type = string
-  description = "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash)"
-}
-
-// --- Check Point Settings ---
-variable "version_license" {
-  type = string
-  description =  "version and license"
-  default = "R80.40-PAYG-NGTP-GW"
-}

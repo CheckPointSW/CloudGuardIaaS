@@ -92,7 +92,6 @@ resource "aws_instance" "tap_gateway" {
     // script's arguments
     RegistrationKey = var.registration_key
     VxlanIds = var.vxlan_id
-    Password_hash = var.password_hash
   })
 }
 

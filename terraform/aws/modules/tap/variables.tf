@@ -51,30 +51,17 @@ variable "instance_type" {
 module "validate_instance_type" {
   source = "../../modules/instance_type"
 
-  gateway_or_management = "gateway"
+  chkp_type = "gateway"
   instance_type = var.instance_type
 }
 variable "key_name" {
   type = string
   description = "The EC2 Key Pair name to allow SSH access to the instance"
 }
-variable "password_hash" {
-  type = string
-  description = "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash)"
-}
 
 // --- Check Point Settings ---
 variable "version_license" {
   type = string
   description =  "version and license"
-  default = "R80.40-PAYG-NGTP-GW"
-}
-locals { // locals for 'version and license' allowed values
-  version_license_allowed_values = [
-    "R80.40-BYOL-GW",
-    "R80.40-PAYG-NGTP-GW",
-    "R80.40-PAYG-NGTX-GW"
-  ]
-  // Will fail if var.version_license is invalid
-  validate_version_license = index(local.version_license_allowed_values, var.version_license)
+  default = "R80.40-PAYG-NGTX-GW"
 }

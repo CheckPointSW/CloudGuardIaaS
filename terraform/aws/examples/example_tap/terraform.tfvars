@@ -19,7 +19,3 @@ schedule_scan_interval = 60
 instance_name = "tap-gateway"
 instance_type = "c5.xlarge"
 key_name = "privatekey"
-password_hash = "12345678"
-
-// --- Check Point Settings ---
-version_license = "R80.40-PAYG-NGTP-GW"
