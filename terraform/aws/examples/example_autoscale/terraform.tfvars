@@ -28,6 +28,7 @@ version_license = "R80.30-PAYG-NGTP-GW"
 admin_shell = "/bin/bash"
 password_hash = "12345678"
 SICKey = "12345678"
+enable_instance_connect = false
 allow_upload_download = true
 enable_cloudwatch = false
 bootstrap_script = "echo 12345678"

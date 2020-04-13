@@ -45,6 +45,7 @@ version_license = "R80.30-PAYG-NGTP-GW"
 admin_shell = "/bin/bash"
 password_hash = "12345678"
 SICKey = "12345678"
+enable_instance_connect = false
 allow_upload_download = true
 enable_cloudwatch = false
 bootstrap_script = "echo 12345678"
@@ -92,6 +93,7 @@ module "autoscale" {
   admin_shell = var.admin_shell
   password_hash = var.password_hash
   SICKey = var.SICKey
+  enable_instance_connect = var.enable_instance_connect
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
   bootstrap_script = var.bootstrap_script
@@ -138,8 +140,9 @@ proxy_elb_type= "none"
 | admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
 | password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
 | SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |
+| enable_instance_connect | Enable AWS Instance Connect - not supported with versions prior to R80.40 | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | n/a | true | no |
-| enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | n/a | false | no |
+| enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | true/false | false | no |
 | bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
 |  |  |  |  |  |
 | proxy_elb_type | Type of ELB to create as an HTTP/HTTPS outbound proxy. | string | - none <br/> - internal <br/> - internet-facing | "none" | no |

@@ -56,17 +56,11 @@ variable "instance_type" {
   description = ""
   default = "c5.xlarge"
 }
-locals {
-  instance_type_allowed_values = [
-    "c5.large",
-    "c5.xlarge",
-    "c5.2xlarge",
-    "c5.4xlarge",
-    "c5.9xlarge",
-    "c5.18xlarge"
-  ]
-  // Will fail if var.instance_type is invalid
-  validate_instance_type = index(local.instance_type_allowed_values, var.instance_type)
+module "validate_instance_type" {
+  source = "../../modules/instance_type"
+
+  chkp_type = "gateway"
+  instance_type = var.instance_type
 }
 variable "key_name" {
   type = string
@@ -84,7 +78,6 @@ variable "maximum_group_size" {
   description = "The maximum number of instances in the Auto Scaling group"
   default = 10
 }
-
 variable "target_groups" {
   type = list(string)
   description = "(Optional) List of Target Group ARNs to associate with the Auto Scaling group"
@@ -137,6 +130,11 @@ locals {
   regex_valid_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.SICKey) == var.SICKey ? 0 : "Variable [SICKey] must be at least 8 alphanumeric characters"
+}
+variable "enable_instance_connect" {
+  type = bool
+  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
+  default = false
 }
 variable "allow_upload_download" {
   type = bool

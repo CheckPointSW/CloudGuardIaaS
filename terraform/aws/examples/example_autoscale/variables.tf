@@ -70,7 +70,6 @@ variable "maximum_group_size" {
   description = "The maximum number of instances in the Auto Scaling group"
   default = 10
 }
-
 variable "target_groups" {
   type = list(string)
   description = "(Optional) List of Target Group ARNs to associate with the Auto Scaling group"
@@ -96,6 +95,11 @@ variable "password_hash" {
 variable "SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters)"
+}
+variable "enable_instance_connect" {
+  type = bool
+  description = "Enable AWS Instance Connect - Ec2 Instance Connect is not supported with versions prior to R80.40"
+  default = false
 }
 variable "allow_upload_download" {
   type = bool

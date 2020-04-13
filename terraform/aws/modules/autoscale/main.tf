@@ -38,6 +38,7 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
     // script's arguments
     PasswordHash = var.password_hash,
     EnableCloudWatch = var.enable_cloudwatch,
+    EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,
     SICKey = var.SICKey,
     AllowUploadDownload = var.allow_upload_download,

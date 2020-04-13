@@ -33,6 +33,7 @@ module "autoscale" {
   admin_shell = var.admin_shell
   password_hash = var.password_hash
   SICKey = var.SICKey
+  enable_instance_connect = var.enable_instance_connect
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
   bootstrap_script = var.bootstrap_script
