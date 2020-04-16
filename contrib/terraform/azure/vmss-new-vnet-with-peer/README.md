@@ -1,10 +1,14 @@
 # Check Point CloudGuard IaaS VMSS Terraform deployment for Azure
 
-This Terraform module deploys Check Point CloudGuard IaaS VMSS solution in Azure.
+This Terraform module deploys Check Point CloudGuard IaaS VMSS solution and connects it to an existing management server deployed in Azure. It is assumed that the management server is already created and is deployed into its own Resource-Group / vNET.
+Further more, it is assumed that the management server is configured with a security policy and with the CME (Cloud Management Extension) service to automatically configure the VMSS when it shows up. 
+
 As part of the deployment the following resources are created:
 - Resource group
 - Virtual network
 - Network security group
+- vNET peering between VMSS new vNET and between existing management vNET
+- VM Scalability Set of Check Point R80.40 gateways 
 
 See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
 
@@ -16,7 +20,21 @@ This solution uses the following modules:
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
-- In order to use ssh connection to VMs, add a public key to the /cgi-terraform/azure/vmss-new-vnet/azure_public_key file
+This module assumes you authenticate using Service Principlan Name (SPN) 
+For security best practices reasons, the SPN credentials were removed from the terraform.tfvars file
+It is advised you have the credentials as part of the environment variables of your shell.
+
+One example is adding the below to the end of .bashrc on your host (replacing the "x" with the respective information 
+
+  export ARM_CLIENT_ID="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"
+  
+  export ARM_CLIENT_SECRET="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  
+  export ARM_SUBSCRIPTION_ID="xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  
+  export ARM_TENANT_ID="xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+Another option, is to have a text file (e.g. app-env) with the above text in it and run the "source" command to inject environment variables every time before executing the terraform script (i.e. "source app-env")
 
 ## Usage
 - Create a Service Principal with the following permissions to the Azure subscription. 
@@ -35,14 +53,6 @@ This service principal will be used by Terraform in order to deploy the solution
 ### terraform.tfvars variables:
  | Name          | Description   | Type          | Allowed values |
  | ------------- | ------------- | ------------- | -------------  |
- | **client_secret** | passwordThe client secret of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **client_id** | The client ID of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **tenant_id** | The tenant ID of the Service Principal used to deploy the solution | string |
- |  |  |  |  |  |
- | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
- |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
@@ -87,6 +97,10 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **management_IP** | The IP address used to manage the VMSS instances | string | A valid IP address |
  |  |  |  |  |  |
+  | **mgmt_vnet_name** | The name of the vNET in which the management server is deployed in | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
+ |  |  |  |  |  |
+ | **mgmt_resource_group_name** | The of the Resource Group in which the management server is deployed in | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
+ |  |  |  |  |  |
  | **management_interface** | Manages the Gateways in the VMSS | string | "eth0" - An instance's external NIC's private IP address; <br/>"eth1" - an instance's internal NIC's private IP address |
  |  |  |  |  |  |
  | **configuration_template_name** | The configuration template name as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
@@ -99,10 +113,6 @@ This service principal will be used by Terraform in order to deploy the solution
 
 
 ## Example
-    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     resource_group_name             = "checkpoint-vmss-terraform"
     location                        = "eastus"
     vmss_name                       = "checkpoint-vmss-terraform"
@@ -130,7 +140,8 @@ This service principal will be used by Terraform in order to deploy the solution
     notification_email              = ""
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
-    
+    mgmt_vnet_name                  = "mgmt_vnet"
+    mgmt_resource_group_name        = "management"
 ## License
 
 See the [LICENSE](../../LICENSE) file for details
