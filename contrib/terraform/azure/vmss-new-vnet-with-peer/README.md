@@ -8,6 +8,7 @@ As part of the deployment the following resources are created:
 - Virtual network
 - Network security group
 - vNET peering between VMSS new vNET and between existing management vNET
+- VM Scalability Set of Check Point R80.40 gateways 
 
 See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
 
@@ -21,7 +22,7 @@ This solution uses the following modules:
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
 This module assumes you authenticate using Service Principlan Name (SPN) 
 For security best practices reasons, the SPN credentials were removed from the terraform.tfvars file
-You can paste the credentials everytime you run the terraform (manually and one by one), or alternatively, have the credentials as part of the environment variables of your shell.
+It is advised you have the credentials as part of the environment variables of your shell.
 
 One example is adding the below to the end of .bashrc on your host (replacing the "x" with the respective information 
 
@@ -33,7 +34,7 @@ One example is adding the below to the end of .bashrc on your host (replacing th
   
   export ARM_TENANT_ID="xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
-Another option, is to have a file (e.g. app-env) with the above text in it and run the "source" command to inject environment variables every time before executing the terraform script
+Another option, is to have a text file (e.g. app-env) with the above text in it and run the "source" command to inject environment variables every time before executing the terraform script (i.e. "source app-env")
 
 ## Usage
 - Create a Service Principal with the following permissions to the Azure subscription. 
