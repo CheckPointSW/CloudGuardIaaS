@@ -4,6 +4,7 @@ Check Point CloudGuard IaaS repository.
 The repository contains:
 
 * Solution/CloudFormation templates
+* Terraform modules
 * Tools and scripts that can be used with CloudGuard for Public Cloud solutions
 * Deprecated Solution/CloudFormation templates
 * Community-supported content

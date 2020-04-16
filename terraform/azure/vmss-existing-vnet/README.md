@@ -7,17 +7,39 @@ As part of the deployment the following resources are created:
 See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
 
 This solution uses the following modules:
-- /cgi-terraform/azure/modules/common - used for creating a resource group and defining common variables.
+- /terraform/azure/modules/common - used for creating a resource group and defining common variables.
 
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
-- In order to use ssh connection to VMs, add a public key to the /cgi-terraform/azure/vmss-existing-vnet/azure_public_key file
+- In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-existing-vnet/azure_public_key file
+<br>In case there is no need in the ssh key usage, the next lines in the main.tf file need to be deleted or commented:
 
+        ssh_keys {
+          path = "/home/notused/.ssh/authorized_keys"
+          key_data = file("${path.module}/azure_public_key")
+        }
 ## Usage
-- Create a Service Principal with the following permissions to the Azure subscription. 
-This service principal will be used by Terraform in order to deploy the solution.
-- Fill all variables in the /cgi-terraform/azure/vmss-existing-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
+- Choose the preferred login method to Azure in order to deploy the solution:
+    <br>1. Using Service Principal:
+    - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
+    - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
+
+    <br>2. Using **az** commands from a command-line:
+    - Run  **az login** command 
+    - Sign in with your account credentials in the browser
+    - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running:
+     <br>**az vm image terms accept --urn publisher:offer:sku:version**, where:
+        - publisher = checkpoint;
+        - offer = vm_os_offer (see accepted values in the table below);
+        - sku = vm_os_sku (see accepted values in the table below);
+        - version = latest<br/>
+    <br>Example:<br>
+    az vm image terms accept --urn checkpoint:check-point-cg-r8040:sg-byol:latest
+    
+    - In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables. 
+ 
+- Fill all variables in the /terraform/azure/vmss-existing-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
 
         terraform init
@@ -53,7 +75,7 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **backend_subnet_name** | Specifies the name of the internal subnet | string | The exact name of the existing internal subnet |
  |  |  |  |  |  |
- | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| number | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
+ | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
@@ -65,7 +87,7 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 only; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 only |
  |  |  |  |  |  |
- | **vm_os_offer** | Storage data disk size size(GB) | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
  |  |  |  |  |  |
  | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; |
  |  |  |  |  |  |
@@ -129,7 +151,25 @@ This service principal will be used by Terraform in order to deploy the solution
     notification_email              = ""
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
-    
+
+## Known limitations
+
+1.  Deploy the VMSS with instance level Public IP address is not supported
+2.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
+3.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
+
+## Revision History
+
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource; |
+| | | |
+| 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
+| | | |
+
+
 ## License
 
 See the [LICENSE](../../LICENSE) file for details

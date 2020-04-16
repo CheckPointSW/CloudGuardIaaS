@@ -1,0 +1,69 @@
+imports:
+- path: check-point-cluster--payg.py
+- path: common.py
+- path: default.py
+- path: password.py
+- path: images.py
+
+resources:
+- name: check-point-cluster--payg
+  type: check-point-cluster--payg.py
+  properties:
+      ha_version: "PLEASE ENTER HA VERSION"
+      zoneA: "PLEASE ENTER ZONE A"
+      zoneB: "PLEASE ENTER ZONE B. MUST BE EQUAL TO ZONE A"
+      machineType: "PLEASE ENTER A MACHINE TYPE"
+      diskType: "PLEASE ENTER A DISK TYPE"
+      bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
+      instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
+      enableMonitoring: "PLEASE ENTER true or false"
+      managementNetwork: "PLEASE ENTER MANAGEMENT IP"
+      sicKey: "PLEASE ENTER A SIC KEY"
+      generatePassword: "PLEASE ENTER true or false"
+      allowUploadDownload: "PLEASE ENTER true or false"
+      shell: "PLEASE ENTER A SHELL"
+      cluster-network-cidr: "PLEASE ENTER CLUSTER NETWORK CIDR"
+      cluster-network-name: "PLEASE ENTER CLUSTER NETWORK ID"
+      cluster-network-subnetwork-name: "PLEASE ENTER CLUSTER SUBNETWORK ID"
+      cluster-network_enableIcmp: "PLEASE ENTER true or false"
+      cluster-network_icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      cluster-network_enableTcp: "PLEASE ENTER true or false"
+      cluster-network_tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      cluster-network_enableUdp: "PLEASE ENTER true or false"
+      cluster-network_udpSourceRanges: "PLEASE ENTER UDP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      cluster-network_enableSctp: "PLEASE ENTER true or false"
+      cluster-network_sctpSourceRanges: "PLEASE ENTER SCTP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      cluster-network_enableEsp: "PLEASE ENTER true or false"
+      cluster-network_espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      mgmt-network-cidr: "PLEASE ENTER MANAGEMENT NETWORK CIDR"
+      mgmt-network-name: "PLEASE ENTER MANAGEMENT NETWORK ID"
+      mgmt-network-subnetwork-name: "PLEASE ENTER MANAGEMENT SUBNETWORK ID"
+      mgmt-network_enableIcmp: "PLEASE ENTER true or false"
+      mgmt-network_icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      mgmt-network_enableTcp: "PLEASE ENTER true or false"
+      mgmt-network_tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      mgmt-network_enableUdp: "PLEASE ENTER true or false"
+      mgmt-network_udpSourceRanges: "PLEASE ENTER UDP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      mgmt-network_enableSctp: "PLEASE ENTER true or false"
+      mgmt-network_sctpSourceRanges: "PLEASE ENTER SCTP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      mgmt-network_enableEsp: "PLEASE ENTER true or false"
+      mgmt-network_espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+      #Define additional NICs networks and subnetworks according the defined numAdditionalNICs value
+      #If there is no need in additional NICs remove additionalNetwork1 and additionalSubnetwork1 variables
+      numInternalNetworks: "PLEASE ENTER A NUMBER OF ADDITIONAL NICS"
+      internal-network1-cidr: "PLEASE ENTER 1ST INTERNAL NETWORK CIDR"
+      internal-network1-name: "PLEASE ENTER 1ST INTERNAL NETWORK ID"
+      internal-network1-subnetwork-name: "PLEASE ENTER INTERNAL SUBNETWORK ID"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-cluster--payg.deployment)
+- name: "Cluster IP external address"
+  value: $(ref.check-point-cluster--payg.clusterIP)
+- name: "Member A"
+  value: $(ref.check-point-cluster--payg.vmAName)
+- name: "Member A external IP"
+  value: $(ref.check-point-cluster--payg.vmAExternalIP)
+- name: "Member B"
+  value: $(ref.check-point-cluster--payg.vmBName)
+- name: "Member B external IP"
+  value: $(ref.check-point-cluster--payg.vmBExternalIP)

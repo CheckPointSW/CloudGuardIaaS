@@ -1,6 +1,6 @@
-# Check Point CloudGuard IaaS High Availability with Availability Set Terraform deployment for Azure
+# Check Point CloudGuard IaaS High Availability with Availability Zones Terraform deployment for Azure
 
-This Terraform module deploys Check Point CloudGuard IaaS High Availability solution in Azure based on Azure Availability Set.
+This Terraform module deploys Check Point CloudGuard IaaS High Availability solution in Azure based on Azure Availability Zones.
 As part of the deployment the following resources are created:
 - Resource group
 - Virtual network
@@ -10,19 +10,41 @@ As part of the deployment the following resources are created:
 See the [Check Point CloudGuard IaaS High Availability for Azure Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_IaaS_HighAvailability_for_Azure/Content/Topics/Check_Point_CloudGuard_IaaS_High_Availability_for_Azure.htm) for additional information
 
 This solution uses the following modules:
-- /cgi-terraform/azure/modules/common - used for creating a resource group and defining common variables.
-- /cgi-terraform/azure/modules/vnet - used for creating new virtual network and subnets.
-- /cgi-terraform/azure/modules/network-security-group - used for creating new network security groups and rules.
+- /terraform/azure/modules/common - used for creating a resource group and defining common variables.
+- /terraform/azure/modules/vnet - used for creating new virtual network and subnets.
+- /terraform/azure/modules/network-security-group - used for creating new network security groups and rules.
 
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
-- In order to use ssh connection to VMs, add a public key to the /cgi-terraform/azure/ha-availability-set/azure_public_key file
+- In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/ha-availability-zones/azure_public_key file
+<br>In case there is no need in the ssh key usage, the next lines in the main.tf file need to be deleted or commented:
 
+        ssh_keys {
+          path = "/home/notused/.ssh/authorized_keys"
+          key_data = file("${path.module}/azure_public_key")
+        }
 ## Usage
-- Create a Service Principal with the following permissions to the Azure subscription. 
-This service principal will be used by Terraform in order to deploy the solution.
-- Fill all variables in the /cgi-terraform/azure/ha-availability-set/terraform.tfvars file with proper values (see below for variables descriptions).
+- Choose the preferred login method to Azure in order to deploy the solution:
+    <br>1. Using Service Principal:
+    - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
+    - Grant the Service Principal at least "**Owner**" permissions to the Azure subscription<br>
+
+    <br>2. Using **az** commands from a command-line:
+    - Run  **az login** command 
+    - Sign in with your account credentials in the browser
+    - [Accept Azure Marketplace image terms](https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest) by running:
+     <br>**az vm image terms accept --urn publisher:offer:sku:version**, where:
+        - publisher = checkpoint;
+        - offer = vm_os_offer (see accepted values in the table below);
+        - sku = vm_os_sku (see accepted values in the table below);
+        - version = latest<br/>
+    <br>Example:<br>
+    az vm image terms accept --urn checkpoint:check-point-cg-r8040:sg-byol:latest
+    
+    - In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables. 
+ 
+- Fill all variables in the /terraform/azure/ha-availability-zones/terraform.tfvars file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
 
         terraform init
@@ -33,7 +55,7 @@ This service principal will be used by Terraform in order to deploy the solution
  
         terraform apply
 
- ### terraform.tfvars variables:
+### terraform.tfvars variables:
  | Name          | Description   | Type          | Allowed values |
  | ------------- | ------------- | ------------- | -------------  |
  | **client_secret** | passwordThe client secret of the Service Principal used to deploy the solution | string |
@@ -66,7 +88,7 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 only; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 only |
  |  |  |  |  |  |
- | **vm_os_offer** | Storage data disk size size(GB) | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
  |  |  |  |  |  |
  | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; |
  |  |  |  |  |  |
@@ -98,6 +120,14 @@ This service principal will be used by Terraform in order to deploy the solution
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     disable_password_authentication = false
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20200305 | First release of Check Point CloudGuard IaaS High Availability with Availability Zones Terraform deployment for Azure |
+| | | |
+
 
 ## License
 
