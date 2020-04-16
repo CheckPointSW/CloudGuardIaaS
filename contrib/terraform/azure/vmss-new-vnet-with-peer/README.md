@@ -105,6 +105,10 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **backend_load_distribution** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
  |  |  |  |  |  |
+ | **mgmt_vnet_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
+ |  |  |  |  |  |
+ | **mgmt_resource_group_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
+ |  |  |  |  |  |
  | **notification_email** | An email address to notify about scaling operations | string | Leave empty double quotes or enter a valid email address |
 
 
