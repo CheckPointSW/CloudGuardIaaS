@@ -11,8 +11,8 @@ provider "random" {
   version = "= 2.2.1"
 }
 data "azurerm_virtual_network" "mgmt" {
-  name 			= "mgmt-vnet"
-  resource_group_name 	= "management"
+  name 			= var.mgmt_vnet_name 
+  resource_group_name 	= var.mgmt_resource_group_name 
 }
 data "azurerm_virtual_network" "vmss" {
   name                  = var.vnet_name

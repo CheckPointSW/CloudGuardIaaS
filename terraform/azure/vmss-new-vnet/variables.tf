@@ -223,7 +223,14 @@ locals { // locals for 'frontend_load_distribution' allowed values
   // will fail if [var.backend_load_distribution] is invalid:
   validate_backend_load_distribution_value = index(local.backend_load_distribution_allowed_values, var.backend_load_distribution)
 }
-
+variable "mgmt_vnet_name" {
+  description = "Name of the Management vNET"
+  type=string
+}
+variable "mgmt_resource_group_name" {
+  description = "Management Resource Group Name"
+  type=string
+}
 //********************** Scale Set variables *******************//
 
 variable "vm_os_offer" {
@@ -252,13 +259,13 @@ variable "notification_email" {
 }
 
 //********************** Credentials **************************//
-variable "tenant_id" {}
+//variable "tenant_id" {}
 
-variable "subscription_id" {}
+//variable "subscription_id" {}
 
-variable "client_id" {}
+//variable "client_id" {}
 
-variable "client_secret" {}
+//variable "client_secret" {}
 
 variable "sku" {
   description = "SKU"
