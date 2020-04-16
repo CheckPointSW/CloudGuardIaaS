@@ -99,15 +99,15 @@ This service principal will be used by Terraform in order to deploy the solution
  |  |  |  |  |  |
  | **management_interface** | Manages the Gateways in the VMSS | string | "eth0" - An instance's external NIC's private IP address; <br/>"eth1" - an instance's internal NIC's private IP address |
  |  |  |  |  |  |
+  | **mgmt_vnet_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
+ |  |  |  |  |  |
+ | **mgmt_resource_group_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
+ |  |  |  |  |  |
  | **configuration_template_name** | The configuration template name as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
  | **frontend_load_distribution** | The load balancing distribution method for the External Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
  |  |  |  |  |  |
  | **backend_load_distribution** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
- |  |  |  |  |  |
- | **mgmt_vnet_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
- |  |  |  |  |  |
- | **mgmt_resource_group_name** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
  |  |  |  |  |  |
  | **notification_email** | An email address to notify about scaling operations | string | Leave empty double quotes or enter a valid email address |
 
