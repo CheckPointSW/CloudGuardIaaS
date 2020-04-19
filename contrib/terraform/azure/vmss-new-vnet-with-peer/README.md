@@ -3,6 +3,10 @@
 This Terraform module deploys Check Point CloudGuard IaaS VMSS solution and connects it to an existing management server deployed in Azure. It is assumed that the management server is already created and is deployed into its own Resource-Group / vNET.
 Further more, it is assumed that the management server is configured with a security policy and with the CME (Cloud Management Extension) service to automatically configure the VMSS when it shows up. 
 
+
+## Topology Diagram
+![Topology](images/Topology-2.JPG)
+
 As part of the deployment the following resources are created:
 - Resource group
 - Virtual network
