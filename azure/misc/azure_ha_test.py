@@ -17,7 +17,7 @@ ARM_VERSIONS = {
         ('resources', '?api-version=2017-10-01'),
     ]),
     'ha': collections.OrderedDict([
-        ('resources', '?api-version=2018-01-01'),
+        ('resources', '?api-version=2019-07-01'),
     ])}
 
 os.environ['AZURE_NO_DOT'] = 'true'
@@ -66,7 +66,7 @@ def test_rw(rid, allow_not_found=False):
 
     log('Attempting to write ')
     try:
-        azure.arm('PUT', rid, json.dumps(obj))
+        azure.arm('PUT', rid + ARM_VERSIONS['resources'], json.dumps(obj))
     except rest.RequestException as e:
         log('- [%s]\n' % e.reason)
         raise
