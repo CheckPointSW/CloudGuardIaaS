@@ -39,7 +39,7 @@ This solution uses the following modules:
                 //  tenant_id = var.tenant_id
                 }
             
-        b. In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables:
+        b. In the terraform.tfvars file leave empty double quotes for client_secret, client_id, tenant_id and subscription_id variables:
         
                 client_secret                   = ""
                 client_id                       = ""
