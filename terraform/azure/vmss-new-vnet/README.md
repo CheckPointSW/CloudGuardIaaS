@@ -28,7 +28,28 @@ This solution uses the following modules:
     <br>1. Using Service Principal:
     - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
     - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
-
+    - The Service Principal credentials can be stored either in the terraform.tfvars or as [Environment Variables](https://www.terraform.io/docs/providers/azuread/guides/service_principal_client_secret.html)<br>
+    
+      In case the Environment Variables are used, perform modifications described below:<br>
+      
+       a. The next lines in the main.tf file, in the provider azurerm resource,  need to be deleted or commented:
+            
+                provider "azurerm" {
+                  version = "=1.44.0"
+                
+                //  subscription_id = var.subscription_id
+                //  client_id = var.client_id
+                //  client_secret = var.client_secret
+                //  tenant_id = var.tenant_id
+                }
+            
+        b. In the terraform.tfvars file leave empty double quotes for client_secret, client_id , tenant_id and subscription_id variables:
+        
+                client_secret                   = ""
+                client_id                       = ""
+                tenant_id                       = ""
+                subscription_id                 = "" 
+        
     <br>2. Using **az** commands from a command-line:
     - Run  **az login** command 
     - Sign in with your account credentials in the browser
