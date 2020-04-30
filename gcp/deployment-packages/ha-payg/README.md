@@ -144,7 +144,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     allowUploadDownload: false
     shell: "/bin/bash"
     cluster-network-cidr: ""
-    cluster-network-name: "romanka-vpc"
+    cluster-network-name: "external-vpc"
     cluster-network-subnetwork-name: "frontend"
     cluster-network_enableIcmp: true
     cluster-network_icmpSourceRanges: "0.0.0.0/0"
