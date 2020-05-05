@@ -10,7 +10,7 @@ These types of Terraform resources are supported:
 * [AWS CloudFormation Stack](https://www.terraform.io/docs/providers/aws/r/cloudformation_stack.html) - creates Traffic Mirror Filter and Target 
 * [AWS Lambdas](https://www.terraform.io/docs/providers/aws/r/lambda_function.html) - TAP Lambda, TAP Termination Lambda
 
-Learn more about TAP Lambda and TAP Termination Lambda [here](#TAP)
+Learn more about [TAP Lambda](#TAP-Lambda) and [TAP Termination Lambda](#TAP-Termination-Lambda)
 
 
 ## Prerequisites
@@ -203,7 +203,7 @@ delete the relevant sessions).
 | schedule_scan_interval | (minutes) Lambda will scan the VPC every X minutes for TAP updates | number  | n/a | 60  | no |
 |         |   |   |  |   |  |
 | instance_name | AWS instance name to launch  | string  | n/a | "CP-TAP-Gateway-tf"  | no |
-| instance_type | AWS instance type - View [Notes and limitations](#Notes) section | string  | n/a | c5.xlarge  | no |
+| instance_type | AWS instance type - View [Notes and limitations](#Notes-and-limitations) section | string  | n/a | c5.xlarge  | no |
 | key_name | The EC2 Key Pair name to allow SSH access to the instances  | string  | n/a | n/a  | yes |
 
 
