@@ -30,10 +30,11 @@ def get_all_instances_in_vpc():
     return all_instances_in_vpc
 
 
-def get_eth0_eni(instance_id):
-    return ec2_client.describe_instances(InstanceIds=[instance_id])[
-        'Reservations'][0]['Instances'][0][
-        'NetworkInterfaces'][0]['NetworkInterfaceId']
+def get_all_enis(instance_id):
+    enis_list = []
+    for eni in ec2_client.describe_instances(InstanceIds=[instance_id])['Reservations'][0]['Instances'][0]['NetworkInterfaces']:
+        enis_list.append((instance_id, eni['NetworkInterfaceId']))
+    return enis_list
 
 
 def get_mirrorable_instance_tuples():
@@ -41,9 +42,11 @@ def get_mirrorable_instance_tuples():
                                 for instance in get_all_instances_in_vpc()
                                 if is_mirrorable(instance['InstanceType'])
                                 and instance['InstanceId'] != gw_id]
-    # save instances' (instance_id, instance_eni) list of tuples
-    return [(instance_id, get_eth0_eni(instance_id))
-            for instance_id in mirrorable_instances_ids]
+    instance_list = []
+    for instance_id in mirrorable_instances_ids:
+        instance_list.append(get_all_enis(instance_id))
+    # save instances' (instance_id, instance_eni) list of tuples - flattebd the list of tuples on return
+    return [item for sublist in instance_list for item in sublist]
 
 
 def get_tap_if_exists(instance_eni):
