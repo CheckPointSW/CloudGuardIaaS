@@ -10,24 +10,40 @@ These types of Terraform resources are supported:
 * [AWS CloudFormation Stack](https://www.terraform.io/docs/providers/aws/r/cloudformation_stack.html) - creates Traffic Mirror Filter and Target 
 * [AWS Lambdas](https://www.terraform.io/docs/providers/aws/r/lambda_function.html) - TAP Lambda, TAP Termination Lambda
 
+Learn more about [TAP Lambda](#TAP-Lambda) and [TAP Termination Lambda](#TAP-Termination-Lambda)
+
 
 ## Prerequisites
 * **Internet Gateway -** The VPC deployed into **must** have an [Internet Gateway](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html) 
 configured as default route in the VPC's main route-table in order to allow communication between the TAP Gateway and Check Point NOW Cloud.
 **Note:** Internet connectivity is mandatory pre-deployment.
 * **License -** This module supports Check Point R80.40 NGTX-PAYG license only
-* **NOW domain and Cyber Sentry -** In order to connect to Check Point NOW cloud portal, refer to [NOW onboarding page](CheckPoint_NOW_onboarding_page.pdf) to create a domain and Cyber Sentry.
-Make sure the Cyber Sentry you intend to connect to is 'decativated' pre-deployment.
+* **NOW domain and Cyber Sentry -** 
+To create a NOW domain fill in the [NOW cloud registration form](https://now.checkpoint.com/register/index.html).
+Once you are logged in to your NOW domain, create a Cyber Sentry and use its MAC address as the 'registration_key' variable in the terraform deployment.
+For detailed information and instructions refer to the [NOW onboarding page](CheckPoint_NOW_onboarding_page.pdf).
 
+> **Note:** Make sure the Cyber Sentry you intend to connect to is 'decativated' pre-deployment in the NOW portal.
 
-### Notes
+### Notes and limitations
 * As explained in [AWS Traffic Mirroring considerations](https://docs.aws.amazon.com/vpc/latest/mirroring/traffic-mirroring-considerations.html) page,
 AWS supports traffic mirroring for [Nitro-based instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances) only.
-* Post-deployment refer to [Check Point NOW portal](https://now.checkpoint.com) > Cyber Sentries. Once your Cyber sentry changes its state to 'activated' and 'connected' - the instance connected successfully to Check Point NOW Cloud. This can take up to 20 minutes.
+* Post-deployment refer to [Check Point NOW portal](https://now.checkpoint.com) > Cyber Sentries. 
+Once your Cyber sentry changes its state to 'activated' and 'connected' - the instance connected successfully to Check Point NOW Cloud. 
+This may take up to 20 minutes.
+* Due to an AWS limitation the **maximum number of mirror sources per target** depends on the TAP Gateway instance type.
+For a non-dedicated instance type as target, the limit is 10 sources.
+For a dedicated instance type, the limit is 100 sources.
+CGI supports the following dedicated instance types: c5.18xlarge and c5n.18xlarge
+For more information please refer to [AWS Traffic Mirroring quotas and considerations](https://docs.aws.amazon.com/vpc/latest/mirroring/traffic-mirroring-considerations.html#traffic-mirroring-limits) page.
 
 
 ## Usage
-Variables are configured in **terraform.tfvars** file as follows:
+[Clone or download](https://github.com/CheckPointSW/CloudGuardIaaS) Check Point CloudGuard IaaS Github Repository.
+
+For your convenience, find our tap_example terraform files [here](https://github.com/CheckPointSW/CloudGuardIaaS/tree/master/terraform/aws/examples/example_tap) or navigate to terraform>aws>examples>example_tap in your local clone.
+
+Configure your variables in **terraform.tfvars** file as follows:
 ```
 region = "us-east-1"
 
@@ -51,7 +67,7 @@ instance_name = "tap-gateway"
 instance_type = "c5.xlarge"
 key_name = "privatekey"
 ```
-**main.tf**:
+**main.tf** - Refers to the above configured variables and does not require any changes:
 ```
 provider "aws" {
   region = var.region
@@ -78,6 +94,12 @@ module "tap" {
   key_name = var.key_name
 }
 ```
+From your example directory's command line -
+* Run 'terraform plan' to generate and show an execution plan
+* Run 'terraform apply' to initiate deployment and build the TAP infrastructure
+* Run 'terraform destroy' to destroy the terraform-managed infrastructure
+
+> Find Terraform commands doc [here](https://www.terraform.io/docs/commands/index.html).
 
 This module creates a Check Point TAP Gateway instance in the VPC specified by the user, 
 along with traffic mirror filter and target, and two lambda functions: TAP Lambda and TAP Termination Lambda.
@@ -87,9 +109,11 @@ VPC for mirrorable NITRO instances.
 
 ## Deployment
 
-First, you will purchase a [CloudGuard IaaS gateway](https://aws.amazon.com/marketplace/pp/B07LB54LFB?qid=1586153579302&sr=0-2&ref_=srh_res_product_title) 
+First, purchase a [CloudGuard IaaS gateway](https://aws.amazon.com/marketplace/pp/B07LB54LFB?qid=1586153579302&sr=0-2&ref_=srh_res_product_title) 
 with Threat Prevention & SandBlast from the AWS marketplace. 
-A named customer domain must be provisioned on the Check Point now.checkpoint.com SaaS – during the Early Availability period, this must be performed by Check Point. Please reach out to the local Check Point partner sales representative for this.
+A named customer domain must be provisioned on the Check Point now.checkpoint.com SaaS – 
+during the Early Availability period, this must be performed by Check Point. 
+To create a NOW domain fill in the [NOW cloud registration form](https://now.checkpoint.com/register/index.html) and your request will be handled as soon as possible.
 You will receive an email with a registration link – click that, and a certificate will be automatically generated and provided to you for download and import into your browser.
 (Note: some browsers, e.g. Google Chrome, require a restart for the certificate to be activated – kill all instances of the browser, and restart it.)
 Now point your browser at [now.checkpoint.com](https://now.checkpoint.com). You will be directed into your new domain.
@@ -103,7 +127,7 @@ Edit the example's terraform.tfvars file according to the instructions in the [U
 * After up to 20 minutes, the sentry state will change to “Connected” in the NOW portal.
 Check the Logs tab to see that network traffic is flowing into the sentry.
 
-### TAP Lambda:
+### TAP Lambda
 
 #### IAM role
 The module creates an IAM role for the TAP Lambda, named 'chkp_iam_tap_lambda' suffixed with a uuid.
@@ -147,7 +171,7 @@ You can update the blacklist tags list by editing the TAP Lambda 'TAP_BLACKLIST'
 The structure "key1=value1:key2-value2:key3=value3" of the variable must be maintained.
 
 
-### TAP Termination Lambda:
+### TAP Termination Lambda
  
  This Lambda should be manually invoked **prior** to destroying the Terraform environment.
  The environment destruction **will fail** if skipping the Termination Lambda invocation.
@@ -179,7 +203,7 @@ delete the relevant sessions).
 | schedule_scan_interval | (minutes) Lambda will scan the VPC every X minutes for TAP updates | number  | n/a | 60  | no |
 |         |   |   |  |   |  |
 | instance_name | AWS instance name to launch  | string  | n/a | "CP-TAP-Gateway-tf"  | no |
-| instance_type | AWS instance type  | string  | n/a | c5.xlarge  | no |
+| instance_type | AWS instance type - View [Notes and limitations](#Notes-and-limitations) section | string  | n/a | c5.xlarge  | no |
 | key_name | The EC2 Key Pair name to allow SSH access to the instances  | string  | n/a | n/a  | yes |
 
 
