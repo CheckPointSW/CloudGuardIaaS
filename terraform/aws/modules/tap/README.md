@@ -32,9 +32,9 @@ AWS supports traffic mirroring for [Nitro-based instance](https://docs.aws.amazo
 Once your Cyber sentry changes its state to 'activated' and 'connected' - the instance connected successfully to Check Point NOW Cloud. 
 This may take up to 20 minutes.
 * Due to an AWS limitation the **maximum number of mirror sources per target** depends on the TAP Gateway instance type.
-CGI supports the following dedicated instance types: c5.18xlarge and c5n.18xlarge
 For a non-dedicated instance type as target, the limit is 10 sources.
 For a dedicated instance type, the limit is 100 sources.
+CGI supports the following dedicated instance types: c5.18xlarge and c5n.18xlarge
 For more information please refer to [AWS Traffic Mirroring quotas and considerations](https://docs.aws.amazon.com/vpc/latest/mirroring/traffic-mirroring-considerations.html#traffic-mirroring-limits) page.
 
 
