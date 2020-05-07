@@ -206,6 +206,20 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
   number_of_probes = var.lb_probe_unhealthy_threshold
 }
 
+    resource "azurerm_lb_rule" "backend_lb_rule" {
+     count = 2
+     resource_group_name = module.common.resource_group_name
+     loadbalancer_id = azurerm_lb.backend-lb.id
+     name  ="backend-lb-rule"
+     protocol = "All"
+     frontend_ip_configuration_name = "backend-lb"
+     frontend_port =0
+     backend_port =0
+     backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool.id
+     probe_id =  azurerm_lb_probe.azure_lb_healprob[count.index].id
+ }
+
+      
 //********************** Storage accounts **************************//
 // Generate random text for a unique storage account name
 resource "random_id" "randomId" {
