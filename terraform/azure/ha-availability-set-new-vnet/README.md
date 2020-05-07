@@ -146,6 +146,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20200508 | Add backend load-balancer rules resource |
+| | | |
 | 20200305 | First release of Check Point CloudGuard IaaS High Availability with Availability Set Terraform deployment for Azure |
 | | | |
 
