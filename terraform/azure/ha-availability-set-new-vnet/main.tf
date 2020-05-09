@@ -199,7 +199,7 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
   count = 2
   resource_group_name = module.common.resource_group_name
   loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
-  name = var.lb_probe_name
+  name = count.index == 0 ? var.lb_probe_name : azurerm_lb.backend-lb.name
   protocol = var.lb_probe_protocol
   port = var.lb_probe_port
   interval_in_seconds = var.lb_probe_interval
