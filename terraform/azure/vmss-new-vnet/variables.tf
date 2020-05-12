@@ -136,6 +136,17 @@ variable "configuration_template_name" {
   description = "The configuration template name as it appears in the configuration file"
   type = string
 }
+  
+
+locals { // locals for 'management_interface_IP' allowed values
+  management_interface_IP_allowed_values = [
+    "private",
+    "public"
+  ]
+  // will fail if [var.management_interface_IP] is invalid:
+  validate_management_interface_IP_value = index(local.management_interface_IP_allowed_values, var.management_interface_IP)
+}
+  
 
 //********************** Natworking Variables **************************//
 variable "vnet_name" {
