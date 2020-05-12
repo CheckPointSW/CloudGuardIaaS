@@ -21,7 +21,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -33,7 +33,7 @@ variable "sic_key" {
 variable "template_name"{
   description = "Template name. Should be defined according to deployment type(ha, vmss)"
   type = string
-  default = "ha_terraform"
+  default = "ha"
 }
 
 variable "template_version"{
