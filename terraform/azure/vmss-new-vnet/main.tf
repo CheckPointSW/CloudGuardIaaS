@@ -227,6 +227,12 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = module.vnet.vnet_subnets[0]
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
+        public_ip_address_configuration {
+          name = "instancePublicIP"
+          idle_timeout = 15
+          domain_name_label = "public"
+          }
+
      }
  }
 
@@ -251,7 +257,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   tags = var.management_interface == "eth0"?{
     x-chkp-management = var.management_name,
     x-chkp-template = var.configuration_template_name,
-    x-chkp-ip-address = "private",
+    x-chkp-ip-address = var.management_interface_IP,
     x-chkp-management-interface = var.management_interface,
     x-chkp-management-address = var.management_IP,
     x-chkp-topology = "eth0:external,eth1:internal",
