@@ -108,7 +108,7 @@ module "autoscale" {
 This module creates by default a proxy ELB and does not create an IAM role.
 1. To create an ASG configuration with an IAM role:
 ```
-enable_cloudwatch = false
+enable_cloudwatch = true
 ```
 2. To create an ASG configuration without a proxy ELB:
 ```
