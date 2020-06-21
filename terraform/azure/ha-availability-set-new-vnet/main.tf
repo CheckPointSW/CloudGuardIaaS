@@ -199,12 +199,25 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
   count = 2
   resource_group_name = module.common.resource_group_name
   loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
-  name = var.lb_probe_name
+  name = count.index == 0 ? var.lb_probe_name : azurerm_lb.backend-lb.name
   protocol = var.lb_probe_protocol
   port = var.lb_probe_port
   interval_in_seconds = var.lb_probe_interval
   number_of_probes = var.lb_probe_unhealthy_threshold
 }
+
+resource "azurerm_lb_rule" "backend_lb_rule" {
+  resource_group_name = module.common.resource_group_name
+  loadbalancer_id = azurerm_lb.backend-lb.id
+  name  = azurerm_lb.backend-lb.name
+  protocol = "All"
+  frontend_ip_configuration_name = "backend-lb"
+  frontend_port = 0
+  backend_port = 0
+  backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool.id
+  probe_id =  azurerm_lb_probe.azure_lb_healprob[1].id
+}
+
 
 //********************** Availability Set **************************//
 resource "azurerm_availability_set" "availability-set" {
