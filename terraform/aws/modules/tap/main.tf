@@ -1,12 +1,10 @@
 
 module "amis" {
   source = "../amis"
-
   version_license = var.version_license
 }
 
 resource "aws_security_group" "tap_sg" {
-  description = format("%s Security group", var.resources_tag_name != "" ? var.resources_tag_name : var.instance_name)
   vpc_id = var.vpc_id
   egress {
     from_port = 0
@@ -27,16 +25,14 @@ resource "aws_security_group" "tap_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    description = "allow VXLAN for traffic mirroring"
+    description = "Allow VXLAN for traffic mirroring"
     protocol = "udp"
     from_port = 4789
     to_port = 4789
     cidr_blocks = ["0.0.0.0/0"]
   }
-  name = format("%s_SecurityGroup", var.resources_tag_name != "" ? var.resources_tag_name : var.instance_name) // Group name
-  tags = {
-    Name = format("%s_SecurityGroup", var.resources_tag_name != "" ? var.resources_tag_name : var.instance_name) // Resource name
-  }
+  name = format("%s_SecurityGroup_for_%s", var.resources_tag_name, var.zone)
+  description = format("%s Security group", var.resources_tag_name)
 }
 resource "aws_network_interface" "external-eni" {
   subnet_id = var.external_subnet_id
@@ -44,7 +40,7 @@ resource "aws_network_interface" "external-eni" {
   description = "eth0"
   source_dest_check = false
   tags = {
-    Name = format("%s-external_network_interface", var.resources_tag_name != "" ? var.resources_tag_name : var.instance_name)
+    Name = format("%s_ENI_External", var.resources_tag_name)
   }
 }
 resource "aws_network_interface" "internal-eni" {
@@ -53,13 +49,14 @@ resource "aws_network_interface" "internal-eni" {
   description = "eth1"
   source_dest_check = false
   tags = {
-    Name = format("%s-internal_network_interface", var.resources_tag_name != "" ? var.resources_tag_name : var.instance_name)
+    Name = format("%s_ENI_Internal", var.resources_tag_name)
   }
 }
 resource "aws_eip" "eip" {
   vpc = true
   network_interface = aws_network_interface.external-eni.id
 }
+
 resource "aws_instance" "tap_gateway" {
   depends_on = [
     aws_network_interface.external-eni,
@@ -68,40 +65,40 @@ resource "aws_instance" "tap_gateway" {
   ]
 
   ami = module.amis.ami_id
-  tags = {
-    Name = var.instance_name
-  }
   instance_type = var.instance_type
-  key_name = var.key_name
+  key_name = var.key_pair_name
+  availability_zone = var.zone
+
+  tags = {
+    Name = format("%s_CP_Sensor", var.resources_tag_name)
+    CKP_Type = "Sensor"
+  }
 
   ebs_block_device {
     device_name = "/dev/xvda"
     volume_type = "gp2"
     volume_size = 100
   }
-  network_interface { // external
+
+  network_interface {
     network_interface_id = aws_network_interface.external-eni.id
     device_index = 0
   }
-  network_interface { // internal
+  network_interface {
     network_interface_id = aws_network_interface.internal-eni.id
     device_index = 1
   }
 
-  user_data = templatefile("${path.module}/tap_user_data_script.sh", {
-    // script's arguments
+  user_data = templatefile("${path.module}/scripts/tap_user_data_script.sh", {
     RegistrationKey = var.registration_key
     VxlanIds = var.vxlan_id
   })
 }
 
-// Create CloudFormation Stack
-resource "random_id" "stack_uuid" {
-  byte_length = 5
-}
+// CloudFormation Stack
 resource "aws_cloudformation_stack" "tap_target_and_filter" {
   depends_on = [aws_instance.tap_gateway]
-  name = format("traffic-mirror-filter-and-target-%s", random_id.stack_uuid.hex)
+  name = format("%s-TrafficMirrorFilterAndTarget-for-%s", var.resources_tag_name, var.zone)
 
   parameters = {
     MirroringNetworkInterfaceId = aws_network_interface.internal-eni.id
@@ -109,13 +106,8 @@ resource "aws_cloudformation_stack" "tap_target_and_filter" {
   }
   template_url = "https://cgi-cfts.s3.amazonaws.com/utils/tap_target_and_filter.yaml"
 }
-locals {
-  trafficMirrorTargetId = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorTargetId"]
-  trafficMirrorFilterId = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorFilterId"]
-}
 
-// Lambdas
-// --- TAP Lambda ---
+// Lambda policy and role
 data "aws_iam_policy_document" "assume_policy_doc" {
   statement {
     effect = "Allow"
@@ -150,25 +142,28 @@ resource "aws_iam_role_policy" "tap_lambda_policy" {
   policy = data.aws_iam_policy_document.tap_lambda_policy_doc.json
   role = aws_iam_role.tap_lambda_iam_role.id
 }
+
 // Lambda Function
-resource "random_id" "tap_lambda_uuid" {
-  byte_length = 5
-}
 data "archive_file" "tap_lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/tap_lambda.py"
-  output_path = "${path.module}/tap_lambda.zip"
+  source_file = "${path.module}/lambdas/tap_lambda.py"
+  output_path = "${path.module}/output/tap_lambda.zip"
 }
 locals {
   blacklisted_tag_pairs_joined = join(":", [for tag_key in keys(var.blacklist_tags): join("=", [tag_key, var.blacklist_tags[tag_key]])])
 }
+locals {
+  whitelisted_tag_pairs_joined = join(":", [for tag_key in keys(var.whitelist_tags): join("=", [tag_key, var.whitelist_tags[tag_key]])])
+}
 resource "aws_lambda_function" "tap_lambda" {
-  depends_on = [aws_instance.tap_gateway]
-  function_name = format("chkp_tap_lambda-%s", random_id.tap_lambda_uuid.hex)
-  description = "The TAP lambda creates traffic mirror sessions with the TAP gateway instance, and removes them for blacklisted instances in the VPC."
+  depends_on = [
+    aws_instance.tap_gateway,
+    aws_cloudformation_stack.tap_target_and_filter
+  ]
 
-  filename = "${path.module}/tap_lambda.zip"
-
+  function_name = format("%s_Lambda_for_%s", var.resources_tag_name, var.zone)
+  description = "The TAP lambda creates traffic mirror sessions with the TAP gateway instance."
+  filename = "${path.module}/output/tap_lambda.zip"
   role = aws_iam_role.tap_lambda_iam_role.arn
   handler = "tap_lambda.lambda_handler"
   runtime = "python3.8"
@@ -177,14 +172,18 @@ resource "aws_lambda_function" "tap_lambda" {
   environment {
     variables = {
       VPC_ID = var.vpc_id
-      GW_ID = aws_instance.tap_gateway.id
-      TM_TARGET_ID = local.trafficMirrorTargetId
-      TM_FILTER_ID = local.trafficMirrorFilterId
+      AZ = var.zone
+      TMT_ID = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorTargetId"]
+      TMF_ID = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorFilterId"]
       VNI = var.vxlan_id
+      ALL_ENI = var.all_eni
       TAP_BLACKLIST = local.blacklisted_tag_pairs_joined
+      TAP_WHITELIST = local.whitelisted_tag_pairs_joined
+      USE_WHITELIST = var.use_whitelist
     }
   }
 }
+
 // CloudWatch event - EC2 state change to Running
 resource "aws_cloudwatch_event_rule" "on_ec2_running_state" {
   name_prefix = "tap_ec2_running_rule"
@@ -216,6 +215,7 @@ resource "aws_lambda_permission" "allow_ec2_rule_to_call_tap_lambda" {
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.on_ec2_running_state.arn
 }
+
 // CloudWatch event - Scheduled
 resource "aws_cloudwatch_event_rule" "on_schedule" {
   name_prefix = "tap_schedule_rule"
@@ -233,18 +233,24 @@ resource "aws_lambda_permission" "allow_schedule_rule_to_call_tap_lambda" {
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.on_schedule.arn
 }
-// TAP Lambda Invocation
+
+// Lambda Invocation
 data "aws_lambda_invocation" "tap_lambda_invocation" {
-  depends_on = [aws_lambda_function.tap_lambda]
+  depends_on = [
+    aws_lambda_function.tap_lambda
+  ]
   function_name = aws_lambda_function.tap_lambda.function_name
   input = <<JSON
   {
-    "deployment_invocation": "true"
+    "detail-type": "TAP Deployment"
   }
   JSON
 }
 
-// --- Terminate TAP Lambda ---
+
+
+
+// Termination Lambda policy and role
 data "aws_iam_policy_document" "tap_termination_policy_doc" {
   statement {
     effect = "Allow"
@@ -266,29 +272,24 @@ resource "aws_iam_role_policy" "tap_termination_policy" {
   policy = data.aws_iam_policy_document.tap_termination_policy_doc.json
   role = aws_iam_role.terminate_gw_lambda_iam_role.id
 }
-// Lambda Function
-resource "random_id" "tap_termination_lambda_uuid" {
-  byte_length = 5
-}
+
+// Termination Lambda Function
 data "archive_file" "tap_termination_lambda_zip" {
   type        = "zip"
-  source_file = "${path.module}/tap_termination_lambda.py"
-  output_path = "${path.module}/tap_termination_lambda.zip"
+  source_file = "${path.module}/lambdas/tap_termination_lambda.py"
+  output_path = "${path.module}/output/tap_termination_lambda.zip"
 }
 resource "aws_lambda_function" "tap_termination_lambda" {
-  function_name = format("chkp_tap_termination_lambda-%s", random_id.tap_termination_lambda_uuid.hex)
+  function_name = format("%s_Termination_Lambda_for_%s", var.resources_tag_name, var.zone)
   description = "Manually invoke the termination lambda before destroying the TAP environment. The termination lambda deletes all mirror sessions to the TAP gateway in order to allow destruction."
-
-  filename = "${path.module}/tap_termination_lambda.zip"
-
+  filename = "${path.module}/output/tap_termination_lambda.zip"
   role = aws_iam_role.terminate_gw_lambda_iam_role.arn
   handler = "tap_termination_lambda.lambda_handler"
   runtime = "python3.8"
 
   environment {
     variables = {
-      TM_TARGET_ID = local.trafficMirrorTargetId
-      TM_FILTER_ID = local.trafficMirrorFilterId
+      TMT_ID = aws_cloudformation_stack.tap_target_and_filter.outputs["TrafficMirrorTargetId"]
     }
   }
 }
