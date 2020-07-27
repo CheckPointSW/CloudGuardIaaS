@@ -38,12 +38,16 @@ def is_listed_nomirror(instance):
     for tag in instance_tags:
         if(use_whitelist == "no"):
             for pair in tap_blacklist.split(':'):
-                btag = {'Key': x.split('=')[0], 'Value': x.split('=')[1]}
+                if '=' not in pair:
+                    continue
+                btag = {'Key': pair.split('=')[0], 'Value': pair.split('=')[1]}
                 if tag == btag:
                     return True
         else:
             for pair in tap_whitelist.split(':'):
-                wtag = {'Key': x.split('=')[0], 'Value': x.split('=')[1]}
+                if '=' not in pair:
+                    continue
+                wtag = {'Key': pair.split('=')[0], 'Value': pair.split('=')[1]}
                 if tag == wtag:
                     return False
     return (use_whitelist == "yes")

@@ -31,7 +31,7 @@ resource "aws_security_group" "tap_sg" {
     to_port = 4789
     cidr_blocks = ["0.0.0.0/0"]
   }
-  name = format("%s_SecurityGroup_for_%s", var.resources_tag_name, var.zone)
+  name = format("%s_SecurityGroup_for_%s", var.resources_tag_name, var.zone == "none" ? var.region : var.zone)
   description = format("%s Security group", var.resources_tag_name)
 }
 resource "aws_network_interface" "external-eni" {
@@ -67,7 +67,7 @@ resource "aws_instance" "tap_gateway" {
   ami = module.amis.ami_id
   instance_type = var.instance_type
   key_name = var.key_pair_name
-  availability_zone = var.zone
+  availability_zone = var.zone == "none" ? null : var.zone
 
   tags = {
     Name = format("%s_CP_Sensor", var.resources_tag_name)
@@ -98,7 +98,7 @@ resource "aws_instance" "tap_gateway" {
 // CloudFormation Stack
 resource "aws_cloudformation_stack" "tap_target_and_filter" {
   depends_on = [aws_instance.tap_gateway]
-  name = format("%s-TrafficMirrorFilterAndTarget-for-%s", var.resources_tag_name, var.zone)
+  name = format("%s-TrafficMirrorFilterAndTarget-for-%s", var.resources_tag_name, var.zone == "none" ? var.region : var.zone)
 
   parameters = {
     MirroringNetworkInterfaceId = aws_network_interface.internal-eni.id
@@ -161,7 +161,7 @@ resource "aws_lambda_function" "tap_lambda" {
     aws_cloudformation_stack.tap_target_and_filter
   ]
 
-  function_name = format("%s_Lambda_for_%s", var.resources_tag_name, var.zone)
+  function_name = format("%s_Lambda_for_%s", var.resources_tag_name, var.zone == "none" ? var.region : var.zone)
   description = "The TAP lambda creates traffic mirror sessions with the TAP gateway instance."
   filename = "${path.module}/output/tap_lambda.zip"
   role = aws_iam_role.tap_lambda_iam_role.arn
@@ -280,7 +280,7 @@ data "archive_file" "tap_termination_lambda_zip" {
   output_path = "${path.module}/output/tap_termination_lambda.zip"
 }
 resource "aws_lambda_function" "tap_termination_lambda" {
-  function_name = format("%s_Termination_Lambda_for_%s", var.resources_tag_name, var.zone)
+  function_name = format("%s_Termination_Lambda_for_%s", var.resources_tag_name, var.zone == "none" ? var.region : var.zone)
   description = "Manually invoke the termination lambda before destroying the TAP environment. The termination lambda deletes all mirror sessions to the TAP gateway in order to allow destruction."
   filename = "${path.module}/output/tap_termination_lambda.zip"
   role = aws_iam_role.terminate_gw_lambda_iam_role.arn
