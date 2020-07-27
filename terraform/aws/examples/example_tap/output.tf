@@ -3,13 +3,13 @@ output "tap_output" {
 }
 
 output "tap-gateway_instance_id" {
-  value = module.tap.tap-gateway_instance_id
+  value = module.tap.tap-sensor_instance_id
 }
 output "gateway_instance_name" {
-  value = module.tap.tap-gateway_instance_name
+  value = module.tap.tap-sensor_instance_name
 }
 output "gateway_instance_public_ip" {
-  value = module.tap.tap-gateway_instance_public_ip
+  value = module.tap.tap-sensor_instance_public_ip
 }
 
 output "traffic_mirror_filter_id" {
@@ -22,13 +22,6 @@ output "traffic_mirror_target_id" {
 output "tap_lambda_name" {
   value = module.tap.tap-tap_lambda_name
 }
-output "tap_lambda_description" {
-  value = module.tap.tap-tap_lambda_description
-}
-
 output "termination_lambda_name" {
   value = module.tap.tap-termination_lambda_name
-}
-output "termination_lambda_description" {
-  value = module.tap.tap-termination_lambda_description
 }

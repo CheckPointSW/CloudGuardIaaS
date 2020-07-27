@@ -3,8 +3,11 @@ provider "aws" {
 }
 
 module "tap" {
-  source = "../../modules/tap"
+  source = "./modules/tap"
 
+  region = var.region
+  zone = var.zone
+  
   // --- VPC Network Configuration ---
   vpc_id = var.vpc_id
   external_subnet_id = var.external_subnet_id
@@ -14,11 +17,16 @@ module "tap" {
   // --- TAP Configuration ---
   registration_key = var.registration_key
   vxlan_id = var.vxlan_id
-  blacklist_tags = var.blacklist_tags
   schedule_scan_interval = var.schedule_scan_interval
+  all_eni = var.all_eni
+  blacklist_tags = var.blacklist_tags
+  whitelist_tags = var.whitelist_tags
+  use_whitelist = var.use_whitelist
 
   // --- EC2 Instance Configuration ---
-  instance_name = var.instance_name
   instance_type = var.instance_type
-  key_name = var.key_name
+  key_pair_name = var.key_pair_name
+
+  // --- Check Point Settings ---
+  version_license = var.version_license
 }
