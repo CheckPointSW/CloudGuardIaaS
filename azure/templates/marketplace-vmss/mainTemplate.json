@@ -19,7 +19,7 @@
         "R80.40 - Pay As You Go (NGTP)",
         "R80.40 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R80.30 - Bring Your Own License",
+      "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -357,6 +357,31 @@
       },
       "defaultValue": ""
     },
+    "remoteAccessVpn": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "no",
+      "metadata": {
+        "Description": "Indicates whether the remote access VPN will be used"
+      }
+    },
+    "dnsZoneResourceId": {
+      "type": "string",
+      "defaultValue": "Define a DNS Zone Resource ID only in case Remote Access VPN usage and DNS Zone(domain) is already exists",
+      "metadata": {
+        "description": "DNS Zone DNS Zone Resource ID"
+      }
+    },
+    "dnsZoneRecordSetName": {
+      "type": "string",
+      "defaultValue": "remote-access-instances",
+      "metadata": {
+        "description": "DNS Zone Record Set name"
+      }
+    },
     "Check_PointTags": {
       "type": "object",
       "defaultValue": {
@@ -367,7 +392,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20200331",
+    "templateVersion": "20200808",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -486,9 +511,11 @@
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
+    "azureFunctionSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/azure-func-sami.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
+    "vnetID": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
@@ -520,7 +547,10 @@
     "uniqueTags": {
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
     },
-    "vmssTags": "[if(equals(variables('mgmtIPaddress'), ''), variables('commomTags'), union(variables('commomTags'), variables('uniqueTags')))]"
+    "vmssTags": "[if(equals(variables('mgmtIPaddress'), ''), variables('commomTags'), union(variables('commomTags'), variables('uniqueTags')))]",
+    "dnsZoneResourceId": "[parameters('dnsZoneResourceId')]",
+    "dnsZoneRecordSetName": "[parameters('dnsZoneRecordSetName')]",
+    "numberOfRecordSetEntries": "20"
   },
   "resources": [
     {
@@ -611,12 +641,46 @@
       }
     },
     {
+      "condition": "[and(equals(parameters('remoteAccessVpn'), 'yes'),or(contains(parameters('cloudGuardVersion'),'R80.40'),contains(parameters('cloudGuardVersion'),'R81')))]",
+      "name": "azureFunctionSetup",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-11-01",
+      "resourceGroup": "[resourceGroup().name]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('azureFunctionSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "dnsZoneResourceId": {
+            "value": "[variables('dnsZoneResourceId')]"
+          },
+          "dnsZoneRecordSetName": {
+            "value": "[variables('dnsZoneRecordSetName')]"
+          },
+          "numberOfRecordSetEntries": {
+            "value": "[variables('numberOfRecordSetEntries')]"
+          },
+          "vmssResourceGroupName": {
+            "value": "[resourceGroup().name]"
+          },
+          "vmssName": {
+            "value": "[parameters('vmName')]"
+          }
+        }
+      }
+    },
+    {
       "name": "loadBalancerSetup",
       "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[variables('lbRGName')]",
       "apiVersion": "2018-11-01",
       "dependsOn": [
-        "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]"
+        "[variables('vnetID')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -667,7 +731,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2019-06-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -705,7 +769,7 @@
       "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
       "tags": "[variables('vmssTags')]",
       "dependsOn": [
-        "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
+        "[variables('vnetID')]",
         "[variables('loadBalancerSetupId')]",
         "[variables('storageAccountId')]",
         "[variables('customImageId')]"
@@ -785,7 +849,7 @@
           "diagnosticsProfile": {
             "bootDiagnostics": {
               "enabled": "true",
-              "storageUri": "[reference(variables('storageAccountId'), '2018-07-01').primaryEndpoints.blob]"
+              "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
             }
           }
         },

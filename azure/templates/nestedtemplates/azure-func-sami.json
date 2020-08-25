@@ -135,6 +135,10 @@
                             "value": "[parameters('vmssName')]"
                         },
                         {
+                            "name": "DNS_ZONE_SUBSCRIPTION_ID",
+                            "value": "[reference(parameters('dnsZoneResourceId'),'2018-05-01','Full').subscriptionId]"
+                        },
+                        {
                             "name": "DNS_ZONE_RESOURCE_GROUP_NAME",
                             "value": "[reference(parameters('dnsZoneResourceId'),'2018-05-01','Full').resourceGroupName]"
                         },
