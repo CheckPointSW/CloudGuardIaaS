@@ -3,11 +3,11 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "subscriptionId": {
-            "type": "string",
-            "defaultValue": "[subscription().subscriptionId]",
-            "metadata": {
-                "description": "Subscription ID."
-            }
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Subscription ID."
+      }
     },
     "location": {
       "type": "string",
@@ -389,27 +389,27 @@
         "description": "DNS Zone Record Set name"
       }
     },
-        "customMetrics": {
-            "type": "string",
-            "allowedValues": [
-                "no",
-                "yes"
-            ],
-            "defaultValue": "yes",
-            "metadata": {
-                "Description": "Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring"
-            }
-        },
-        "rbacGuid": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
-        },
-        "Check_PointTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-            }
+    "customMetrics": {
+      "type": "string",
+        "allowedValues": [
+          "no",
+          "yes"
+        ],
+        "defaultValue": "yes",
+        "metadata": {
+          "Description": "Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring"
         }
+    },
+    "rbacGuid": {
+      "type": "string",
+      "defaultValue": "[newGuid()]"
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
   },
   "variables": {
     "resourceGroup": "[resourceGroup()]",
