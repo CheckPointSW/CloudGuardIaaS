@@ -403,13 +403,7 @@
         "rbacGuid": {
             "type": "string",
             "defaultValue": "[newGuid()]"
-        },
-    "Check_PointTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-      }
-    }
+        }
   },
   "variables": {
     "resourceGroup": "[resourceGroup()]",
@@ -563,8 +557,7 @@
       "x-chkp-management-interface": "[variables('mgmtInterfaceName')]",
       "x-chkp-topology": "eth0:external,eth1:internal",
       "x-chkp-anti-spoofing": "eth0:false,eth1:false",
-      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]",
-      "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]"
     },
     "uniqueTags": {
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
@@ -603,10 +596,7 @@
       },
       "dependsOn": [
         "[variables('vmssID')]"
-      ],
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      ]
     },
         {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -778,10 +768,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      "kind": "Storage"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -798,9 +785,6 @@
             "storageAccountType": "Standard_LRS"
           }
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -969,9 +953,6 @@
             ]
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
