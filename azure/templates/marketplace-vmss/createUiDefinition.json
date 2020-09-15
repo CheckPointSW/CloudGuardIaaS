@@ -68,7 +68,7 @@
               "text": "Please provide the configuration values according to the Deployment Guide.",
               "link": {
                 "label": "Deployment Guide",
-                "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/html_frameset.htm"
+                "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Default.htm"
               }
             }
           },
@@ -501,6 +501,36 @@
             "options": {
               "icon": "Error",
               "text": "For Remote Access VPN configuration it is mandatory to deploy instance level public IP addresses."
+            }
+          },
+          {
+            "name": "customMetrics",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable CloudGuard metrics",
+            "defaultValue": "Yes",
+            "toolTip": "Enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "remoteAccessCustomMetricsInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').customMetrics, 'yes')))]",
+            "options": {
+              "icon": "Warning",
+              "text": "When Remote Access VPN is enabled it is recommended to use Scaling policy that is based on the \"IPsec number of VPN-1 RA peers\" CloudGuard metric. See the VMSS admin guide for more information."
             }
           }
         ]
@@ -1253,6 +1283,7 @@
       "remoteAccessVpn": "[steps('autoprovision').remoteAccessVpn]",
       "dnsZoneResourceId": "[steps('autoprovision').dnsZoneResourceId]",
       "dnsZoneRecordSetName": "[steps('autoprovision').dnsZoneRecordSetName]",
+      "customMetrics": "[steps('autoprovision').customMetrics]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
       "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiNGTP, steps('chkp').R8030vmSizeUiNGTX, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiNGTP, steps('chkp').R8040vmSizeUiNGTX)]",
       "sicKey": "[steps('chkp').sicKeyUi]",
