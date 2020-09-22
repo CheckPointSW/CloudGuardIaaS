@@ -414,7 +414,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20200915",
+    "templateVersion": "20200921",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
