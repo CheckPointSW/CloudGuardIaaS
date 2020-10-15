@@ -9,15 +9,16 @@ import password
 GATEWAY = 'checkpoint-gateway'
 PROJECT = 'checkpoint-public'
 LICENSE = 'byol'
+LICENCE_TYPE = 'mig'
 
 VERSIONS = {
-    'R80.20-GW': 'r8020-gw',
     'R80.30-GW': 'r8030-gw',
-    'R80.40-GW': 'r8040-gw'
+    'R80.40-GW': 'r8040-gw',
+    'R81-GW': 'r81-gw'
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20200503'
+TEMPLATE_VERSION = '20201014'
 
 startup_script = '''
 #!/bin/bash
@@ -266,71 +267,59 @@ fi
 '''
 
 
-def make_nic(prop, net_name, zone_name, subnet_name, externalIP=False):
+def make_nic(context, net_name, subnet, external_ip=False):
+    prop = context.properties
     network_interface = {
         'kind': 'compute#networkInterface',
-        'network': common.GlobalNetworkLink(prop['project'],
-                                            net_name),
-        'subnetwork': common.MakeRegionalSubnetworkLink(prop['project'],
-                                                        zone_name,
-                                                        subnet_name)
+        'network': common.GlobalNetworkLink(prop['project'], net_name)
     }
+
+    if subnet:
+        network_interface["subnetwork"] = common.MakeRegionalSubnetworkLink(
+            prop['project'], prop['zone'], subnet)
+
     # add ephemeral public IP address
-    if externalIP:
-        network_interface["accessConfigs"] = [
-            make_access_config(name="external-nat")
-        ]
+    if external_ip:
+        network_interface["accessConfigs"] = \
+            [make_access_config(name="external-nat")]
+
     return network_interface
-
-
-def validate_networks(internal, external):
-    if external == internal:
-        err_msg = 'Each network must be different, ' + \
-                  'but both External and Internal networks are set to {}'
-        raise common.Error(err_msg.format(external))
 
 
 def create_nics(context):
     prop = context.properties
-    base_region = common.ZoneToRegion(prop['externalZone'])
 
     firewall_rules = create_firewall_rules(context)
     if firewall_rules:
         prop['resources'].extend(firewall_rules)
 
-    validate_region(prop['internalZone'], base_region)
-    validate_networks(prop['externalNetwork'], prop['internalNetwork'])
+    networks = prop.setdefault('networks', ['default'])
+    subnetworks = prop.get('subnetworks', [])
+
     nics = []
-    nics.append(make_nic(prop,
-                         prop['externalNetwork'],
-                         prop['externalZone'],
-                         prop['externalSubnet'],
-                         prop['gatewayExternalIP'])
-                )
-    nics.append(make_nic(prop,
-                         prop['internalNetwork'],
-                         prop['internalZone'],
-                         prop['internalSubnet'],
-                         externalIP=False))
+    for i in range(len(networks)):
+        name = networks[i]
+        subnet = ''
+        external_ip = prop.get('gatewayExternalIP') and i == 0
+        if subnetworks and i < len(subnetworks) and subnetworks[i]:
+            subnet = subnetworks[i]
+
+        network_interface = make_nic(context, name, subnet, external_ip)
+        nics.append(network_interface)
+
     return nics
 
 
 def create_firewall_rules(context):
     prop = context.properties
     deployment = prop['deployment']
-    network = prop['externalNetwork']
+    network = prop.setdefault('networks', ['default'])[0]
     firewall_rules = []
     protocols = ['Icmp', 'Udp', 'Tcp', 'Sctp', 'Esp']
     for protocol in protocols:
         proto = protocol.lower()
-        source_ranges = prop[proto + 'SourceRanges']
-        protocol_enabled = prop['enable' + protocol]
-        if protocol_enabled and not source_ranges:
-            raise Exception('Allowed source IP ranges are required for '
-                            'protocol ' + protocol)
-        if source_ranges and not protocol_enabled:
-            raise Exception('Enable source IP ranges option for protocol ' +
-                            protocol)
+        source_ranges = prop.get(proto + 'SourceRanges', '')
+        protocol_enabled = prop.get('enable' + protocol, '')
         if protocol_enabled and source_ranges:
             firewall_rules.append(make_firewall_rule(
                 proto, source_ranges, deployment, network))
@@ -351,7 +340,7 @@ def make_firewall_rule(protocol, source_ranges, deployment, net_name):
             'network': 'global/networks/' + net_name,
             'sourceRanges': ranges,
             'targetTags': [GATEWAY],
-            'allowed': [{'IPProtocol': protocol}],
+            'allowed': [{'IPProtocol': protocol}]
         }
     }
 
@@ -362,8 +351,12 @@ def create_instance_template(context,
                              name,
                              nics,
                              depends_on=None,
-                             gw_version=VERSIONS['R80.20-GW']):
-    family = '-'.join(['check-point', gw_version, LICENSE])
+                             gw_version=VERSIONS['R80.30-GW']):
+    if 'gw' in gw_version:
+        license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
+    else:
+        license_name = LICENSE
+    family = '-'.join(['check-point', gw_version, license_name])
     formatter = common.DefaultFormatter()
     instance_template_name = common.AutoName(name, default.TEMPLATE)
     instance_template = {
@@ -457,7 +450,7 @@ def create_instance_template(context,
                         "--network-defined-by-routes")
 
     metadata = instance_template['properties']['properties']['metadata']
-    if context.properties['instanceSSHKey']:
+    if 'instanceSSHKey' in context.properties:
         metadata['items'].append(
             {
                 'key': 'instanceSSHKey',
@@ -479,7 +472,7 @@ def GenerateAutscaledGroup(context, name,
             },
         'type': default.REGION_IGM,
         'properties': {
-            'region': common.ZoneToRegion(prop.get("externalZone")),
+            'region': common.ZoneToRegion(prop.get("zone")),
             'baseInstanceName': name,
             'instanceTemplate': '$(ref.' + instance_template + '.selfLink)',
             'targetSize': prop.get("minInstances"),
@@ -505,7 +498,7 @@ def CreateAutscaler(context, name,
         'type': default.REGION_AUTOSCALER,
         'properties': {
             'target': '$(ref.' + igm + '.selfLink)',
-            'region': common.ZoneToRegion(prop.get("externalZone")),
+            'region': common.ZoneToRegion(prop.get("zone")),
             'autoscalingPolicy': {
                 'minNumReplicas': int(prop.get("minInstances")),
                 'maxNumReplicas': int(prop.get("maxInstances")),

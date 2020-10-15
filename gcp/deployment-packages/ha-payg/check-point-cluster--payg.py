@@ -13,15 +13,16 @@ GATEWAY = 'checkpoint-gateway'
 
 PROJECT = 'checkpoint-public'
 LICENSE = 'payg'
+LICENCE_TYPE = 'cluster'
 
 VERSIONS = {
-    'R80.20': 'r8020-gw',
     'R80.30': 'r8030-gw',
-    'R80.40': 'r8040-gw'
+    'R80.40': 'r8040-gw',
+    'R81': 'r81-gw'
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20200503'
+TEMPLATE_VERSION = '20201014'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
@@ -278,7 +279,11 @@ fi
 
 def make_gw(context, name, zone, nics, passwd=None, depends_on=None):
     cg_version = context.properties['ha_version'].split(' ')[0]
-    family = '-'.join(['check-point', VERSIONS[cg_version], LICENSE])
+    if 'gw' in VERSIONS[cg_version]:
+        license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
+    else:
+        license_name = LICENSE
+    family = '-'.join(['check-point', VERSIONS[cg_version], license_name])
     formatter = common.DefaultFormatter()
 
     gw = {
@@ -333,7 +338,7 @@ def make_gw(context, name, zone, nics, passwd=None, depends_on=None):
         }
     }
 
-    if context.properties['instanceSSHKey']:
+    if 'instanceSSHKey' in context.properties:
         gw['properties']['metadata']['items'].append(
             {
                 'key': 'instanceSSHKey',
@@ -491,14 +496,9 @@ def create_firewall_rules(prop, net_prop_name, net_name, net_cidr):
     protocols = ['Icmp', 'Udp', 'Tcp', 'Sctp', 'Esp']
     for protocol in protocols:
         proto = protocol.lower()
-        source_ranges = prop[net_prop_name + '_' + proto + 'SourceRanges']
-        protocol_enabled = prop[net_prop_name + '_enable' + protocol]
-        if protocol_enabled and not source_ranges:
-            raise Exception('Allowed source IP ranges are required for '
-                            'protocol ' + protocol)
-        if source_ranges and not protocol_enabled:
-            raise Exception('Enable source IP ranges option for protocol ' +
-                            protocol)
+        source_ranges = prop.get(net_prop_name + '_' + proto +
+                                 'SourceRanges', '')
+        protocol_enabled = prop.get(net_prop_name + '_enable' + protocol, '')
         if protocol_enabled and source_ranges:
             firewall_rules.append(
                 make_firewall_rule(proto, source_ranges, deployment,
