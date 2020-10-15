@@ -140,7 +140,7 @@ properties:
         diskTypeProperty: diskType
   installationType:
     type: string
-    default: R80.30 Gateway only
+    default: R80.40 Gateway only
     enum:
       - R80.30 Gateway only
       - R80.30 Management only

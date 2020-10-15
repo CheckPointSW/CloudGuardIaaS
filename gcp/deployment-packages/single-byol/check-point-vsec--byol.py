@@ -9,12 +9,15 @@ MANAGEMENT = 'checkpoint-management'
 
 PROJECT = 'checkpoint-public'
 LICENSE = 'byol'
+LICENCE_TYPE = 'single'
 
 VERSIONS = {
     'R80.30': 'r8030',
     'R80.30-GW': 'r8030-gw',
     'R80.40': 'r8040',
-    'R80.40-GW': 'r8040-gw'
+    'R80.40-GW': 'r8040-gw',
+    'R81': 'r81',
+    'R81-GW': 'r81-gw'
 }
 
 ADDITIONAL_NETWORK = 'additionalNetwork{}'
@@ -23,7 +26,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20200503'
+TEMPLATE_VERSION = '20201014'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -340,19 +343,12 @@ def create_firewall_rules(prop, net_name, fw_rule_name_prefix, mgmt=False,
         protocols.remove('Tcp')
     for protocol in protocols:
         proto = protocol.lower()
-        source_ranges = prop['network' + '_' + proto + 'SourceRanges']
-        protocol_enabled = prop['network' + '_enable' + protocol]
-        if protocol_enabled and not source_ranges:
-            raise Exception('Allowed source IP ranges are required for '
-                            'protocol ' + protocol)
-        if source_ranges and not protocol_enabled:
-            raise Exception('Enable source IP ranges option for protocol ' +
-                            protocol)
+        source_ranges = prop.get('network' + '_' + proto + 'SourceRanges', '')
+        protocol_enabled = prop.get('network' + '_enable' + protocol, '')
         if protocol_enabled and source_ranges:
-            firewall_rules.append(
-                make_firewall_rule(
-                    proto, source_ranges, net_name, fw_rule_name_prefix,
-                    mgmt, uid))
+            firewall_rules.append(make_firewall_rule(
+                proto, source_ranges, net_name, fw_rule_name_prefix, mgmt,
+                uid))
 
     return firewall_rules
 
@@ -492,8 +488,13 @@ def generate_config(context):
         'value': prop['computed_sic_key'],
     }, )
 
+    if 'gw' in VERSIONS[prop['cloudguardVersion']]:
+        license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
+    else:
+        license_name = LICENSE
+
     family = '-'.join(['check-point', VERSIONS[prop['cloudguardVersion']],
-                       LICENSE])
+                       license_name])
 
     formatter = common.DefaultFormatter()
 
@@ -580,7 +581,7 @@ def generate_config(context):
                 },
             },
         })
-    if prop['instanceSSHKey']:
+    if 'instanceSSHKey' in prop:
         gw['properties']['metadata']['items'].append(
             {
                 'key': 'instanceSSHKey',

@@ -7,11 +7,8 @@ info:
 
 required:
   - autoscalingVersion
-  - externalNetwork
-  - externalZone
-  - mgmtNIC
-  - internalNetwork
-  - internalZone
+  - networks
+  - zone
   - machineType
   - cpuUsage
   - minInstances
@@ -26,31 +23,46 @@ required:
   - enableMonitoring
 
 properties:
-  externalNetwork:
-    type: string
-    default: default
-    x-googleProperty:
-      type: GCE_NETWORK
-  externalZone:
+  zone:
     type: string
     default: us-central1-a
     x-googleProperty:
       type: GCE_ZONE
-  externalSubnet:
-    type: string
-    default: default
+  networks:
+    type: array
+    default: [default, default1]
+    minItems: 2
+    maxItems: 2
     x-googleProperty:
-      type: GCE_SUBNETWORK
-      zoneProperty: externalZone
-      gceSubnetwork:
-        networkProperty: externalNetwork
+        type: GCE_NETWORK
+        gceNetwork:
+            labels:
+             - External
+             - Internal
+    allowSharedVpcs: True
+    machineTypeProperty: machineType
+  subnetworks:
+    type: array
+    minItems: 2
+    maxItems: 2
+    x-googleProperty:
+        type: GCE_SUBNETWORK
+        zoneProperty: zone
+        gceSubnetwork:
+            networkProperty: networks
+  mgmtNIC:
+    type: string
+    default: Ephemeral Public IP (eth0)
+    enum:
+      - Ephemeral Public IP (eth0)
+      - Private IP (eth1)
   enableIcmp:
     type: boolean
     default: False
     x-googleProperty:
       type: GCE_FIREWALL
       gceFirewall:
-        networkProperty: externalNetwork
+        networkProperty: networks
   icmpSourceRanges:
     type: string
     x-googleProperty:
@@ -63,7 +75,7 @@ properties:
     x-googleProperty:
       type: GCE_FIREWALL
       gceFirewall:
-        networkProperty: externalNetwork
+        networkProperty: networks
   tcpSourceRanges:
     type: string
     x-googleProperty:
@@ -76,7 +88,7 @@ properties:
     x-googleProperty:
       type: GCE_FIREWALL
       gceFirewall:
-        networkProperty: externalNetwork
+        networkProperty: networks
   udpSourceRanges:
     type: string
     x-googleProperty:
@@ -89,7 +101,7 @@ properties:
     x-googleProperty:
       type: GCE_FIREWALL
       gceFirewall:
-        networkProperty: externalNetwork
+        networkProperty: networks
   sctpSourceRanges:
     type: string
     x-googleProperty:
@@ -102,43 +114,19 @@ properties:
     x-googleProperty:
       type: GCE_FIREWALL
       gceFirewall:
-        networkProperty: externalNetwork
+        networkProperty: networks
   espSourceRanges:
     type: string
     x-googleProperty:
       type: GCE_FIREWALL_RANGE
       gceFirewallRange:
         firewallProperty: enableEsp
-  mgmtNIC:
-    type: string
-    default: Ephemeral Public IP (eth0)
-    enum:
-      - Ephemeral Public IP (eth0)
-      - Private IP (eth1)
-  internalNetwork:
-    type: string
-    default: default2
-    x-googleProperty:
-      type: GCE_NETWORK
-  internalZone:
-    type: string
-    default: us-central1-a
-    x-googleProperty:
-      type: GCE_ZONE
-  internalSubnet:
-    type: string
-    default: default2
-    x-googleProperty:
-      type: GCE_SUBNETWORK
-      zoneProperty: internalZone
-      gceSubnetwork:
-        networkProperty: internalNetwork
   machineType:
     type: string
     default: n1-standard-4
     x-googleProperty:
       type: GCE_MACHINE_TYPE
-      zoneProperty: externalZone
+      zoneProperty: zone
       gceMachineType:
         minCpu: 2
         minRamGb: 1.843000054359436
@@ -166,7 +154,7 @@ properties:
     default: pd-ssd
     x-googleProperty:
       type: GCE_DISK_TYPE
-      zoneProperty: externalZone
+      zoneProperty: zone
   bootDiskSizeGb:
     type: integer
     default: 100
@@ -178,7 +166,7 @@ properties:
         diskTypeProperty: diskType
   autoscalingVersion:
     type: string
-    default: R80.30 Autoscaling
+    default: R80.40 Autoscaling
     enum:
       - R80.30 Autoscaling
       - R80.40 Autoscaling

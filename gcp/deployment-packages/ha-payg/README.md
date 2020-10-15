@@ -143,7 +143,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     generatePassword: false
     allowUploadDownload: false
     shell: "/bin/bash"
-    cluster-network-cidr: ""
+    cluster-network-cidr: "10.0.1.0/24"
     cluster-network-name: "external-vpc"
     cluster-network-subnetwork-name: "frontend"
     cluster-network_enableIcmp: true
@@ -170,7 +170,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     mgmt-network_enableEsp: true
     mgmt-network_espSourceRanges: "0.0.0.0/0"
     numInternalNetworks: 1
-    internal-network1-cidr: ""
+    internal-network1-cidr: "10.0.3.0/24"
     internal-network1-name: "vpc-internal2"
     internal-network1-subnetwork-name: "vpc-internal2"
 

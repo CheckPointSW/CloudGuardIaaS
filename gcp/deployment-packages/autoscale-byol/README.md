@@ -51,11 +51,11 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **allowUploadDownload** | Allow download from/upload to Check Point  | boolean | true; <br/>false; |
 |  |  |  |  |  |
-| **externalZone** | External base zone. The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
+| **zone** | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
 |  |  |  |  |  |
-| **externalNetwork** | The external network ID in which the gateways will reside | string | Available network in the chosen zone  |
+| **networks** | The external networks ID in which the gateways will reside and internal networks ID in which application servers reside. | list(string) | Available network in the chosen zone  |
 |  |  |  |  |  |
-| **externalSubnet** | External subnet ID. Assigns the instance an IPv4 address from the subnetwork’s range. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network. | string | Available subnetwork in the chosen network  |
+| **subnetworks** | External and Internal subnet ID. Assigns the instance an IPv4 address from the subnetwork’s range. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network. | list(string) | Available subnetwork in the chosen network  |
 |  |  |  |  |  |
 | **enableIcmp** | Allow ICMP traffic from the Internet | boolean | true; <br/>false;  |
 |  |  |  |  |  |
@@ -76,12 +76,6 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 | **enableEsp** | Allow ESP traffic from the Internet | boolean | true; <br/>false; |
 |  |  |  |  |  |
 | **espSourceRanges** | Source IP ranges for ESP traffic | string | Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. For gateway only. [Learn more](https://cloud.google.com/vpc/docs/vpc?_ga=2.36703144.-962483654.1585043745#firewalls) |
-|  |  |  |  |  |
-| **internalZone** | Internal base zone. The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
-|  |  |  |  |  |
-| **internalNetwork** | The internal network ID in which application servers reside | string | Available network in the chosen zone  |
-|  |  |  |  |  |
-| **internalSubnet** | Internal subnet ID. Assigns the instance an IPv4 address from the subnetwork’s range. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network. | string | Available subnetwork in the chosen network  |
 |  |  |  |  |  |
 | **machineType** | Machine types determine the specifications of your machines, such as the amount of memory, virtual cores, and persistent disk limits an instance will have | string | [Learn more about Machine Types](https://cloud.google.com/compute/docs/machine-types?hl=en_US&_ga=2.267871494.-962483654.1585043745) |
 |  |  |  |  |  |
@@ -107,9 +101,9 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     networkDefinedByRoutes: true
     shell: "/bin/bash"
     allowUploadDownload: true
-    externalZone: "asia-east1-a"
-    externalNetwork: "external-vpc"
-    externalSubnet: "frontend"
+    zone: "asia-east1-a"
+    networks: ["external-vpc", "internal-vpc"]
+    subnetworks: ["frontend", "backend"]
     enableIcmp: true
     icmpSourceRanges: "0.0.0.0/0"
     enableTcp: false
@@ -120,9 +114,6 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     sctpSourceRanges: ""
     enableEsp: false
     espSourceRanges: ""
-    internalZone: "asia-east1-a"
-    internalNetwork: "internal-vpc"
-    internalSubnet: "backend"
     machineType: "n1-standard-4"
     cpuUsage: 60
     minInstances: 2
