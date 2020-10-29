@@ -24,7 +24,10 @@
         "R80.30 - Pay As You Go (NGTX)",
         "R80.40 - Bring Your Own License",
         "R80.40 - Pay As You Go (NGTP)",
-        "R80.40 - Pay As You Go (NGTX)"
+        "R80.40 - Pay As You Go (NGTX)",
+        "R81 - Bring Your Own License",
+        "R81 - Pay As You Go (NGTP)",
+        "R81 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
@@ -422,7 +425,10 @@
       "R80.30 - Pay As You Go (NGTX)": "NGTX-V2",
       "R80.40 - Bring Your Own License": "BYOL",
       "R80.40 - Pay As You Go (NGTP)": "NGTP",
-      "R80.40 - Pay As You Go (NGTX)": "NGTX"
+      "R80.40 - Pay As You Go (NGTX)": "NGTX",
+      "R81 - Bring Your Own License": "BYOL",
+      "R81 - Pay As You Go (NGTP)": "NGTP",
+      "R81 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -431,7 +437,10 @@
       "R80.30 - Pay As You Go (NGTX)": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R80.40 - Pay As You Go (NGTP)": "R8040",
-      "R80.40 - Pay As You Go (NGTX)": "R8040"
+      "R80.40 - Pay As You Go (NGTX)": "R8040",
+      "R81 - Bring Your Own License": "R81",
+      "R81 - Pay As You Go (NGTP)": "R81",
+      "R81 - Pay As You Go (NGTX)": "R81"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "adminUsername": "notused",
@@ -786,7 +795,7 @@
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('customImage')]",
       "location": "[variables('resourceGroup').location]",
       "properties": {
@@ -805,7 +814,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",

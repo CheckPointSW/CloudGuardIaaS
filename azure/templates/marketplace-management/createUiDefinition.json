@@ -25,7 +25,6 @@
           "sshPublicKey": "SSH public key"
         },
         "toolTip": {
-          "authenticationType": "",
           "password": "The user 'admin' password",
           "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
         },
@@ -53,7 +52,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R80.30",
+            "defaultValue": "R80.40",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -64,6 +63,10 @@
                 {
                   "label": "R80.40",
                   "value": "R80.40"
+                },
+                {
+                  "label": "R81",
+                  "value": "R81"
                 }
               ]
             }
@@ -196,6 +199,62 @@
             "imageReference": {
               "publisher": "checkpoint",
               "offer": "check-point-cg-r8040",
+              "sku": "mgmt-25"
+            },
+            "count": 1
+          },
+          {
+            "name": "R81vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Management",
+            "recommendedSizes": [
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r81",
+              "sku": "mgmt-byol"
+            },
+            "count": 1
+          },
+          {
+            "name": "R81vmSizeUiMGMT25",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81'), contains(steps('chkp').R80Offer, '(MGMT25)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Management",
+            "recommendedSizes": [
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r81",
               "sku": "mgmt-25"
             },
             "count": 1
@@ -389,7 +448,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiMGMT25, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25)]",
+      "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiMGMT25, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
