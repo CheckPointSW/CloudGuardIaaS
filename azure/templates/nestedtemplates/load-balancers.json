@@ -79,7 +79,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[variables('appAddressName')]",
       "sku": {
@@ -95,7 +95,7 @@
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('elbName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -157,7 +157,7 @@
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployILB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('ilbName')]",
       "location": "[parameters('location')]",
       "sku": {

@@ -588,7 +588,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "pid-5432b4df-d783-57a2-b65f-39f4bca4974a",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -621,7 +621,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "name": "networkNewSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
       "properties": {
         "mode": "Incremental",
@@ -664,7 +664,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
       "name": "networkExistingSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
       "properties": {
         "mode": "Incremental",
@@ -695,7 +695,7 @@
       "condition": "[and(equals(parameters('remoteAccessVpn'), 'yes'),or(contains(parameters('cloudGuardVersion'),'R80.40'),contains(parameters('cloudGuardVersion'),'R81')))]",
       "name": "azureFunctionSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "resourceGroup": "[resourceGroup().name]",
       "properties": {
         "mode": "Incremental",
@@ -729,7 +729,7 @@
       "name": "loadBalancerSetup",
       "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[variables('lbRGName')]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[variables('vnetID')]"
       ],
@@ -806,7 +806,8 @@
             "blobUri": "[parameters('sourceImageVhdUri')]",
             "storageAccountType": "Standard_LRS"
           }
-        }
+        },
+		"hyperVGeneration": "V1"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
