@@ -170,6 +170,7 @@ properties:
     enum:
       - R80.30 Autoscaling
       - R80.40 Autoscaling
+      - R81 Autoscaling
   managementName:
     type: string
     default: 'checkpoint-management'
