@@ -56,6 +56,12 @@
       "containerName": {
           "type": "string",
           "defaultValue": "azure-function"
+        },
+        "Check_PointTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
       }
     },
     "variables": {
@@ -80,7 +86,10 @@
             },
              "dependsOn": [
                 "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
-            ]
+            ],
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
         },
         {
             "apiVersion": "2020-06-01",
@@ -159,6 +168,9 @@
                 },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "reserved": true
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         },
         {
@@ -176,6 +188,9 @@
           "kind": "linux",
           "properties": {
               "reserved": true
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
           }
         },
         {
@@ -198,7 +213,10 @@
                     "[variables('storageAccountName')]"
                   ]
                 }
-            ]
+            ],
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
         },
         {
             "apiVersion": "2020-02-02-preview",
@@ -208,6 +226,9 @@
             "properties": {
                 "Application_Type": "web",
                 "Request_Source": "IbizaWebAppExtensionCreate"
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         }
     ]

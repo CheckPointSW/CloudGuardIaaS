@@ -31,6 +31,12 @@
         "description": "The address prefix of the 1st subnet"
       },
       "defaultValue": "10.0.1.0/24"
+        },
+        "Check_PointTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
     }
   },
   "variables": {},
@@ -54,6 +60,9 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
