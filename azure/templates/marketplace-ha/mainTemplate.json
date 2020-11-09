@@ -245,7 +245,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20201029",
+        "templateVersion": "20201102",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
