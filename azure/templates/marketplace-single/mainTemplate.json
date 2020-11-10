@@ -232,7 +232,7 @@
   },
   "variables": {
     "templateName": "single",
-        "templateVersion": "20201104",
+    "templateVersion": "20201104",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
