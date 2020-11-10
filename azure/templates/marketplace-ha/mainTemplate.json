@@ -17,9 +17,12 @@
         "R80.30 - Pay As You Go (NGTX)",
         "R80.40 - Bring Your Own License",
         "R80.40 - Pay As You Go (NGTP)",
-        "R80.40 - Pay As You Go (NGTX)"
+        "R80.40 - Pay As You Go (NGTX)",
+        "R81 - Bring Your Own License",
+        "R81 - Pay As You Go (NGTP)",
+        "R81 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R80.30 - Bring Your Own License",
+      "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
         "description": "Check Point CloudGuard version"
       }
@@ -242,7 +245,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20200331",
+    "templateVersion": "20201102",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -252,7 +255,10 @@
       "R80.30 - Pay As You Go (NGTX)": "NGTX-V2",
       "R80.40 - Bring Your Own License": "BYOL",
       "R80.40 - Pay As You Go (NGTP)": "NGTP",
-      "R80.40 - Pay As You Go (NGTX)": "NGTX"
+      "R80.40 - Pay As You Go (NGTX)": "NGTX",
+      "R81 - Bring Your Own License": "BYOL",
+      "R81 - Pay As You Go (NGTP)": "NGTP",
+      "R81 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -261,7 +267,10 @@
       "R80.30 - Pay As You Go (NGTX)": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R80.40 - Pay As You Go (NGTP)": "R8040",
-      "R80.40 - Pay As You Go (NGTX)": "R8040"
+      "R80.40 - Pay As You Go (NGTX)": "R8040",
+      "R81 - Bring Your Own License": "R81",
+      "R81 - Pay As You Go (NGTP)": "R81",
+      "R81 - Pay As You Go (NGTX)": "R81"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "adminUsername": "notused",
@@ -371,7 +380,7 @@
     ],
     "roleDefinitionId": "[if(equals(parameters('role'), 'Contributor'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c'), parameters('role'))]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "azureCloud": "[not(or(startsWith(variables('location'), 'us'), startsWith(variables('location'), 'china'), startsWith(variables('location'), 'germany')))]",
+    "azureCloud": "[not(or(startsWith(variables('location'), 'china'), startsWith(variables('location'), 'germany')))]",
     "managedSystemAssigned": "[if(not(variables('azureCloud')), 'no', parameters('managedSystemAssigned'))]",
     "subnet2PrivateAddresses": [
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]",
@@ -410,7 +419,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "pid-7fbd7ca2-a62c-5cb5-9b28-3900ca6dba8d",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -425,7 +434,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2019-06-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -439,7 +448,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "name": "networkNewSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -478,7 +487,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
       "name": "networkExistingSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -498,7 +507,7 @@
     {
       "type": "Microsoft.Compute/availabilitySets",
       "condition": "[not(variables('useAZ'))]",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[concat(variables('availabilitySetName'))]",
       "properties": {
@@ -513,7 +522,7 @@
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[variables('elbPublicIPName')]",
       "sku": {
@@ -532,7 +541,7 @@
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[concat(parameters('vmName'), copyIndex(1))]",
       "sku": {
@@ -555,7 +564,7 @@
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
       "sku": {
@@ -574,7 +583,7 @@
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[variables('elbId')]",
@@ -629,7 +638,7 @@
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[variables('elbId')]",
@@ -669,7 +678,7 @@
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[variables('ilbId')]"
@@ -710,7 +719,7 @@
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('customImage')]",
       "location": "[variables('location')]",
       "properties": {
@@ -721,7 +730,8 @@
             "blobUri": "[parameters('sourceImageVhdUri')]",
             "storageAccountType": "Standard_LRS"
           }
-        }
+        },
+		"hyperVGeneration": "V1"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
@@ -729,7 +739,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
@@ -799,7 +809,7 @@
     },
     {
       "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[variables('elbPublicIPId')]"
       ],
@@ -843,7 +853,7 @@
     {
       "condition": "[equals(variables('managedSystemAssigned'), 'yes')]",
       "type": "Microsoft.Authorization/roleAssignments",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2020-04-01-preview",
       "name": "[guid(resourceGroup().id, concat(parameters('vmName'), copyIndex(1)))]",
       "copy": {
         "name": "virtualMachineCopy",
@@ -863,7 +873,7 @@
     },
     {
       "type": "Microsoft.Network/loadBalancers",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]"
       ],

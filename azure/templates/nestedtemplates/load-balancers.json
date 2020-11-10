@@ -37,6 +37,12 @@
     },
     "ilbTargetBEAddressPoolName": {
       "type": "string"
+        },
+        "Check_PointTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
     }
   },
   "variables": {
@@ -79,7 +85,7 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[variables('appAddressName')]",
       "sku": {
@@ -90,12 +96,15 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(variables('resourceGroup').id, deployment().name))]"
         }
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployELB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('elbName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -152,12 +161,15 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
       "condition": "[and(variables('deployILB'), not(parameters('upgrading')))]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('ilbName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -213,6 +225,9 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

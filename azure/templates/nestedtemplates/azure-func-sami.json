@@ -56,6 +56,12 @@
       "containerName": {
           "type": "string",
           "defaultValue": "azure-function"
+        },
+        "Check_PointTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
       }
     },
     "variables": {
@@ -80,10 +86,13 @@
             },
              "dependsOn": [
                 "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
-            ]
+            ],
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
         },
         {
-            "apiVersion": "2018-11-01",
+            "apiVersion": "2020-06-01",
             "name": "[variables('functionAppName')]",
             "type": "Microsoft.Web/sites",
             "kind": "functionapp,linux",
@@ -108,7 +117,7 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
                         },
                         {
                             "name": "WEBSITE_RUN_FROM_PACKAGE",
@@ -159,6 +168,9 @@
                 },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "reserved": true
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         },
         {
@@ -176,6 +188,9 @@
           "kind": "linux",
           "properties": {
               "reserved": true
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
           }
         },
         {
@@ -198,16 +213,22 @@
                     "[variables('storageAccountName')]"
                   ]
                 }
-            ]
+            ],
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
         },
         {
-            "apiVersion": "2018-05-01-preview",
+            "apiVersion": "2020-02-02-preview",
             "name": "[variables('functionAppName')]",
             "type": "microsoft.insights/components",
             "location": "[parameters('location')]",
             "properties": {
                 "Application_Type": "web",
                 "Request_Source": "IbizaWebAppExtensionCreate"
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         }
     ]

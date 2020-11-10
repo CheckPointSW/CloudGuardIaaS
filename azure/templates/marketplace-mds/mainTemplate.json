@@ -13,9 +13,10 @@
       "type": "string",
       "allowedValues": [
         "R80.30 - Bring Your Own License",
-        "R80.40 - Bring Your Own License"
+        "R80.40 - Bring Your Own License",
+        "R81 - Bring Your Own License"
       ],
-      "defaultValue": "R80.30 - Bring Your Own License",
+      "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -115,8 +116,7 @@
       "type": "string",
       "metadata": {
         "description": "Allowed GUI clients"
-      },
-      "defaultValue": "0.0.0.0/0"
+      }
     },
     "sicKey": {
       "type": "securestring",
@@ -211,16 +211,18 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20200305",
+    "templateVersion": "20201109",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
-      "R80.40 - Bring Your Own License": "BYOL"
+      "R80.40 - Bring Your Own License": "BYOL",
+      "R81 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R80.30 - Bring Your Own License": "R8030",
-      "R80.40 - Bring Your Own License": "R8040"
+      "R80.40 - Bring Your Own License": "R8040",
+      "R81 - Bring Your Own License": "R81"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "adminUsername": "notused",
@@ -281,7 +283,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "name": "pid-cad9cfed-843e-554d-a348-a42352708fab",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -296,7 +298,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2018-07-01",
+      "apiVersion": "2019-06-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -310,7 +312,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "name": "networkNewSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -340,7 +342,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
       "name": "networkExistingSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -359,7 +361,7 @@
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[variables('publicIPAddressName')]",
       "properties": {
@@ -375,7 +377,7 @@
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[variables('nsgName')]",
       "properties": {
@@ -500,7 +502,7 @@
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[variables('nsgId')]",
@@ -536,7 +538,7 @@
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('customImage')]",
       "location": "[variables('location')]",
       "properties": {
@@ -547,7 +549,8 @@
             "blobUri": "[parameters('sourceImageVhdUri')]",
             "storageAccountType": "Standard_LRS"
           }
-        }
+        },
+		"hyperVGeneration": "V1"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
@@ -555,7 +558,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2020-06-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",

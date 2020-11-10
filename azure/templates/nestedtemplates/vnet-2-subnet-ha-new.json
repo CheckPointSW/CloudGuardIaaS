@@ -52,6 +52,12 @@
     "deployNsg": {
       "type": "bool",
       "defaultValue": "true"
+        },
+        "Check_PointTags": {
+            "type": "object",
+            "defaultValue": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
     }
   },
   "variables": {
@@ -86,16 +92,19 @@
   "resources": [
     {
       "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[parameters('subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[parameters('subnet2Name')]",
       "properties": {
@@ -108,11 +117,14 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[parameters('virtualNetworkName')]",
       "dependsOn": [
@@ -143,12 +155,15 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "condition": "[parameters('deployNsg')]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
       "name": "[variables('nsgName')]",
       "properties": {
@@ -168,6 +183,9 @@
             }
           }
         ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
