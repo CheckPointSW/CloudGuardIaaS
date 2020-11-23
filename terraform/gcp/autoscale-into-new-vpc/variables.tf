@@ -1,4 +1,4 @@
-# Check Point CloudGuard IaaS Autoscaling - BYOL Terraform Template
+# Check Point CloudGuard IaaS Autoscaling - Terraform Template
 
 # --- Google Provider ---
 variable "service_account_path" {
@@ -73,11 +73,12 @@ data "google_compute_regions" "available_regions" {
 }
 variable "region" {
   type = string
+  default = "us-central1"
 }
 
 variable "external_subnetwork_ip_cidr_range" {
   type = string
-  description = "The range of internal addresses that are owned by this subnetwork, only IPv4 is supported (e.g. \"10.0.0.0/8\" or \"192.168.0.0/16\")."
+  description = "The range of external addresses that are owned by this subnetwork, only IPv4 is supported (e.g. \"10.0.0.0/8\" or \"192.168.0.0/16\")."
 }
 variable "internal_subnetwork_ip_cidr_range" {
   type = string
@@ -90,22 +91,22 @@ variable "ICMP_traffic" {
 }
 variable "TCP_traffic" {
   type = list(string)
-  description = "(Optional) Source IP ranges for ICMP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable ICMP traffic."
+  description = "(Optional) Source IP ranges for TCP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable TCP traffic."
   default = []
 }
 variable "UDP_traffic" {
   type = list(string)
-  description = "(Optional) Source IP ranges for ICMP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable ICMP traffic."
+  description = "(Optional) Source IP ranges for UDP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable UDP traffic."
   default = []
 }
 variable "SCTP_traffic" {
   type = list(string)
-  description = "(Optional) Source IP ranges for ICMP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable ICMP traffic."
+  description = "(Optional) Source IP ranges for SCTP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable SCTP traffic."
   default = []
 }
 variable "ESP_traffic" {
   type = list(string)
-  description = "(Optional) Source IP ranges for ICMP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable ICMP traffic."
+  description = "(Optional) Source IP ranges for ESP traffic - Traffic is only allowed from sources within these IP address ranges. Use CIDR notation when entering ranges. Please leave empty list to unable ESP traffic."
   default = []
 }
 

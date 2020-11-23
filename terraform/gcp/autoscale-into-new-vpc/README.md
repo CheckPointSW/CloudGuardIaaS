@@ -154,6 +154,10 @@ enable_monitoring = false
     ```
     terraform destroy
     ```
+
+#### Revision History
+In order to check the template version refer to the [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032).
+
 ## Conditional creation
 To create Firewall and allow traffic for ICMP, TCP, UDP, SCTP or/and ESP - enter list of Source IP ranges.
 ```
