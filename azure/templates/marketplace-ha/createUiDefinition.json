@@ -1001,6 +1001,36 @@
               "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
             },
             "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+          },
+          {
+            "name": "customMetrics",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable CloudGuard metrics",
+            "defaultValue": "Yes",
+            "toolTip": "Enable CloudGuard metrics in order to send statuses and statistics collected from Cluster members to the Azure Monitor service.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "customMetricsInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('chkp').customMetrics, 'yes'), not(equals(steps('chkp').managedSystemAssigned, 'yes')))]",
+            "options": {
+              "icon": "Warning",
+              "text": "CloudGuard metrics can't be used when System Assigned Identity is disabled"
+            }
           }
         ]
       },
@@ -1089,7 +1119,9 @@
       "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
       "managedSystemAssigned": "[steps('chkp').managedSystemAssigned]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "availabilityOptions": "[steps('chkp').availabilityOptions]"
+      "availabilityOptions": "[steps('chkp').availabilityOptions]",
+      "customMetrics": "[steps('chkp').customMetrics]"
+
     }
   }
 }

@@ -992,6 +992,27 @@
               "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
             },
             "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+          },
+          {
+            "name": "customMetrics",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable CloudGuard metrics",
+            "defaultValue": "Yes",
+            "toolTip": "Enable CloudGuard metrics in order to send statuses and statistics collected from Gateway or Standalone to the Azure Monitor service.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
           }
         ]
       },
@@ -1080,7 +1101,8 @@
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
       "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
-      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]"
+      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
+      "customMetrics": "[steps('chkp').customMetrics]"
     }
   }
 }

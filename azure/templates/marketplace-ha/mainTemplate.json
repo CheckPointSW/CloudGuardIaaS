@@ -241,6 +241,17 @@
       "defaultValue": {
         "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
       }
+    },
+    "customMetrics": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "yes",
+      "metadata": {
+        "Description": "Indicates whether CloudGuard Metrics will be used for Cluster members monitoring"
+      }
     }
   },
   "variables": {
@@ -279,7 +290,7 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -415,7 +426,8 @@
     "availabilitySetProperty": {
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
     },
-    "useAZ": "[and(contains(variables('availabilityZonesLocations'), variables('location')), equals(parameters('availabilityOptions'), 'Availability Zones'))]"
+    "useAZ": "[and(contains(variables('availabilityZonesLocations'), variables('location')), equals(parameters('availabilityOptions'), 'Availability Zones'))]",
+    "customMetrics": "[parameters('customMetrics')]"
   },
   "resources": [
     {
