@@ -13,11 +13,6 @@ variable "project" {
 }
 
 # --- Check Point---
-variable "template_version"{
-  description = "Template version. It is reccomended to always use the latest template version"
-  type = string
-  default = "20201028"
-}
 variable "prefix" {
   type = string
   description = "(Optional) Resources name prefix"

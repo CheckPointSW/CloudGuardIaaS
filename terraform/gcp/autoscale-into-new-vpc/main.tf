@@ -33,7 +33,6 @@ module "autoscale-into-existing-vpc" {
   project = var.project
 
   # --- Check Point---
-  template_version = var.template_version
   prefix = var.prefix
   image_name = var.image_name
   management_nic = var.management_nic

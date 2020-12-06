@@ -110,7 +110,6 @@ service_account_path = "service-accounts/service-account-file-name.json"
 project = "project-name"
 
 # --- Check Point---
-template_version = "20201028"
 prefix = "chkp-tf-mig"
 license = "BYOL"
 image_name = "check-point-r8040-gw-byol-mig-123-456-v12345678"
@@ -148,8 +147,6 @@ enable_monitoring = false
     ```
     terraform destroy
     ```
-#### Revision History
-In order to check the template version refer to the [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032).
 
 ## Conditional creation
 To create Firewall and allow traffic for ICMP, TCP, UDP, SCTP or/and ESP - enter list of Source IP ranges.
@@ -168,7 +165,6 @@ Please leave empty list to which port you want to unable traffic.
 | service_account_path | User service account path in JSON format - From the service account key page in the Cloud Console choose an existing account or create a new one. Next, download the JSON key file. Name it something you can remember, store it somewhere secure on your machine, and supply the path to the location is stored. (e.g. "service-accounts/service-account-name.json")  | string  | N/A | "" | no |
 | project  | Personal project id. The project indicates the default GCP project all of your resources will be created in.  | string  | N/A | "" | no |
 |  |  |  |  |  |
-| template_version | Template version. It is reccomended to always use the latest template version. In order to check the template version refer to the [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032). | string | Autoscaling template version from [sk147032](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk147032). | "20201028" | no |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-mig" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
 | image_name | The autoscaling (MIG) image name (e.g. check-point-r8040-gw-byol-mig-123-456-v12345678). You can choose the desired mig image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py). | string | N/A | N/A | yes |

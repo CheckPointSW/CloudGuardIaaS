@@ -3,7 +3,6 @@ service_account_path              = "PLEASE ENTER SERVICE ACCOUNT PATH"         
 project                           = "PLEASE ENTER PROJECT NAME"                   # "project-name"
 
 # --- Check Point---
-template_version                  = "PLEASE ENTER TEMPLATE VERSION"               # "20201028"
 prefix                            = "PLEASE ENTER PREFIX"                         # "chkp-tf-mig"
 license                           = "PLEASE ENTER LICENSE"                        # "BYOL"
 image_name                        = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8040-gw-byol-mig-123-456-v12345678"
