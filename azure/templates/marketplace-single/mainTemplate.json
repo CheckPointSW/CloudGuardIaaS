@@ -2,6 +2,13 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Subscription ID."
+      }
+    },
     "location": {
       "type": "string",
       "metadata": {
@@ -228,6 +235,21 @@
       "defaultValue": {
         "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
       }
+    },
+    "customMetrics": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "yes",
+      "metadata": {
+        "Description": "Indicates whether CloudGuard Metrics will be used for this VM monitoring"
+      }
+    },
+    "rbacGuid": {
+      "type": "string",
+      "defaultValue": "[newGuid()]"
     }
   },
   "variables": {
@@ -265,7 +287,7 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'))), 'mgmt-byol', 'sg-byol')]",
@@ -354,7 +376,11 @@
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "sicKey": "[parameters('sicKey')]",
-    "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]"
+    "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
+    "vmID": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
+    "customMetrics": "[parameters('customMetrics')]",
+    "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+    "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]"
   },
   "resources": [
     {
@@ -555,6 +581,7 @@
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
+      "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -604,6 +631,18 @@
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
+    },
+    {
+      "condition": "[equals(variables('customMetrics'), 'yes')]",
+      "apiVersion": "2020-04-01-preview",
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[parameters('rbacGuid')]",
+        "properties": {
+          "roleDefinitionId": "[variables('monitoringMetricsPublisher')]",
+          "principalId": "[reference(variables('vmID'), '2019-12-01', 'Full').identity.principalId]",
+          "scope":"[resourceGroup().id]"
+        },
+        "dependsOn": ["[variables('vmID')]"]
     }
   ],
   "outputs": {
