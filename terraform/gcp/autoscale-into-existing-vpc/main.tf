@@ -4,10 +4,10 @@ provider "google" {
   region = var.region
 }
 
-data "google_compute_network" "external-network" {
+data "google_compute_network" "external_network" {
   name = var.external_network_name
 }
-data "google_compute_network" "internal-network" {
+data "google_compute_network" "internal_network" {
   name = var.internal_network_name
 }
 resource "random_string" "random_sic_key" {
@@ -22,7 +22,7 @@ resource "google_compute_instance_template" "instance_template" {
 
 
   disk {
-    source_image = var.image_name
+    source_image = "checkpoint-public/${var.image_name}"
     auto_delete = true
     boot = true
     device_name = substr(format("${var.prefix}-boot-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-boot-")+5)
@@ -33,7 +33,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   network_interface {
-    network = data.google_compute_network.external-network.self_link
+    network = data.google_compute_network.external_network.self_link
     subnetwork = var.external_subnetwork_name
     dynamic "access_config" {
       for_each = local.mgmt_nic_condition ? [
@@ -45,7 +45,7 @@ resource "google_compute_instance_template" "instance_template" {
   }
 
   network_interface {
-    network = data.google_compute_network.internal-network.self_link
+    network = data.google_compute_network.internal_network.self_link
     subnetwork = var.internal_subnetwork_name
   }
 
@@ -83,7 +83,7 @@ resource "google_compute_instance_template" "instance_template" {
     sicKey = ""
     allowUploadDownload = var.allow_upload_download
     templateName = "autoscale_tf"
-    templateVersion = var.template_version
+    templateVersion = "20201206"
     mgmtNIC = var.management_nic
     hasInternet = "false"
     enableMonitoring = var.enable_monitoring
@@ -107,7 +107,7 @@ resource "google_compute_instance_template" "instance_template" {
 resource "google_compute_firewall" "ICMP_firewall_rules" {
   count = local.ICMP_traffic_condition
   name = substr(format("${var.prefix}-icmp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-icmp-")+5)
-  network = data.google_compute_network.external-network.self_link
+  network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "icmp"
   }
@@ -118,7 +118,7 @@ resource "google_compute_firewall" "ICMP_firewall_rules" {
 resource "google_compute_firewall" "TCP_firewall_rules" {
   count = local.TCP_traffic_condition
   name = substr(format("${var.prefix}-tcp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-tcp-")+5)
-  network = data.google_compute_network.external-network.self_link
+  network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "tcp"
   }
@@ -129,7 +129,7 @@ resource "google_compute_firewall" "TCP_firewall_rules" {
 resource "google_compute_firewall" "UDP_firewall_rules" {
   count = local.UDP_traffic_condition
   name = substr(format("${var.prefix}-udp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-udp-")+5)
-  network = data.google_compute_network.external-network.self_link
+  network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "udp"
   }
@@ -140,7 +140,7 @@ resource "google_compute_firewall" "UDP_firewall_rules" {
 resource "google_compute_firewall" "SCTP_firewall_rules" {
   count = local.SCTP_traffic_condition
   name = substr(format("${var.prefix}-sctp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-sctp-")+5)
-  network = data.google_compute_network.external-network.self_link
+  network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "sctp"
   }
@@ -151,7 +151,7 @@ resource "google_compute_firewall" "SCTP_firewall_rules" {
 resource "google_compute_firewall" "ESP_firewall_rules" {
   count = local.ESP_traffic_condition
   name = substr(format("${var.prefix}-esp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-esp-")+5)
-  network = data.google_compute_network.external-network.self_link
+  network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "esp"
   }
