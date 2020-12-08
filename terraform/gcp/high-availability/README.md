@@ -72,7 +72,7 @@ provider "google" {
     ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
-    - Static credentials can be provided by adding the path to your service-account json file, project-name and region in /gcp/modules/ha-availability/**terraform.tfvars** file as follows:
+    - Static credentials can be provided by adding the path to your service-account json file, project-name and region in /gcp/modules/high-availability/**terraform.tfvars** file as follows:
         ```
         service_account_path = "service-accounts/service-account-file-name.json"
         project = "project-name"
@@ -94,7 +94,7 @@ The provider credentials can be provided either as static credentials or as [Env
        project = ""
        ```
     ## Usage
-- Fill all variables in the /gcp/ha-availability/**terraform.tfvars** file with proper values (see below for variables descriptions).
+- Fill all variables in the /gcp/high-availability/**terraform.tfvars** file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
     ```
     terraform init
@@ -108,7 +108,7 @@ The provider credentials can be provided either as static credentials or as [Env
     terraform apply
     ```
   
-#### Variables are configured in ha-availability/**terraform.tfvars** file as follows:
+#### Variables are configured in high-availability/**terraform.tfvars** file as follows:
 ```
 # --- Google Provider ---
 service_account_path = "service-accounts/service-account-file-name.json"
