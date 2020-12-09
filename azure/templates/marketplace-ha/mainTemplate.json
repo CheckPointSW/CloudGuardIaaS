@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
@@ -147,6 +147,29 @@
         "description": "Resource Group of the existing virtual network"
       },
       "defaultValue": "[resourceGroup().name]"
+    },
+    "ipPrefix": {
+      "type": "string",
+      "allowedValues": [
+        "yes",
+        "no"
+      ],
+      "defaultValue": "no",
+      "metadata": {
+        "description": "Define if a Public IP Prefix should be created or not"
+      }
+    },
+    "ipPrefixSize": {
+      "type": "int",
+      "defaultValue": 30,
+      "allowedvalues": [
+        28,
+        29,
+        30
+      ],
+      "metadata": {
+        "description": "Define the size of the Public IP Prefix"
+      }
     },
     "bootstrapScript": {
       "type": "string",
@@ -427,7 +450,11 @@
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
     },
     "useAZ": "[and(contains(variables('availabilityZonesLocations'), variables('location')), equals(parameters('availabilityOptions'), 'Availability Zones'))]",
-    "customMetrics": "[parameters('customMetrics')]"
+    "customMetrics": "[parameters('customMetrics')]",
+    "ipPrefixName": "[concat(parameters('vmName'), '-ipprefix')]",
+    "publicIPPrefixProperty": {
+      "id": "[resourceId('Microsoft.Network/publicipprefixes',variables('ipPrefixName'))]"
+    }
   },
   "resources": [
     {
@@ -533,8 +560,26 @@
       }
     },
     {
+      "condition": "[equals(parameters('ipPrefix'), 'yes')]",
+      "type": "Microsoft.Network/publicipprefixes",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('ipPrefixName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "prefixLength": "[parameters('ipPrefixSize')]",
+        "publicIPAddressVersion": "IPv4"
+      },
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      }
+    },
+    {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicipprefixes',variables('ipPrefixName'))]"
+      ],
       "location": "[variables('location')]",
       "name": "[variables('elbPublicIPName')]",
       "sku": {
@@ -545,7 +590,8 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
+        },
+        "publicIPPrefix": "[if(equals(parameters('ipPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
@@ -554,6 +600,9 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicipprefixes',variables('ipPrefixName'))]"
+      ],
       "location": "[variables('location')]",
       "name": "[concat(parameters('vmName'), copyIndex(1))]",
       "sku": {
@@ -568,7 +617,8 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
+        },
+        "publicIPPrefix": "[if(equals(parameters('ipPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
@@ -577,6 +627,9 @@
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicipprefixes',variables('ipPrefixName'))]"
+      ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
       "sku": {
@@ -587,7 +640,8 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-vip-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
+        },
+        "publicIPPrefix": "[if(equals(parameters('ipPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"
@@ -743,7 +797,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-		"hyperVGeneration": "V1"
+        "hyperVGeneration": "V1"
       },
       "tags": {
         "provider": "[toUpper(parameters('Check_PointTags').provider)]"

@@ -1090,6 +1090,51 @@
                 }
               }
             }
+          },
+          {
+            "name": "ipPrefix",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Create Public IP Prefix",
+            "defaultValue": "No",
+            "toolTip": "Creates a Public IP Prefix with a reserved range of IP addresses in Azure used by Check Point CloudGuard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "ipPrefixSize",
+            "type": "Microsoft.Common.DropDown",
+            "label": "IP Prefix Size",
+            "defaultValue": "/30 (4 addresses)",
+            "toolTip": "Define the size of the Public IP Prefix",
+            "visible": "[equals(steps('network').ipPrefix, 'yes')]",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/30 (4 addresses)",
+                  "value": 30
+                },
+                {
+                  "label": "/29 (8 addresses)",
+                  "value": 29
+                },
+                {
+                  "label": "/28 (16 addresses)",
+                  "value": 28
+                }
+              ]
+            }
           }
         ]
       }
@@ -1120,8 +1165,9 @@
       "managedSystemAssigned": "[steps('chkp').managedSystemAssigned]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "availabilityOptions": "[steps('chkp').availabilityOptions]",
-      "customMetrics": "[steps('chkp').customMetrics]"
-
+      "customMetrics": "[steps('chkp').customMetrics]",
+      "ipPrefix": "[steps('network').ipPrefix]",
+      "ipPrefixSize": "[steps('network').ipPrefixSize]"
     }
   }
 }
