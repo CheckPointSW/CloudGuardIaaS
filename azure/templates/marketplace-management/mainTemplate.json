@@ -240,13 +240,13 @@
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
       "sku": "mgmt-byol",
-      "version": "8030.900200.0590"
+      "version": "latest"
     },
     "imageReferenceMGMT25": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
       "sku": "mgmt-25",
-      "version": "8030.900200.0590"
+      "version": "latest"
     },
     "imageReferenceMarketplace": "[if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), variables('imageReferenceMGMT25'))]",
     "customImage": "customImage",
