@@ -1,7 +1,7 @@
 variable "amis_url" {
   type = string
   description = "URL to amis.json"
-  default = "https://s3.amazonaws.com/CloudFormationTemplate/amis.json"
+  default = "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml"
 }
 
 data "http" "amis_json_http" {
