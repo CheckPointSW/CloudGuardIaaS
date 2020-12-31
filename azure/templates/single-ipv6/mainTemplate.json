@@ -556,9 +556,9 @@
                   }
                 },
                 {
-                  "name": "allow-all-outboud",
+                  "name": "allow-all-outbound",
                   "properties": {
-                    "description": "Allow all inbound traffic",
+                    "description": "Allow all outbound traffic",
                     "protocol": "*",
                     "sourcePortRange": "*",
                     "destinationPortRange": "*",
