@@ -558,7 +558,7 @@
                 {
                   "name": "allow-all-outboud",
                   "properties": {
-                    "description": "Allow all inbound traffic",
+                    "description": "Allow all outboud traffic",
                     "protocol": "*",
                     "sourcePortRange": "*",
                     "destinationPortRange": "*",
