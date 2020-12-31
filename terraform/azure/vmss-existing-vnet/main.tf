@@ -1,14 +1,23 @@
-provider "azurerm" {
-  version = "=1.44.0"
+terraform {
+  required_version = ">= 0.14.3"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 2.17.0"
+    }
+    random = {
+      version = "~> 2.2.1"
+    }
+  }
+}
 
+provider "azurerm" {
   subscription_id = var.subscription_id
   client_id = var.client_id
   client_secret = var.client_secret
   tenant_id = var.tenant_id
-}
 
-provider "random" {
-  version = "= 2.2.1"
+  features {}
 }
 
 //********************** Basic Configuration **************************//
@@ -17,7 +26,6 @@ module "common" {
   resource_group_name = var.resource_group_name
   location = var.location
   admin_password = var.admin_password
-  sic_key = var.sic_key
   installation_type = var.installation_type
   template_name = var.template_name
   template_version = var.template_version
@@ -29,7 +37,7 @@ module "common" {
   os_version = var.os_version
   vm_os_sku = var.vm_os_sku
   vm_os_offer = var.vm_os_offer
-  disable_password_authentication = var.disable_password_authentication
+  authentication_type = var.authentication_type
 }
 
 //********************** Networking **************************//
@@ -56,7 +64,6 @@ resource "azurerm_public_ip" "public-ip-lb" {
 }
 
 resource "azurerm_lb" "frontend-lb" {
- depends_on = [azurerm_public_ip.public-ip-lb]
  name = "frontend-lb"
  location = module.common.resource_group_location
  resource_group_name = module.common.resource_group_name
@@ -94,6 +101,7 @@ resource "azurerm_lb_backend_address_pool" "backend-lb-pool" {
 }
 
 resource "azurerm_lb_probe" "azure_lb_healprob" {
+  depends_on = [azurerm_lb.frontend-lb, azurerm_lb.frontend-lb]
   count = 2
   resource_group_name = module.common.resource_group_name
   loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
@@ -138,12 +146,24 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
 }
 
 //********************** Virtual Machines **************************//
+locals {
+  SSH_authentication_type_condition = var.authentication_type == "SSH Public Key" ? true : false
+}
+
 resource "azurerm_virtual_machine_scale_set" "vmss" {
   name = var.vmss_name
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
   zones = [var.availability_zones_num]
   overprovision = false
+
+  dynamic "identity" {
+    for_each = var.enable_custom_metrics ? [
+      1] : []
+    content {
+      type = "SystemAssigned"
+    }
+  }
 
   storage_profile_image_reference {
     publisher = module.common.publisher
@@ -177,17 +197,22 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       is_blink=module.common.is_blink
       bootstrap_script64=base64encode(var.bootstrap_script)
       location=module.common.resource_group_location
-      sic_key=module.common.sic_key
+      sic_key=var.sic_key
       vnet=data.azurerm_subnet.frontend.address_prefix
+      enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
     })
   }
 
   os_profile_linux_config {
-    disable_password_authentication = module.common.disable_password_authentication
+    disable_password_authentication = local.SSH_authentication_type_condition
 
-    ssh_keys {
-      path = "/home/notused/.ssh/authorized_keys"
-      key_data = file("${path.module}/azure_public_key")
+    dynamic "ssh_keys" {
+      for_each = local.SSH_authentication_type_condition ? [
+        1] : []
+      content {
+        path = "/home/notused/.ssh/authorized_keys"
+        key_data = file("${path.module}/azure_public_key")
+      }
     }
   }
 
@@ -208,6 +233,11 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = data.azurerm_subnet.frontend.id
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
+       public_ip_address_configuration {
+         name = "instancePublicIP"
+         idle_timeout = 15
+         domain_name_label = "public"
+       }
      }
  }
 
@@ -312,5 +342,18 @@ resource "azurerm_monitor_autoscale_setting" "vmss_settings" {
       send_to_subscription_co_administrator = false
       custom_emails = var.notification_email == "" ? [] : [var.notification_email]
     }
+  }
+}
+
+resource "azurerm_role_assignment" "custom_metrics_role_assignment"{
+  depends_on = [azurerm_virtual_machine_scale_set.vmss]
+  count = var.enable_custom_metrics ? 1 : 0
+  role_definition_id = join("", ["/subscriptions/", var.subscription_id, "/providers/Microsoft.Authorization/roleDefinitions/", "3913510d-42f4-4e42-8a64-420c390055eb"])
+  principal_id = lookup(azurerm_virtual_machine_scale_set.vmss.identity[0], "principal_id")
+  scope = module.common.resource_group_id
+  lifecycle {
+    ignore_changes = [
+      role_definition_id, principal_id
+    ]
   }
 }

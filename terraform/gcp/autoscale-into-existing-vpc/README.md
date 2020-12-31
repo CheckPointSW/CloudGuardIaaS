@@ -195,7 +195,13 @@ Please leave empty list to which port you want to unable traffic.
 | disk_size | Disk size in GB - Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. | number | number between 100 and 4096 | 100 | no |
 | enable_monitoring | Enable Stackdriver monitoring | bool | true/false | false | no |
 
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
+| | | |
 
 ## Outputs
 | Name  | Description |

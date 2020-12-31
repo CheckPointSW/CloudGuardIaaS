@@ -22,7 +22,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -42,14 +42,6 @@ variable "vm_instance_identity_type" {
   description = "Managed Service Identity type"
   type = string
   default = "SystemAssigned"
-}
-
-variable "sic_key" {
-  description = "Secure Internal Communication(SIC) key"
-  type = string
-}
-resource "null_resource" "sic_key_invalid" {
-  count = length(var.sic_key) >= 12 ? 0 : "SIC key must be at least 12 characters long"
 }
 
 variable "template_name"{
@@ -76,7 +68,8 @@ variable "os_version"{
 locals { // locals for 'os_version' allowed values
   os_version_allowed_values = [
     "R80.30",
-    "R80.40"
+    "R80.40",
+    "R81"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
@@ -90,7 +83,8 @@ variable "installation_type"{
 locals { // locals for 'installation_type' allowed values
   installation_type_allowed_values = [
     "cluster",
-    "vmss"
+    "vmss",
+    "management"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_installation_type_value = index(local.installation_type_allowed_values, var.installation_type)
@@ -145,14 +139,15 @@ variable "publisher" {
 
 //************** Storage image reference and plan variables ****************//
 variable "vm_os_offer" {
-  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8030, check-point-cg-r8040"
+  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
   type = string
 }
 
 locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r8030",
-    "check-point-cg-r8040"
+    "check-point-cg-r8040",
+    "check-point-cg-r81"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
@@ -164,8 +159,10 @@ variable "vm_os_sku" {
       - "sg-byol"
       - "sg-ngtp-v2" (for R80.30 only)
       - "sg-ngtx-v2" (for R80.30 only)
-      - "sg-ngtp" (for R80.40 only)
-      - "sg-ngtx" (for R80.40 only)
+      - "sg-ngtp" (for R80.40 and above)
+      - "sg-ngtx" (for R80.40 and above)
+      - "mgmt-byol"
+      - "mgmt-25"
   */
   description = "The sku of the image to be deployed"
   type = string
@@ -177,7 +174,9 @@ locals { // locals for 'vm_os_sku' allowed values
     "sg-ngtp",
     "sg-ngtx",
     "sg-ngtp-v2",
-    "sg-ngtx-v2"
+    "sg-ngtx-v2",
+    "mgmt-byol",
+    "mgmt-25"
   ]
   // will fail if [var.vm_os_sku] is invalid:
   validate_vm_os_sku_value = index(local.vm_os_sku_allowed_values, var.vm_os_sku)
@@ -240,10 +239,9 @@ variable "disk_size" {
   type = string
 }
 
-locals { // local for 'disk_size' allowed regex
-  regex_disk_size_range = "^([1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$"
-  // Will fail if var.disk_size is invalid
-  regex_disk_size_result = regex(local.regex_disk_size_range, var.disk_size) == var.disk_size ? 0 : "Variable [disk_size] must be a between 100 and 3995"
+resource "null_resource" "disk_size_validation" {
+  // Will fail if var.disk_size is less than 100 or more than 3995
+  count = tonumber(var.disk_size) >= 100 && tonumber(var.disk_size) <= 3995 ? 0 : "variable disk_size must be a number between 100 and 3995"
 }
 
 //************** Storage OS disk variables **************//
@@ -273,11 +271,19 @@ locals { // locals for 'managed_disk_type' allowed values
   validate_managed_disk_type_value = index(local.managed_disk_type_allowed_values, var.managed_disk_type)
 }
 
-variable "disable_password_authentication" {
-  description = "Disable password authentication"
-  type = bool
-  default = false
+variable "authentication_type" {
+  description = "Specifies whether a password authentication or SSH Public Key authentication should be used"
+  type = string
 }
+locals { // locals for 'authentication_type' allowed values
+  authentication_type_allowed_values = [
+    "Password",
+    "SSH Public Key"
+  ]
+  // will fail if [var.authentication_type] is invalid:
+  validate_authentication_type_value = index(local.authentication_type_allowed_values, var.authentication_type)
+}
+
 
 //********************** Role Assigments variables**************************//
 variable "role_definition" {

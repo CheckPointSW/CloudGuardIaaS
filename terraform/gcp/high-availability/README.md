@@ -288,6 +288,13 @@ internal_network1_subnetwork_name = ""
 | member_b_external_ip  | Member B external ip. |
 | member_b_zone  | Member B Zone. |
 
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |
+| | | |
 
 ## Authors
 

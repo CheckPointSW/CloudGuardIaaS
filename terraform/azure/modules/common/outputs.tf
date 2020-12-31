@@ -26,10 +26,6 @@ output "vm_instance_identity" {
   value = var.vm_instance_identity_type
 }
 
-output "sic_key"{
-  value = var.sic_key
-}
-
 output "template_name"{
   value = var.template_name
 }
@@ -114,8 +110,8 @@ output "managed_disk_type" {
   value = var.managed_disk_type
 }
 
-output "disable_password_authentication" {
-  value = var.disable_password_authentication
+output "authentication_type" {
+  value = var.authentication_type
 }
 
 output "tags" {

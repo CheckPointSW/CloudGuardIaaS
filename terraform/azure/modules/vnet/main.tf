@@ -13,8 +13,19 @@ resource "azurerm_subnet" "subnet" {
   name = var.subnet_names[count.index]
   virtual_network_name = azurerm_virtual_network.vnet.name
   resource_group_name = var.resource_group_name
-  address_prefix = var.subnet_prefixes[count.index]
-  network_security_group_id = count.index == 0 ? var.nsg_id : ""
+  address_prefixes = [var.subnet_prefixes[count.index]]
+}
+
+resource "azurerm_subnet_network_security_group_association" "security_group_frontend_association" {
+  depends_on = [azurerm_virtual_network.vnet, azurerm_subnet.subnet[0]]
+  subnet_id = azurerm_subnet.subnet[0].id
+  network_security_group_id = var.nsg_id
+}
+resource "azurerm_subnet_network_security_group_association" "security_group_backend_association" {
+  count = length(var.subnet_names) >= 2 ? 1 : 0
+  depends_on = [azurerm_virtual_network.vnet, azurerm_subnet.subnet[1]]
+  subnet_id = azurerm_subnet.subnet[1].id
+  network_security_group_id = var.nsg_id
 }
 
 locals { // locals for 'next_hop_type' allowed values
@@ -50,6 +61,7 @@ resource "azurerm_subnet_route_table_association" "frontend_association" {
 }
 
 resource "azurerm_route_table" "backend" {
+  count = length(var.subnet_names) >= 2 ? 1 : 0
   name = azurerm_subnet.subnet[1].name
   location = var.location
   resource_group_name = var.resource_group_name
@@ -62,6 +74,7 @@ resource "azurerm_route_table" "backend" {
 }
 
 resource "azurerm_subnet_route_table_association" "backend_association" {
+  count = length(var.subnet_names) >= 2 ? 1 : 0
   subnet_id = azurerm_subnet.subnet[1].id
-  route_table_id = azurerm_route_table.backend.id
+  route_table_id = azurerm_route_table.backend[count.index].id
 }
