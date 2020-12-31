@@ -556,7 +556,7 @@
                   }
                 },
                 {
-                  "name": "allow-all-outboud",
+                  "name": "allow-all-outbound",
                   "properties": {
                     "description": "Allow all outboud traffic",
                     "protocol": "*",
