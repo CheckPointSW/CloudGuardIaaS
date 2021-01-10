@@ -10,7 +10,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "The location/region where rescources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  description = "The location/region where resources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
   type = string
 }
 
@@ -21,7 +21,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -47,6 +47,9 @@ variable "sic_key" {
   description = "Secure Internal Communication(SIC) key"
   type = string
 }
+resource "null_resource" "sic_key_invalid" {
+  count = length(var.sic_key) >= 12 ? 0 : "SIC key must be at least 12 characters long"
+}
 
 variable "template_name"{
   description = "Template name. Should be defined according to deployment type(ha, vmss)"
@@ -57,7 +60,7 @@ variable "template_name"{
 variable "template_version"{
   description = "Template version. It is reccomended to always use the latest template version"
   type = string
-  default = "20200323"
+  default = "20210111"
 }
 
 variable "installation_type"{
@@ -102,9 +105,17 @@ variable "vm_os_sku" {
   type = string
 }
 
-variable "disable_password_authentication" {
-  description = "Specifies whether password authentication should be disabled"
-  type = bool
+variable "authentication_type" {
+  description = "Specifies whether a password authentication or SSH Public Key authentication should be used"
+  type = string
+}
+locals { // locals for 'authentication_type' allowed values
+  authentication_type_allowed_values = [
+    "Password",
+    "SSH Public Key"
+  ]
+  // will fail if [var.authentication_type] is invalid:
+  validate_authentication_type_value = index(local.authentication_type_allowed_values, var.authentication_type)
 }
 
 variable "allow_upload_download" {
@@ -227,14 +238,15 @@ locals { // locals for 'frontend_load_distribution' allowed values
 //********************** Scale Set variables *******************//
 
 variable "vm_os_offer" {
-  description = "The name of the offer of the image that you want to deploy.Choose from: check-point-cg-r8030, check-point-cg-r8040"
+  description = "The name of the offer of the image that you want to deploy.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
   type = string
 }
 
 locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r8030",
-    "check-point-cg-r8040"
+    "check-point-cg-r8040",
+    "check-point-cg-r81"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
@@ -276,4 +288,10 @@ variable "sku" {
   description = "SKU"
   type = string
   default = "Standard"
+}
+
+variable "enable_custom_metrics" {
+  description = "Enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service."
+  type = bool
+  default = true
 }

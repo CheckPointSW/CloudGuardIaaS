@@ -1,8 +1,10 @@
 # Check Point CloudGuard IaaS VMSS Terraform deployment for Azure
 
-This Terraform module deploys Check Point CloudGuard IaaS VMSS solution in Azure.
+This Terraform module deploys Check Point CloudGuard IaaS VMSS solution into an existing Vnet in Azure.
 As part of the deployment the following resources are created:
 - Resource group
+- Role assignment - conditional creation
+
 
 See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
 
@@ -13,12 +15,7 @@ This solution uses the following modules:
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
 - In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-existing-vnet/azure_public_key file
-<br>In case there is no need in the ssh key usage, the next lines in the main.tf file need to be deleted or commented:
 
-        ssh_keys {
-          path = "/home/notused/.ssh/authorized_keys"
-          key_data = file("${path.module}/azure_public_key")
-        }
 ## Usage
 - Choose the preferred login method to Azure in order to deploy the solution:
     <br>1. Using Service Principal:
@@ -31,12 +28,13 @@ This solution uses the following modules:
        a. The next lines in the main.tf file, in the provider azurerm resource,  need to be deleted or commented:
             
                 provider "azurerm" {
-                  version = "=1.44.0"
                 
                 //  subscription_id = var.subscription_id
                 //  client_id = var.client_id
                 //  client_secret = var.client_secret
                 //  tenant_id = var.tenant_id
+                
+                   features {}
                 }
             
         b. In the terraform.tfvars file leave empty double quotes for client_secret, client_id, tenant_id and subscription_id variables:
@@ -88,7 +86,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **vmss_name** | The name of the Check Point VMSS Object | string | Only alphanumeric characters are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
- | **vnet_name** | The name of virtual network that will be created | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens |
+ | **vnet_name** | Virtual Network name | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens |
  |  |  |  |  |  |
  | **vnet_resource_group** | Resource Group of the existing virtual network | string | The exact name of the existing vnet's resource group |
  |  |  |  |  |  |
@@ -106,17 +104,17 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **disk_size** | Storage data disk size size(GB) | string | A number in the range 100 - 3995 (GB) |
  |  |  |  |  |  |
- | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 only; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 only |
+ | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
  |  |  |  |  |  |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
  |  |  |  |  |  |
- | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; |
+ | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; |
  |  |  |  |  |  |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it |
  |  |  |  |  |  |
  | **allow_upload_download** | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | boolean | true; <br/>false; |
  |  |  |  |  |  |
- | **disable_password_authentication** | Specifies whether password authentication should be disabled | boolean | true; <br/>false; |
+ | **authentication_type** | Specifies whether a password authentication or SSH Public Key authentication should be used | string | "Password"; <br/>"SSH Public Key"; |
  |  |  |  |  |  |
  | **availability_zones_num** | A list of a single item of the Availability Zone which the Virtual Machine should be allocated in | string | "centralus", "eastus2", "francecentral", "northeurope", "southeastasia", "westeurope", "westus2", "eastus", "uksouth" |
  |  |  |  |  |  |
@@ -137,7 +135,14 @@ This solution uses the following modules:
  | **backend_load_distribution** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
  |  |  |  |  |  |
  | **notification_email** | An email address to notify about scaling operations | string | Leave empty double quotes or enter a valid email address |
+ |  |  |  |  |  |
+ | **enable_custom_metrics** | Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring | boolean | true; <br/>false; |
 
+## Conditional creation
+To create role assignment and enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service:
+```
+enable_custom_metrics = true
+```
 
 ## Example
     client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -161,7 +166,7 @@ This solution uses the following modules:
     os_version                      = "R80.30"
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
-    disable_password_authentication = true
+    authentication_type             = "Password"
     availability_zones_num          = "1"
     minimum_number_of_vm_instances  = 2
     maximum_number_of_vm_instances  = 10
@@ -172,12 +177,12 @@ This solution uses the following modules:
     notification_email              = ""
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
+    enable_custom_metrics           = true
 
 ## Known limitations
 
-1.  Deploy the VMSS with instance level Public IP address is not supported
-2.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
-3.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
+1.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
+2.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
 
 ## Revision History
 
@@ -185,6 +190,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Adding support for R81.<br/> - Add public IP addresses support. <br/> - Add support to CloudGuards metrics. <br/> - Avoid role-assignment re-creation when re-apply |
+| | | |
 | 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource; |
 | | | |
 | 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |

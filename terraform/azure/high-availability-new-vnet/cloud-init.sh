@@ -13,4 +13,4 @@ tenantId="${tenant_id}"
 virtualNetwork="${virtual_network}"
 clusterName="${cluster_name}"
 externalPrivateAddresses="${external_private_addresses}"
-
+customMetrics="${enable_custom_metrics}"

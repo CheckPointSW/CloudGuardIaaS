@@ -1,14 +1,14 @@
-# Check Point CloudGuard IaaS VMSS Terraform deployment for Azure
+# Check Point CloudGuard IaaS High Availability Terraform deployment for Azure
 
-This Terraform module deploys Check Point CloudGuard IaaS VMSS solution into a new Vnet in Azure.
+This Terraform module deploys Check Point CloudGuard IaaS High Availability solution into a new Vnet in Azure.
 As part of the deployment the following resources are created:
 - Resource group
 - Virtual network
 - Network security group
-- Role assignment - conditional creation
+- System assigned identity
+- Availability Set - conditional creation
 
-
-See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
+See the [Check Point CloudGuard IaaS High Availability for Azure Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_IaaS_HighAvailability_for_Azure/Content/Topics/Check_Point_CloudGuard_IaaS_High_Availability_for_Azure.htm) for additional information
 
 This solution uses the following modules:
 - /terraform/azure/modules/common - used for creating a resource group and defining common variables.
@@ -18,13 +18,13 @@ This solution uses the following modules:
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure)
-- In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/vmss-new-vnet/azure_public_key file
+- In order to use ssh connection to VMs, it is **required** to add a public key to the /terraform/azure/high-availability-new-vnet/azure_public_key file.
 
 ## Usage
 - Choose the preferred login method to Azure in order to deploy the solution:
     <br>1. Using Service Principal:
     - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
-    - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
+    - Grant the Service Principal at least "**Owner**" permissions to the Azure subscription<br>
     - The Service Principal credentials can be stored either in the terraform.tfvars or as [Environment Variables](https://www.terraform.io/docs/providers/azuread/guides/service_principal_client_secret.html)<br>
     
       In case the Environment Variables are used, perform modifications described below:<br>
@@ -62,7 +62,7 @@ This solution uses the following modules:
     
     - In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables. 
  
-- Fill all variables in the /terraform/azure/vmss-new-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
+- Fill all variables in the /terraform/azure/high-availability-new-vnet/terraform.tfvars file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
 
         terraform init
@@ -88,15 +88,13 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
  |  |  |  |  |  |
- | **vmss_name** | The name of the Check Point VMSS Object | string | Only alphanumeric characters are allowed, and the name must be 1-30 characters long |
+ | **cluster_name** | The name of the Check Point Cluster Object | string | Only alphanumeric characters are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
  | **vnet_name** | The name of virtual network that will be created | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens |
  |  |  |  |  |  |
  | **address_space** | The address prefixes of the virtual network | string | Valid CIDR block |
  |  |  |  |  |  |
  | **subnet_prefixes** | The address prefixes to be used for created subnets | string | The subnets need to contain within the address space for this virtual network(defined by address_space variable) |
- |  |  |  |  |  |
- | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| number | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
@@ -106,7 +104,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **disk_size** | Storage data disk size size(GB) | string | A number in the range 100 - 3995 (GB) |
  |  |  |  |  |  |
- | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
+ | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above |
  |  |  |  |  |  |
  | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
  |  |  |  |  |  |
@@ -118,46 +116,35 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **authentication_type** | Specifies whether a password authentication or SSH Public Key authentication should be used | string | "Password"; <br/>"SSH Public Key"; |
  |  |  |  |  |  |
- | **availability_zones_num** | A list of a single item of the Availability Zone which the Virtual Machine should be allocated in | string | "centralus", "eastus2", "francecentral", "northeurope", "southeastasia", "westeurope", "westus2", "eastus", "uksouth" |
+ | **availability_type** | Specifies whether to deploy the solution based on Azure Availability Set or based on Azure Availability Zone. | string | "Availability Zone"; <br/>"Availability Set"; |
  |  |  |  |  |  |
- | **minimum_number_of_vm_instances** | The minimum number of VMSS instances for this resource | number | Valid values are in the range 0 - 10 |
- |  |  |  |  |  |
- | **maximum_number_of_vm_instances** | The maximum number of VMSS instances for this resource | number | Valid values are in the range 0 - 10 |
- |  |  |  |  |  |
- | **management_name** | The name of the management server as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
- |  |  |  |  |  |
- | **management_IP** | The IP address used to manage the VMSS instances | string | A valid IP address |
- |  |  |  |  |  |
- | **management_interface** | Manages the Gateways in the VMSS | string | "eth0" - An instance's external NIC's private IP address; <br/>"eth1" - an instance's internal NIC's private IP address |
- |  |  |  |  |  |
- | **configuration_template_name** | The configuration template name as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
- |  |  |  |  |  |
- | **frontend_load_distribution** | The load balancing distribution method for the External Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
- |  |  |  |  |  |
- | **backend_load_distribution** | The load balancing distribution method for the Internal Load Balancer | string | "Default" - None(5-tuple); <br/>"SourceIP" - ClientIP(2-tuple); <br/>"SourceIPProtocol" - ClientIP and protocol(3-tuple) |
- |  |  |  |  |  |
- | **notification_email** | An email address to notify about scaling operations | string | Leave empty double quotes or enter a valid email address |
- |  |  |  |  |  |
- | **enable_custom_metrics** | Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring | boolean | true; <br/>false; |
+ | **enable_custom_metrics** | Indicates whether CloudGuard Metrics will be use for Cluster members monitoring. | boolean | true; <br/>false; |
 
 ## Conditional creation
-To create role assignment and enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service:
+- To deploy the solution based on Azure Availability Set and create a new Availability Set for the virtual machines:
 ```
-enable_custom_metrics = true
+availability_type = "Availability Set"
 ```
+   Otherwise, to deploy the solution based on Azure Availability Zone:
+```
+availability_type = "Availability Zone"
+```
+-  To enable CloudGuard metrics in order to send statuses and statistics collected from HA instances to the Azure Monitor service:
+  ```
+  enable_custom_metrics = true
+  ```
 
 ## Example
     client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    resource_group_name             = "checkpoint-vmss-terraform"
+    resource_group_name             = "checkpoint-ha-terraform"
+    cluster_name                    = "checkpoint-ha-terraform"
     location                        = "eastus"
-    vmss_name                       = "checkpoint-vmss-terraform"
-    vnet_name                       = "checkpoint-vmss-vnet"
+    vnet_name                       = "checkpoint-ha-vnet"
     address_space                   = "10.0.0.0/16"
     subnet_prefixes                 = ["10.0.1.0/24","10.0.2.0/24"]
-    backend_lb_IP_address           = 4
     admin_password                  = "xxxxxxxxxxxx"
     sic_key                         = "xxxxxxxxxxxx"
     vm_size                         = "Standard_D3_v2"
@@ -168,36 +155,20 @@ enable_custom_metrics = true
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     authentication_type             = "Password"
-    availability_zones_num          = "1"
-    minimum_number_of_vm_instances  = 2
-    maximum_number_of_vm_instances  = 10
-    management_name                 = "mgmt"
-    management_IP                   = "13.92.42.181"
-    management_interface            = "eth0"
-    configuration_template_name     = "vmss_template"
-    notification_email              = ""
-    frontend_load_distribution      = "Default"
-    backend_load_distribution       = "Default"
+    availability_type               = "Availability Zone"
     enable_custom_metrics           = true
-
-## Known limitations
-  
-1.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
-2.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
-
+    
 ## Revision History
-
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Add support for R81.<br/> - Add public IP addresses support.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - Avoid role-assignment re-creation when re-applying |
+| 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Merge ha-availability-set-new-vnet and ha-availability-zones-new-vnet deployments to one deployment.<br/> - Adding support for R81.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - The cluster member current state is kept when redeploying. <br/> - Avoid role-assignment re-creation when re-apply |
 | | | |
-| 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource; |
+| 20200508 |- Add backend load balancer rules resource. <br/> - Rename the health probe for the backend load balancer. <br/> - Rename the template name to "ha" |
 | | | |
-| 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
+| 20200305 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment for Azure |
 | | | |
-
 
 ## License
 
