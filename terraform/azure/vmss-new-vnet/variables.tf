@@ -60,7 +60,7 @@ variable "template_name"{
 variable "template_version"{
   description = "Template version. It is reccomended to always use the latest template version"
   type = string
-  default = "20200323"
+  default = "20210111"
 }
 
 variable "installation_type"{

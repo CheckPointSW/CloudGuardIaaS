@@ -106,7 +106,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **disk_size** | Storage data disk size size(GB) | string | A number in the range 100 - 3995 (GB) |
  |  |  |  |  |  |
- | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 only; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 only |
+ | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
  |  |  |  |  |  |
  | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
  |  |  |  |  |  |
@@ -168,7 +168,7 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20201231 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure. |
+| 20210111 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure. |
 | | | |
 
 ## License
