@@ -256,7 +256,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20201102",
+    "templateVersion": "20210111",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -421,7 +421,12 @@
       "westeurope",
       "westus2",
       "eastus",
-      "uksouth"
+      "uksouth",
+      "southafricanorth",
+      "southcentralus",
+      "germanywestcentral",
+      "canadacentral",	
+      "japaneast"
     ],
     "availabilitySetProperty": {
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"

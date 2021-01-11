@@ -119,7 +119,8 @@
       "type": "string",
       "metadata": {
         "description": "Allowed GUI clients"
-      }
+      },
+	  "defaultValue": "0.0.0.0/0"
     },
     "installationType": {
       "type": "string",
@@ -207,7 +208,7 @@
   },
   "variables": {
     "templateName": "management",
-    "templateVersion": "20201109",
+    "templateVersion": "20210111",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
