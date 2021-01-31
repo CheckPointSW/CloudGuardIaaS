@@ -233,11 +233,6 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = data.azurerm_subnet.frontend.id
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
-       public_ip_address_configuration {
-         name = "instancePublicIP"
-         idle_timeout = 15
-         domain_name_label = "public"
-       }
      }
  }
 
