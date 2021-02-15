@@ -116,7 +116,8 @@
       "type": "string",
       "metadata": {
         "description": "Allowed GUI clients"
-      }
+       },
+       "defaultValue": "0.0.0.0/0"
     },
     "sicKey": {
       "type": "securestring",
@@ -211,7 +212,7 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20201109",
+    "templateVersion": "20210204",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
