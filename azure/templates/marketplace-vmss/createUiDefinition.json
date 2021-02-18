@@ -418,7 +418,7 @@
             "label": "Number of Availability Zones to use",
             "defaultValue": "None",
             "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' centralus eastus2 francecentral northeurope southeastasia westeurope westus2 eastus uksouth ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' centralus eastus2 francecentral northeurope southeastasia westeurope westus2 eastus uksouth  southafricanorth southcentralus germanywestcentral canadacentral japaneast ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {

@@ -417,7 +417,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20201102",
+    "templateVersion": "20210204",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -558,7 +558,12 @@
       "westeurope",
       "westus2",
       "eastus",
-      "uksouth"
+      "uksouth",
+      "southafricanorth",
+      "southcentralus",
+      "germanywestcentral",
+      "canadacentral",
+      "japaneast"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
     "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
