@@ -82,7 +82,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
- | **source_image_vhd_uri** | The URI of the blob containing the development image. | string | 
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images. | string | 
  |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |

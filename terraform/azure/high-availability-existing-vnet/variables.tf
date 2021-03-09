@@ -32,7 +32,7 @@ locals { // locals for 'availability_type' allowed values
 
 variable "source_image_vhd_uri" {
   type = string
-  description = "The URI of the blob containing the development image."
+  description = "The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images."
   default = "noCustomUri"
 }
 

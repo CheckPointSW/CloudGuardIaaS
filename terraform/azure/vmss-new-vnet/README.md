@@ -84,7 +84,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
- | **source_image_vhd_uri** | The URI of the blob containing the development image. | string | 
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images. | string | 
  |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
@@ -130,7 +130,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **management_IP** | The IP address used to manage the VMSS instances | string | A valid IP address |
  |  |  |  |  |  |
- | **management_interface** | Manages the Gateways in the VMSS | string | "eth0-public" - An instance's external NIC's public IP address; <br/> "eth0-private" - An instance's external NIC's private IP address; <br/>"eth1-private" - an instance's internal NIC's private IP address |
+ | **management_interface** | Management option for the Gateways in the VMSS | string | "eth0-public" - Manages the GWs using their external NIC's public IP address; <br/> "eth0-private" -Manages the GWs using their external NIC's private IP address; <br/>"eth1-private" - Manages the GWs using their internal NIC's private IP address |
  |  |  |  |  |  |
  | **configuration_template_name** | The configuration template name as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
