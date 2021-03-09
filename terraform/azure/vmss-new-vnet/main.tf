@@ -165,13 +165,30 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
 //********************** Virtual Machines **************************//
 locals {
   SSH_authentication_type_condition = var.authentication_type == "SSH Public Key" ? true : false
+  availability_zones_num_condition = var.availability_zones_num == "0" ? ["0"] : var.availability_zones_num == "1" ? ["1"] : var.availability_zones_num == "2" ? ["1", "2"] : ["1", "2", "3"]
+  custom_image_condition = var.source_image_vhd_uri == "noCustomUri" ? false : true
+  management_interface_name = split("-", var.management_interface)[0]
+  management_ip_address_type = split("-", var.management_interface)[1]
+}
+
+resource "azurerm_image" "custom-image" {
+  count = local.custom_image_condition ? 1 : 0
+  name = "custom-image"
+  location = var.location
+  resource_group_name = module.common.resource_group_name
+
+  os_disk {
+    os_type  = "Linux"
+    os_state = "Generalized"
+    blob_uri = var.source_image_vhd_uri
+  }
 }
 
 resource "azurerm_virtual_machine_scale_set" "vmss" {
   name = var.vmss_name
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
-  zones = [var.availability_zones_num]
+  zones = local.availability_zones_num_condition
   overprovision = false
 
   dynamic "identity" {
@@ -183,7 +200,8 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   }
 
   storage_profile_image_reference {
-    publisher = module.common.publisher
+    id = local.custom_image_condition ? azurerm_image.custom-image[0].id : null
+    publisher = local.custom_image_condition ? null : module.common.publisher
     offer = module.common.vm_os_offer
     sku = module.common.vm_os_sku
     version = module.common.vm_os_version
@@ -195,10 +213,14 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
     managed_disk_type = module.common.storage_account_type
   }
 
-  plan {
-    name = module.common.vm_os_sku
-    publisher = module.common.publisher
-    product = module.common.vm_os_offer
+  dynamic "plan" {
+    for_each = local.custom_image_condition ? [
+    ] : [1]
+    content {
+      name = module.common.vm_os_sku
+      publisher = module.common.publisher
+      product = module.common.vm_os_offer
+    }
   }
 
   os_profile {
@@ -232,7 +254,6 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       }
     }
   }
-
 
   boot_diagnostics {
     enabled = module.common.boot_diagnostics
@@ -276,20 +297,20 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   tags = var.management_interface == "eth0"?{
     x-chkp-management = var.management_name,
     x-chkp-template = var.configuration_template_name,
-    x-chkp-ip-address = "private",
-    x-chkp-management-interface = var.management_interface,
+    x-chkp-ip-address = local.management_ip_address_type,
+    x-chkp-management-interface = local.management_interface_name,
     x-chkp-management-address = var.management_IP,
     x-chkp-topology = "eth0:external,eth1:internal",
     x-chkp-anti-spoofing = "eth0:false,eth1:false",
-    x-chkp-srcImageUri = "noCustomUri",
+    x-chkp-srcImageUri = var.source_image_vhd_uri,
   }:{
     x-chkp-management = var.management_name,
     x-chkp-template = var.configuration_template_name,
-    x-chkp-ip-address = "private",
-    x-chkp-management-interface = var.management_interface,
+    x-chkp-ip-address = local.management_ip_address_type,
+    x-chkp-management-interface = local.management_interface_name,
     x-chkp-topology = "eth0:external,eth1:internal",
     x-chkp-anti-spoofing = "eth0:false,eth1:false",
-    x-chkp-srcImageUri = "noCustomUri",
+    x-chkp-srcImageUri = var.source_image_vhd_uri,
   }
 }
 

@@ -84,6 +84,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images. | string | 
+ |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
@@ -128,7 +130,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **management_IP** | The IP address used to manage the VMSS instances | string | A valid IP address |
  |  |  |  |  |  |
- | **management_interface** | Manages the Gateways in the VMSS | string | "eth0" - An instance's external NIC's private IP address; <br/>"eth1" - an instance's internal NIC's private IP address |
+ | **management_interface** | Management option for the Gateways in the VMSS | string | "eth0-public" - Manages the GWs using their external NIC's public IP address; <br/> "eth0-private" -Manages the GWs using their external NIC's private IP address; <br/>"eth1-private" - Manages the GWs using their internal NIC's private IP address |
  |  |  |  |  |  |
  | **configuration_template_name** | The configuration template name as it appears in the configuration file | string | Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
@@ -151,6 +153,7 @@ enable_custom_metrics = true
     client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-vmss-terraform"
     location                        = "eastus"
     vmss_name                       = "checkpoint-vmss-terraform"
@@ -173,7 +176,7 @@ enable_custom_metrics = true
     maximum_number_of_vm_instances  = 10
     management_name                 = "mgmt"
     management_IP                   = "13.92.42.181"
-    management_interface            = "eth0"
+    management_interface            = "eth1-private"
     configuration_template_name     = "vmss_template"
     notification_email              = ""
     frontend_load_distribution      = "Default"
@@ -191,9 +194,11 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image <br/> - Fix zones filed for scale set be installed as multi-zone <br/> - Modify "management_interface" variable and tags regarding managing the Gateways in the Scale Set |
+| | | |
 | 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Add support for R81.<br/> - Add public IP addresses support.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - Avoid role-assignment re-creation when re-applying |
 | | | |
-| 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource; |
+| 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource |
 | | | |
 | 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
 | | | |
