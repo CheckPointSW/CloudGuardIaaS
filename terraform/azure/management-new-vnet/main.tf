@@ -202,7 +202,22 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
 //********************** Virtual Machines **************************//
 locals {
   SSH_authentication_type_condition = var.authentication_type == "SSH Public Key" ? true : false
+  custom_image_condition = var.source_image_vhd_uri == "noCustomUri" ? false : true
 }
+
+resource "azurerm_image" "custom-image" {
+  count = local.custom_image_condition ? 1 : 0
+  name = "custom-image"
+  location = var.location
+  resource_group_name = module.common.resource_group_name
+
+  os_disk {
+    os_type  = "Linux"
+    os_state = "Generalized"
+    blob_uri = var.source_image_vhd_uri
+  }
+}
+
 resource "azurerm_virtual_machine" "mgmt-vm-instance" {
   depends_on = [
     azurerm_network_interface.nic]
@@ -219,10 +234,14 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
     type = module.common.vm_instance_identity
   }
 
-  plan {
-    name = module.common.vm_os_sku
-    publisher = module.common.publisher
-    product = module.common.vm_os_offer
+  dynamic "plan" {
+    for_each = local.custom_image_condition ? [
+    ] : [1]
+    content {
+      name = module.common.vm_os_sku
+      publisher = module.common.publisher
+      product = module.common.vm_os_offer
+    }
   }
 
   boot_diagnostics {
@@ -261,7 +280,8 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
   }
 
   storage_image_reference {
-    publisher = module.common.publisher
+    id = local.custom_image_condition ? azurerm_image.custom-image[0].id : null
+    publisher = local.custom_image_condition ? null : module.common.publisher
     offer = module.common.vm_os_offer
     sku = module.common.vm_os_sku
     version = module.common.vm_os_version

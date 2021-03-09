@@ -15,6 +15,12 @@ variable "location" {
 }
 
 //********************** Virtual Machine Instances Variables **************************//
+variable "source_image_vhd_uri" {
+  type = string
+  description = "The URI of the blob containing the development image."
+  default = "noCustomUri"
+}
+
 variable "admin_username" {
   description = "Administrator username of deployed VM. Due to Azure limitations 'notused' name can be used"
   default = "notused"

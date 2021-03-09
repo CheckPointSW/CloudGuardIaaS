@@ -15,6 +15,12 @@ variable "location" {
 }
 
 //********************** Virtual Machine Instances Variables **************************//
+variable "source_image_vhd_uri" {
+  type = string
+  description = "The URI of the blob containing the development image."
+  default = "noCustomUri"
+}
+
 variable "admin_username" {
   description = "Administrator username of deployed VM. Due to Azure limitations 'notused' name can be used"
   default = "notused"
@@ -141,6 +147,16 @@ variable "management_IP" {
 variable "management_interface" {
   description = "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC's private IP address"
   type = string
+  default = "eth1-private"
+}
+locals { // locals for 'management_interface' allowed values
+  management_interface_allowed_values = [
+    "eth0-public",
+    "eth0-private",
+    "eth1-private"
+  ]
+  // will fail if [var.management_interface] is invalid:
+  validate_management_interface_value = index(local.management_interface_allowed_values, var.management_interface)
 }
 
 variable "configuration_template_name" {

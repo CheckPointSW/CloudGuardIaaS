@@ -84,6 +84,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. | string | 
+ |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
@@ -139,6 +141,7 @@ availability_type = "Availability Zone"
     client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-ha-terraform"
     cluster_name                    = "checkpoint-ha-terraform"
     location                        = "eastus"
@@ -163,6 +166,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
+| | | |
 | 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Merge ha-availability-set-new-vnet and ha-availability-zones-new-vnet deployments to one deployment.<br/> - Adding support for R81.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - The cluster member current state is kept when redeploying. <br/> - Avoid role-assignment re-creation when re-apply |
 | | | |
 | 20200508 |- Add backend load balancer rules resource. <br/> - Rename the health probe for the backend load balancer. <br/> - Rename the template name to "ha" |

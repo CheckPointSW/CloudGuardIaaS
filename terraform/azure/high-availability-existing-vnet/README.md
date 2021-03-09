@@ -80,6 +80,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. | string | 
+ |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
@@ -141,6 +143,7 @@ availability_type = "Availability Zone"
     client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-ha-terraform"
     cluster_name                    = "checkpoint-ha-terraform"
     location                        = "eastus"
@@ -168,6 +171,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
+| | | |
 | 20210111 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure. |
 | | | |
 

@@ -253,6 +253,22 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
 }
 
 //********************** Virtual Machines **************************//
+locals {
+  custom_image_condition = var.source_image_vhd_uri == "noCustomUri" ? false : true
+}
+
+resource "azurerm_image" "custom-image" {
+  count = local.custom_image_condition ? 1 : 0
+  name = "custom-image"
+  location = var.location
+  resource_group_name = module.common.resource_group_name
+
+  os_disk {
+    os_type  = "Linux"
+    os_state = "Generalized"
+    blob_uri = var.source_image_vhd_uri
+  }
+}
 resource "azurerm_virtual_machine" "vm-instance-availability-set" {
   depends_on = [
     azurerm_network_interface.nic,
@@ -275,7 +291,8 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
     type = module.common.vm_instance_identity
   }
   storage_image_reference {
-    publisher = module.common.publisher
+    id = local.custom_image_condition ? azurerm_image.custom-image[0].id : null
+    publisher = local.custom_image_condition ? null : module.common.publisher
     offer = module.common.vm_os_offer
     sku = module.common.vm_os_sku
     version = module.common.vm_os_version
@@ -289,10 +306,14 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
     disk_size_gb = module.common.disk_size
   }
 
-  plan {
-    name = module.common.vm_os_sku
-    publisher = module.common.publisher
-    product = module.common.vm_os_offer
+  dynamic "plan" {
+    for_each = local.custom_image_condition ? [
+    ] : [1]
+    content {
+      name = module.common.vm_os_sku
+      publisher = module.common.publisher
+      product = module.common.vm_os_offer
+    }
   }
 
   os_profile {
@@ -359,7 +380,8 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
     type = module.common.vm_instance_identity
   }
   storage_image_reference {
-    publisher = module.common.publisher
+    id = local.custom_image_condition ? azurerm_image.custom-image[0].id : null
+    publisher = local.custom_image_condition ? null : module.common.publisher
     offer = module.common.vm_os_offer
     sku = module.common.vm_os_sku
     version = module.common.vm_os_version
@@ -373,10 +395,14 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
     disk_size_gb = module.common.disk_size
   }
 
-  plan {
-    name = module.common.vm_os_sku
-    publisher = module.common.publisher
-    product = module.common.vm_os_offer
+  dynamic "plan" {
+    for_each = local.custom_image_condition ? [
+    ] : [1]
+    content {
+      name = module.common.vm_os_sku
+      publisher = module.common.publisher
+      product = module.common.vm_os_offer
+    }
   }
 
   os_profile {
