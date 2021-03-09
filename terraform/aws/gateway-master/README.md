@@ -1,0 +1,198 @@
+# Check Point CloudGuard Network Security Gateway Master Terraform module for AWS
+
+Terraform module which deploys a Check Point CloudGuard Network Security Gateway into a new VPC.
+
+These types of Terraform resources are supported:
+* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
+* [VPC](https://www.terraform.io/docs/providers/aws/r/vpc.html)
+* [Security group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
+* [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
+* [Route](https://www.terraform.io/docs/providers/aws/r/route.html)
+* [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html) - conditional creation
+
+
+See the [Automatically Provision a CloudGuard Security Gateway in AWS](https://supportcenter.us.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk131434) for additional information
+
+This solution uses the following modules:
+- /terraform/aws/gateway
+- /terraform/aws/modules/amis
+- /terraform/aws/modules/vpc
+
+## Configurations
+
+The **main.tf** file includes the following provider configuration block used to configure the credentials for the authentication with AWS, as well as a default region for your resources:
+```
+provider "aws" {
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
+}
+```
+The provider credentials can be provided either as static credentials or as [Environment Variables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables).
+- Static credentials can be provided by adding an access_key and secret_key in /terraform/aws/gateway-master/**terraform.tfvars** file as follows:
+```
+region     = "us-east-1"
+access_key = "my-access-key"
+secret_key = "my-secret-key"
+```
+- In case the Static credentials are used, perform modifications described below:<br/>
+  a. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-module /terraform/aws/gateway:
+  ```
+  provider "aws" {
+  //  region = var.region
+  //  access_key = var.access_key
+  //  secret_key = var.secret_key
+  }
+  ```
+- In case the Environment Variables are used, perform modifications described below:<br/>
+  a. The next lines in main.tf file, in the provider aws resource, need to be commented:
+  ```
+  provider "aws" {
+  //  region = var.region
+  //  access_key = var.access_key
+  //  secret_key = var.secret_key
+  }
+  ```
+  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-module /terraform/aws/gateway:
+  ```
+  provider "aws" {
+  //  region = var.region
+  //  access_key = var.access_key
+  //  secret_key = var.secret_key
+  }
+
+
+## Usage
+- Fill all variables in the /terraform/aws/gateway-master/**terraform.tfvars** file with proper values (see below for variables descriptions).
+- From a command line initialize the Terraform configuration directory:
+    ```
+    terraform init
+    ```
+- Create an execution plan:
+    ```
+    terraform plan
+    ```
+- Create or modify the deployment:
+    - Due to terraform limitation, the apply command is:
+    ```
+    terraform apply -target=aws_route_table.private_subnet_rtb -auto-approve && terraform apply 
+    ```
+    >Once terraform is updated, we will update accordingly.
+  
+- Variables are configured in /terraform/aws/gateway-master/**terraform.tfvars** file as follows:
+
+  ```
+    //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
+
+    // --- VPC Network Configuration ---
+    vpc_cidr = "10.0.0.0/16"
+    public_subnets_map = {
+      "us-east-1a" = 1
+    }
+    private_subnets_map = {
+      "us-east-1a" = 2
+    }
+    subnets_bit_length = 8
+
+    // --- EC2 Instance Configuration ---
+    gateway_name = "Check-Point-Gateway-tf"
+    gateway_instance_type = "c5.xlarge"
+    key_name = "privatekey"
+    allocate_and_associate_eip = true
+    volume_size = 100
+    volume_encryption = ""
+    enable_instance_connect = false
+    instance_tags = {
+      key1 = "value1"
+      key2 = "value2"
+    }
+
+    // --- Check Point Settings ---
+    gateway_version = "R80.40-PAYG-NGTP"
+    admin_shell = "/bin/bash"
+    gateway_SICKey = "12345678"
+    gateway_password_hash = "12345678"
+
+    // --- Advanced Settings ---
+    resources_tag_name = "tag-name"
+    gateway_hostname = "gw-hostname"
+    allow_upload_download = true
+    gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+    primary_ntp = ""
+    secondary_ntp = ""
+
+    // --- (Optional) Automatic Provisioning with Security Management Server Settings ---
+    control_gateway_over_public_or_private_address =  "private"
+    management_server = ""
+    configuration_template = ""
+  ```
+
+- Conditional creation
+  - To create an Elastic IP and associate it to the Gateway instance:
+  ```
+  allocate_and_associate_eip = true
+  ```
+
+- To tear down your resources:
+    ```
+    terraform destroy
+    ```
+
+
+## Inputs
+| Name          | Description   | Type          | Allowed values | Default       | Required      |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| vpc_cidr | The CIDR block of the VPC | string | n/a | n/a | yes |
+| public_subnets_map | A map of pairs {availability-zone = subnet-suffix-number}. Each entry creates a subnet. Minimum 1 pair.  (e.g. {\"us-east-1a\" = 1} ) | map | n/a |  n/a | yes |
+| private_subnets_map | A map of pairs {availability-zone = subnet-suffix-number}. Each entry creates a subnet. Minimum 1 pair. (e.g. {\"us-east-1a\" = 2} ) | map | n/a | n/a | yes |
+| subnets_bit_length | Number of additional bits with which to extend the vpc cidr. For example, if given a vpc_cidr ending in /16 and a subnets_bit_length value of 4, the resulting subnet address will have length /20 | number | n/a | n/a | yes |
+| gateway_name | (Optional) The name tag of the Security Gateway instance | string | n/a | Check-Point-Gateway-tf | no |
+| gateway_instance_type | The instance type of the Security Gateway | string | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge | c5.xlarge | no |
+| key_name | The EC2 Key Pair name to allow SSH access to the instance | string  | n/a | n/a | yes |
+| allocate_and_associate_eip | If set to true, an elastic IP will be allocated and associated with the launched instance | bool | true/false | true | no |
+| volume_size | Root volume size (GB) - minimum 100 | number | n/a | 100 | no |
+| volume_encryption | KMS or CMK key Identifier: Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs') | string | n/a | alias/aws/ebs | no |
+| enable_instance_connect | Enable SSH connection over AWS web console. Supporting regions can be found [here](https://aws.amazon.com/about-aws/whats-new/2019/06/introducing-amazon-ec2-instance-connect/) | bool | true/false | false | no |
+| instance_tags  | (Optional) A map of tags as key=value pairs. All tags will be added to the Security Gateway EC2 Instance | map(string)  | n/a  | {}  | no  |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| admin_shell | Set the admin shell to enable advanced command line configuration | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
+| gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
+| gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
+| resources_tag_name | (optional) | string | n/a | "" | no |
+| gateway_hostname | (Optional) Security Gateway prompt hostname | string | n/a | "" | no |
+| allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
+| gateway_bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
+| primary_ntp | (Optional) The IPv4 addresses of Network Time Protocol primary server | string | n/a | 169.254.169.123 | no |
+| secondary_ntp | (Optional) The IPv4 addresses of Network Time Protocol secondary server | string | n/a | 0.pool.ntp.org | no |
+| control_gateway_over_public_or_private_address | Determines if the Security Gateway is provisioned using its private or public address | string | - public <br/> - private | private | no |
+| management_server | (Optional) The name that represents the Security Management Server in the automatic provisioning configuration | string | n/a | "" | no |
+| configuration_template |(Optional) A name of a Security Gateway configuration template in the automatic provisioning configuration | string | n/a | "" | no |
+
+
+## Outputs
+| Name  | Description |
+| ------------- | ------------- |
+| vpc_id  | The id of the deployed vpc  |
+| internal_rt_id  | The internal route table id  |
+| vpc_public_subnets_ids_list  | A list of the public subnets ids  |
+| vpc_private_subnets_ids_list  | A list of the private subnets ids  |
+| ami_id  | The ami id of the deployed Security Gateway |
+| permissive_sg_id  | The permissive security group id  |
+| permissive_sg_name  | The permissive security group id name  |
+| gateway_url  | URL to the portal of the deployed Security Gateway  |
+| gateway_public_ip  | The deployed Security Gateway Server AWS public ip  |
+| gateway_instance_id  | The deployed Security Gateway AWS instance id  |
+| gateway_instance_name  | The deployed Security Gateway AWS instance name  |
+
+## Revision History
+In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20210309 | First release of Check Point Security Gateway Master Terraform module for AWS |
+
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details
