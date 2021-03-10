@@ -63,7 +63,6 @@ secret_key = "my-secret-key"
 
     // --- VPC Network Configuration ---
     vpc_id = "vpc-12345678"
-    vpc_cidr = "10.0.0.0/16"
     public_subnet_id = "subnet-123456"
     private_subnet_id = "subnet-345678"
     private_route_table = "rtb-12345678"
