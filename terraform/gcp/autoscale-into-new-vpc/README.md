@@ -225,6 +225,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210311 | Enable private google access in the new subnetworks, so VMs in those subnetworks without external IP addresses can access Google APIs and services by using Private Google Access. 
+| | | |
 | 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into a new VPC on GCP. |
 | | | |
 
