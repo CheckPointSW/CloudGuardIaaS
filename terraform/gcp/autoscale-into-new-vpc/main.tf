@@ -12,7 +12,6 @@ resource "google_compute_subnetwork" "external_subnetwork" {
   ip_cidr_range = var.external_subnetwork_ip_cidr_range
   region = var.region
   network = google_compute_network.external_network.id
-  private_ip_google_access = true
 }
 
 resource "google_compute_network" "internal_network" {
@@ -24,7 +23,6 @@ resource "google_compute_subnetwork" "internal_subnetwork" {
   ip_cidr_range = var.internal_subnetwork_ip_cidr_range
   region = var.region
   network = google_compute_network.internal_network.id
-  private_ip_google_access = true
 }
 
 
