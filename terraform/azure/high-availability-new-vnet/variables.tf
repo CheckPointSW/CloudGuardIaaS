@@ -30,6 +30,11 @@ locals { // locals for 'availability_type' allowed values
   validate_availability_type_value = index(local.availability_type_allowed_values, var.availability_type)
 }
 
+variable "source_image_vhd_uri" {
+  type = string
+  description = "The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images."
+  default = "noCustomUri"
+}
 
 variable "admin_username" {
   description = "Administrator username of deployed VM. Due to Azure limitations 'notused' name can be used"

@@ -82,6 +82,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **subscription_id** | The subscription ID is used to pay for Azure cloud services | string |
  |  |  |  |  |  |
+ | **source_image_vhd_uri** | The URI of the blob containing the development image. Please use noCustomUri if you want to use marketplace images. | string | 
+ |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
  | **mgmt_name** | Management name. | string |  
@@ -121,6 +123,7 @@ This solution uses the following modules:
     client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-mgmt-terraform"
     mgmt_name                       = "checkpoint-mgmt-terraform"
     location                        = "eastus"
@@ -143,6 +146,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
+| | | |
 | 20210111 | First release of Check Point CloudGuard IaaS Management Terraform deployment into a new Vnet in Azure. |
 | | | |
 
