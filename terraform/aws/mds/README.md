@@ -170,6 +170,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | Template Version | Description   |
 | ---------------- | ------------- |
 | 20210309 | First release of Check Point Multi-Domain Server Terraform module for AWS |
+| 20210329 | Stability fixes |
 
 
 

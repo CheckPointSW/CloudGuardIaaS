@@ -107,10 +107,11 @@ secret_key = "my-secret-key"
   ```
 
 - Conditional creation
-  - To create an ASG configuration with an IAM role:
+  - To enable cloudwatch for ASG:
   ```
   enable_cloudwatch = true
   ```
+  Note: enabling cloudwatch will automatically create IAM role with cloudwatch:PutMetricData permission
   - To create an ASG configuration without a proxy ELB:
   ```
   proxy_elb_type= "none"
@@ -177,6 +178,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | ---------------- | ------------- |
 | 20200318 | First release of Check Point Auto Scaling Terraform module for AWS |
 | 20210309 | AWS Terraform modules refactor |
+| 20210329 | Stability fixes |
  
 
 
