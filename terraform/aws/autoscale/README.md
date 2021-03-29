@@ -178,6 +178,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | ---------------- | ------------- |
 | 20200318 | First release of Check Point Auto Scaling Terraform module for AWS |
 | 20210309 | AWS Terraform modules refactor |
+| 20210329 | Stability fixes |
  
 
 
