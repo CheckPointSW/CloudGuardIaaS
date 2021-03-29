@@ -11,11 +11,12 @@ cv_path="/etc/cloud-version"
 if test -f $cv_path; then
   echo "template_name: $template" >> $cv_path
   echo "template_version: 20210309" >> $cv_path
+  echo "template_type: terraform" >> $cv_path
 fi
 cv_json_path="/etc/cloud-version.json"
 cv_json_path_tmp="/etc/cloud-version-tmp.json"
 if test -f $cv_json_path; then
-   cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "20210309"' > $cv_json_path_tmp
+   cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "20210309"' | jq '.template_type = "terraform"' > $cv_json_path_tmp
    mv $cv_json_path_tmp $cv_json_path
 fi
 
@@ -76,10 +77,10 @@ chkconfig --add autoprovision
 service autoprovision start
 
 if ${AllocateElasticIP} && [[ "${GatewayManagement}" == "Over the internet" ]]; then
-    addr="$(ip addr show dev eth0 | sed -n -e 's|^ *inet \\([^/]*\\)/.* eth0$|\\1|p')"
-    pub_addr="$(ip addr show dev eth0 | sed -n -e 's|^ *inet \\([^/]*\\)/.* eth0:1$|\\1|p')"
-    uid="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json | jq -r '.objects[] | select(.ipaddr == \"'$addr'\") | .uid')"
-    test -z "$uid\" || test -z $pub_addr || mgmt_cli -r true set-generic-object uid $uid ipaddr \"$pub_addr"
+    addr="$(ip addr show dev eth0 | sed -n -e 's|^ *inet \([^/]*\)/.* eth0$|\1|p')"
+    pub_addr="$(ip addr show dev eth0 | sed -n -e 's|^ *inet \([^/]*\)/.* eth0:1$|\1|p')"
+    uid="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json | jq -r '.objects[] | select(.ipaddr == "'$addr'") | .uid')"
+    test -z "$uid" || test -z $pub_addr || mgmt_cli -r true set-generic-object uid $uid ipaddr "$pub_addr"
 fi
 
 if ${EnableInstanceConnect}; then

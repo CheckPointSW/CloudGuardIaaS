@@ -11,11 +11,12 @@ cv_path="/etc/cloud-version"
 if test -f $cv_path; then
   echo "template_name: $template" >> $cv_path
   echo "template_version: 20210309" >> $cv_path
+  echo "template_type: terraform" >> $cv_path
 fi
 cv_json_path="/etc/cloud-version.json"
 cv_json_path_tmp="/etc/cloud-version-tmp.json"
 if test -f $cv_json_path; then
-  cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "20210309"' > $cv_json_path_tmp
+  cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "20210309"' | jq '.template_type = "terraform"' > $cv_json_path_tmp
   mv $cv_json_path_tmp $cv_json_path
 fi
 

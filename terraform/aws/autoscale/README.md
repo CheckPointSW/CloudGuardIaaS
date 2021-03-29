@@ -107,10 +107,11 @@ secret_key = "my-secret-key"
   ```
 
 - Conditional creation
-  - To create an ASG configuration with an IAM role:
+  - To enable cloudwatch for ASG:
   ```
   enable_cloudwatch = true
   ```
+  Note: enabling cloudwatch will automatically create IAM role with cloudwatch:PutMetricData permission
   - To create an ASG configuration without a proxy ELB:
   ```
   proxy_elb_type= "none"
