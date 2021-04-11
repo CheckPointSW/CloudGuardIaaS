@@ -38,7 +38,7 @@
             "type": "securestring",
             "defaultValue": "",
             "metadata": {
-                "description": "Administrator password"
+                "description": "User is set to 'admin'"
             }
         },
         "sshPublicKey": {
@@ -48,19 +48,26 @@
                 "description": "Administrator SSH public key"
             }
         },
-        "waapAgentFog": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Fog address, should be reachable from public cloud"
-            }
-        },
         "waapAgentToken": {
             "type": "secureString",
             "defaultValue": "",
             "minLength": 1,
             "metadata": {
                 "description": "Infinity Next Agent Token"
+            }
+        },
+        "waapAgentFog": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Fog address"
+            }
+        },
+        "adminEmail": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Email address to notify about scaling events"
             }
         },
         "availabilityZonesNum": {
@@ -179,13 +186,6 @@
                 "description": "The Internal Load Balancer distribution method"
             }
         },
-        "adminEmail": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Email address to notify about scaling events"
-            }
-        },
         "bootstrapScript": {
             "type": "string",
             "metadata": {
@@ -295,12 +295,78 @@
             "metadata": {
                 "description": "One time key for Secure Internal Communication"
             }
+        },
+        "chooseVault": {
+            "type": "string",
+            "allowedValues": [
+                "none",
+                "existingVault",
+                "newVault"
+            ],
+            "defaultValue": "none",
+            "metadata": {
+                "description": "Choose an existing Azure Key Vault or create new Azure Key Vault and upload certificates. 'none' means you don't use HTTPS certificates."
+            }
+        },
+        "existingKeyVaultRGName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group name of the existing key vault - could be on a different resource group"
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "numberOfCerts": {
+            "type": "int",
+            "allowedValues": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "defaultValue": 0,
+            "metadata": {
+                "description": "Number of certificates to upload"
+            }
+        },
+        "firstCertificate": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "PFX certificate file"
+            }
+        },
+        "firstCertPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Password used when exporting the PFX certificate"
+            }
+        },
+        "secondCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "secondCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "thirdCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "thirdCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
         }
     },
     "variables": {
         "resourceGroup": "[resourceGroup()]",
         "templateName": "waap_vmss",
-        "templateVersion": "20210308",
+        "templateVersion": "20210411",
         "location": "[parameters('location')]",
         "osVersion": "R8040",
         "adminUsername": "notused",
@@ -389,24 +455,23 @@
         "commomTags": {
             "provider": "[toUpper(parameters('Check_PointTags').provider)]"
         },
-        "vmssTags": "[variables('commomTags')]",
-        "https": false,
-        "identity": "[json('{\"type\": \"SystemAssigned\"}')]"
+        "vaultTags": {
+            "vault": "[parameters('keyVaultName')]"
+        },
+        "isHttps": "[not(equals(parameters('chooseVault'), 'none'))]",
+        "vmssTags": "[if(variables('isHttps'), union(variables('commomTags'), variables('vaultTags')), variables('commomTags'))]",
+        "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+        "secretsArray": [
+            "[parameters('firstCertificate')]",
+            "[parameters('firstCertPassword')]",
+            "[parameters('secondCertificate')]",
+            "[parameters('secondCertPassword')]",
+            "[parameters('thirdCertificate')]",
+            "[parameters('thirdCertPassword')]"
+        ],
+        "certUploaded": "[and(equals(parameters('chooseVault'), 'newVault'), greater(parameters('numberOfCerts'), 0), greater(length(variables('secretsArray')), 0))]"
     },
     "resources": [
-        {
-            "apiVersion": "2020-06-01",
-            "name": "pid-5432b4df-d783-57a2-b65f-39f4bca4974a",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
         {
             "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
             "name": "networkNewSetup",
@@ -643,7 +708,7 @@
             "apiVersion": "2020-06-01",
             "name": "[parameters('vmName')]",
             "location": "[variables('location')]",
-            "identity": "[if(variables('https'), variables('identity'), json('null'))]",
+            "identity": "[if(variables('isHttps'), variables('identity'), json('null'))]",
             "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
             "tags": "[variables('vmssTags')]",
             "dependsOn": [
@@ -811,6 +876,49 @@
             "tags": {
                 "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
+        },
+        {
+            "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'existingVault'))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('keyVaultName')]",
+            "dependsOn": [
+                "[variables('vmssID')]"
+            ],
+            "resourceGroup": "[parameters('existingKeyVaultRGName')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+                            "name": "[concat(parameters('keyVaultName'), '/add')]",
+                            "apiVersion": "2019-09-01",
+                            "properties": {
+                                "accessPolicies": [
+                                    {
+                                        "tenantId": "[subscription().tenantid]",
+                                        "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
+                                        "permissions": {
+                                            "secrets": [
+                                                "get",
+                                                "list"
+                                            ],
+                                            "certificates": [
+                                                "get",
+                                                "list"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
         }
     ],
     "outputs": {
@@ -821,6 +929,10 @@
         "ApplicationFQDN": {
             "type": "string",
             "value": "[reference('loadBalancerSetup').outputs.ApplicationFQDN.value]"
+        },
+        "CertificatesUploaded": {
+            "value": "[variables('certUploaded')]",
+            "type": "bool"
         }
     }
 }
