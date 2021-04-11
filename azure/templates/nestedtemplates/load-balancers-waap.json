@@ -53,7 +53,7 @@
         "appAddressName": "[variables('appName')]",
         "appAddressId": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
         "appFEName": "[variables('appName')]",
-        "elbName": "frontend-lb",
+        "elbName": "External-lb",
         "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
         "elbBEAddressPool": "[concat(variables('elbName'), '-pool')]",
         "elbBEAddressPoolName": "[if(parameters('upgrading'), parameters('elbTargetBEAddressPoolName'), variables('elbBEAddressPool'))]",
@@ -256,6 +256,18 @@
         "elbId": {
             "value": "[if(variables('deployELB'), variables('elbId'), '')]",
             "type": "string"
+        },
+        "appProbeName": {
+            "value": "[if(variables('deployELB'), variables('appProbeName'), '')]",
+            "type": "string"
+        },
+        "appHealthProtocol": {
+            "value": "[if(variables('deployELB'), variables('appHealthProtocol'), '')]",
+            "type": "string"
+        },
+        "lbHealthPort": {
+            "value": "[variables('lbHealthPort')]",
+            "type": "int"
         },
         "ilbId": {
             "value": "[if(variables('deployILB'), variables('ilbId'), '')]",
