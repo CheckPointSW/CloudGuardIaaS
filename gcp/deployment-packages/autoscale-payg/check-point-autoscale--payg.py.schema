@@ -3,7 +3,7 @@ imports:
 
 info:
   version: 1.0
-  title: Check Point CloudGuard IaaS Autoscaling - PAYG Template
+  title: Check Point CloudGuard Network Security Autoscaling - PAYG Template
 
 required:
   - autoscalingVersion
