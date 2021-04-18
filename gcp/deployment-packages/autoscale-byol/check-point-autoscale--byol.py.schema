@@ -178,7 +178,7 @@ properties:
   AutoProvTemplate:
     type: string
     default: 'gcp-asg-autoprov-tmplt'
-    pattern: ^([ -~]+)$
+    pattern: ^([ -~]{1,30})$
   enableMonitoring:
     type: boolean
     default: False
