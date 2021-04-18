@@ -26,7 +26,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20210413'
+TEMPLATE_VERSION = '20210418'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
