@@ -438,6 +438,10 @@
               {
                 "label": "Choose an existing Azure Key Vault",
                 "value": "existingVault"
+              },
+			        {
+                "label": "Create new Azure Key Vault and upload certificates",
+                "value": "newVault"
               }
               ],
               "required": true
@@ -450,6 +454,216 @@
             "label": "Choose a certificate",
             "toolTip": "You need to select one certificate only, the next ones will be added automatically",
             "visible": "[equals(steps('https').chooseVault, 'existingVault')]"
+          },
+          {
+            "name": "keyVaultName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Azure Key Vault name",
+            "toolTip": "Azure Key Vault name",
+            "constraints": {
+              "required": "[equals(steps('https').chooseVault, 'newVault')]",
+              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "numberOfCerts",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Number of certificates to upload",
+            "defaultValue": "1",
+            "toolTip": "Each certificate will have two entries in the Key Vault secrets - one for certificate and one for its password",
+            "constraints": {
+              "required": "[equals(steps('https').chooseVault, 'newVault')]",
+              "allowedValues": [
+                {
+                  "label": "1",
+                  "value": 1
+                },
+                {
+                  "label": "2",
+                  "value": 2
+                },
+                {
+                  "label": "3",
+                  "value": 3
+                },
+                {
+                  "label": "4",
+                  "value": 4
+                },
+                {
+                  "label": "5",
+                  "value": 5
+                }
+              ]
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "firstCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(1, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "firstCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Cert password",
+              "confirmPassword": "Confirm cert password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate",
+            "constraints": {
+              "required": "[lessOrEquals(1, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "secondCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "secondCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Cert password",
+              "confirmPassword": "Confirm cert password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "thirdCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "thirdCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Cert password",
+              "confirmPassword": "Confirm cert password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fourthCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fourthCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Cert password",
+              "confirmPassword": "Confirm cert password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fifthCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fifthCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Cert password",
+              "confirmPassword": "Confirm cert password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
           }
         ]
       }
@@ -484,7 +698,18 @@
       "adminEmail": "[basics('adminEmail')]",
       "chooseVault": "[steps('https').chooseVault]",
       "existingKeyVaultRGName": "[if(empty(steps('https').existingKeyVault), resourceGroup().name, first(skip(split(steps('https').existingKeyVault.keyVaultId, '/'), 4)))]",
-      "keyVaultName": "[if(empty(steps('https').existingKeyVault), resourceGroup().name, steps('https').existingKeyVault.keyVaultName)]"
+      "keyVaultName": "[if(equals(steps('https').chooseVault, 'none'), resourceGroup().name, if(empty(steps('https').existingKeyVault), steps('https').keyVaultName, steps('https').existingKeyVault.keyVaultName))]",
+      "numberOfCerts": "[coalesce(steps('https').numberOfCerts, int('0'))]",
+      "firstCertificate": "[steps('https').firstCertificate]",
+      "firstCertPassword": "[steps('https').firstCertPassword]",
+      "secondCertificate": "[steps('https').secondCertificate]",
+      "secondCertPassword": "[steps('https').secondCertPassword]",
+      "thirdCertificate": "[steps('https').thirdCertificate]",
+      "thirdCertPassword": "[steps('https').thirdCertPassword]",
+      "fourthCertificate": "[steps('https').fourthCertificate]",
+      "fourthCertPassword": "[steps('https').fourthCertPassword]",
+      "fifthCertificate": "[steps('https').fifthCertificate]",
+      "fifthCertPassword": "[steps('https').fifthCertPassword]"
     }
   }
 }

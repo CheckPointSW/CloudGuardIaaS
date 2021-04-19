@@ -1,938 +1,1025 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "location": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().location]",
-            "metadata": {
-                "description": "Deployment location"
-            }
-        },
-        "vmName": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().name]",
-            "metadata": {
-                "description": "Name of the VM Scale Set"
-            }
-        },
-        "inboundSources": {
-            "type": "string",
-            "defaultValue": "0.0.0.0/0",
-            "metadata": {
-                "description": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)"
-            }
-        },
-        "authenticationType": {
-            "type": "string",
-            "allowedValues": [
-                "password",
-                "sshPublicKey"
-            ],
-            "defaultValue": "password",
-            "metadata": {
-                "description": "Authentication type"
-            }
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "User is set to 'admin'"
-            }
-        },
-        "sshPublicKey": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Administrator SSH public key"
-            }
-        },
-        "waapAgentToken": {
-            "type": "secureString",
-            "defaultValue": "",
-            "minLength": 1,
-            "metadata": {
-                "description": "Infinity Next Agent Token"
-            }
-        },
-        "waapAgentFog": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Fog address"
-            }
-        },
-        "adminEmail": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Email address to notify about scaling events"
-            }
-        },
-        "availabilityZonesNum": {
-            "type": "int",
-            "allowedValues": [
-                1,
-                2,
-                3
-            ],
-            "defaultValue": 2,
-            "metadata": {
-                "description": "The number of availability zones to use for the scale set. The VMs will be spread equally between the zones"
-            }
-        },
-        "vmSize": {
-            "type": "string",
-            "defaultValue": "Standard_DS2_v2",
-            "metadata": {
-                "description": "The VM size of the Security Gateway"
-            }
-        },
-        "diskType": {
-            "type": "string",
-            "defaultValue": "Standard_LRS",
-            "metadata": {
-                "description": "The type of the OS disk. Premium is applicable only to DS machine sizes"
-            },
-            "allowedValues": [
-                "Standard_LRS",
-                "Premium_LRS"
-            ]
-        },
-        "instanceCount": {
-            "type": "string",
-            "defaultValue": "2",
-            "metadata": {
-                "description": "Initial number of gateways"
-            }
-        },
-        "maxInstanceCount": {
-            "type": "string",
-            "defaultValue": "10",
-            "metadata": {
-                "description": "Maximum number of gateways"
-            }
-        },
-        "instanceLevelPublicIP": {
-            "type": "string",
-            "allowedValues": [
-                "yes",
-                "no"
-            ],
-            "defaultValue": "yes",
-            "metadata": {
-                "description": "Assign public IP address to each gateway"
-            }
-        },
-        "elbResourceId": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The Resource ID of the Load Balancer."
-            }
-        },
-        "elbTargetBEAddressPoolName": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The name of the new External Load Balancer's Backend Pool."
-            }
-        },
-        "deploymentMode": {
-            "type": "string",
-            "allowedValues": [
-                "ELBOnly"
-            ],
-            "defaultValue": "ELBOnly",
-            "metadata": {
-                "description": "Solution deployment architecture"
-            }
-        },
-        "appLoadDistribution": {
-            "type": "string",
-            "allowedValues": [
-                "Default",
-                "SourceIP"
-            ],
-            "defaultValue": "SourceIP",
-            "metadata": {
-                "description": "The load balancing distribution method"
-            }
-        },
-        "ilbResourceId": {
-            "type": "string",
-            "metadata": {
-                "description": "The Resource ID of the Target Internal Load Balancer."
-            },
-            "defaultValue": ""
-        },
-        "ilbTargetBEAddressPoolName": {
-            "type": "string",
-            "metadata": {
-                "description": "The name of the new Target Internal Load Balancer's Backend Pool."
-            },
-            "defaultValue": ""
-        },
-        "ilbLoadDistribution": {
-            "type": "string",
-            "allowedValues": [
-                "Default",
-                "SourceIP",
-                "SourceIPProtocol"
-            ],
-            "defaultValue": "Default",
-            "metadata": {
-                "description": "The Internal Load Balancer distribution method"
-            }
-        },
-        "bootstrapScript": {
-            "type": "string",
-            "metadata": {
-                "description": "Bootstrap script"
-            },
-            "defaultValue": ""
-        },
-        "sourceImageVhdUri": {
-            "type": "string",
-            "defaultValue": "noCustomUri",
-            "metadata": {
-                "description": "The URI of the blob containing the development image"
-            }
-        },
-        "_artifactsLocation": {
-            "type": "string",
-            "defaultValue": "[deployment().properties.templateLink.uri]",
-            "metadata": {
-                "description": "The base URI where artifacts required by this template are located including a trailing '/'"
-            }
-        },
-        "_artifactsLocationSasToken": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured"
-            }
-        },
-        "vnetNewOrExisting": {
-            "type": "string",
-            "defaultValue": "new",
-            "allowedValues": [
-                "new",
-                "existing"
-            ],
-            "metadata": {
-                "Description": "Indicates whether the virtual network is new or existing"
-            }
-        },
-        "virtualNetworkExistingRGName": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().name]",
-            "metadata": {
-                "description": "Resource Group of the existing virtual network"
-            }
-        },
-        "virtualNetworkName": {
-            "type": "string",
-            "defaultValue": "[concat(resourceGroup().name, '-vnet')]",
-            "metadata": {
-                "description": "The name of the virtual network"
-            }
-        },
-        "virtualNetworkAddressPrefixes": {
-            "type": "array",
-            "metadata": {
-                "description": "The address prefixes of the virtual network. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
-            },
-            "defaultValue": [
-                "10.0.0.0/16"
-            ]
-        },
-        "subnet1Name": {
-            "type": "string",
-            "defaultValue": "VMSS-External",
-            "metadata": {
-                "description": "The name of the Gateway external subnet"
-            }
-        },
-        "subnet1Prefix": {
-            "type": "string",
-            "defaultValue": "10.0.1.0/24",
-            "metadata": {
-                "description": "The address prefix of the Gateway external subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
-            }
-        },
-        "subnet2Name": {
-            "type": "string",
-            "defaultValue": "VMSS-Internal",
-            "metadata": {
-                "description": "The name of the Gateway internal subnet"
-            }
-        },
-        "subnet2Prefix": {
-            "type": "string",
-            "defaultValue": "10.0.2.0/24",
-            "metadata": {
-                "description": "The address prefix of the Gateway internal subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
-            }
-        },
-        "subnet2StartAddress": {
-            "type": "string",
-            "defaultValue": "10.0.2.4",
-            "metadata": {
-                "description": "The first available address on the 2nd subnet"
-            }
-        },
-        "Check_PointTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-            }
-        },
-        "sicKey": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "One time key for Secure Internal Communication"
-            }
-        },
-        "chooseVault": {
-            "type": "string",
-            "allowedValues": [
-                "none",
-                "existingVault",
-                "newVault"
-            ],
-            "defaultValue": "none",
-            "metadata": {
-                "description": "Choose an existing Azure Key Vault or create new Azure Key Vault and upload certificates. 'none' means you don't use HTTPS certificates."
-            }
-        },
-        "existingKeyVaultRGName": {
-            "type": "string",
-            "defaultValue": "[resourceGroup().name]",
-            "metadata": {
-                "description": "Resource group name of the existing key vault - could be on a different resource group"
-            }
-        },
-        "keyVaultName": {
-            "type": "string",
-            "defaultValue": ""
-        },
-        "numberOfCerts": {
-            "type": "int",
-            "allowedValues": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "defaultValue": 0,
-            "metadata": {
-                "description": "Number of certificates to upload"
-            }
-        },
-        "firstCertificate": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "PFX certificate file"
-            }
-        },
-        "firstCertPassword": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Password used when exporting the PFX certificate"
-            }
-        },
-        "secondCertificate": {
-            "type": "securestring",
-            "defaultValue": ""
-        },
-        "secondCertPassword": {
-            "type": "securestring",
-            "defaultValue": ""
-        },
-        "thirdCertificate": {
-            "type": "securestring",
-            "defaultValue": ""
-        },
-        "thirdCertPassword": {
-            "type": "securestring",
-            "defaultValue": ""
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Deployment location"
+      }
     },
-    "variables": {
-        "resourceGroup": "[resourceGroup()]",
-        "templateName": "waap_vmss",
-        "templateVersion": "20210411",
-        "location": "[parameters('location')]",
-        "osVersion": "R8040",
-        "adminUsername": "notused",
-        "isBlink": true,
-        "subnet2Name": "[parameters('subnet2Name')]",
-        "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
-        "storageAccountType": "Standard_LRS",
-        "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'waapAgentToken =\"', variables('waapAgentToken'), '\"', '\n', 'waapAgentFog =\"', variables('waapAgentFog'), '\"', '\n')]",
-        "imageOffer": "infinity-gw",
-        "imagePublisher": "checkpoint",
-        "imageSku": "infinity-img",
-        "imageReferenceBYOL": {
-            "offer": "[variables('imageOffer')]",
-            "publisher": "[variables('imagePublisher')]",
-            "sku": "[variables('imageSku')]",
-            "version": "latest"
-        },
-        "imageReferenceMarketplace": "[variables('imageReferenceBYOL')]",
-        "customImage": "customImage",
-        "imageReferenceCustomUri": {
-            "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
-        },
-        "imageReference": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('imageReferenceMarketplace'), variables('imageReferenceCustomUri'))]",
-        "linuxConfigurationpassword": {
-            "disablePasswordAuthentication": "false"
-        },
-        "linuxConfigurationsshPublicKey": {
-            "disablePasswordAuthentication": "true",
-            "ssh": {
-                "publicKeys": [
-                    {
-                        "keyData": "[parameters('sshPublicKey')]",
-                        "path": "/home/notused/.ssh/authorized_keys"
-                    }
-                ]
-            }
-        },
-        "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'),  variables('linuxConfigurationpassword'), variables('linuxConfigurationsshPublicKey'))]",
-        "planBYOL": {
-            "name": "[variables('imageSku')]",
-            "product": "[variables('imageOffer')]",
-            "publisher": "[variables('imagePublisher')]"
-        },
-        "plan": "[variables('planBYOL')]",
-        "vmssID": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmName'))]",
-        "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
-        "allowUploadDownload": "false",
-        "sicKey": "[parameters('sicKey')]",
-        "waapAgentToken": "[parameters('waapAgentToken')]",
-        "waapAgentFog": "[parameters('waapAgentFog')]",
-        "inboundSources": "[parameters('inboundSources')]",
-        "installationType": "waap_vmss",
-        "publicIPProperties": {
-            "name": "instancePublicIP",
-            "properties": {
-                "idleTimeoutInMinutes": 15
-            }
-        },
-        "upgrading": false,
-        "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-        "nsgName": "[concat(parameters('vmName'), '-nsg')]",
-        "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
-        "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers-waap.json', parameters('_artifactsLocationSasToken')))]",
-        "lbRGName": "[resourceGroup().name]",
-        "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
-        "vnetID": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
-        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "customImageId": "[variables('imageReferenceCustomUri').id]",
-        "availabilityZonesLocations": [
-            "centralus",
-            "eastus2",
-            "francecentral",
-            "northeurope",
-            "southeastasia",
-            "westeurope",
-            "westus2",
-            "eastus",
-            "uksouth",
-            "southafricanorth",
-            "southcentralus",
-            "germanywestcentral",
-            "canadacentral",
-            "japaneast"
-        ],
-        "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
-        "commomTags": {
-            "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-        },
-        "vaultTags": {
-            "vault": "[parameters('keyVaultName')]"
-        },
-        "isHttps": "[not(equals(parameters('chooseVault'), 'none'))]",
-        "vmssTags": "[if(variables('isHttps'), union(variables('commomTags'), variables('vaultTags')), variables('commomTags'))]",
-        "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-        "secretsArray": [
-            "[parameters('firstCertificate')]",
-            "[parameters('firstCertPassword')]",
-            "[parameters('secondCertificate')]",
-            "[parameters('secondCertPassword')]",
-            "[parameters('thirdCertificate')]",
-            "[parameters('thirdCertPassword')]"
-        ],
-        "certUploaded": "[and(equals(parameters('chooseVault'), 'newVault'), greater(parameters('numberOfCerts'), 0), greater(length(variables('secretsArray')), 0))]"
+    "vmName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the VM Scale Set"
+      }
     },
-    "resources": [
-        {
-            "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-            "name": "networkNewSetup",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
-            "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('networkSetupURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "location": {
-                        "value": "[variables('location')]"
-                    },
-                    "virtualNetworkName": {
-                        "value": "[parameters('virtualNetworkName')]"
-                    },
-                    "virtualNetworkAddressPrefixes": {
-                        "value": "[parameters('virtualNetworkAddressPrefixes')]"
-                    },
-                    "subnet1Name": {
-                        "value": "[parameters('subnet1Name')]"
-                    },
-                    "subnet1Prefix": {
-                        "value": "[parameters('subnet1Prefix')]"
-                    },
-                    "subnet2Name": {
-                        "value": "[parameters('subnet2Name')]"
-                    },
-                    "subnet2Prefix": {
-                        "value": "[parameters('subnet2Prefix')]"
-                    },
-                    "vmName": {
-                        "value": "[parameters('vmName')]"
-                    },
-                    "deployNsg": {
-                        "value": false
-                    }
-                }
-            }
-        },
-        {
-            "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
-            "name": "networkExistingSetup",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
-            "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('networkSetupURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "location": {
-                        "value": "[variables('location')]"
-                    },
-                    "virtualNetworkName": {
-                        "value": "[parameters('virtualNetworkName')]"
-                    },
-                    "virtualNetworkExistingRGName": {
-                        "value": "[parameters('virtualNetworkExistingRGName')]"
-                    },
-                    "vmName": {
-                        "value": "[parameters('vmName')]"
-                    },
-                    "deployNsg": {
-                        "value": false
-                    }
-                }
-            }
-        },
-        {
-            "name": "loadBalancerSetup",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('lbRGName')]",
-            "apiVersion": "2020-06-01",
-            "dependsOn": [
-                "[variables('vnetID')]"
-            ],
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('loadBalacerSetupURL')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "deploymentMode": {
-                        "value": "[parameters('deploymentMode')]"
-                    },
-                    "location": {
-                        "value": "[variables('location')]"
-                    },
-                    "vmName": {
-                        "value": "[parameters('vmName')]"
-                    },
-                    "appLoadDistribution": {
-                        "value": "[parameters('appLoadDistribution')]"
-                    },
-                    "subnet2StartAddress": {
-                        "value": "[parameters('subnet2StartAddress')]"
-                    },
-                    "subnet2Id": {
-                        "value": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('subnet2Name'))]"
-                    },
-                    "ilbLoadDistribution": {
-                        "value": "[parameters('ilbLoadDistribution')]"
-                    },
-                    "elbResourceId": {
-                        "value": "[parameters('elbResourceId')]"
-                    },
-                    "elbTargetBEAddressPoolName": {
-                        "value": "[parameters('elbTargetBEAddressPoolName')]"
-                    },
-                    "ilbResourceId": {
-                        "value": "[parameters('ilbResourceId')]"
-                    },
-                    "ilbTargetBEAddressPoolName": {
-                        "value": "[parameters('ilbTargetBEAddressPoolName')]"
-                    },
-                    "upgrading": {
-                        "value": "[variables('upgrading')]"
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('storageAccountName')]",
-            "apiVersion": "2019-06-01",
-            "location": "[variables('location')]",
-            "sku": {
-                "name": "[variables('storageAccountType')]"
-            },
-            "kind": "Storage",
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
-        },
-        {
-            "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
-            "type": "Microsoft.Compute/images",
-            "apiVersion": "2020-06-01",
-            "name": "[variables('customImage')]",
-            "location": "[variables('resourceGroup').location]",
-            "properties": {
-                "storageProfile": {
-                    "osDisk": {
-                        "osType": "Linux",
-                        "osState": "Generalized",
-                        "blobUri": "[parameters('sourceImageVhdUri')]",
-                        "storageAccountType": "Standard_LRS"
-                    }
-                },
-                "hyperVGeneration": "V1"
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-06-01",
-            "location": "[variables('location')]",
-            "name": "[variables('nsgName')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "SSH",
-                        "properties": {
-                            "description": "Allow inbound SSH connection",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "[variables('inboundSources')]",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 100,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "GAiA-portal",
-                        "properties": {
-                            "description": "Allow inbound HTTPS access to the GAiA portal",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "30443",
-                            "sourceAddressPrefix": "[variables('inboundSources')]",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 110,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "HTTPS",
-                        "properties": {
-                            "description": "Allow inbound access using the SmartConsole GUI client",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "443",
-                            "sourceAddressPrefix": "[variables('inboundSources')]",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 120,
-                            "direction": "Inbound"
-                        }
-                    },
-                    {
-                        "name": "HTTP",
-                        "properties": {
-                            "description": "Allow inbound access using the SmartConsole GUI client",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "80",
-                            "sourceAddressPrefix": "[variables('inboundSources')]",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 130,
-                            "direction": "Inbound"
-                        }
-                    }
-                ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachineScaleSets",
-            "apiVersion": "2020-06-01",
-            "name": "[parameters('vmName')]",
-            "location": "[variables('location')]",
-            "identity": "[if(variables('isHttps'), variables('identity'), json('null'))]",
-            "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
-            "tags": "[variables('vmssTags')]",
-            "dependsOn": [
-                "[variables('vnetID')]",
-                "[variables('loadBalancerSetupId')]",
-                "[variables('storageAccountId')]",
-                "[variables('customImageId')]",
-                "[variables('nsgId')]"
-            ],
-            "sku": {
-                "name": "[parameters('vmSize')]",
-                "tier": "Standard",
-                "capacity": "[parameters('instanceCount')]"
-            },
-            "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
-            "properties": {
-                "upgradePolicy": {
-                    "mode": "Manual"
-                },
-                "virtualMachineProfile": {
-                    "storageProfile": {
-                        "osDisk": {
-                            "caching": "ReadWrite",
-                            "createOption": "FromImage",
-                            "managedDisk": {
-                                "storageAccountType": "[parameters('diskType')]"
-                            }
-                        },
-                        "imageReference": "[variables('imageReference')]"
-                    },
-                    "osProfile": {
-                        "adminPassword": "[parameters('adminPassword')]",
-                        "adminUsername": "[variables('adminUsername')]",
-                        "computerNamePrefix": "[toLower(parameters('vmName'))]",
-                        "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
-                        "linuxConfiguration": "[variables('linuxConfiguration')]"
-                    },
-                    "networkProfile": {
-                        "networkInterfaceConfigurations": [
-                            {
-                                "name": "eth0",
-                                "properties": {
-                                    "primary": true,
-                                    "enableIPForwarding": false,
-                                    "enableAcceleratedNetworking": true,
-                                    "networkSecurityGroup": {
-                                        "id": "[variables('nsgId')]"
-                                    },
-                                    "ipConfigurations": [
-                                        {
-                                            "name": "ipconfig1",
-                                            "properties": {
-                                                "publicIpAddressConfiguration": "[if(equals(parameters('instanceLevelPublicIP'),'yes'), variables('publicIPProperties'), json('null'))]",
-                                                "subnet": {
-                                                    "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
-                                                },
-                                                "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.elbId.value), json('null'), reference('loadBalancerSetup').outputs.elbBEAddressPoolProperties.value)]"
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                "name": "eth1",
-                                "properties": {
-                                    "primary": false,
-                                    "enableIPForwarding": true,
-                                    "enableAcceleratedNetworking": true,
-                                    "ipConfigurations": [
-                                        {
-                                            "name": "ipconfig2",
-                                            "properties": {
-                                                "subnet": {
-                                                    "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
-                                                },
-                                                "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.ilbId.value), json('null'), reference('loadBalancerSetup').outputs.ilbBEAddressPoolProperties.value)]"
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    },
-                    "diagnosticsProfile": {
-                        "bootDiagnostics": {
-                            "enabled": "true",
-                            "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
-                        }
-                    }
-                },
-                "overprovision": false
-            }
-        },
-        {
-            "type": "Microsoft.Insights/autoscaleSettings",
-            "apiVersion": "2015-04-01",
-            "name": "[parameters('vmName')]",
-            "location": "[variables('location')]",
-            "dependsOn": [
-                "[variables('vmssID')]"
-            ],
-            "properties": {
-                "name": "[parameters('vmName')]",
-                "targetResourceUri": "[variables('vmssID')]",
-                "notifications": [
-                    {
-                        "operation": "Scale",
-                        "email": {
-                            "sendToSubscriptionAdministrator": false,
-                            "sendToSubscriptionCoAdministrators": false,
-                            "customEmails": "[if(empty(parameters('adminEmail')), json('null'), array(parameters('adminEmail')))]"
-                        }
-                    }
-                ],
-                "enabled": true,
-                "profiles": [
-                    {
-                        "name": "Profile1",
-                        "capacity": {
-                            "minimum": "[parameters('instanceCount')]",
-                            "maximum": "[parameters('maxInstanceCount')]",
-                            "default": "[parameters('instanceCount')]"
-                        },
-                        "rules": [
-                            {
-                                "metricTrigger": {
-                                    "metricName": "Percentage CPU",
-                                    "metricResourceUri": "[variables('vmssID')]",
-                                    "timeGrain": "PT1M",
-                                    "statistic": "Average",
-                                    "timeWindow": "PT5M",
-                                    "timeAggregation": "Average",
-                                    "operator": "GreaterThan",
-                                    "threshold": 80
-                                },
-                                "scaleAction": {
-                                    "direction": "Increase",
-                                    "type": "ChangeCount",
-                                    "value": "1",
-                                    "cooldown": "PT5M"
-                                }
-                            },
-                            {
-                                "metricTrigger": {
-                                    "metricName": "Percentage CPU",
-                                    "metricResourceUri": "[variables('vmssID')]",
-                                    "timeGrain": "PT1M",
-                                    "statistic": "Average",
-                                    "timeWindow": "PT5M",
-                                    "timeAggregation": "Average",
-                                    "operator": "LessThan",
-                                    "threshold": 60
-                                },
-                                "scaleAction": {
-                                    "direction": "Decrease",
-                                    "type": "ChangeCount",
-                                    "value": "1",
-                                    "cooldown": "PT5M"
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
-        },
-        {
-            "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'existingVault'))]",
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2020-06-01",
-            "name": "[parameters('keyVaultName')]",
-            "dependsOn": [
-                "[variables('vmssID')]"
-            ],
-            "resourceGroup": "[parameters('existingKeyVaultRGName')]",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": [
-                        {
-                            "type": "Microsoft.KeyVault/vaults/accessPolicies",
-                            "name": "[concat(parameters('keyVaultName'), '/add')]",
-                            "apiVersion": "2019-09-01",
-                            "properties": {
-                                "accessPolicies": [
-                                    {
-                                        "tenantId": "[subscription().tenantid]",
-                                        "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
-                                        "permissions": {
-                                            "secrets": [
-                                                "get",
-                                                "list"
-                                            ],
-                                            "certificates": [
-                                                "get",
-                                                "list"
-                                            ]
-                                        }
-                                    }
-                                ]
-                            }
-                        }
-                    ],
-                    "outputs": {}
-                }
-            }
-        }
-    ],
-    "outputs": {
-        "ApplicationAddress": {
-            "type": "string",
-            "value": "[reference('loadBalancerSetup').outputs.ApplicationAddress.value]"
-        },
-        "ApplicationFQDN": {
-            "type": "string",
-            "value": "[reference('loadBalancerSetup').outputs.ApplicationFQDN.value]"
-        },
-        "CertificatesUploaded": {
-            "value": "[variables('certUploaded')]",
-            "type": "bool"
-        }
+    "inboundSources": {
+      "type": "string",
+      "defaultValue": "0.0.0.0/0",
+      "metadata": {
+        "description": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)"
+      }
+    },
+    "authenticationType": {
+      "type": "string",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "defaultValue": "password",
+      "metadata": {
+        "description": "Authentication type"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "User is set to 'admin'"
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Administrator SSH public key"
+      }
+    },
+    "waapAgentToken": {
+      "type": "secureString",
+      "defaultValue": "",
+      "minLength": 1,
+      "metadata": {
+        "description": "Infinity Next Agent Token"
+      }
+    },
+    "waapAgentFog": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Fog address"
+      }
+    },
+    "adminEmail": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Email address to notify about scaling events"
+      }
+    },
+    "availabilityZonesNum": {
+      "type": "int",
+      "allowedValues": [
+        1,
+        2,
+        3
+      ],
+      "defaultValue": 2,
+      "metadata": {
+        "description": "The number of availability zones to use for the scale set. The VMs will be spread equally between the zones"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS2_v2",
+      "metadata": {
+        "description": "The VM size of the Security Gateway"
+      }
+    },
+    "diskType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The type of the OS disk. Premium is applicable only to DS machine sizes"
+      },
+      "allowedValues": [
+        "Standard_LRS",
+        "Premium_LRS"
+      ]
+    },
+    "instanceCount": {
+      "type": "string",
+      "defaultValue": "2",
+      "metadata": {
+        "description": "Initial number of gateways"
+      }
+    },
+    "maxInstanceCount": {
+      "type": "string",
+      "defaultValue": "10",
+      "metadata": {
+        "description": "Maximum number of gateways"
+      }
+    },
+    "instanceLevelPublicIP": {
+      "type": "string",
+      "allowedValues": [
+        "yes",
+        "no"
+      ],
+      "defaultValue": "yes",
+      "metadata": {
+        "description": "Assign public IP address to each gateway"
+      }
+    },
+    "elbResourceId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The Resource ID of the Load Balancer."
+      }
+    },
+    "elbTargetBEAddressPoolName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The name of the new External Load Balancer's Backend Pool."
+      }
+    },
+    "deploymentMode": {
+      "type": "string",
+      "allowedValues": [
+        "ELBOnly"
+      ],
+      "defaultValue": "ELBOnly",
+      "metadata": {
+        "description": "Solution deployment architecture"
+      }
+    },
+    "appLoadDistribution": {
+      "type": "string",
+      "allowedValues": [
+        "Default",
+        "SourceIP"
+      ],
+      "defaultValue": "SourceIP",
+      "metadata": {
+        "description": "The load balancing distribution method"
+      }
+    },
+    "ilbResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The Resource ID of the Target Internal Load Balancer."
+      },
+      "defaultValue": ""
+    },
+    "ilbTargetBEAddressPoolName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the new Target Internal Load Balancer's Backend Pool."
+      },
+      "defaultValue": ""
+    },
+    "ilbLoadDistribution": {
+      "type": "string",
+      "allowedValues": [
+        "Default",
+        "SourceIP",
+        "SourceIPProtocol"
+      ],
+      "defaultValue": "Default",
+      "metadata": {
+        "description": "The Internal Load Balancer distribution method"
+      }
+    },
+    "bootstrapScript": {
+      "type": "string",
+      "metadata": {
+        "description": "Bootstrap script"
+      },
+      "defaultValue": ""
+    },
+    "sourceImageVhdUri": {
+      "type": "string",
+      "defaultValue": "noCustomUri",
+      "metadata": {
+        "description": "The URI of the blob containing the development image"
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "defaultValue": "[deployment().properties.templateLink.uri]",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+      }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured"
+      }
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "[concat(resourceGroup().name, '-vnet')]",
+      "metadata": {
+        "description": "The name of the virtual network"
+      }
+    },
+    "virtualNetworkAddressPrefixes": {
+      "type": "array",
+      "metadata": {
+        "description": "The address prefixes of the virtual network. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+      },
+      "defaultValue": [
+        "10.0.0.0/16"
+      ]
+    },
+    "subnet1Name": {
+      "type": "string",
+      "defaultValue": "VMSS-External",
+      "metadata": {
+        "description": "The name of the Gateway external subnet"
+      }
+    },
+    "subnet1Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.1.0/24",
+      "metadata": {
+        "description": "The address prefix of the Gateway external subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+      }
+    },
+    "subnet2Name": {
+      "type": "string",
+      "defaultValue": "VMSS-Internal",
+      "metadata": {
+        "description": "The name of the Gateway internal subnet"
+      }
+    },
+    "subnet2Prefix": {
+      "type": "string",
+      "defaultValue": "10.0.2.0/24",
+      "metadata": {
+        "description": "The address prefix of the Gateway internal subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+      }
+    },
+    "subnet2StartAddress": {
+      "type": "string",
+      "defaultValue": "10.0.2.4",
+      "metadata": {
+        "description": "The first available address on the 2nd subnet"
+      }
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    },
+    "sicKey": {
+      "type": "securestring",
+	    "defaultValue": "",
+      "metadata": {
+        "description": "One time key for Secure Internal Communication"
+      }
+    },
+    "chooseVault": {
+      "type": "string",
+      "allowedValues": [
+        "none",
+        "existingVault",
+        "newVault"
+      ],
+      "defaultValue": "none",
+      "metadata": {
+        "description": "Choose an existing Azure Key Vault or create new Azure Key Vault and upload certificates. 'none' means you don't use HTTPS certificates."
+      }
+    },
+    "existingKeyVaultRGName": {
+      "type": "string",
+	    "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Resource group name of the existing key vault - could be on a different resource group"
+      }
+    },
+    "keyVaultName": {
+      "type": "string",
+	    "defaultValue": ""
+    },
+    "numberOfCerts": {
+      "type": "int",
+      "allowedValues": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Number of certificates to upload"
+      }
+    },
+    "firstCertificate": {
+      "type": "securestring",
+	    "defaultValue": "",
+      "metadata": {
+        "description": "PFX certificate file encoded to base64 format"
+      }
+    },
+    "firstCertPassword": {
+      "type": "securestring",
+	    "defaultValue": "",
+      "metadata": {
+        "description": "Password used when exporting the PFX certificate"
+      }
+    },
+    "secondCertificate": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "secondCertPassword": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "thirdCertificate": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "thirdCertPassword": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "fourthCertificate": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "fourthCertPassword": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "fifthCertificate": {
+      "type": "securestring",
+	    "defaultValue": ""
+    },
+    "fifthCertPassword": {
+      "type": "securestring",
+	    "defaultValue": ""
     }
+  },
+  "variables": {
+    "resourceGroup": "[resourceGroup()]",
+    "templateName": "waap_vmss",
+    "templateVersion": "20210419",
+    "location": "[parameters('location')]",
+    "osVersion": "R8040",
+    "adminUsername": "notused",
+    "isBlink": true,
+    "subnet2Name": "[parameters('subnet2Name')]",
+    "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
+    "storageAccountType": "Standard_LRS",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'waapAgentToken =\"', variables('waapAgentToken'), '\"', '\n', 'waapAgentFog =\"', variables('waapAgentFog'), '\"', '\n')]",
+    "imageOffer": "infinity-gw",
+    "imagePublisher": "checkpoint",
+    "imageSku": "infinity-img",
+    "imageReferenceBYOL": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "[variables('imageSku')]",
+      "version": "latest"
+    },
+    "imageReferenceMarketplace": "[variables('imageReferenceBYOL')]",
+    "customImage": "customImage",
+    "imageReferenceCustomUri": {
+      "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
+    },
+    "imageReference": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('imageReferenceMarketplace'), variables('imageReferenceCustomUri'))]",
+    "linuxConfigurationpassword": {
+      "disablePasswordAuthentication": "false"
+    },
+    "linuxConfigurationsshPublicKey": {
+      "disablePasswordAuthentication": "true",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "[parameters('sshPublicKey')]",
+            "path": "/home/notused/.ssh/authorized_keys"
+          }
+        ]
+      }
+    },
+    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'),  variables('linuxConfigurationpassword'), variables('linuxConfigurationsshPublicKey'))]",
+    "planBYOL": {
+      "name": "[variables('imageSku')]",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+	  "plan": "[variables('planBYOL')]",
+    "vmssID": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmName'))]",
+    "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
+    "allowUploadDownload": "false",
+    "sicKey": "[parameters('sicKey')]",
+	  "waapAgentToken": "[parameters('waapAgentToken')]",
+    "waapAgentFog": "[parameters('waapAgentFog')]",
+    "inboundSources": "[parameters('inboundSources')]",
+    "installationType": "waap_vmss",
+    "publicIPProperties": {
+      "name": "instancePublicIP",
+      "properties": {
+        "idleTimeoutInMinutes": 15
+      }
+    },
+    "upgrading": false,
+    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+    "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
+    "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers-waap.json', parameters('_artifactsLocationSasToken')))]",
+    "lbRGName": "[resourceGroup().name]",
+    "elbName": "External-lb",
+    "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
+    "vnetID": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+    "customImageId": "[variables('imageReferenceCustomUri').id]",
+    "availabilityZonesLocations": [
+      "centralus",
+      "eastus2",
+      "francecentral",
+      "northeurope",
+      "southeastasia",
+      "westeurope",
+      "westus2",
+      "eastus",
+      "uksouth",
+	    "southafricanorth",
+      "southcentralus",
+      "germanywestcentral",
+      "canadacentral",
+      "japaneast"
+    ],
+    "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
+    "commomTags": {
+      "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+    },
+    "vaultTags": {
+      "vault": "[parameters('keyVaultName')]"
+    },
+    "isHttps" : "[not(equals(parameters('chooseVault'), 'none'))]",
+    "vmssTags": "[if(variables('isHttps'), union(variables('commomTags'), variables('vaultTags')), variables('commomTags'))]",
+    "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+    "secretsValueArray": [
+      "[parameters('firstCertificate')]",
+      "[parameters('firstCertPassword')]",
+      "[parameters('secondCertificate')]",
+      "[parameters('secondCertPassword')]",
+      "[parameters('thirdCertificate')]",
+      "[parameters('thirdCertPassword')]",
+      "[parameters('fourthCertificate')]",
+      "[parameters('fourthCertPassword')]",
+      "[parameters('fifthCertificate')]",
+      "[parameters('fifthCertPassword')]"
+    ],
+    "secretsNameArray": [
+      "cert1",
+      "cert1-pw",
+      "cert2",
+      "cert2-pw",
+      "cert3",
+      "cert3-pw",
+      "cert4",
+      "cert4-pw",
+      "cert5",
+      "cert5-pw"
+    ],
+    "numberOfSecrets": "[mul(parameters('numberOfCerts'), 2)]"
+  },
+  "resources": [
+    {
+      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+      "name": "networkNewSetup",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressPrefixes": {
+            "value": "[parameters('virtualNetworkAddressPrefixes')]"
+          },
+          "subnet1Name": {
+            "value": "[parameters('subnet1Name')]"
+          },
+          "subnet1Prefix": {
+            "value": "[parameters('subnet1Prefix')]"
+          },
+          "subnet2Name": {
+            "value": "[parameters('subnet2Name')]"
+          },
+          "subnet2Prefix": {
+            "value": "[parameters('subnet2Prefix')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "deployNsg": {
+            "value": false
+          }
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
+      "name": "networkExistingSetup",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkExistingRGName": {
+            "value": "[parameters('virtualNetworkExistingRGName')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "deployNsg": {
+            "value": false
+          }
+        }
+      }
+    },
+    {
+      "name": "loadBalancerSetup",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[variables('lbRGName')]",
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+       "[variables('vnetID')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('loadBalacerSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "deploymentMode": {
+            "value": "[parameters('deploymentMode')]"
+          },
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "appLoadDistribution": {
+            "value": "[parameters('appLoadDistribution')]"
+          },
+          "subnet2StartAddress": {
+            "value": "[parameters('subnet2StartAddress')]"
+          },
+          "subnet2Id": {
+            "value": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('subnet2Name'))]"
+          },
+          "ilbLoadDistribution": {
+            "value": "[parameters('ilbLoadDistribution')]"
+          },
+          "elbResourceId": {
+            "value": "[parameters('elbResourceId')]"
+          },
+          "elbTargetBEAddressPoolName": {
+            "value": "[parameters('elbTargetBEAddressPoolName')]"
+          },
+          "ilbResourceId": {
+            "value": "[parameters('ilbResourceId')]"
+          },
+          "ilbTargetBEAddressPoolName": {
+            "value": "[parameters('ilbTargetBEAddressPoolName')]"
+          },
+          "upgrading": {
+            "value": "[variables('upgrading')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "2019-06-01",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
+      "type": "Microsoft.Compute/images",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('customImage')]",
+      "location": "[variables('resourceGroup').location]",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Linux",
+            "osState": "Generalized",
+            "blobUri": "[parameters('sourceImageVhdUri')]",
+            "storageAccountType": "Standard_LRS"
+          }
+        },
+		    "hyperVGeneration": "V1"
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "location": "[variables('location')]",
+      "name": "[variables('nsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allow inbound SSH connection",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "[variables('inboundSources')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "GAiA-portal",
+            "properties": {
+              "description": "Allow inbound HTTPS access to the GAiA portal",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "30443",
+              "sourceAddressPrefix": "[variables('inboundSources')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 110,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTPS",
+            "properties": {
+              "description": "Allow inbound access using the SmartConsole GUI client",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "[variables('inboundSources')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 120,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "description": "Allow inbound access using the SmartConsole GUI client",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "[variables('inboundSources')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 130,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachineScaleSets",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "identity": "[if(variables('isHttps'), variables('identity'), json('null'))]",
+      "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
+      "tags": "[variables('vmssTags')]",
+      "dependsOn": [
+        "[variables('vnetID')]",
+        "[variables('loadBalancerSetupId')]",
+        "[variables('storageAccountId')]",
+        "[variables('customImageId')]",
+        "[variables('nsgId')]"
+      ],
+      "sku": {
+        "name": "[parameters('vmSize')]",
+        "tier": "Standard",
+        "capacity": "[parameters('instanceCount')]"
+      },
+      "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
+      "properties": {
+        "upgradePolicy": {
+          "mode": "Manual"
+        },
+        "virtualMachineProfile": {
+          "storageProfile": {
+            "osDisk": {
+              "caching": "ReadWrite",
+              "createOption": "FromImage",
+              "managedDisk": {
+                "storageAccountType": "[parameters('diskType')]"
+              }
+            },
+            "imageReference": "[variables('imageReference')]"
+          },
+          "osProfile": {
+            "adminPassword": "[parameters('adminPassword')]",
+            "adminUsername": "[variables('adminUsername')]",
+            "computerNamePrefix": "[toLower(parameters('vmName'))]",
+            "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+            "linuxConfiguration": "[variables('linuxConfiguration')]"
+          },
+          "networkProfile": {
+            "healthProbe": {
+              "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbName'), reference('loadBalancerSetup').outputs.appProbeName.value)]"
+            },
+            "networkInterfaceConfigurations": [
+              {
+                "name": "eth0",
+                "properties": {
+                  "primary": true,
+                  "enableIPForwarding": false,
+                  "enableAcceleratedNetworking": true,
+                  "networkSecurityGroup": {
+                    "id":"[variables('nsgId')]"
+                  },
+                  "ipConfigurations": [
+                    {
+                      "name": "ipconfig1",
+                      "properties": {
+                        "publicIpAddressConfiguration": "[if(equals(parameters('instanceLevelPublicIP'),'yes'), variables('publicIPProperties'), json('null'))]",
+                        "subnet": {
+                          "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
+                        },
+                        "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.elbId.value), json('null'), reference('loadBalancerSetup').outputs.elbBEAddressPoolProperties.value)]"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "eth1",
+                "properties": {
+                  "primary": false,
+                  "enableIPForwarding": true,
+                  "enableAcceleratedNetworking": true,
+                  "ipConfigurations": [
+                    {
+                      "name": "ipconfig2",
+                      "properties": {
+                        "subnet": {
+                          "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
+                        },
+                        "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.ilbId.value), json('null'), reference('loadBalancerSetup').outputs.ilbBEAddressPoolProperties.value)]"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": "true",
+              "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
+            }
+          }
+        },
+        "overprovision": false
+      }
+    },
+    {
+      "type": "Microsoft.Insights/autoscaleSettings",
+      "apiVersion": "2015-04-01",
+      "name": "[parameters('vmName')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('vmssID')]"
+      ],
+      "properties": {
+        "name": "[parameters('vmName')]",
+        "targetResourceUri": "[variables('vmssID')]",
+        "notifications": [
+          {
+            "operation": "Scale",
+            "email": {
+              "sendToSubscriptionAdministrator": false,
+              "sendToSubscriptionCoAdministrators": false,
+              "customEmails": "[if(empty(parameters('adminEmail')), json('null'), array(parameters('adminEmail')))]"
+            }
+          }
+        ],
+        "enabled": true,
+        "profiles": [
+          {
+            "name": "Profile1",
+            "capacity": {
+              "minimum": "[parameters('instanceCount')]",
+              "maximum": "[parameters('maxInstanceCount')]",
+              "default": "[parameters('instanceCount')]"
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "Percentage CPU",
+                  "metricResourceUri": "[variables('vmssID')]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 80
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "Percentage CPU",
+                  "metricResourceUri": "[variables('vmssID')]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 60
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'existingVault'))]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('keyVaultName')]",
+      "dependsOn": [
+        "[variables('vmssID')]"
+      ],
+      "resourceGroup": "[parameters('existingKeyVaultRGName')]",
+      "properties": {
+          "mode": "Incremental",
+          "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "resources": [
+                    {
+                        "type": "Microsoft.KeyVault/vaults/accessPolicies",
+                        "name": "[concat(parameters('keyVaultName'), '/add')]",
+                        "apiVersion": "2019-09-01",
+                        "properties": {
+                          "accessPolicies": [
+                            {
+                              "tenantId": "[subscription().tenantid]",
+                              "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
+                              "permissions": {
+                                "secrets": [
+                                  "get",
+                                  "list"
+                                ],
+                                "certificates": [
+                                  "get",
+                                  "list"
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                    }
+              ],
+              "outputs": {}
+          }
+      }
+    },
+    {
+      "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'newVault'))]",
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2019-09-01",
+      "name": "[parameters('keyVaultName')]",
+      "dependsOn": [
+        "[variables('vmssID')]"
+      ],
+      "location": "[variables('location')]",
+      "properties": {
+        "tenantId": "[subscription().tenantid]",
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "accessPolicies": [
+          {
+            "tenantId": "[subscription().tenantid]",
+            "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
+            "permissions": {
+              "secrets": [
+                "get",
+                "list"
+              ],
+              "certificates": [
+                "get",
+                "list"
+              ]
+            }
+          }
+        ],
+        "enabledForDeployment": true,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": false,
+        "enableSoftDelete": true,
+        "enableRbacAuthorization": false,
+        "createMode": "default"
+      }
+    },
+    {
+      "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'newVault'))]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2019-09-01",
+      "name": "[concat(parameters('keyVaultName'), '/', variables('secretsNameArray')[copyIndex()])]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+      ],
+      "properties": {
+        "value": "[if(endsWith(variables('secretsNameArray')[copyIndex()], '-pw'), base64(variables('secretsValueArray')[copyIndex()]), variables('secretsValueArray')[copyIndex()])]"
+      },
+      "copy": {
+        "name": "secretscopy",
+        "count": "[variables('numberOfSecrets')]"
+      }
+    }
+  ],
+  "outputs": {
+    "ApplicationAddress": {
+      "type": "string",
+      "value": "[reference('loadBalancerSetup').outputs.ApplicationAddress.value]"
+    },
+    "ApplicationFQDN": {
+      "type": "string",
+      "value": "[reference('loadBalancerSetup').outputs.ApplicationFQDN.value]"
+    }
+  }
 }
