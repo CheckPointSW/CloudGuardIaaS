@@ -439,7 +439,7 @@
                 "label": "Choose an existing Azure Key Vault",
                 "value": "existingVault"
               },
-			        {
+              {
                 "label": "Create new Azure Key Vault and upload certificates",
                 "value": "newVault"
               }
