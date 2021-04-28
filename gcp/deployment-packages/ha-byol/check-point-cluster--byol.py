@@ -22,7 +22,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20201028'
+TEMPLATE_VERSION = '20210418'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
@@ -467,7 +467,7 @@ def get_or_create_net(prop, name, resources, gw_dependencies,
     net_cidr = prop.get(name + '-cidr')
 
     if net_cidr:
-        net_name = '{}-{}'.format(prop['deployment'][:22], name)
+        net_name = '{}-{}'.format(prop['deployment'][:20], name)
         subnet_name = '{}-subnet'.format(net_name)
         net = make_net(net_name)
         subnet = make_subnet(

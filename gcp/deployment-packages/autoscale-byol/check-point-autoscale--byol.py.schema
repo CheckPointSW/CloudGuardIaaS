@@ -3,7 +3,7 @@ imports:
 
 info:
   version: 1.0
-  title: Check Point CloudGuard IaaS Autoscaling - BYOL Template
+  title: Check Point CloudGuard Network Security Autoscaling - BYOL Template
 
 required:
   - autoscalingVersion
@@ -178,7 +178,7 @@ properties:
   AutoProvTemplate:
     type: string
     default: 'gcp-asg-autoprov-tmplt'
-    pattern: ^([ -~]+)$
+    pattern: ^([ -~]{1,30})$
   enableMonitoring:
     type: boolean
     default: False
