@@ -3,23 +3,30 @@ provider "google" {
   project     = var.project
   region      = var.region
 }
+
+resource "random_string" "mig_random_string" {
+  length = 5
+  special = false
+  upper = false
+  keepers = {}
+}
 resource "google_compute_network" "external_network" {
-  name = substr(format("${var.prefix}-ext-network-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-ext-network-")+5)
+  name = "${var.prefix}-ext-network-${random_string.mig_random_string.result}"
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "external_subnetwork" {
-  name = substr(format("${var.prefix}-ext-subnet-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-ext-subnet-")+5)
+  name = "${var.prefix}-ext-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.external_subnetwork_ip_cidr_range
   region = var.region
   network = google_compute_network.external_network.id
 }
 
 resource "google_compute_network" "internal_network" {
-  name = substr(format("${var.prefix}-int-network-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-int-network-")+5)
+  name = "${var.prefix}-int-network-${random_string.mig_random_string.result}"
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "internal_subnetwork" {
-  name = substr(format("${var.prefix}-int-subnet-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-int-subnet-")+5)
+  name = "${var.prefix}-int-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.internal_subnetwork_ip_cidr_range
   region = var.region
   network = google_compute_network.internal_network.id
