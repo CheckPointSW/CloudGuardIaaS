@@ -19,7 +19,7 @@ resource "google_compute_instance" "cluster_member" {
 
   boot_disk {
     auto_delete = true
-    device_name = substr(format("${var.prefix}-boot-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-boot-")+5)
+    device_name = "${var.prefix}-boot"
 
     initialize_params {
       size = var.disk_size
@@ -89,7 +89,7 @@ resource "google_compute_instance" "cluster_member" {
   }
 
   service_account {
-    email = "default"
+    
     scopes = [
       "https://www.googleapis.com/auth/monitoring.write",
       "https://www.googleapis.com/auth/compute",

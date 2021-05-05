@@ -4,10 +4,17 @@ provider "google" {
   region = var.region
 }
 
+resource "random_string" "random_string" {
+  length = 5
+  special = false
+  upper = false
+  keepers = {}
+}
+
 module "cluster_network_and_subnet" {
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "cluster"
   network_cidr = var.cluster_network_cidr
   private_ip_google_access = true
@@ -20,7 +27,7 @@ module "cluster_ICMP_firewall_rules" {
 
   protocol = "icmp"
   source_ranges = var.cluster_ICMP_traffic
-  rule_name = substr(format("${var.prefix}-cluster-icmp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-cluster-icmp-")+5)
+  rule_name = "${var.prefix}-cluster-icmp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
 }
 module "cluster_TCP_firewall_rules" {
@@ -29,7 +36,7 @@ module "cluster_TCP_firewall_rules" {
 
   protocol = "tcp"
   source_ranges = var.cluster_TCP_traffic
-  rule_name = substr(format("${var.prefix}-cluster-tcp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-cluster-tcp-")+5)
+  rule_name = "${var.prefix}-cluster-tcp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
 }
 module "cluster_UDP_firewall_rules" {
@@ -38,7 +45,7 @@ module "cluster_UDP_firewall_rules" {
 
   protocol = "udp"
   source_ranges = var.cluster_UDP_traffic
-  rule_name = substr(format("${var.prefix}-cluster-udp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-cluster-udp-")+5)
+  rule_name = "${var.prefix}-cluster-udp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
 }
 module "cluster_SCTP_firewall_rules" {
@@ -47,7 +54,7 @@ module "cluster_SCTP_firewall_rules" {
 
   protocol = "sctp"
   source_ranges = var.cluster_SCTP_traffic
-  rule_name = substr(format("${var.prefix}-cluster-sctp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-cluster-sctp-")+5)
+  rule_name = "${var.prefix}-cluster-sctp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
 }
 module "cluster_ESP_firewall_rules" {
@@ -56,14 +63,14 @@ module "cluster_ESP_firewall_rules" {
 
   protocol = "esp"
   source_ranges = var.cluster_ESP_traffic
-  rule_name = substr(format("${var.prefix}-cluster-esp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-cluster-esp-")+5)
+  rule_name = "${var.prefix}-cluster-esp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
 }
 
 module "mgmt_network_and_subnet" {
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "mgmt"
   network_cidr = var.mgmt_network_cidr
   private_ip_google_access = false
@@ -76,7 +83,7 @@ module "mgmt_ICMP_firewall_rules" {
 
   protocol = "icmp"
   source_ranges = var.mgmt_ICMP_traffic
-  rule_name = substr(format("${var.prefix}-mgmt-icmp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-mgmt-icmp-")+5)
+  rule_name = "${var.prefix}-mgmt-icmp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
 }
 module "mgmt_TCP_firewall_rules" {
@@ -85,7 +92,7 @@ module "mgmt_TCP_firewall_rules" {
 
   protocol = "tcp"
   source_ranges = var.mgmt_TCP_traffic
-  rule_name = substr(format("${var.prefix}-mgmt-tcp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-mgmt-tcp-")+5)
+  rule_name = "${var.prefix}-mgmt-tcp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
 }
 module "mgmt_UDP_firewall_rules" {
@@ -94,7 +101,7 @@ module "mgmt_UDP_firewall_rules" {
 
   protocol = "udp"
   source_ranges = var.mgmt_UDP_traffic
-  rule_name = substr(format("${var.prefix}-mgmt-udp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-mgmt-udp-")+5)
+  rule_name = "${var.prefix}-mgmt-udp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
 }
 module "mgmt_SCTP_firewall_rules" {
@@ -103,7 +110,7 @@ module "mgmt_SCTP_firewall_rules" {
 
   protocol = "sctp"
   source_ranges = var.mgmt_SCTP_traffic
-  rule_name = substr(format("${var.prefix}-mgmt-sctp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-mgmt-sctp-")+5)
+  rule_name = "${var.prefix}-mgmt-sctp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
 }
 module "mgmt_ESP_firewall_rules" {
@@ -112,14 +119,14 @@ module "mgmt_ESP_firewall_rules" {
 
   protocol = "esp"
   source_ranges = var.mgmt_ESP_traffic
-  rule_name = substr(format("${var.prefix}-mgmt-esp-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-mgmt-esp-")+5)
+  rule_name = "${var.prefix}-mgmt-esp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
 }
 
 module "internal_network1_and_subnet" {
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network1"
   network_cidr = var.internal_network1_cidr
   private_ip_google_access = false
@@ -131,7 +138,7 @@ module "internal_network2_and_subnet" {
   count = var.num_internal_networks < 2 ? 0 : 1
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network2"
   network_cidr = var.internal_network2_cidr
   private_ip_google_access = false
@@ -143,7 +150,7 @@ module "internal_network3_and_subnet" {
   count = var.num_internal_networks < 3 ? 0 : 1
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network3"
   network_cidr = var.internal_network3_cidr
   private_ip_google_access = false
@@ -155,7 +162,7 @@ module "internal_network4_and_subnet" {
   count = var.num_internal_networks < 4 ? 0 : 1
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network4"
   network_cidr = var.internal_network4_cidr
   private_ip_google_access = false
@@ -167,7 +174,7 @@ module "internal_network5_and_subnet" {
   count = var.num_internal_networks < 5 ? 0 : 1
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network5"
   network_cidr = var.internal_network5_cidr
   private_ip_google_access = false
@@ -179,7 +186,7 @@ module "internal_network6_and_subnet" {
   count = var.num_internal_networks < 6 ? 0 : 1
   source = "../common/network-and-subnet"
 
-  prefix = var.prefix
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   type = "internal-network6"
   network_cidr = var.internal_network6_cidr
   private_ip_google_access = false
@@ -187,11 +194,11 @@ module "internal_network6_and_subnet" {
   network_name = var.internal_network6_name
 }
 resource "google_compute_address" "primary_cluster_ip_ext_address" {
-  name = substr(format("${var.prefix}-primary-cluster-address-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-primary-cluster-address-")+5)
+  name = "${var.prefix}-primary-cluster-address-${random_string.random_string.result}"
   region = var.region
 }
 resource "google_compute_address" "secondary_cluster_ip_ext_address" {
-  name = substr(format("${var.prefix}-secondary-cluster-address-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-secondary-cluster-address-")+5)
+  name = "${var.prefix}-secondary-cluster-address-${random_string.random_string.result}"
   region = var.region
 }
 resource "random_string" "generated_password" {
@@ -202,7 +209,7 @@ resource "random_string" "generated_password" {
 module "members_a_b" {
   source = "../common/members-a-b"
 
-  prefix = substr(format("${var.prefix}-%s", replace(uuid(), "-", "")), 0, length("${var.prefix}-")+5)
+  prefix = "${var.prefix}-${random_string.random_string.result}"
   region = var.region
   zoneA = var.zoneA
   zoneB = var.zoneB
