@@ -21,6 +21,6 @@ IMAGES = {
   "check-point-r8040-gw-payg-single": "check-point-r8040-gw-payg-single-294-688-v20200924",
   "check-point-r8030-byol": "check-point-r8030-byol-200-773-v20201208",
   "check-point-r81-gw-payg-cluster": "check-point-r81-gw-payg-cluster-392-751-v20201129",
-  "check-point-r81-byol": "check-point-r81-byol-392-787-v20210112",
+  "check-point-r81-byol": "check-point-r81-byol-392-787-v20210112", 
   "check-point-r81-gw-byol-single": "check-point-r81-gw-byol-single-392-751-v20201129"
 }
