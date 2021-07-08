@@ -18,11 +18,12 @@ LICENCE_TYPE = 'cluster'
 VERSIONS = {
     'R80.30': 'r8030-gw',
     'R80.40': 'r8040-gw',
-    'R81': 'r81-gw'
+    'R81': 'r81-gw',
+    'R81.10': 'r8110-gw'
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20210418'
+TEMPLATE_VERSION = '20210706'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
