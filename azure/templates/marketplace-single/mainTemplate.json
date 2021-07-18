@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "subscriptionId": {
@@ -27,7 +27,10 @@
         "R80.40 - Pay As You Go (NGTX)",
         "R81 - Bring Your Own License",
         "R81 - Pay As You Go (NGTP)",
-        "R81 - Pay As You Go (NGTX)"
+        "R81 - Pay As You Go (NGTX)",
+        "R81.10 - Bring Your Own License",
+        "R81.10 - Pay As You Go (NGTP)",
+        "R81.10 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
@@ -254,7 +257,7 @@
   },
   "variables": {
     "templateName": "single",
-    "templateVersion": "20210126",
+    "templateVersion": "20210711",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -265,7 +268,10 @@
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
       "R81 - Bring Your Own License": "BYOL",
       "R81 - Pay As You Go (NGTP)": "NGTP",
-      "R81 - Pay As You Go (NGTX)": "NGTX"
+      "R81 - Pay As You Go (NGTX)": "NGTX",
+      "R81.10 - Bring Your Own License": "BYOL",
+      "R81.10 - Pay As You Go (NGTP)": "NGTP",
+      "R81.10 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -277,7 +283,10 @@
       "R80.40 - Pay As You Go (NGTX)": "R8040",
       "R81 - Bring Your Own License": "R81",
       "R81 - Pay As You Go (NGTP)": "R81",
-      "R81 - Pay As You Go (NGTX)": "R81"
+      "R81 - Pay As You Go (NGTX)": "R81",
+      "R81.10 - Bring Your Own License": "R8110",
+      "R81.10 - Pay As You Go (NGTP)": "R8110",
+      "R81.10 - Pay As You Go (NGTX)": "R8110"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "installationType": "[parameters('installationType')]",
@@ -290,7 +299,7 @@
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
-    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'))), 'mgmt-byol', 'sg-byol')]",
+    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R81.10'))), 'mgmt-byol', 'sg-byol')]",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
@@ -385,7 +394,7 @@
   "resources": [
     {
       "apiVersion": "2020-06-01",
-      "name": "pid-769ae546-3d1f-5beb-87f2-918ac09137c0",
+      "name": "pid-6f13b00a-7546-4ab2-be9f-c66815cc6c8b-partnercenter",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -399,7 +408,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2021-04-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
