@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "subscriptionId": {
@@ -117,7 +117,7 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2020-08-01-preview').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
                         },
                         {
                             "name": "WEBSITE_RUN_FROM_PACKAGE",
@@ -194,7 +194,7 @@
           }
         },
         {
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2020-08-01-preview",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
             "location": "[parameters('location')]",
@@ -207,7 +207,7 @@
             "resources": [
                 {
                   "type": "blobServices/containers",
-                  "apiVersion": "2019-06-01",
+                  "apiVersion": "2020-08-01-preview",
                   "name": "[concat('default/', parameters('containerName'))]",
                   "dependsOn": [
                     "[variables('storageAccountName')]"
