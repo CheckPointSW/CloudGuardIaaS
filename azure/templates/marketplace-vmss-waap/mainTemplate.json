@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
@@ -38,7 +38,7 @@
             "type": "securestring",
             "defaultValue": "",
             "metadata": {
-                "description": "Administrator password"
+                "description": "User is set to 'admin'"
             }
         },
         "sshPublicKey": {
@@ -48,19 +48,26 @@
                 "description": "Administrator SSH public key"
             }
         },
+        "waapAgentToken": {
+            "type": "securestring",
+            "minLength": 75,
+            "maxLength": 75,
+            "metadata": {
+                "description": "Infinity Next Agent Token"
+            }
+        },
         "waapAgentFog": {
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "description": "Fog address, should be reachable from public cloud"
+                "description": "Fog address"
             }
         },
-        "waapAgentToken": {
-            "type": "secureString",
+        "adminEmail": {
+            "type": "string",
             "defaultValue": "",
-            "minLength": 1,
             "metadata": {
-                "description": "Infinity Next Agent Token"
+                "description": "Email address to notify about scaling events"
             }
         },
         "availabilityZonesNum": {
@@ -179,13 +186,6 @@
                 "description": "The Internal Load Balancer distribution method"
             }
         },
-        "adminEmail": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Email address to notify about scaling events"
-            }
-        },
         "bootstrapScript": {
             "type": "string",
             "metadata": {
@@ -242,7 +242,7 @@
         "virtualNetworkAddressPrefixes": {
             "type": "array",
             "metadata": {
-                "description": "The address prefixes of the virtual network. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+                "description": "The address prefixes of the virtual network. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
             },
             "defaultValue": [
                 "10.0.0.0/16"
@@ -259,7 +259,7 @@
             "type": "string",
             "defaultValue": "10.0.1.0/24",
             "metadata": {
-                "description": "The address prefix of the Gateway external subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+                "description": "The address prefix of the Gateway external subnet. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
             }
         },
         "subnet2Name": {
@@ -273,7 +273,7 @@
             "type": "string",
             "defaultValue": "10.0.2.0/24",
             "metadata": {
-                "description": "The address prefix of the Gateway internal subnet. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+                "description": "The address prefix of the Gateway internal subnet. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
             }
         },
         "subnet2StartAddress": {
@@ -289,26 +289,136 @@
                 "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
             }
         },
-        "sicKey": {
+        "chooseVault": {
+            "type": "string",
+            "allowedValues": [
+                "none",
+                "newVault",
+                "existingVault"
+            ],
+            "defaultValue": "none",
+            "metadata": {
+                "description": "Choose an existing Azure Key Vault or create new Azure Key Vault and upload certificates. 'none' means you don't use HTTPS certificates."
+            }
+        },
+        "existingKeyVaultRGName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "Resource group name of the existing key vault - could be on a different resource group"
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 24,
+            "defaultValue": "vault",
+            "metadata": {
+                "description": "A vault's name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens"
+            }
+        },
+        "numberOfCerts": {
+            "type": "int",
+            "allowedValues": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "defaultValue": 0,
+            "metadata": {
+                "description": "Number of certificates to upload"
+            }
+        },
+        "firstCertificate": {
             "type": "securestring",
             "defaultValue": "",
             "metadata": {
-                "description": "One time key for Secure Internal Communication"
+                "description": "PFX certificate file encoded to base64 format"
             }
+        },
+        "firstCertDescription": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "It is recommended to add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets"
+            }
+        },
+        "firstCertPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault"
+            }
+        },
+        "secondCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "secondCertDescription": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "secondCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "thirdCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "thirdCertDescription": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "thirdCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "fourthCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "fourthCertDescription": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "fourthCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "fifthCertificate": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "fifthCertDescription": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "fifthCertPassword": {
+            "type": "securestring",
+            "defaultValue": ""
+        },
+        "adminUsername": {
+            "type": "string",
+            "metadata": {
+                "description": "DO NOT CHANGE"
+            },
+            "defaultValue": "notused"
         }
     },
     "variables": {
-        "resourceGroup": "[resourceGroup()]",
         "templateName": "waap_vmss",
-        "templateVersion": "20210308",
+        "templateVersion": "20210711",
         "location": "[parameters('location')]",
         "osVersion": "R8040",
-        "adminUsername": "notused",
         "isBlink": true,
         "subnet2Name": "[parameters('subnet2Name')]",
-        "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
+        "storageAccountName": "[concat('bootdiag', uniqueString(resourceGroup().id, deployment().name))]",
         "storageAccountType": "Standard_LRS",
-        "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'waapAgentToken =\"', variables('waapAgentToken'), '\"', '\n', 'waapAgentFog =\"', variables('waapAgentFog'), '\"', '\n')]",
+        "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', '', '\"', '\n', 'waapAgentToken =\"', variables('waapAgentToken'), '\"', '\n', 'waapAgentFog =\"', variables('waapAgentFog'), '\"', '\n')]",
         "imageOffer": "infinity-gw",
         "imagePublisher": "checkpoint",
         "imageSku": "infinity-img",
@@ -348,7 +458,6 @@
         "vmssID": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmName'))]",
         "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
         "allowUploadDownload": "false",
-        "sicKey": "[parameters('sicKey')]",
         "waapAgentToken": "[parameters('waapAgentToken')]",
         "waapAgentFog": "[parameters('waapAgentFog')]",
         "inboundSources": "[parameters('inboundSources')]",
@@ -365,6 +474,7 @@
         "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
         "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers-waap.json', parameters('_artifactsLocationSasToken')))]",
         "lbRGName": "[resourceGroup().name]",
+        "elbName": "External-lb",
         "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
         "vnetID": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
@@ -389,24 +499,52 @@
         "commomTags": {
             "provider": "[toUpper(parameters('Check_PointTags').provider)]"
         },
-        "vmssTags": "[variables('commomTags')]",
-        "https": false,
-        "identity": "[json('{\"type\": \"SystemAssigned\"}')]"
+        "vaultTags": {
+            "vault": "[parameters('keyVaultName')]"
+        },
+        "isHttps": "[not(equals(parameters('chooseVault'), 'none'))]",
+        "vmssTags": "[if(variables('isHttps'), union(variables('commomTags'), variables('vaultTags')), variables('commomTags'))]",
+        "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+        "secretsValueArray": [
+            "[parameters('firstCertificate')]",
+            "[parameters('firstCertPassword')]",
+            "[parameters('secondCertificate')]",
+            "[parameters('secondCertPassword')]",
+            "[parameters('thirdCertificate')]",
+            "[parameters('thirdCertPassword')]",
+            "[parameters('fourthCertificate')]",
+            "[parameters('fourthCertPassword')]",
+            "[parameters('fifthCertificate')]",
+            "[parameters('fifthCertPassword')]"
+        ],
+        "secretsNameArray": [
+            "cert1",
+            "cert1-pw",
+            "cert2",
+            "cert2-pw",
+            "cert3",
+            "cert3-pw",
+            "cert4",
+            "cert4-pw",
+            "cert5",
+            "cert5-pw"
+        ],
+        "secretsPasswordDescription": "password",
+        "secretsDescriptionArray": [
+            "[parameters('firstCertDescription')]",
+            "[variables('secretsPasswordDescription')]",
+            "[parameters('secondCertDescription')]",
+            "[variables('secretsPasswordDescription')]",
+            "[parameters('thirdCertDescription')]",
+            "[variables('secretsPasswordDescription')]",
+            "[parameters('fourthCertDescription')]",
+            "[variables('secretsPasswordDescription')]",
+            "[parameters('fifthCertDescription')]",
+            "[variables('secretsPasswordDescription')]"
+        ],
+        "numberOfSecrets": "[mul(parameters('numberOfCerts'), 2)]"
     },
     "resources": [
-        {
-            "apiVersion": "2020-06-01",
-            "name": "pid-5432b4df-d783-57a2-b65f-39f4bca4974a",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "resources": []
-                }
-            }
-        },
         {
             "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
             "name": "networkNewSetup",
@@ -538,7 +676,7 @@
         {
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2021-02-01",
             "location": "[variables('location')]",
             "sku": {
                 "name": "[variables('storageAccountType')]"
@@ -553,7 +691,7 @@
             "type": "Microsoft.Compute/images",
             "apiVersion": "2020-06-01",
             "name": "[variables('customImage')]",
-            "location": "[variables('resourceGroup').location]",
+            "location": "[variables('location')]",
             "properties": {
                 "storageProfile": {
                     "osDisk": {
@@ -607,7 +745,7 @@
                     {
                         "name": "HTTPS",
                         "properties": {
-                            "description": "Allow inbound access using the SmartConsole GUI client",
+                            "description": "Allow inbound HTTPS access",
                             "protocol": "TCP",
                             "sourcePortRange": "*",
                             "destinationPortRange": "443",
@@ -621,7 +759,7 @@
                     {
                         "name": "HTTP",
                         "properties": {
-                            "description": "Allow inbound access using the SmartConsole GUI client",
+                            "description": "Allow inbound HTTP access",
                             "protocol": "TCP",
                             "sourcePortRange": "*",
                             "destinationPortRange": "80",
@@ -643,7 +781,7 @@
             "apiVersion": "2020-06-01",
             "name": "[parameters('vmName')]",
             "location": "[variables('location')]",
-            "identity": "[if(variables('https'), variables('identity'), json('null'))]",
+            "identity": "[if(variables('isHttps'), variables('identity'), json('null'))]",
             "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
             "tags": "[variables('vmssTags')]",
             "dependsOn": [
@@ -676,12 +814,15 @@
                     },
                     "osProfile": {
                         "adminPassword": "[parameters('adminPassword')]",
-                        "adminUsername": "[variables('adminUsername')]",
+                        "adminUsername": "[parameters('adminUsername')]",
                         "computerNamePrefix": "[toLower(parameters('vmName'))]",
                         "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
                         "linuxConfiguration": "[variables('linuxConfiguration')]"
                     },
                     "networkProfile": {
+                        "healthProbe": {
+                            "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbName'), reference('loadBalancerSetup').outputs.appProbeName.value)]"
+                        },
                         "networkInterfaceConfigurations": [
                             {
                                 "name": "eth0",
@@ -729,7 +870,7 @@
                     },
                     "diagnosticsProfile": {
                         "bootDiagnostics": {
-                            "enabled": "true",
+                            "enabled": true,
                             "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
                         }
                     }
@@ -807,6 +948,112 @@
                         ]
                     }
                 ]
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
+        },
+        {
+            "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'existingVault'))]",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[parameters('keyVaultName')]",
+            "dependsOn": [
+                "[variables('vmssID')]"
+            ],
+            "resourceGroup": "[parameters('existingKeyVaultRGName')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+                            "name": "[concat(parameters('keyVaultName'), '/add')]",
+                            "apiVersion": "2019-09-01",
+                            "properties": {
+                                "accessPolicies": [
+                                    {
+                                        "tenantId": "[subscription().tenantid]",
+                                        "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
+                                        "permissions": {
+                                            "secrets": [
+                                                "get",
+                                                "list"
+                                            ],
+                                            "certificates": [
+                                                "get",
+                                                "list"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "outputs": {}
+                }
+            }
+        },
+        {
+            "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'newVault'))]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('keyVaultName')]",
+            "dependsOn": [
+                "[variables('vmssID')]"
+            ],
+            "location": "[variables('location')]",
+            "properties": {
+                "tenantId": "[subscription().tenantid]",
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "accessPolicies": [
+                    {
+                        "tenantId": "[subscription().tenantid]",
+                        "objectId": "[reference(variables('vmssID'), '2020-06-01', 'full').identity.principalId]",
+                        "permissions": {
+                            "secrets": [
+                                "get",
+                                "list"
+                            ],
+                            "certificates": [
+                                "get",
+                                "list"
+                            ]
+                        }
+                    }
+                ],
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false,
+                "enableSoftDelete": true,
+                "enableRbacAuthorization": false,
+                "createMode": "default"
+            },
+            "tags": {
+                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+            }
+        },
+        {
+            "condition": "[and(variables('isHttps'), equals(parameters('chooseVault'), 'newVault'))]",
+            "type": "Microsoft.KeyVault/vaults/secrets",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('keyVaultName'), '/', variables('secretsNameArray')[copyIndex()])]",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "value": "[if(endsWith(variables('secretsNameArray')[copyIndex()], '-pw'), base64(variables('secretsValueArray')[copyIndex()]), variables('secretsValueArray')[copyIndex()])]",
+                "contentType": "[variables('secretsDescriptionArray')[copyIndex()]]"
+            },
+            "copy": {
+                "name": "secretscopy",
+                "count": "[variables('numberOfSecrets')]"
             },
             "tags": {
                 "provider": "[toUpper(parameters('Check_PointTags').provider)]"

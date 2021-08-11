@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "deploymentMode": {
@@ -46,14 +46,13 @@
         }
     },
     "variables": {
-        "resourceGroup": "[resourceGroup()]",
         "deployELB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ELBOnly'))]",
         "deployILB": "[or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ILBOnly'))]",
         "appName": "[concat(parameters('vmName'), '-app-1')]",
         "appAddressName": "[variables('appName')]",
-        "appAddressId": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
+        "appAddressId": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
         "appFEName": "[variables('appName')]",
-        "elbName": "frontend-lb",
+        "elbName": "External-lb",
         "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
         "elbBEAddressPool": "[concat(variables('elbName'), '-pool')]",
         "elbBEAddressPoolName": "[if(parameters('upgrading'), parameters('elbTargetBEAddressPoolName'), variables('elbBEAddressPool'))]",
@@ -92,7 +91,7 @@
             "properties": {
                 "publicIPAllocationMethod": "Static",
                 "dnsSettings": {
-                    "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(variables('resourceGroup').id, deployment().name))]"
+                    "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
                 }
             },
             "tags": {
@@ -117,7 +116,7 @@
                         "name": "[variables('appFEName')]",
                         "properties": {
                             "publicIPAddress": {
-                                "id": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]"
                             }
                         }
                     }
@@ -173,8 +172,8 @@
                         "properties": {
                             "protocol": "[variables('appHealthProtocol')]",
                             "port": "[variables('lbHealthPort')]",
-                            "intervalInSeconds": "5",
-                            "numberOfProbes": "2"
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
                         }
                     }
                 ]
@@ -237,8 +236,8 @@
                         "properties": {
                             "protocol": "[variables('ilbHealthProtocol')]",
                             "port": "[variables('lbHealthPort')]",
-                            "intervalInSeconds": "5",
-                            "numberOfProbes": "2"
+                            "intervalInSeconds": 5,
+                            "numberOfProbes": 2
                         }
                     }
                 ]
@@ -256,6 +255,18 @@
         "elbId": {
             "value": "[if(variables('deployELB'), variables('elbId'), '')]",
             "type": "string"
+        },
+        "appProbeName": {
+            "value": "[if(variables('deployELB'), variables('appProbeName'), '')]",
+            "type": "string"
+        },
+        "appHealthProtocol": {
+            "value": "[if(variables('deployELB'), variables('appHealthProtocol'), '')]",
+            "type": "string"
+        },
+        "lbHealthPort": {
+            "value": "[variables('lbHealthPort')]",
+            "type": "int"
         },
         "ilbId": {
             "value": "[if(variables('deployILB'), variables('ilbId'), '')]",
