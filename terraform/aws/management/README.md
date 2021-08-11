@@ -149,7 +149,7 @@ secret_key = "my-secret-key"
 | iam_permissions  | IAM role to attach to the instance profile  | string  | - None (configure later) <br/> - Use existing (specify an existing IAM role name) <br/> - Create with assume role permissions (specify an STS role ARN) <br/> - Create with read permissions <br/> - Create with read-write permissions  | Create with read permissions  | no  |
 | predefined_role  | (Optional) A predefined IAM role to attach to the instance profile. Ignored if var.iam_permissions is not set to 'Use existing'  | string  | n/a  | ""  | no  |
 | sts_roles  | (Optional) The IAM role will be able to assume these STS Roles (list of ARNs). Ignored if var.iam_permissions is set to 'None' or 'Use existing'  | list(string)  | n/a  | []  | no  |
-| management_version  | Management version and license  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG| R80.40-PAYG  | no  |
+| management_version  | Management version and license  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG <br/> - R81.10-BYOL <br/> - R81.10-PAYG | R80.40-PAYG  | no  |
 | admin_shell  | Set the admin shell to enable advanced command line configuration  | string  | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | management_password_hash | (Optional) Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash) | string | n/a | "" | no |
 | management_hostname  | (Optional) Security Management Server prompt hostname  | string  | n/a  | ""  | no  |
@@ -179,6 +179,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | Template Version | Description   |
 | ---------------- | ------------- |
 | 20210309 | First release of Check Point Security Management Server Terraform module for AWS |
+| 20210329 | Stability fixes |
 
 
 

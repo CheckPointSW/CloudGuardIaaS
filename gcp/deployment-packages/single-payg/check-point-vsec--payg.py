@@ -17,7 +17,9 @@ VERSIONS = {
     'R80.40': 'r8040',
     'R80.40-GW': 'r8040-gw',
     'R81': 'r81',
-    'R81-GW': 'r81-gw'
+    'R81-GW': 'r81-gw',
+    'R81.10': 'r8110',
+    'R81.10-GW': 'r8110-gw'
 }
 
 ADDITIONAL_NETWORK = 'additionalNetwork{}'
@@ -26,7 +28,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20201102'
+TEMPLATE_VERSION = '20210706'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -349,7 +351,6 @@ def create_firewall_rules(prop, net_name, fw_rule_name_prefix, mgmt=False,
             firewall_rules.append(make_firewall_rule(
                 proto, source_ranges, net_name, fw_rule_name_prefix, mgmt,
                 uid))
-
     return firewall_rules
 
 
@@ -374,7 +375,6 @@ def make_firewall_rule(protocol, source_ranges,
             'allowed': [{'IPProtocol': protocol}],
         }
     }
-
     return firewall_rule
 
 
@@ -386,25 +386,19 @@ def generate_config(context):
     prop['templateName'] = TEMPLATE_NAME
     prop['templateVersion'] = TEMPLATE_VERSION
     prop['allowUploadDownload'] = str(prop['allowUploadDownload']).lower()
-
     if not prop['managementGUIClientNetwork'] and prop['installationType'] in {
             'Gateway and Management (Standalone)', 'Management only'}:
         raise Exception('Allowed GUI clients are required when installing '
                         'a management server')
-
     for k in ['managementGUIClientNetwork']:
         prop.setdefault(k, '')
-
     resources = []
     outputs = []
-
     network_interfaces = []
     external_ifs = []
-
     zone = prop['zone']
     deployment = context.env['deployment']
     vm_name = set_name_and_truncate(deployment, '-vm')
-
     access_configs = []
     if prop['externalIP'] != 'None':
         access_config = make_access_config(resources, vm_name, zone,
@@ -414,7 +408,6 @@ def generate_config(context):
         prop['hasInternet'] = 'true'
     else:
         prop['hasInternet'] = 'false'
-
     network = common.MakeGlobalComputeLink(context, default.NETWORK)
     networks = {prop['network']}
     network_interface = {
@@ -425,7 +418,6 @@ def generate_config(context):
         network_interface['subnetwork'] = common.MakeSubnetworkComputeLink(
             context, default.SUBNETWORK)
     network_interfaces.append(network_interface)
-
     for ifnum in range(1, prop['numAdditionalNICs'] + 1):
         net = prop.get(ADDITIONAL_NETWORK.format(ifnum))
         subnet = prop.get(ADDITIONAL_SUBNET.format(ifnum))
@@ -443,7 +435,6 @@ def generate_config(context):
             default.COMPUTE_URL_BASE,
             'projects/', context.env['project'],
             '/regions/', common.ZoneToRegion(zone), '/subnetworks/', subnet])
-
         network_interface = {
             'network': net,
             'subnetwork': subnet,
@@ -457,23 +448,19 @@ def generate_config(context):
             if not prop.get('hasInternet') or 'false' == prop['hasInternet']:
                 prop['hasInternet'] = 'true'
         network_interfaces.append(network_interface)
-
     for ifnum in range(prop['numAdditionalNICs'] + 1, MAX_NICS):
         prop.pop(ADDITIONAL_NETWORK.format(ifnum), None)
         prop.pop(ADDITIONAL_SUBNET.format(ifnum), None)
         prop.pop(ADDITIONAL_EXTERNAL_IP.format(ifnum), None)
-
     deployment_config = set_name_and_truncate(deployment, '-config')
-    prop['config_url'] = (
-        'https://runtimeconfig.googleapis.com/v1beta1/' +
-        'projects/' + context.env['project'] + '/configs/' + deployment_config)
+    prop['config_url'] = ('https://runtimeconfig.googleapis.com/v1beta1/' +
+                          'projects/' + context.env[
+                              'project'] + '/configs/' + deployment_config)
     prop['config_path'] = '/'.join(prop['config_url'].split('/')[-4:])
     prop['deployment_config'] = deployment_config
-
     tags = ATTRIBUTES[prop['installationType']]['tags']
     uid = set_name_and_truncate(vm_name, '-' + password.GeneratePassword(
         8, False).lower())
-
     if prop['installationType'] == 'Gateway only':
         prop['cloudguardVersion'] += '-GW'
         if not prop.get('sicKey'):
@@ -482,22 +469,17 @@ def generate_config(context):
             prop['computed_sic_key'] = prop['sicKey']
     else:
         prop['computed_sic_key'] = 'N/A'
-
     outputs.append({
         'name': 'sicKey',
         'value': prop['computed_sic_key'],
     }, )
-
     if 'gw' in VERSIONS[prop['cloudguardVersion']]:
         license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
     else:
         license_name = LICENSE
-
     family = '-'.join(['check-point', VERSIONS[prop['cloudguardVersion']],
                        license_name])
-
     formatter = common.DefaultFormatter()
-
     gw = {
         'type': default.INSTANCE,
         'name': vm_name,
@@ -543,7 +525,6 @@ def generate_config(context):
             }]
         }
     }
-
     if (prop['externalIP'] != 'None') and (
             'Manual Configuration' != prop['installationType']):
         gw['properties']['serviceAccounts'][0]['scopes'].append(
@@ -598,7 +579,6 @@ def generate_config(context):
         )
     else:
         passwd = ''
-
     resources.append(gw)
     netlist = list(networks)
     if GATEWAY in tags:
@@ -610,7 +590,6 @@ def generate_config(context):
             firewall_rules = create_firewall_rules(
                 prop, network, fw_rule_name_prefix)
             resources.extend(firewall_rules)
-
     elif MANAGEMENT in tags:
         for i in range(len(netlist)):
             network = netlist[i]
@@ -623,9 +602,9 @@ def generate_config(context):
                     'Allowed source IP ranges for TCP traffic are provided '
                     'but TCP not marked as allowed')
             if tcp_enabled and not source_ranges:
-                    raise Exception('Allowed source IP ranges for TCP traffic'
-                                    ' are required when installing '
-                                    'a management server')
+                raise Exception('Allowed source IP ranges for TCP traffic'
+                                ' are required when installing '
+                                'a management server')
             if not gwNetwork_enabled and gwNetwork_source_range:
                 raise Exception('Gateway network source IP are provided but '
                                 'not marked as allowed.')
@@ -677,14 +656,12 @@ def generate_config(context):
                         ],
                     }
                 })
-
             fw_rule_name_prefix = set_name_and_truncate(
                 '{}-{}'.format(deployment[:23], network[:18]),
                 '-allow-all-to-chkp-{}'.format(i + 1))
             firewall_rules = create_firewall_rules(
                 prop, network, fw_rule_name_prefix, True, uid)
             resources.extend(firewall_rules)
-
     outputs += [
         {
             'name': 'deployment',

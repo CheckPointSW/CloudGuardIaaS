@@ -5,7 +5,6 @@ import default
 import images
 import password
 
-
 GATEWAY = 'checkpoint-gateway'
 PROJECT = 'checkpoint-public'
 LICENSE = 'payg'
@@ -14,11 +13,12 @@ LICENCE_TYPE = 'mig'
 VERSIONS = {
     'R80.30-GW': 'r8030-gw',
     'R80.40-GW': 'r8040-gw',
-    'R81-GW': 'r81-gw'
+    'R81-GW': 'r81-gw',
+    'R81.10-GW': 'r8110-gw'
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20201028'
+TEMPLATE_VERSION = '20210706'
 
 startup_script = '''
 #!/bin/bash
@@ -273,29 +273,23 @@ def make_nic(context, net_name, subnet, external_ip=False):
         'kind': 'compute#networkInterface',
         'network': common.GlobalNetworkLink(prop['project'], net_name)
     }
-
     if subnet:
         network_interface["subnetwork"] = common.MakeRegionalSubnetworkLink(
             prop['project'], prop['zone'], subnet)
-
     # add ephemeral public IP address
     if external_ip:
         network_interface["accessConfigs"] = \
             [make_access_config(name="external-nat")]
-
     return network_interface
 
 
 def create_nics(context):
     prop = context.properties
-
     firewall_rules = create_firewall_rules(context)
     if firewall_rules:
         prop['resources'].extend(firewall_rules)
-
     networks = prop.setdefault('networks', ['default'])
     subnetworks = prop.get('subnetworks', [])
-
     nics = []
     for i in range(len(networks)):
         name = networks[i]
@@ -303,10 +297,8 @@ def create_nics(context):
         external_ip = prop.get('gatewayExternalIP') and i == 0
         if subnetworks and i < len(subnetworks) and subnetworks[i]:
             subnet = subnetworks[i]
-
         network_interface = make_nic(context, name, subnet, external_ip)
         nics.append(network_interface)
-
     return nics
 
 
@@ -323,7 +315,6 @@ def create_firewall_rules(context):
         if protocol_enabled and source_ranges:
             firewall_rules.append(make_firewall_rule(
                 proto, source_ranges, deployment, network))
-
     return firewall_rules
 
 
@@ -343,7 +334,6 @@ def make_firewall_rule(protocol, source_ranges, deployment, net_name):
             'allowed': [{'IPProtocol': protocol}]
         }
     }
-
     return firewall_rule
 
 
@@ -377,13 +367,13 @@ def create_instance_template(context,
                            "index": 0,
                            "initializeParams": {
                                "diskType":
-                               context.properties['diskType'],
+                                   context.properties['diskType'],
                                "diskSizeGb":
-                               context.properties['bootDiskSizeGb'],
+                                   context.properties['bootDiskSizeGb'],
                                "sourceImage":
-                               'projects/%s/global/images/%s' % (
-                                   PROJECT, images.IMAGES[family])
-                               },
+                                   'projects/%s/global/images/%s' % (
+                                       PROJECT, images.IMAGES[family])
+                           },
                            "kind": 'compute#attachedDisk',
                            "mode": "READ_WRITE",
                            "type": "PERSISTENT"}],
@@ -401,7 +391,7 @@ def create_instance_template(context,
                             'key': 'serial-port-enable',
                             'value': 'true'
                         }
-                        ]},
+                    ]},
                 "scheduling": {
                     "automaticRestart": True,
                     "onHostMaintenance": "MIGRATE",
@@ -434,21 +424,17 @@ def create_instance_template(context,
             }
         }
     }
-
     tagItems = instance_template['properties']['properties']['tags']['items']
-
     if context.properties['mgmtNIC'] == 'Ephemeral Public IP (eth0)':
         tagItems.append("x-chkp-ip-address--public")
         tagItems.append("x-chkp-management-interface--eth0")
     elif context.properties['mgmtNIC'] == 'Private IP (eth1)':
         tagItems.append("x-chkp-ip-address--private")
         tagItems.append("x-chkp-management-interface--eth1")
-
     if context.properties['networkDefinedByRoutes']:
         tagItems.append("x-chkp-topology-eth1--internal")
         tagItems.append("x-chkp-topology-settings-eth1"
                         "--network-defined-by-routes")
-
     metadata = instance_template['properties']['properties']['metadata']
     if 'instanceSSHKey' in context.properties:
         metadata['items'].append(
@@ -469,7 +455,7 @@ def GenerateAutscaledGroup(context, name,
         'name': igm_name,
         'metadata': {
             'dependsOn': depends_on
-            },
+        },
         'type': default.REGION_IGM,
         'properties': {
             'region': common.ZoneToRegion(prop.get("zone")),
@@ -479,8 +465,8 @@ def GenerateAutscaledGroup(context, name,
             # 'autoHealingPolicies': [{
             #                    'initialDelaySec': 60
             #    }]
-            }
         }
+    }
     return resource
 
 
@@ -489,12 +475,12 @@ def CreateAutscaler(context, name,
     prop = context.properties
     autoscaler_name = common.AutoName(name, default.AUTOSCALER)
     depends_on = depends_on
-    cpu_usage = float(cpu_usage)/100
+    cpu_usage = float(cpu_usage) / 100
     resource = {
         'name': autoscaler_name,
         'metadata': {
             'dependsOn': depends_on
-            },
+        },
         'type': default.REGION_AUTOSCALER,
         'properties': {
             'target': '$(ref.' + igm + '.selfLink)',
@@ -517,7 +503,6 @@ def make_access_config(name=None):
         'type': default.ONE_NAT,
         "kind": 'compute#accessConfig'
     }
-
     if name:
         access_config['name'] = name
     return access_config
@@ -530,7 +515,7 @@ def validate_region(test_zone, valid_region):
                   'in the same region ({})'
         raise common.Error(
             err_msg.format(test_zone, test_region, valid_region)
-            )
+        )
 
 
 @common.FormatErrorsDec
@@ -556,8 +541,7 @@ def generate_config(context):
     prop['computed_sic_key'] = password.GeneratePassword(12, False)
     prop['gatewayExternalIP'] = (prop['mgmtNIC'] ==
                                  'Ephemeral Public IP (eth0)')
-
-    version_chosen = prop['autoscalingVersion'].split(' ')[0]+"-GW"
+    version_chosen = prop['autoscalingVersion'].split(' ')[0] + "-GW"
     nics = create_nics(context)
     gw_template = create_instance_template(context,
                                            prop['deployment'],
@@ -571,7 +555,6 @@ def generate_config(context):
                                  gw_template['name'],
                                  prop['igm_dependencies'])
     prop['resources'] += [igm]
-
     prop['autoscaler_dependencies'] = [igm['name']]
     cpu_usage = prop.get("cpuUsage")
     autoscaler = CreateAutscaler(context,
@@ -580,7 +563,6 @@ def generate_config(context):
                                  cpu_usage,
                                  prop['autoscaler_dependencies'])
     prop['resources'] += [autoscaler]
-
     prop['outputs'] += [
         {
             'name': 'deployment',
@@ -608,7 +590,7 @@ def generate_config(context):
         },
         {
             'name': 'cpuUsagePercentage',
-            'value': str(int(prop['cpuUsage']))+'%'
+            'value': str(int(prop['cpuUsage'])) + '%'
         },
         {
             'name': 'minInstancesInt',
@@ -619,5 +601,4 @@ def generate_config(context):
             'value': str(int(prop['maxInstances']))
         },
     ]
-
     return common.MakeResource(prop['resources'], prop['outputs'])

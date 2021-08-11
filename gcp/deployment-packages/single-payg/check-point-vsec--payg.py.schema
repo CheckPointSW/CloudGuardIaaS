@@ -3,7 +3,7 @@ imports:
 
 info:
   version: 1.0
-  title: Check Point CloudGuard IaaS - PAYG Template
+  title: Check Point CloudGuard Network Security - PAYG Template
 
 required:
   - zone
@@ -154,6 +154,10 @@ properties:
       - R81 Management only
       - R81 Manual Configuration
       - R81 Gateway and Management (Standalone)
+      - R81.10 Gateway only
+      - R81.10 Management only
+      - R81.10 Manual Configuration
+      - R81.10 Gateway and Management (Standalone)
   allowUploadDownload:
     type: boolean
     default: True

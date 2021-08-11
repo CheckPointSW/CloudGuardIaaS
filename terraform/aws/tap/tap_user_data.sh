@@ -4,6 +4,7 @@ exec 1>/var/log/aws-user-data.log 2>&1
 
 echo template_name: TAP_tf >> /etc/cloud-version
 echo template_version: 20210309 >> /etc/cloud-version
+echo template_type: terraform >> $cv_path
 
 hname="CP-TAP"
 

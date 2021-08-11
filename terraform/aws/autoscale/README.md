@@ -107,10 +107,11 @@ secret_key = "my-secret-key"
   ```
 
 - Conditional creation
-  - To create an ASG configuration with an IAM role:
+  - To enable cloudwatch for ASG:
   ```
   enable_cloudwatch = true
   ```
+  Note: enabling cloudwatch will automatically create IAM role with cloudwatch:PutMetricData permission
   - To create an ASG configuration without a proxy ELB:
   ```
   proxy_elb_type= "none"
@@ -141,7 +142,7 @@ secret_key = "my-secret-key"
 | minimum_group_size | The minimum number of instances in the Auto Scaling group | number | n/a | 2 | no |
 | maximum_group_size | The maximum number of instances in the Auto Scaling group | number | n/a | 10 | no |
 | target_groups | (Optional) List of Target Group ARNs to associate with the Auto Scaling group | list(string) | n/a | [] | no |
-| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R80.40-PAYG-NGTP | no |
 | admin_shell | Set the admin shell to enable advanced command line configuration | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateway_SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |
@@ -177,6 +178,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | ---------------- | ------------- |
 | 20200318 | First release of Check Point Auto Scaling Terraform module for AWS |
 | 20210309 | AWS Terraform modules refactor |
+| 20210329 | Stability fixes |
  
 
 

@@ -140,10 +140,11 @@ secret_key = "my-secret-key"
   ```
 
 - Conditional creation
-  - To create an ASG configuration with an IAM role:
+  - To enable cloudwatch for ASG:
   ```
   enable_cloudwatch = true
   ```
+  Note: enabling cloudwatch will automatically create IAM role with cloudwatch:PutMetricData permission
   - To deploy Security Management Server:
   ```
   management_deploy = true
@@ -180,16 +181,16 @@ secret_key = "my-secret-key"
 | certificate  | Amazon Resource Name (ARN) of an HTTPS Certificate, ignored if the selected protocol is HTTP | string  | n/a | n/a  | no |
 | service_port  | The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS | string | n/a | n/a  | no |
 | gateways_subnets  | Select at least 2 public subnets in the VPC. If you choose to deploy a Security Management Server it will be deployed in the first subnet | list(string) | n/a | n/a  | yes |
-| gateway_instance_type | The instance type of the Secutiry Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge  | c5.xlarge  | no  |
+| gateway_instance_type | The instance type of the Security Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge  | c5.xlarge  | no  |
 | gateways_min_group_size | The minimal number of Security Gateways | number | n/a | 2 | no |
 | gateways_max_group_size | The maximal number of Security Gateways | number | n/a | 10 | no |
-| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R80.40-PAYG-NGTP | no |
 | gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
 | enable_cloudwatch  | Report Check Point specific CloudWatch metrics | bool  | true/false  | false  | no  |
 | management_deploy  | Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section | bool  | true/false  | true  | no  |
 | management_instance_type | The EC2 instance type of the Security Management Server  | string  | - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.12xlarge <br/> - m5.24xlarge  | m5.xlarge  | no  |
-| management_version  | The license to install on the Security Management Server  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG | R80.40-PAYG  | no  |
+| management_version  | The license to install on the Security Management Server  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG <br/> - R81.10-BYOL <br/> - R81.10-PAYG | R80.40-PAYG  | no  |
 | management_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateways_policy | The name of the Security Policy package to be installed on the gateways in the Security Gateways Auto Scaling group | string | n/a | Standard | no |
 | gateways_blades | Turn on the Intrusion Prevention System, Application Control, Anti-Virus and Anti-Bot Blades (additional Blades can be manually turned on later) | bool | true/false | true | no |
@@ -215,7 +216,6 @@ secret_key = "my-secret-key"
 | internal_load_balancer_arn  | The internal Load Balancer arn  |
 | external_lb_target_group_arn  | The external Load Balancer Target Group arn  |
 | internal_lb_target_group_arn  | The internal Load Balancer Target Group arn  |
-| autoscale_autoscaling_group_id  | The id of the deployed AutoScaling Group  |
 | autoscale_autoscaling_group_name  | The name of the deployed AutoScaling Group  |
 | autoscale_autoscaling_group_arn  | The ARN for the deployed AutoScaling Group  |
 | autoscale_security_group_id  | The deployed AutoScaling Group's security group id  |

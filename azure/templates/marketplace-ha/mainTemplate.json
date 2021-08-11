@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "location": {
@@ -20,7 +20,10 @@
         "R80.40 - Pay As You Go (NGTX)",
         "R81 - Bring Your Own License",
         "R81 - Pay As You Go (NGTP)",
-        "R81 - Pay As You Go (NGTX)"
+        "R81 - Pay As You Go (NGTX)",
+        "R81.10 - Bring Your Own License",
+        "R81.10 - Pay As You Go (NGTP)",
+        "R81.10 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R80.40 - Bring Your Own License",
       "metadata": {
@@ -256,7 +259,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20210111",
+    "templateVersion": "20210711",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -269,7 +272,10 @@
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
       "R81 - Bring Your Own License": "BYOL",
       "R81 - Pay As You Go (NGTP)": "NGTP",
-      "R81 - Pay As You Go (NGTX)": "NGTX"
+      "R81 - Pay As You Go (NGTX)": "NGTX",
+      "R81.10 - Bring Your Own License": "BYOL",
+      "R81.10 - Pay As You Go (NGTP)": "NGTP",
+      "R81.10 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -281,7 +287,10 @@
       "R80.40 - Pay As You Go (NGTX)": "R8040",
       "R81 - Bring Your Own License": "R81",
       "R81 - Pay As You Go (NGTP)": "R81",
-      "R81 - Pay As You Go (NGTX)": "R81"
+      "R81 - Pay As You Go (NGTX)": "R81",
+      "R81.10 - Bring Your Own License": "R8110",
+      "R81.10 - Pay As You Go (NGTP)": "R8110",
+      "R81.10 - Pay As You Go (NGTX)": "R8110"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "adminUsername": "notused",
@@ -437,7 +446,7 @@
   "resources": [
     {
       "apiVersion": "2020-06-01",
-      "name": "pid-7fbd7ca2-a62c-5cb5-9b28-3900ca6dba8d",
+      "name": "pid-6f13b00a-7546-4ab2-be9f-c66815cc6c8b-partnercenter",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
@@ -451,7 +460,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2021-04-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"

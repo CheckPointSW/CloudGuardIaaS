@@ -250,6 +250,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | ---------------- | ------------- |
 | 20200413 | First release of Check Point Traffic Access Point (TAP) Terraform module for AWS |
 | 20210309 | AWS Terraform modules refactor |
+| 20210329 | Stability fixes |
  
 
 
