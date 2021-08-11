@@ -18,7 +18,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20210706'
+TEMPLATE_VERSION = '20210811'
 
 startup_script = '''
 #!/bin/bash
@@ -137,6 +137,28 @@ EOF
         fi
 
         ##########
+    fi
+
+    if $installSecurityManagement ; then
+        set +e
+        public_ip="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
+        declare -i attempts=0
+        declare -i max_attempts=80
+        mgmt_cli -r true discard
+        result=$?
+        while [ $result -ne 0 ] && [ $attempts -lt $max_attempts ]
+        do
+            attempts=$attempts+1
+            sleep 30
+            mgmt_cli -r true discard
+            result=$?
+        done
+        generic_objects="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json)"
+        uid="$(echo $generic_objects | jq .objects | jq .[0] | jq .uid)"
+        if [ ! -z "$public_ip" ] && [ ! -z "${{uid:1:-1}}" ] ; then
+            mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
+        fi
+        set -e
     fi
 
     if "$need_boot" ; then

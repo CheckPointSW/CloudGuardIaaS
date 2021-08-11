@@ -1,6 +1,6 @@
 {
   "defaultDeploymentType": "SINGLE_VM",
-  "imageName": "check-point-r8040-gw-byol-single-294-688-v20200924",
+  "imageName": "check-point-r8040-gw-byol-single-294-904-v20210715",
   "projectId": "checkpoint-public",
   "templateName": "nonexistent_template",
   "useSolutionPackage": "true"
