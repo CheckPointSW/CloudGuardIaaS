@@ -211,7 +211,7 @@
             "osPlatform": "Linux",
             "imageReference": {
               "publisher": "checkpoint",
-              "offer": "check-point-cg-r8040-4qa-preview",
+              "offer": "infinity-gw",
               "sku": "sg-byol"
             },
             "count": "[steps('autoprovision').vmCount]"
@@ -337,9 +337,9 @@
                   "value": "No"
                 }
               ],
-              "required": true
+              "required": false
             },
-            "visible": true
+            "visible": false
           },
           {
             "name": "sourceImageVhdUri",
@@ -373,7 +373,7 @@
             },
             "toolTip": {
               "virtualNetwork": "Virtual Network Name",
-              "subnets": "The subnets to deploy into. Allowed ranges are [10.0.0.0 - 10.255.255.255] and [192.168.0.0 - 192.168.255.255]"
+              "subnets": "The subnets to deploy into. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
             },
             "defaultValue": {
               "name": "vnet01",
@@ -436,12 +436,12 @@
                 "value": "none"
               },
               {
-                "label": "Choose an existing Azure Key Vault",
-                "value": "existingVault"
-              },
-              {
                 "label": "Create new Azure Key Vault and upload certificates",
                 "value": "newVault"
+              },
+              {
+                "label": "Choose an existing Azure Key Vault",
+                "value": "existingVault"
               }
               ],
               "required": true
@@ -450,9 +450,16 @@
           },
           {
             "name": "existingKeyVault",
-            "type": "Microsoft.KeyVault.KeyVaultCertificateSelector",
-            "label": "Choose a certificate",
-            "toolTip": "You need to select one certificate only, the next ones will be added automatically",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Choose Key Vault",
+            "resourceType": "Microsoft.KeyVault/vaults",
+            "options": {
+                "filter": {
+                    "subscription": "onBasics",
+                    "location": "onBasics"
+                }
+            },
+            "toolTip": "The chosen key vault should contain PFX certificates for all the relevant HTTPS based assets in the [Infinity Portal](https://portal.checkpoint.com/)",
             "visible": "[equals(steps('https').chooseVault, 'existingVault')]"
           },
           {
@@ -461,9 +468,9 @@
             "label": "Azure Key Vault name",
             "toolTip": "Azure Key Vault name",
             "constraints": {
-              "required": "[equals(steps('https').chooseVault, 'newVault')]",
-              "regex": "^[a-z0-9A-Z]{1,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+              "required": true,
+              "regex": "^[a-zA-Z0-9-]{3,24}$",
+              "validationMessage": "A vault's name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
             },
             "visible": "[equals(steps('https').chooseVault, 'newVault')]"
           },
@@ -474,7 +481,7 @@
             "defaultValue": "1",
             "toolTip": "Each certificate will have two entries in the Key Vault secrets - one for certificate and one for its password",
             "constraints": {
-              "required": "[equals(steps('https').chooseVault, 'newVault')]",
+              "required": true,
               "allowedValues": [
                 {
                   "label": "1",
@@ -506,7 +513,7 @@
             "label": "PFX certificate file",
             "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
             "constraints": {
-              "required": "[lessOrEquals(1, steps('https').numberOfCerts)]",
+              "required": true,
               "accept": ".pfx,.p12"
             },
             "options": {
@@ -518,15 +525,28 @@
             "visible": "[equals(steps('https').chooseVault, 'newVault')]"
           },
           {
+            "name": "firstCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": true,
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
             "name": "firstCertPassword",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
-              "password": "Cert password",
-              "confirmPassword": "Confirm cert password"
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
             },
-            "toolTip": "Password used when exporting the PFX certificate",
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
             "constraints": {
-              "required": "[lessOrEquals(1, steps('https').numberOfCerts)]"
+              "required": true
             },
             "options": {
               "hideConfirmation": false
@@ -551,13 +571,26 @@
             "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
           },
           {
+            "name": "secondCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
             "name": "secondCertPassword",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
-              "password": "Cert password",
-              "confirmPassword": "Confirm cert password"
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
             },
-            "toolTip": "Password used when exporting the PFX certificate",
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
             "constraints": {
               "required": "[lessOrEquals(2, steps('https').numberOfCerts)]"
             },
@@ -584,13 +617,26 @@
             "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
           },
           {
+            "name": "thirdCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
             "name": "thirdCertPassword",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
-              "password": "Cert password",
-              "confirmPassword": "Confirm cert password"
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
             },
-            "toolTip": "Password used when exporting the PFX certificate",
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
             "constraints": {
               "required": "[lessOrEquals(3, steps('https').numberOfCerts)]"
             },
@@ -617,13 +663,26 @@
             "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
           },
           {
+            "name": "fourthCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
             "name": "fourthCertPassword",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
-              "password": "Cert password",
-              "confirmPassword": "Confirm cert password"
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
             },
-            "toolTip": "Password used when exporting the PFX certificate",
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
             "constraints": {
               "required": "[lessOrEquals(4, steps('https').numberOfCerts)]"
             },
@@ -650,13 +709,26 @@
             "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
           },
           {
+            "name": "fifthCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
             "name": "fifthCertPassword",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
-              "password": "Cert password",
-              "confirmPassword": "Confirm cert password"
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
             },
-            "toolTip": "Password used when exporting the PFX certificate",
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
             "constraints": {
               "required": "[lessOrEquals(5, steps('https').numberOfCerts)]"
             },
@@ -697,18 +769,23 @@
       "waapAgentFog": "[basics('waapAgentFog')]",
       "adminEmail": "[basics('adminEmail')]",
       "chooseVault": "[steps('https').chooseVault]",
-      "existingKeyVaultRGName": "[if(empty(steps('https').existingKeyVault), resourceGroup().name, first(skip(split(steps('https').existingKeyVault.keyVaultId, '/'), 4)))]",
-      "keyVaultName": "[if(equals(steps('https').chooseVault, 'none'), resourceGroup().name, if(empty(steps('https').existingKeyVault), steps('https').keyVaultName, steps('https').existingKeyVault.keyVaultName))]",
+      "existingKeyVaultRGName": "[if(empty(steps('https').existingKeyVault), resourceGroup().name, first(skip(split(steps('https').existingKeyVault.id, '/'), 4)))]",
+      "keyVaultName": "[if(equals(steps('https').chooseVault, 'none'), 'vault', if(empty(steps('https').existingKeyVault), steps('https').keyVaultName, steps('https').existingKeyVault.name))]",
       "numberOfCerts": "[coalesce(steps('https').numberOfCerts, int('0'))]",
       "firstCertificate": "[steps('https').firstCertificate]",
+      "firstCertDescription": "[steps('https').firstCertDescription]",
       "firstCertPassword": "[steps('https').firstCertPassword]",
       "secondCertificate": "[steps('https').secondCertificate]",
+      "secondCertDescription": "[steps('https').secondCertDescription]",
       "secondCertPassword": "[steps('https').secondCertPassword]",
       "thirdCertificate": "[steps('https').thirdCertificate]",
+      "thirdCertDescription": "[steps('https').thirdCertDescription]",
       "thirdCertPassword": "[steps('https').thirdCertPassword]",
       "fourthCertificate": "[steps('https').fourthCertificate]",
+      "fourthCertDescription": "[steps('https').fourthCertDescription]",
       "fourthCertPassword": "[steps('https').fourthCertPassword]",
       "fifthCertificate": "[steps('https').fifthCertificate]",
+      "fifthCertDescription": "[steps('https').fifthCertDescription]",
       "fifthCertPassword": "[steps('https').fifthCertPassword]"
     }
   }
