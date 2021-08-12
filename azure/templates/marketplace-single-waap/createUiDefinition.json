@@ -8,11 +8,32 @@
         "name": "gatewayNameUi",
         "type": "Microsoft.Common.TextBox",
         "label": "VM Name",
-        "toolTip": "The name of the Check Point CloudGuard.",
+        "toolTip": "This will determine the hostname prefix of the VM",
         "constraints": {
           "required": true,
           "regex": "^[a-z0-9A-Z]{1,30}$",
           "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+        }
+      },
+      {
+        "name": "inboundSources",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Allow access from",
+        "defaultValue": "0.0.0.0/0",
+        "toolTip": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)",
+        "constraints": {
+          "required": true,
+          "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2])){1,50}$",
+          "validationMessage": "Only CIDR notation is allowed i.e. X.X.X.X/X"
+        },
+        "visible": true
+      },
+      {
+        "name": "user",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "User is set to 'admin'"
         }
       },
       {
@@ -25,7 +46,6 @@
           "sshPublicKey": "SSH public key"
         },
         "toolTip": {
-          "password": "The user 'admin' password",
           "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
         },
         "constraints": {
@@ -36,17 +56,47 @@
           "hidePassword": false
         },
         "osPlatform": "Linux"
+      },
+      {
+        "name": "waapAgentToken",
+        "type": "Microsoft.Common.PasswordBox",
+        "label": {
+          "password": "Infinity Next Agent Token",
+          "confirmPassword": "Confirm Infinity Next Agent Token"
+        },
+        "toolTip": "Token can be obtained by logging in to [https://portal.checkpoint.com/](https://portal.checkpoint.com/) –> INFINITY POLICY -> CLOUD -> Profiles",
+        "constraints": {
+          "required": true,
+          "regex": "^cp-[a-z0-9A-Z-]{72,72}$",
+          "validationMessage": "Token should begin with 'cp-' and must be 75 characters long"
+        },
+        "options": {
+          "hideConfirmation": false
+        },
+        "visible": true
+      },
+      {
+        "name": "waapAgentFog",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Fog address (optional)",
+        "toolTip": "Fog address",
+        "constraints": {
+          "required": false,
+          "regex": "^https://",
+          "validationMessage": "Should begin with https://"
+        },
+        "visible": true
       }
     ],
     "steps": [
       {
-        "name": "chkp",
-        "label": "Check Point CloudGuard settings",
+        "name": "autoprovision",
+        "label": "VM settings",
         "subLabel": {
-          "preValidation": "Configure CloudGuard settings",
+          "preValidation": "Configure VM settings",
           "postValidation": "Done"
         },
-        "bladeTitle": "CloudGuard settings",
+        "bladeTitle": "VM settings",
         "elements": [
           {
             "name": "vmSizeUiBYOL",
@@ -55,7 +105,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_DS2_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -130,27 +181,11 @@
             "count": 1
           },
           {
-            "name": "bootstrapScript",
-            "type": "Microsoft.Common.FileUpload",
-            "label": "Bootstrap script",
-            "toolTip": "An optional script to run on the initial boot",
-            "constraints": {
-              "required": false,
-              "accept": ".sh,text/plain"
-            },
-            "options": {
-              "multiple": false,
-              "uploadMode": "file",
-              "openMode": "text",
-              "encoding": "UTF-8"
-            }
-          },
-          {
             "name": "waapPublicIP",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Auto Assign Public IP address",
+            "label": "Assign public IP address to the gateway",
+            "toolTip": "Assign public IP address to the gateway",
             "defaultValue": "Yes",
-            "toolTip": "If selected 'Yes', then the solution will have public IP address.",
             "constraints": {
               "allowedValues": [
                 {
@@ -165,17 +200,20 @@
             }
           },
           {
-            "name": "inboundSources",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Configure inbound sources",
-            "defaultValue": "0.0.0.0/0",
-            "toolTip": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)",
+            "name": "bootstrapScript",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "Bootstrap script",
+            "toolTip": "Bootstrap script",
             "constraints": {
-              "required": true,
-              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-              "validationMessage": "Only CIDR notation is allowed i.e. X.X.X.X/X"
+              "required": false,
+              "accept": ".sh,text/plain"
             },
-            "visible": true
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "text",
+              "encoding": "UTF-8"
+            }
           },
           {
             "name": "useCustomImageUri",
@@ -194,9 +232,9 @@
                   "value": "No"
                 }
               ],
-              "required": true
+              "required": false
             },
-            "visible": true
+            "visible": false
           },
           {
             "name": "sourceImageVhdUri",
@@ -204,27 +242,11 @@
             "label": "Development Image URI",
             "toolTip": "The URI of the blob containing the development image",
             "constraints": {
-              "required": "[equals(steps('chkp').useCustomImageUri, 'Yes')]",
+              "required": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]",
               "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
               "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
             },
-            "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
-          },
-          {
-            "name": "waapAgentToken",
-            "type": "Microsoft.Common.PasswordBox",
-            "label": {
-              "password": "Infinity Next Agent Token",
-              "confirmPassword": "Confirm Infinity Next Agent Token"
-            },
-            "toolTip": "Token can be obtained by logging in to [https://portal.checkpoint.com/](https://portal.checkpoint.com/) – Unified Policy or CloudGuard AppSec -> In the Profiles Menu choose or create a new profile",
-            "constraints": {
-              "required": true
-            },
-            "options": {
-              "hideConfirmation": false
-            },
-            "visible": true
+            "visible": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]"
           }
         ]
       },
@@ -246,7 +268,7 @@
             },
             "toolTip": {
               "virtualNetwork": "Virtual Network Name",
-              "subnets": "List of subnets to deploy into"
+              "subnets": "The subnets to deploy into. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
             },
             "defaultValue": {
               "name": "vnet01",
@@ -260,9 +282,9 @@
             },
             "subnets": {
               "subnet1": {
-                "label": "Frontend subnet",
+                "label": "Gateway external subnet",
                 "defaultValue": {
-                  "name": "Frontend",
+                  "name": "VM-External",
                   "addressPrefixSize": "/24"
                 },
                 "constraints": {
@@ -272,9 +294,9 @@
                 }
               },
               "subnet2": {
-                "label": "Backend subnet",
+                "label": "Gateway internal subnet",
                 "defaultValue": {
-                  "name": "Backend",
+                  "name": "VM-Internal",
                   "addressPrefixSize": "/24"
                 },
                 "constraints": {
@@ -290,11 +312,17 @@
     ],
     "outputs": {
       "location": "[location()]",
-      "adminPassword": "[basics('auth').password]",
-      "authenticationType": "[basics('auth').authenticationType]",
-      "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[steps('chkp').vmSizeUiBYOL]",
+      "inboundSources": "[basics('inboundSources')]",
+      "authenticationType": "[basics('auth').authenticationType]",
+      "adminPassword": "[basics('auth').password]",
+      "sshPublicKey": "[basics('auth').sshPublicKey]",
+      "waapAgentToken": "[basics('waapAgentToken')]",
+      "waapAgentFog": "[basics('waapAgentFog')]",
+      "vmSize": "[steps('autoprovision').vmSizeUiBYOL]",
+      "waapPublicIP": "[steps('autoprovision').waapPublicIP]",
+      "bootstrapScript": "[steps('autoprovision').bootstrapScript]",
+      "sourceImageVhdUri": "[coalesce(steps('autoprovision').sourceImageVhdUri, 'noCustomUri')]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
@@ -304,12 +332,7 @@
       "Subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "Subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
-      "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
-      "bootstrapScript": "[steps('chkp').bootstrapScript]",
-      "waapPublicIP": "[steps('chkp').waapPublicIP]",
-      "inboundSources": "[steps('chkp').inboundSources]",
-      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "waapAgentToken": "[steps('chkp').waapAgentToken]"
+      "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]"
     }
   }
 }
