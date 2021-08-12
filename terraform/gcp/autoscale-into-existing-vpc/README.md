@@ -162,8 +162,8 @@ Please leave empty list to which port you want to unable traffic.
 ## Inputs
 | Name          | Description   | Type          | Allowed values | Default       | Required      |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| service_account_path | User service account path in JSON format - From the service account key page in the Cloud Console choose an existing account or create a new one. Next, download the JSON key file. Name it something you can remember, store it somewhere secure on your machine, and supply the path to the location is stored. (e.g. "service-accounts/service-account-name.json")  | string  | N/A | "" | no |
-| project  | Personal project id. The project indicates the default GCP project all of your resources will be created in.  | string  | N/A | "" | no |
+| service_account_path | User service account path in JSON format - From the service account key page in the Cloud Console choose an existing account or create a new one. Next, download the JSON key file. Name it something you can remember, store it somewhere secure on your machine, and supply the path to the location is stored. (e.g. "service-accounts/service-account-name.json")  | string  | N/A | "" | yes |
+| project  | Personal project id. The project indicates the default GCP project all of your resources will be created in.  | string  | N/A | "" | yes |
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-mig" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
