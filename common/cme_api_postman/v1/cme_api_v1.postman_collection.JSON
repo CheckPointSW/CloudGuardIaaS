@@ -1,6 +1,6 @@
 {
 	"info": {
-		"name": "cme_api_v1.2",
+		"name": "cme_api_v1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -410,7 +410,7 @@
 			"description" : "Operations for general CME configurations.",
 			"item": [
 					  {
-						"name": "get delayCycle",
+						"name": "GET delayCycle",
 						"request": {
 						  "method": "GET",
 						  "header": [
@@ -424,14 +424,14 @@
 							}
 						  ],
 						  "url": {
-							  "raw": "{{server}}/v1.8/cme-api/v1.2/generalConfiguration/delayCycle",
+							  "raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
 							  "host": [
 								  "{{server}}"
 							  ],
 							  "path": [
 								  "v1.8",
 								  "cme-api",
-								  "v1.2",
+								  "v1",
 								  "generalConfiguration",
 								  "delayCycle"
 							  ]
@@ -463,14 +463,14 @@
 								}
 							},
 							"url": {
-								"raw": "{{server}}/v1.8/cme-api/v1.2/generalConfiguration/delayCycle",
+								"raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
 								"host": [
 									"{{server}}"
 								],
 								"path": [
 									"v1.8",
 									"cme-api",
-									"v1.2",
+									"v1",
 									"generalConfiguration",
 									"delayCycle"
 								]
@@ -493,14 +493,14 @@
 								}
 							],
 							"url": {
-								"raw": "{{server}}/v1.8/cme-api/v1.2/generalConfiguration/cmeVersion",
+								"raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/cmeVersion",
 								"host": [
 									"{{server}}"
 								],
 								"path": [
 									"v1.8",
 									"cme-api",
-									"v1.2",
+									"v1",
 									"generalConfiguration",
 									"cmeVersion"
 								]
@@ -515,7 +515,7 @@
 			"description" : "Operations for configuring Management.",
 			"item": [
 					  {
-						"name": "GET all mgmt",
+						"name": "GET management",
 						"request": {
 							"method": "GET",
 							"header": [
@@ -546,7 +546,7 @@
 						"response": []
 					  },
 					  {
-						"name": "PUT Edit management",
+						"name": "PUT set management",
 						"request": {
 							"method": "PUT",
 							"header": [
@@ -566,14 +566,14 @@
 								"raw": "{\"name\": \"<mgmt_name>\"}"
 							},
 							"url": {
-								"raw": "{{server}}/v1.8/cme-api/v1.2/management",
+								"raw": "{{server}}/v1.8/cme-api/v1/management",
 								"host": [
 									"{{server}}"
 								],
 								"path": [
 									"v1.8",
 									"cme-api",
-									"v1.2",
+									"v1",
 									"management"
 								]
 							}
@@ -587,7 +587,7 @@
 			"description" : "Operations for configuring Accounts in CME <br/>(Previously known as \"controllers\").",
 			"item": [
 					  {
-						  "name": "GET accounts",
+						  "name": "GET all accounts",
 						  "request": {
 							  "method": "GET",
 							  "header": [
@@ -601,14 +601,14 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/accounts",
+								  "raw": "{{server}}/v1.8/cme-api/v1/accounts",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "accounts"
 								  ]
 							  }
@@ -616,7 +616,7 @@
 						  "response": []
 					  },
 					  {
-						  "name": "GET account 'name'",
+						  "name": "GET account",
 						  "request": {
 							  "method": "GET",
 							  "header": [
@@ -630,14 +630,14 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/accounts/<account_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "accounts",
 									  "<account_name>"
 								  ]
@@ -646,7 +646,7 @@
 						  "response": []
 					  },
 					  {
-						  "name": "delete account",
+						  "name": "DELETE account",
 						  "request": {
 							  "method": "DELETE",
 							  "header": [
@@ -660,14 +660,14 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/accounts/<account_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "accounts",
 									  "<account_name>"
 								  ]
@@ -698,14 +698,14 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations",
+								  "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "gwConfigurations"
 								  ]
 							  }
@@ -713,7 +713,7 @@
 						  "response": []
 					  },
 					  {
-						  "name": "GET a gw configuration",
+						  "name": "GET gw configuration",
 						  "request": {
 							  "method": "GET",
 							  "header": [
@@ -729,23 +729,23 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/<gwConfigurations_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfiguration_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "gwConfigurations",
-									  "<gwConfigurations_name>"
+									  "<gwConfiguration_name>"
 								  ]
 							  }
 						  },
 						  "response": []
 					  },
 					  {
-						  "name": "delete A gw configuration",
+						  "name": "DELETE gw configuration",
 						  "request": {
 							  "method": "DELETE",
 							  "header": [
@@ -761,16 +761,16 @@
 								  }
 							  ],
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/<gwConfigurations_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfiguration_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "gwConfigurations",
-									  "<gwConfigurations_name>"
+									  "<gwConfiguration_name>"
 								  ]
 							  }
 						  },
@@ -806,14 +806,14 @@
 								  }
 							  },
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/accounts/azure",
+								  "raw": "{{server}}/v1.8/cme-api/v1/accounts/azure",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "accounts",
 									  "azure"
 								  ]
@@ -845,14 +845,14 @@
 								  }
 							  },
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/accounts/azure/<account_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/accounts/azure/<account_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "accounts",
 									  "azure",
 									  "<account_name>"
@@ -879,17 +879,17 @@
 							  ],
 							  "body": {
 								  "mode": "raw",
-								  "raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
+								  "raw": "{\"name\": \"<gwConfiguration_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
 							  },
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/azure",
+								  "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "gwConfigurations",
 									  "azure"
 								  ]
@@ -918,17 +918,17 @@
 								  "raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
 							  },
 							  "url": {
-								  "raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/azure/<gwConfigurations_name>",
+								  "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure/<gwConfiguration_name>",
 								  "host": [
 									  "{{server}}"
 								  ],
 								  "path": [
 									  "v1.8",
 									  "cme-api",
-									  "v1.2",
+									  "v1",
 									  "gwConfigurations",
 									  "azure",
-									  "<gwConfigurations_name>"
+									  "<gwConfiguration_name>"
 								  ]
 							  }
 						  },
@@ -956,7 +956,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"name\": \"<account_name>\", \"regions\": [\"eu-west-1\", \"us-east-2\"], \"credentials_file\": \"AWS_credentials_file_name\", \"access_key\": \"<access_key>\", \"secret_key\": \"<secret_key>\", \"sts_role\": \"<sts_role>\", \"sta_external_id\": \"<sts_external_id>\", \"scan_gateways\": \"<scan_gateways>\", \"scan_vpn\": \"<scan_vpn>\", \"scan_load_balancers\": \"<scan_load_balancers>\", \"access_subnets\": \"<access_sunbets>\", \"deletion_tolerance\": \"<deletion_tolerance>\"}",
+							"raw": "{\"name\": \"<account_name>\", \"regions\": [\"eu-west-1\", \"us-east-2\"], \"credentials_file\": \"AWS_credentials_file_name\", \"access_key\": \"<access_key>\", \"secret_key\": \"<secret_key>\", \"sts_role\": \"<sts_role>\", \"sts_external_id\": \"<sts_external_id>\", \"scan_gateways\": \"<scan_gateways>\", \"scan_vpn\": \"<scan_vpn>\", \"scan_load_balancers\": \"<scan_load_balancers>\", \"scan_subnets\": \"<scan_subnets>\", \"communities\": ["<community_a>", "<community_b>"], \"deletion_tolerance\": \"<deletion_tolerance>\", \"sub_accounts\": [{\"name\": \"sub_account_a\",\"credentials_file\": \"AWS_credentials_file_name\"}, {\"name\": \"sub_account_b\", \"access_key\": \"<access_key>\", \"secret_key\": \"<secret_key>\"}, {\"name\": \"sub_account_c\", \"sts_role\": \"<sts_role>\", \"sts_external_id\": \"<sts_external_id>\"}]}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -964,14 +964,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/accounts/aws",
+							"raw": "{{server}}/v1.8/cme-api/v1/accounts/aws",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"accounts",
 								"aws"
 							]
@@ -1003,14 +1003,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/accounts/aws/<account_name>",
+							"raw": "{{server}}/v1.8/cme-api/v1/accounts/aws/<account_name>",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"accounts",
 								"aws",
 								"<account_name>"
@@ -1037,17 +1037,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\", \"vpn_domain\": \"<vpn_domain>\", \"vpn_community\": \"<vpn_community>\", \"deployment_type\": \"<TGW>\", \"tgw_static_routes\": \"<10.0.0.0/16,10.100.0.0/16>\", \"tgw_spoke_routes\": \"<192.168.100.0/24,192.168.200.0/24>\"}"
+							"raw": "{\"name\": \"<gwConfiguration_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\", \"vpn_domain\": \"<vpn_domain>\", \"vpn_community\": \"<vpn_community>\", \"deployment_type\": \"<TGW>\", \"tgw_static_routes\": \"<10.0.0.0/16,10.100.0.0/16>\", \"tgw_spoke_routes\": \"<192.168.100.0/24,192.168.200.0/24>\"}"
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/aws",
+							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"gwConfigurations",
 								"aws"
 							]
@@ -1076,17 +1076,17 @@
 							"raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/aws/<gwConfigurations_name>",
+							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws/<gwConfiguration_name>",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"gwConfigurations",
 								"aws",
-								"<gwConfigurations_name>"
+								"<gwConfiguration_name>"
 							]
 						}
 					},
@@ -1122,14 +1122,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/accounts/gcp",
+							"raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"accounts",
 								"gcp"
 							]
@@ -1160,15 +1160,15 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/accounts/gcp/<account_name>",
+						"url
+							"raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp/<account_name>",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"accounts",
 								"gcp",
 								"<account_name>"
@@ -1195,17 +1195,17 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
+							"raw": "{\"name\": \"<gwConfiguration_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/gcp",
+							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"gwConfigurations",
 								"gcp"
 							]
@@ -1234,17 +1234,17 @@
 							"raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true, \"https-inspection\": true}, \"related_account\": \"<associated_account>\"}"
 						},
 						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1.2/gwConfigurations/gcp/<gwConfigurations_name>",
+							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp/<gwConfiguration_name>",
 							"host": [
 								"{{server}}"
 							],
 							"path": [
 								"v1.8",
 								"cme-api",
-								"v1.2",
+								"v1",
 								"gwConfigurations",
 								"gcp",
-								"<gwConfigurations_name>"
+								"<gwConfiguration_name>"
 							]
 						}
 					},
