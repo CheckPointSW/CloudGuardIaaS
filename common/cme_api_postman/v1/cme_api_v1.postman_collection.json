@@ -988,7 +988,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"regions\" : [\"eu-west-1\", \"us-east-2\"], \"credentials_file\" : \"AWS_credentials_file_name\"}",
+                            "raw": "{\"regions\" : [\"eu-west-1\", \"us-east-2\"], \"credentials_file\" : \"AWS_credentials_file_name\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\", \"sts_role\" : \"<sts_role>\", \"sta_external_id\": \"<sts_external_id>\", \"scan_gateways\" : \"<scan_gateways>\", \"scan_vpn\" : \"<scan_vpn>\", \"scan_load_balancers\" : \"<scan_load_balancers>\", \"scan_subnets\" : \"<scan_subnets>\", \"communities\": [\"<community_a>\", \"<community_b>\"], \"deletion_tolerance\": \"<deletion_tolerance>\", \"sub_accounts\": [{\"name\" : \"sub_account_a\", \"credentials_file\" : \"AWS_credentials_file_name\"}, {\"name\" : \"sub_account_b\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\"}, {\"name\" : \"sub_account_c\", \"sts_role\" : \"<sts_role>\", \"sts_external_id\" : \"<sts_external_id>\"}]}",
                             "options": {
                                 "raw": {
                                     "language": "json"
