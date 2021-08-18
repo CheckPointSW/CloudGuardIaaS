@@ -140,6 +140,9 @@ resource "aws_instance" "management-instance" {
     encrypted = local.volume_encryption_condition
     kms_key_id = local.volume_encryption_condition ? var.volume_encryption : ""
   }
+  lifecycle {
+    ignore_changes = [ebs_block_device,]
+  }
   instance_type = var.management_instance_type
   key_name = var.key_name
   iam_instance_profile = local.use_role == 1 ? aws_iam_instance_profile.management_instance_profile[0].id : ""
