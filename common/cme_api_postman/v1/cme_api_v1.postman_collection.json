@@ -1065,7 +1065,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true}, \"related_account\" : \"<associated_account>\"}"
+                            "raw": "{\"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\", \"vpn_domain\" : \"<vpn_domain>\", \"vpn_community\" : \"<vpn_community>\", \"deployment_type\" : \"TGW\", \"tgw_static_routes\": [\"10.0.0.0/16\", \"10.100.0.0/16\"], \"tgw_spoke_routes\": [\"192.168.100.0/24\", \"192.168.200.0/24\"]}"
                         },
                         "url": {
                             "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws/<gwConfiguration_name>",
