@@ -1,0 +1,124 @@
+
+1. upload files to storage folder(ha-test/nestedtemplates) on Azure。 （load-balancer.json, vnet-2-subnet-ha-new.json，vnet-2-subnet-ha-existing.json）
+
+2. set a service principal on Azure which will provide App ID and secret for API call.
+	Azure Active Directory --> app registration -->new registration
+	subscriptions --> access control(IAM) -->Add (add role assignment) 
+		role: distributor
+		assign access to: Azure AD user, group or service principal
+		select: app name
+
+3. create resource group, security group, Vnet and subnet
+
+4. set template parameters: Insert to '_artifactsLocation' parameter with: https://vmss.blob.core.chinacloudapi.cn/ha-test/
+
+5. install the latest JHF (take 225) for R80.10， replace the azure_ha_test.py file (13K, original one is 9K)
+   check the security group for all the interface
+   modify the time zone
+   
+6. check the azure-ha.json
+	#cd $FWDIR/conf
+	#cat azure-ha.json
+
+7. add app ID and client-secret to azure-ha.json
+	#azure-ha-conf --client-id 'Applicationid' --client-secret 'Password' 
+		example: azure-ha-conf --client-id '67eda80f-8911-48ce-8961-1f896435a6ad' --client-secret 'b9d47Y-kaJ2]UjLEuUbs?SesdBDXP]:q' –-force
+
+8. add China environment in azure-ha.json
+	#azure-ha-conf --environment AzureChinaCloud --force
+	
+9. add cluster info in azure-ha.json
+	"clusterNetworkInterfaces": {
+        "eth0": [
+            "private cluster IP",
+            " vcpfw-cnbjp1"  (cluster name = public ip name)
+        ]
+},
+
+10. check the azure-ha.json：
+	#python -m json.tool $FWDIR/conf/azure-ha.json
+	
+11. reload Azure：
+	#$FWDIR/scripts/azure_ha_cli.py reconf
+
+12. modify the fwkern.conf
+	#vi $FWDIR/boot/modules/fwkern.conf
+			fwha_dead_timeout_multiplier=200
+			fwha_if_problem_tolerance=200
+			cloud_balancer_ip1=0xa83f8110
+			cloud_balancer_port=8117
+			
+13 configure the ClusterXL on the mgmt server 
+	keep the cluster name is the same as "azure-ha.json"
+	using the interface private ip for cluster/memeber IP
+
+14. do ha test	
+	transfer the newest azure_ha_test.py to the GW by SCP
+	#cd $FWDIR/scripts
+	#azure_ha_test.py
+	
+	
+		
+15. fail-over check by "tail -f $FWDIR/log/azure_had.elg"
+
+
+
+
+
+
+
+
+	clish -c ‘add interface eth0 alias 192.168.1.99/32’ -s 
+	
+	set user admin shell /bin/bash
+	
+	ifconfig eth0:1 1.1.1.1/32 up
+	
+	
+### DO NOT put the "clusterNetworkInterfaces" at the end of script.
+
+[Expert@ha-01:0]# cat azure-ha.json
+{
+  "debug": false,
+  "subscriptionId": "49ec1be9-c437-489a-8934-e20490b21260",
+  "resourceGroup": "vmss-test",
+  "credentials": {
+    "tenant": "3a53d8fb-2359-4125-b8e8-0930545c03cb",
+    "grant_type": "client_credentials",
+    "client_id": "67eda80f-8911-48ce-8961-1f896435a6ad",
+    "client_secret": "b9d47Y-kaJ2]UjLEuUbs?SesdBDXP]:q"
+  },
+  "clusterNetworkInterfaces": {
+        "eth0": [
+            "10.0.1.30",
+            " ha-0" 
+        ]
+  },
+  "proxy": "",
+  "virtualNetwork": "vnet-vmss",
+  "clusterName": "ha-0",
+  "lbName": "ha-elb",
+  "environment": "AzureChinaCloud"
+}
+[Expert@ha-01:0]# 
+
+
+
+
+wenxj-2020demo app registration: 
+client-id: 7c788186-8a4e-4afa-8794-027d065055d1
+secret: @lqG5LL1LQ?RWN2OwT3jAVpg=enKWbv?	
+	 
+azure-ha-conf --client-id '7c788186-8a4e-4afa-8794-027d065055d1' --client-secret '@lqG5LL1LQ?RWN2OwT3jAVpg=enKWbv?' –-force
+	 
+  "clusterNetworkInterfaces": {
+        "eth0": [
+            "10.0.1.30",
+            " ha-0" 
+        ]
+  },
+
+
+check Session Sync:  
+		fw ctl pstate 
+		fw tab -t connections -f
