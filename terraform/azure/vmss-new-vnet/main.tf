@@ -273,6 +273,11 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = module.vnet.vnet_subnets[0]
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
+	   public_ip_address_configuration {
+		name = "${var.vmss_name}-public-ip"
+		idle_timeout = 30
+		domain_name_label = "${var.vmss_name}-dns-name"
+	   }
      }
  }
 
@@ -377,19 +382,5 @@ resource "azurerm_monitor_autoscale_setting" "vmss_settings" {
       send_to_subscription_co_administrator = false
       custom_emails = var.notification_email == "" ? [] : [var.notification_email]
     }
-  }
-}
-
-resource "azurerm_role_assignment" "custom_metrics_role_assignment"{
-  depends_on = [azurerm_virtual_machine_scale_set.vmss]
-  count = var.enable_custom_metrics ? 1 : 0
-  role_definition_id = join("", ["/subscriptions/", var.subscription_id, "/providers/Microsoft.Authorization/roleDefinitions/", "3913510d-42f4-4e42-8a64-420c390055eb"])
-  principal_id = lookup(azurerm_virtual_machine_scale_set.vmss.identity[0], "principal_id")
-  scope = module.common.resource_group_id
-
-  lifecycle {
-    ignore_changes = [
-      role_definition_id, principal_id
-    ]
   }
 }
