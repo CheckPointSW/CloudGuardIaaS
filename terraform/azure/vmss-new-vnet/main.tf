@@ -384,3 +384,17 @@ resource "azurerm_monitor_autoscale_setting" "vmss_settings" {
     }
   }
 }
+
+resource "azurerm_role_assignment" "custom_metrics_role_assignment"{
+  depends_on = [azurerm_virtual_machine_scale_set.vmss]
+  count = var.enable_custom_metrics ? 1 : 0
+  role_definition_id = join("", ["/subscriptions/", var.subscription_id, "/providers/Microsoft.Authorization/roleDefinitions/", "3913510d-42f4-4e42-8a64-420c390055eb"])
+  principal_id = lookup(azurerm_virtual_machine_scale_set.vmss.identity[0], "principal_id")
+  scope = module.common.resource_group_id
+
+  lifecycle {
+    ignore_changes = [
+      role_definition_id, principal_id
+    ]
+  }
+}
