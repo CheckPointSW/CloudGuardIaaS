@@ -183,6 +183,11 @@ enable_custom_metrics = true
     backend_load_distribution       = "Default"
     enable_custom_metrics           = true
 
+## Deploy Without Public IP
+
+1. By default the VMSS is deployed with public IP
+2. To deploy without public IP, remove the "public_ip_address_configuration" block in main.tf
+
 ## Known limitations
   
 1.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
