@@ -28,7 +28,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20210811'
+TEMPLATE_VERSION = '20210912'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -172,8 +172,7 @@ EOF
         ##########
     fi
 
-    if $installSecurityManagement ; then
-        set +e
+    if [ "$installSecurityManagement" -a "Management only" = "{installationType}" ] ; then
         public_ip="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
         declare -i attempts=0
         declare -i max_attempts=80
@@ -191,7 +190,6 @@ EOF
         if [ ! -z "$public_ip" ] && [ ! -z "${{uid:1:-1}}" ] ; then
             mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
         fi
-        set -e
     fi
 
     if "$need_boot" ; then
