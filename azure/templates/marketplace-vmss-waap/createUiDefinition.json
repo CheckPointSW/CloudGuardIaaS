@@ -116,7 +116,7 @@
             "label": "Number of Availability Zones to use",
             "defaultValue": "Two zones",
             "toolTip": "The number of availability zones to use for the scale set. The VMs will be spread equally between the zones",
-            "visible": "[contains(' centralus eastus2 francecentral northeurope southeastasia westeurope westus2 eastus uksouth southafricanorth southcentralus germanywestcentral canadacentral japaneast ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralindia centralus eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia uksouth westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -271,15 +271,19 @@
           {
             "name": "deploymentMode",
             "type": "Microsoft.Common.DropDown",
-            "label": "Load balancers deployment",
-            "defaultValue": "External only (Inbound inspection only)",
-            "visible": false,
-            "toolTip": "Defines which load balancers will be deployed. Note: For outbound inspection it is mandatory to deploy an external load balancer and/or instance level public IP addresses.",
+            "label": "Network Load Balancer deployment",
+            "defaultValue": "External",
+            "visible": true,
+            "toolTip": "Define which network load balancer will be deployed",
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "External only (Inbound inspection only)",
+                  "label": "External",
                   "value": "ELBOnly"
+                },
+                {
+                  "label": "Internal",
+                  "value": "ILBOnly"
                 }
               ]
             }
@@ -287,7 +291,7 @@
           {
             "name": "appLoadDistribution",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "External Load Balancer session persistence",
+            "label": "Load Balancer session persistence",
             "defaultValue": "Client IP",
             "toolTip": "The load balancing distribution method",
             "visible": true,
@@ -763,7 +767,6 @@
       "subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
-      "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
       "inboundSources": "[basics('inboundSources')]",
       "waapAgentToken": "[basics('waapAgentToken')]",
       "waapAgentFog": "[basics('waapAgentFog')]",
