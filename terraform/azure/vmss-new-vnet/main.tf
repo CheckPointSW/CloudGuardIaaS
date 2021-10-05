@@ -273,6 +273,11 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = module.vnet.vnet_subnets[0]
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
+	   public_ip_address_configuration {
+		name = "${var.vmss_name}-public-ip"
+		idle_timeout = 30
+		domain_name_label = "${var.vmss_name}-dns-name"
+	   }
      }
  }
 

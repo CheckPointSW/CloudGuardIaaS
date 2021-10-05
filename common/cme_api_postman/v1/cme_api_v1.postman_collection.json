@@ -1,1235 +1,1241 @@
 {
-	"info": {
-		"_postman_id": "b7e9daea-2dc3-48c1-92ae-284fc9449895",
-		"name": "cme_api_v1",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
+    "info": {
+        "name": "cme_api_v1",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
 		{
-			"name": "Session Management",
+            "name": "Session Management",
+            "item": [
+				{
+                    "name": "login",
+                    "event": [
+						{
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "try {\r",
+                                    "    var sid = JSON.parse(responseBody).sid;\r",
+                                    "    postman.setEnvironmentVariable(\"session\", sid);\r",
+                                    "    tests[\"login session-id = \" + sid] = true;\r",
+                                    "} catch (e) {}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/login",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "login"
+                            ]
+                        },
+                        "description": "Login request to receive session token."
+                    },
+                    "response": []
+                },
+				{
+                    "name": "login to last session",
+                    "event": [
+						{
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "try {\r",
+                                    "    var sid = JSON.parse(responseBody).sid;\r",
+                                    "    postman.setEnvironmentVariable(\"session\", sid);\r",
+                                    "    tests[\"login session-id = \" + sid] = true;\r",
+                                    "} catch (e) {}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\", \"continue-last-session\" : true}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/login",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "login"
+                            ]
+                        },
+                        "description": "Login to the last session"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "login to system domain",
+                    "event": [
+						{
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "try {\r",
+                                    "    var sid = JSON.parse(responseBody).sid;\r",
+                                    "    postman.setEnvironmentVariable(\"session\", sid);\r",
+                                    "    tests[\"login session-id = \" + sid] = true;\r",
+                                    "} catch (e) {}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\", \"domain\" : \"System Data\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/login",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "login"
+                            ]
+                        },
+                        "description": "Login to system domain"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "login with API key",
+                    "event": [
+						{
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "try {\r",
+                                    "    var sid = JSON.parse(responseBody).sid;\r",
+                                    "    postman.setEnvironmentVariable(\"session\", sid);\r",
+                                    "    tests[\"login session-id = \" + sid] = true;\r",
+                                    "} catch (e) {}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"api-key\" : \"<api_key>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/login",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "login"
+                            ]
+                        },
+                        "description": "Login with API key without user and password."
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "publish",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ }"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/publish",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.7",
+                                "publish"
+                            ]
+                        },
+                        "description": "Publish the last changes. Use the show-task command to check the progress of the task."
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "discard",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ }"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/discard",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "discard"
+                            ]
+                        },
+                        "description": "Discard the changes"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ }"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/logout",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "logout"
+                            ]
+                        },
+                        "description": "Log out from the existing session"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "disconnect",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"uid\" : \"<uid>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/disconnect",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "disconnect"
+                            ]
+                        },
+                        "description": "Disconnect a private session"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "keepalive",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ }"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/keepalive",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "keepalive"
+                            ]
+                        },
+                        "description": "Keep the session alive"
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "revert-to-revision",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"to-session\" : \"<session>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/revert-to-revision",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "revert-to-revision"
+                            ]
+                        },
+                        "description": "Revert the Management Database to the selected revision."
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "verify-revert",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"to-session\" : \"<session>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/verify-revert",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "verify-revert"
+                            ]
+                        },
+                        "description": "Verify the Management Database can revert to the selected revision."
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "CME General Configuration",
+            "description": "Operations for general CME configurations.",
+            "item": [
+				{
+                    "name": "GET delayCycle",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, 
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "generalConfiguration",
+                                "delayCycle"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "PUT set delayCycle",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"delay_cycle\": 20}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "generalConfiguration",
+                                "delayCycle"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "GET cmeVersion",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/cmeVersion",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "generalConfiguration",
+                                "cmeVersion"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "Management",
+            "description": "Operations for configuring Management.",
+            "item": [
+				{
+                    "name": "GET management",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            },
+							{
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/management",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "management"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "PUT set management",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, 
+							{
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\": \"<mgmt_name>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/management",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "management"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "Accounts",
+            "description": "Operations for configuring Accounts in CME <br/>(Previously known as \"controllers\").",
+            "item": [
+				{
+                    "name": "GET all accounts",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "GET account",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "<account_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "DELETE account",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "<account_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "Gw Configurations",
+            "description": "Operations for configuring Gw Configurations in CME <br/>(Previously known as \"templates\").",
+            "item": [
+				{
+                    "name": "GET all gw configurations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+				{
+                    "name": "GET gw configuration",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            },
+							{
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfiguration_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "<gwConfiguration_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "DELETE gw configuration",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "type": "text",
+                                "value": "{{session}}"
+                            },
+							{
+                                "key": "Content-Type",
+                                "type": "text",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfiguration_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "<gwConfiguration_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "Azure",
+            "description": "Operations in Azure cloud.",
+            "item": [
+				{
+                    "name": "POST Azure account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\" : \"<account_name>\", \"subscription\" : \"<subscription_id>\", \"directory_id\" : \"<directory_id>\", \"application_id\" : \"<application_id>\", \"client_secret\" : \"<client_secret>\", \"deletion_tolerance\" : \"<deletion_tolerance>\"}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/azure",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "azure"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "PUT set Azure account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"subscription\" : \"<subscription_id>\", \"application_id\" : \"<application_id>\", \"directory_id\" : \"<directory_id>\", \"client_secret\" : \"<client_secret>\", \"deletion_tolerance\" : \"<deletion_tolerance>\"}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/azure/<account_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "azure",
+                                "<account_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+				{
+                    "name": "POST add Azure gw configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            },
+							{
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\" : \"<gwConfiguration_name>\", \"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\" }"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "azure"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "PUT set Azure gw configuration",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure/<gwConfiguration_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "azure",
+                                "<gwConfiguration_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+            "name": "AWS",
+            "description": "Operations in AWS cloud.",
+            "item": [
+				{
+                    "name": "POST add AWS account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw" ,
+                            "raw": "{\"name\" : \"<account_name>\", \"regions\" : [\"eu-west-1\", \"us-east-2\"], \"credentials_file\" : \"AWS_credentials_file_name\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\", \"sts_role\" : \"<sts_role>\", \"sts_external_id\" : \"<sts_external_id>\", \"scan_gateways\" : \"<scan_gateways>\", \"scan_vpn\" : \"<scan_vpn>\", \"scan_load_balancers\" : \"<scan_load_balancers>\", \"scan_subnets\" : \"<scan_subnets>\", \"communities\" : [\"< community_a >\", \"< community_b > \"], \"deletion_tolerance\" : \"<deletion_tolerance>\", \"sub_accounts\" : [{\"name\" : \"sub_account_a\",\"credentials_file\" : \"AWS_credentials_file_name\"}, {\"name\" : \"sub_account_b\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\"}, {\"name\" : \"sub_account_c\", \"sts_role\" : \"<sts_role>\", \"sts_external_id\" : \"<sts_external_id>\"}]}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/aws",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "aws"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "PUT set AWS account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"regions\" : [\"eu-west-1\", \"us-east-2\"], \"credentials_file\" : \"AWS_credentials_file_name\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\", \"sts_role\" : \"<sts_role>\", \"sts_external_id\": \"<sts_external_id>\", \"scan_gateways\" : \"<scan_gateways>\", \"scan_vpn\" : \"<scan_vpn>\", \"scan_load_balancers\" : \"<scan_load_balancers>\", \"scan_subnets\" : \"<scan_subnets>\", \"communities\": [\"<community_a>\", \"<community_b>\"], \"deletion_tolerance\": \"<deletion_tolerance>\", \"sub_accounts\": [{\"name\" : \"sub_account_a\", \"credentials_file\" : \"AWS_credentials_file_name\"}, {\"name\" : \"sub_account_b\", \"access_key\" : \"<access_key>\", \"secret_key\" : \"<secret_key>\"}, {\"name\" : \"sub_account_c\", \"sts_role\" : \"<sts_role>\", \"sts_external_id\" : \"<sts_external_id>\"}]}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/aws/<account_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "aws",
+                                "<account_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
+				{
+                    "name": "POST add AWS gw configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\" : \"<gwConfiguration_name>\", \"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" :  true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\", \"vpn_domain\" : \"<vpn_domain>\", \"vpn_community\" : \"<vpn_community>\", \"deployment_type\" : \"<TGW>\", \"tgw_static_routes\" : \"<10.0.0.0/16,10.100.0.0/16>\", \"tgw_spoke_routes\" : \"<192.168.100.0/24,192.168.200.0/24>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "aws"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+				{
+                    "name": "PUT set AWS gw configuration",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+							{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            },
+							{
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\", \"vpn_domain\" : \"<vpn_domain>\", \"vpn_community\" : \"<vpn_community>\", \"deployment_type\" : \"TGW\", \"tgw_static_routes\": [\"10.0.0.0/16\", \"10.100.0.0/16\"], \"tgw_spoke_routes\": [\"192.168.100.0/24\", \"192.168.200.0/24\"]}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws/<gwConfiguration_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "aws",
+                                "<gwConfiguration_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }, 
+		{
+			"name": "GCP",
+			"description": "Operations in GCP cloud.",
 			"item": [
 				{
-					"name": "login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
-									"} catch (e) {}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
+					"name": "POST add GCP account",
+                    "request": {
+                        "method": "POST",
+                        "header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/login",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"login"
-							]
-						},
-						"description": "Login request to receive session token."
-					},
-					"response": []
-				},
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\" : \"<account_name>\", \"project_id\" : \"<GCP_project_id>\", \"credentials_file\" : \"GCP_credentials_file_name\", \"deletion_tolerance\" : \"<deletion_tolerance>\"}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "gcp"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
 				{
-					"name": "login to last session",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
-									"} catch (e) {}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\", \"continue-last-session\" : true}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/login",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"login"
-							]
-						},
-						"description": "Login to the last session"
-					},
-					"response": []
-				},
+                    "name": "PUT set GCP account",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }, {
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"project_id\" : \"<GCP_project_id>\", \"credentials_file\" : \"GCP_credentials_file_name\", \"deletion_tolerance\" : \"<deletion_tolerance>\"}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp/<account_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "accounts",
+                                "gcp",
+                                "<account_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
 				{
-					"name": "login to system domain",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
-									"} catch (e) {}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"user\" : \"<mgmt_user>\", \"password\" : \"<mgmt_password>\", \"domain\" : \"System Data\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/login",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"login"
-							]
-						},
-						"description": "Login to system domain"
-					},
-					"response": []
-				},
+                    "name": "POST add GCP gw configuration",
+                    "request": {
+                        "method": "POST",
+                        "header": [{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\" : \"<gwConfiguration_name>\", \"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\":true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "gcp"
+                            ]
+                        }
+                    },
+                    "response": []
+                }, 
 				{
-					"name": "login with API key",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
-									"} catch (e) {}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"api-key\" : \"<api_key>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/login",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"login"
-							]
-						},
-						"description": "Login with API key without user and password."
-					},
-					"response": []
-				},
-				{
-					"name": "publish",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{ }"
-						},
-						"url": {
-							"raw": "{{server}}/v1.7/publish",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.7",
-								"publish"
-							]
-						},
-						"description": "Publish the last changes. Use the show-task command to check the progress of the task."
-					},
-					"response": []
-				},
-				{
-					"name": "discard",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{ }"
-						},
-						"url": {
-							"raw": "{{server}}/v1.7/discard",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.7",
-								"discard"
-							]
-						},
-						"description": "Discard the changes"
-					},
-					"response": []
-				},
-				{
-					"name": "logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{ }"
-						},
-						"url": {
-							"raw": "{{server}}/v1.7/logout",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.7",
-								"logout"
-							]
-						},
-						"description": "Log out from the existing session"
-					},
-					"response": []
-				},
-				{
-					"name": "disconnect",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"uid\" : \"<uid>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/disconnect",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"disconnect"
-							]
-						},
-						"description": "Disconnect a private session"
-					},
-					"response": []
-				},
-				{
-					"name": "keepalive",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{ }"
-						},
-						"url": {
-							"raw": "{{server}}/v1.7/keepalive",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.7",
-								"keepalive"
-							]
-						},
-						"description": "Keep the session alive"
-					},
-					"response": []
-				},
-				{
-					"name": "revert-to-revision",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"to-session\" : \"<session>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/revert-to-revision",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"revert-to-revision"
-							]
-						},
-						"description": "Revert the Management Database to the selected revision."
-					},
-					"response": []
-				},
-				{
-					"name": "verify-revert",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"to-session\" : \"<session>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/verify-revert",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"verify-revert"
-							]
-						},
-						"description": "Verify the Management Database can revert to the selected revision."
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "cme api",
-			"item": [
-				{
-					"name": "Azure",
-					"item": [
-						{
-							"name": "cme_api - add account - Azure",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<account_name>\", \"subscription\": \"<subscription_id>\", \"application_id\": \"<application_id>\", \"directory_id\": \"<directory_id>\", \"client_secret\": \"<client_secret>\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/azure",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"azure"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api - set account - Azure",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"subscription\": \"<subscription_id>\", \"application_id\": \"<application_id>\", \"directory_id\": \"<directory_id>\", \"client_secret\": \"<client_secret>\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/azure/<account_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"azure",
-										"<account_name>"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- add gw configuration - Azure",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"azure"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- set gw configuration - Azure",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/azure/<gwConfigurations_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"azure",
-										"<gwConfigurations_name>"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "GCP",
-					"item": [
-						{
-							"name": "cme_api - add account - GCP",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<account_name>\", \"project_id\": \"<GCP_project_id>\", \"credentials_file\": \"GCP_credentials_file_name\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"gcp"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api - set account - GCP",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"project_id\": \"<GCP_project_id>\", \"credentials_file\": \"GCP_credentials_file_name\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/gcp/<account_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"gcp",
-										"<account_name>"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- add gw configuration - GCP",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"gcp"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- set gw configuration - GCP",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp/<gwConfigurations_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"gcp",
-										"<gwConfigurations_name>"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "AWS",
-					"item": [
-						{
-							"name": "cme_api - add account - AWS",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<account_name>\", \"regions\": [\"eu-west-1\", \"us-east-2\"], \"credentials_file\": \"AWS_credentials_file_name\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/aws",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"aws"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api - set account - AWS",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"regions\": [\"eu-west-1\", \"us-east-2\"], \"credentials_file\": \"AWS_credentials_file_name\"}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/accounts/aws/<account_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"accounts",
-										"aws",
-										"<account_name>"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- add gw configuration - AWS",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"name\": \"<gwConfigurations_name>\", \"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"aws"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "cme_api- set gw configuration - AWS",
-							"request": {
-								"method": "PUT",
-								"header": [
-									{
-										"key": "X-chkp-sid",
-										"value": "{{session}}",
-										"type": "text"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\"base64_sic_key\": \"<encoded_base64_sic_key>\", \"version\": \"<gw_version>\", \"policy\": \"<policy_name>\", \"blades\": {\"ips\":true, \"anti-bot\":true, \"url-filtering\": true}, \"related_account\": \"<associated_account>\"}"
-								},
-								"url": {
-									"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/aws/<gwConfigurations_name>",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"v1.8",
-										"cme-api",
-										"v1",
-										"gwConfigurations",
-										"aws",
-										"<gwConfigurations_name>"
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "cme_api- get all mgmt",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/management",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"management"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api- set mgmt",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"name\": \"<mgmt_name>\"}"
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/management",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"management"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - get accounts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/accounts",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"accounts"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - get account",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"accounts",
-								"<account_name>"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - delete account",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/accounts/<account_name>",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"accounts",
-								"<account_name>"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api- get all gw configuration",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"gwConfigurations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api- get gw configuration",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}",
-								"type": "text"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfigurations_name>",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"gwConfigurations",
-								"<gwConfigurations_name>"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - delete gw configuration",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "X-chkp-sid",
-								"type": "text",
-								"value": "{{session}}"
-							},
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/<gwConfigurations_name>",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"gwConfigurations",
-								"<gwConfigurations_name>"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - get delay",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"generalConfiguration",
-								"delayCycle"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - set delay",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\"delay_cycle\": 20}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/delayCycle",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"generalConfiguration",
-								"delayCycle"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "cme_api - get cme version",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "X-chkp-sid",
-								"value": "{{session}}"
-							}
-						],
-						"url": {
-							"raw": "{{server}}/v1.8/cme-api/v1/generalConfiguration/cmeVersion",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"v1.8",
-								"cme-api",
-								"v1",
-								"generalConfiguration",
-								"cmeVersion"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	]
+                    "name": "PUT set GCP gw configuration",
+                    "request": {
+                        "method": "PUT",
+                        "header": [{
+                                "key": "X-chkp-sid",
+                                "value": "{{session}}",
+                                "type": "text"
+                            }, {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"base64_sic_key\" : \"<encoded_base64_sic_key>\", \"version\" : \"<gw_version>\", \"policy\" : \"<policy_name>\", \"blades\" : {\"ips\" : true, \"anti-bot\" : true, \"url-filtering\" : true, \"https-inspection\" : true}, \"related_account\" : \"<associated_account>\"}"
+                        },
+                        "url": {
+                            "raw": "{{server}}/v1.8/cme-api/v1/gwConfigurations/gcp/<gwConfiguration_name>",
+                            "host": [
+                                "{{server}}"
+                            ],
+                            "path": [
+                                "v1.8",
+                                "cme-api",
+                                "v1",
+                                "gwConfigurations",
+                                "gcp",
+                                "<gwConfiguration_name>"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
 }
