@@ -233,6 +233,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       os_version=module.common.os_version
       template_name=module.common.template_name
       template_version=module.common.template_version
+      template_type = "terraform"
       is_blink=module.common.is_blink
       bootstrap_script64=base64encode(var.bootstrap_script)
       location=module.common.resource_group_location

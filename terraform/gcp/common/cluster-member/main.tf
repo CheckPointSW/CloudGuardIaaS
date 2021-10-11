@@ -110,6 +110,7 @@ resource "google_compute_instance" "cluster_member" {
     allowUploadDownload = var.allow_upload_download
     templateName = "cluster_tf"
     templateVersion = "20201206"
+    templateType = "terraform"
     mgmtNIC = ""
     hasInternet = "true"
     enableMonitoring = var.enable_monitoring

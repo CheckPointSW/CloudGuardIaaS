@@ -202,6 +202,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | ---------------- | ------------- |
 | 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
 | | | |
+|  | Addition of "template_type" parameter to "cloud-version" files. |
+| | | |
 
 ## Outputs
 | Name  | Description |
