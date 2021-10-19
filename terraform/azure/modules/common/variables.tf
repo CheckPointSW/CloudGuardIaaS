@@ -11,7 +11,7 @@ variable "resource_group_id" {
 }
 
 variable "location" {
-  description = "The location/region where rescources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  description = "The location/region where resources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
   type = string
 }
 //************** Virtual machine instance variables **************
@@ -22,7 +22,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -76,7 +76,7 @@ locals { // locals for 'os_version' allowed values
 }
 
 variable "installation_type"{
-  description = "Installaiton type. Allowed values: cluster, vmss"
+  description = "Installation type. Allowed values: cluster, vmss"
   type = string
 }
 
@@ -133,7 +133,7 @@ variable "delete_os_disk_on_termination" {
 }
 
 variable "publisher" {
-  description = "CheckPoint publicher"
+  description = "CheckPoint publisher"
   default = "checkpoint"
 }
 
@@ -285,7 +285,7 @@ locals { // locals for 'authentication_type' allowed values
 }
 
 
-//********************** Role Assigments variables**************************//
+//********************** Role Assignments variables**************************//
 variable "role_definition" {
   description = "Role definition. The full list of Azure Built-in role descriptions can be found at https://docs.microsoft.com/bs-latn-ba/azure/role-based-access-control/built-in-roles"
   type = string

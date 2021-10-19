@@ -27,7 +27,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -64,13 +64,13 @@ variable "template_name"{
 }
 
 variable "template_version"{
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
   default = "20210111"
 }
 
 variable "installation_type"{
-  description = "Installaiton type"
+  description = "Installation type"
   type = string
   default = "vmss"
 }
@@ -164,7 +164,7 @@ variable "configuration_template_name" {
   type = string
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -214,7 +214,7 @@ variable "lb_probe_unhealthy_threshold" {
 }
 
 variable "lb_probe_interval" {
-  description = "Interval in seconds load balancer health probe rule perfoms a check"
+  description = "Interval in seconds load balancer health probe rule performs a check"
   default = 5
 }
 
@@ -300,7 +300,7 @@ variable "subscription_id" {
 }
 
 variable "client_id" {
-  description = "Aplication ID(Client ID)"
+  description = "Application ID(Client ID)"
   type = string
 }
 
@@ -319,4 +319,10 @@ variable "enable_custom_metrics" {
   description = "Enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service."
   type = bool
   default = true
+}
+
+variable "enable_floating_ip" {
+  description = "Indicates whether the load balancers will be deployed with floating IP."
+  type = bool
+  default = false
 }

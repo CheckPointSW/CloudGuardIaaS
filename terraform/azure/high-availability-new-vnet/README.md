@@ -121,6 +121,14 @@ This solution uses the following modules:
  | **availability_type** | Specifies whether to deploy the solution based on Azure Availability Set or based on Azure Availability Zone. | string | "Availability Zone"; <br/>"Availability Set"; |
  |  |  |  |  |  |
  | **enable_custom_metrics** | Indicates whether CloudGuard Metrics will be use for Cluster members monitoring. | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **enable_floating_ip** | Indicates whether the load balancers will be deployed with floating IP. | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **use_public_ip_prefix** | Indicates whether the public IP resources will be deployed with public IP prefix. | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **create_public_ip_prefix** | Indicates whether the public IP prefix will created or an existing will be used. | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **existing_public_ip_prefix_id** | The existing public IP prefix resource id. | string | Existing public IP prefix resource id |
 
 ## Conditional creation
 - To deploy the solution based on Azure Availability Set and create a new Availability Set for the virtual machines:
@@ -134,6 +142,17 @@ availability_type = "Availability Zone"
 -  To enable CloudGuard metrics in order to send statuses and statistics collected from HA instances to the Azure Monitor service:
   ```
   enable_custom_metrics = true
+  ```
+- To create new public IP prefix for the public IP:
+  ```
+  use_public_ip_prefix            = true
+  create_public_ip_prefix         = true
+  ```
+- To use an exisiting public IP prefix for the public IP:
+  ```
+  use_public_ip_prefix            = true
+  create_public_ip_prefix         = false
+  existing_public_ip_prefix_id    = "public IP prefix resource id"
   ```
 
 ## Example
@@ -160,6 +179,10 @@ availability_type = "Availability Zone"
     authentication_type             = "Password"
     availability_type               = "Availability Zone"
     enable_custom_metrics           = true
+    enable_floating_ip              = false
+    use_public_ip_prefix            = false
+    create_public_ip_prefix         = false
+    existing_public_ip_prefix_id    = ""
     
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

@@ -209,3 +209,27 @@ variable "enable_custom_metrics" {
   type = bool
   default = true
 }
+
+variable "enable_floating_ip" {
+  description = "Indicates whether the load balancers will be deployed with floating IP."
+  type = bool
+  default = false
+}
+
+variable "use_public_ip_prefix" {
+  description = "Indicates whether the public IP resources will be deployed with public IP prefix."
+  type = bool
+  default = false
+}
+
+variable "create_public_ip_prefix" {
+  description = "Indicates whether the public IP prefix will created or an existing will be used."
+  type = bool
+  default = false
+}
+
+variable "existing_public_ip_prefix_id" {
+  description = "The existing public IP prefix resource id."
+  type = string
+  default = ""
+}

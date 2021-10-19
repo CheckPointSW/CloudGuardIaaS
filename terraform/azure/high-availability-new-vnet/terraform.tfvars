@@ -1,4 +1,4 @@
-//#PLEASE reffer to the README.md for accepted values FOR THE VARIABELS BELOW
+//#PLEASE refer to the README.md for accepted values FOR THE VARIABLES BELOW
 client_secret                   = "PLEASE ENTER CLIENT SECRET"                                     # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 client_id                       = "PLEASE ENTER CLIENT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 tenant_id                       = "PLEASE ENTER TENANT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -21,4 +21,8 @@ bootstrap_script                = "PLEASE ENTER CUSTOM SCRIPT OR LEAVE EMPTY DOU
 allow_upload_download           = "PLEASE ENTER true or false"                                     # true
 authentication_type             = "PLEASE ENTER AUTHENTICATION TYPE"                               # "Password"
 availability_type               = "PLEASE ENTER AVAILABILITY TYPE"                                 # "Availability Zone"
-enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
+enable_custom_metrics           = "PLEASE ENTER true or false"
+enable_floating_ip              = false
+use_public_ip_prefix            = false
+create_public_ip_prefix         = false
+existing_public_ip_prefix_id    = ""
