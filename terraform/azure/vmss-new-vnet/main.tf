@@ -73,12 +73,20 @@ module "network-security-group" {
 }
 
 //********************** Load Balancers **************************//
+resource "random_id" "random_id" {
+  byte_length = 13
+  keepers = {
+    rg_id = module.common.resource_group_id
+  }
+}
+
 resource "azurerm_public_ip" "public-ip-lb" {
-    name = "${var.vmss_name}-app-1"
-    location = module.common.resource_group_location
-    resource_group_name = module.common.resource_group_name
-    allocation_method = module.vnet.allocation_method
-    sku = var.sku
+  name = "${var.vmss_name}-app-1"
+  location = module.common.resource_group_location
+  resource_group_name = module.common.resource_group_name
+  allocation_method = module.vnet.allocation_method
+  sku = var.sku
+  domain_name_label = "${lower(var.vmss_name)}-${random_id.random_id.hex}"
 }
 
 resource "azurerm_lb" "frontend-lb" {
@@ -143,6 +151,7 @@ resource "azurerm_lb_rule" "lbnatrule" {
   frontend_ip_configuration_name = count.index == 0 ? azurerm_lb.frontend-lb.frontend_ip_configuration[0].name : azurerm_lb.backend-lb.frontend_ip_configuration[0].name
   probe_id = azurerm_lb_probe.azure_lb_healprob[count.index].id
   load_distribution = count.index == 0 ? var.frontend_load_distribution : var.backend_load_distribution
+  enable_floating_ip = var.enable_floating_ip
 }
 
 //********************** Storage accounts **************************//
@@ -273,11 +282,11 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        subnet_id = module.vnet.vnet_subnets[0]
        load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
        primary = true
-	   public_ip_address_configuration {
-		name = "${var.vmss_name}-public-ip"
-		idle_timeout = 30
-		domain_name_label = "${var.vmss_name}-dns-name"
-	   }
+       public_ip_address_configuration {
+        name = "${var.vmss_name}-public-ip"
+        idle_timeout = 15
+        domain_name_label = "${var.vmss_name}-dns-name"
+       }
      }
  }
 
@@ -391,7 +400,6 @@ resource "azurerm_role_assignment" "custom_metrics_role_assignment"{
   role_definition_id = join("", ["/subscriptions/", var.subscription_id, "/providers/Microsoft.Authorization/roleDefinitions/", "3913510d-42f4-4e42-8a64-420c390055eb"])
   principal_id = lookup(azurerm_virtual_machine_scale_set.vmss.identity[0], "principal_id")
   scope = module.common.resource_group_id
-
   lifecycle {
     ignore_changes = [
       role_definition_id, principal_id

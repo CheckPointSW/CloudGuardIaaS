@@ -1,4 +1,4 @@
-#PLEASE reffer to the README.md for accepted values FOR THE VARIABELS BELOW
+#PLEASE refer to the README.md for accepted values FOR THE VARIABLES BELOW
 client_secret                   = "PLEASE ENTER CLIENT SECRET"                                     # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 client_id                       = "PLEASE ENTER CLIENT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 tenant_id                       = "PLEASE ENTER TENANT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

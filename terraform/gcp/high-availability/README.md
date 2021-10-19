@@ -1,6 +1,6 @@
 # Check Point Cluster High Availability (HA) Terraform module for GCP
 
-Terrafrom module which deploys Check Point CloudGuard IaaS High Availability solution on GCP.
+Terraform module which deploys Check Point CloudGuard IaaS High Availability solution on GCP.
 
 These types of Terraform resources are supported:
 * [Network](https://www.terraform.io/docs/providers/google/d/compute_network.html) - conditional creation
@@ -181,7 +181,7 @@ internal_network1_subnetwork_name = ""
     cluster_network_subnetwork_name = "cluster-subnetwork"
 ```
 <br>2. To create Firewall and allow traffic for ICMP, TCP, UDP, SCTP or/and ESP - enter list of Source IP ranges.
-<br>Please leave empty list to which port you want to unable traffic.
+<br>Please leave empty list for a protocol if you want to disable traffic for it.
 - For cluster:
 ```
     cluster_ICMP_traffic = ["123.123.0.0/24", "234.234.0.0/24"]
