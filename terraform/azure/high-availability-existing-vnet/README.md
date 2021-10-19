@@ -150,7 +150,7 @@ availability_type = "Availability Zone"
   use_public_ip_prefix            = true
   create_public_ip_prefix         = true
   ```
-- To use an exisiting public IP prefix for the public IP:
+- To use an existing public IP prefix for the public IP:
   ```
   use_public_ip_prefix            = true
   create_public_ip_prefix         = false
