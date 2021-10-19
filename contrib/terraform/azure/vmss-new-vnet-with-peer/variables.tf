@@ -10,7 +10,7 @@ variable "resource_group_name" {
 }
 
 variable "location" {
-  description = "The location/region where rescources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
+  description = "The location/region where resources will be created. The full list of Azure regions can be found at https://azure.microsoft.com/regions"
   type = string
 }
 
@@ -21,7 +21,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -55,13 +55,13 @@ variable "template_name"{
 }
 
 variable "template_version"{
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
   default = "20200305"
 }
 
 variable "installation_type"{
-  description = "Installaiton type"
+  description = "Installation type"
   type = string
   default = "vmss"
 }
@@ -137,7 +137,7 @@ variable "configuration_template_name" {
   type = string
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -150,7 +150,7 @@ variable "address_space" {
 }
 
 variable "subnet_prefixes" {
-  description = "Address prefix to be used for netwok subnets"
+  description = "Address prefix to be used for network subnets"
   type = list(string)
   default = ["10.0.0.0/24","10.0.1.0/24"]
 }
@@ -178,7 +178,7 @@ variable "lb_probe_unhealthy_threshold" {
 }
 
 variable "lb_probe_interval" {
-  description = "Interval in seconds load balancer health probe rule perfoms a check"
+  description = "Interval in seconds load balancer health probe rule performs a check"
   default = 5
 }
 

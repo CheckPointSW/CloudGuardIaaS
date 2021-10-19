@@ -1,6 +1,6 @@
 # Check Point CloudGuard Network Security Cluster Master Terraform module for AWS
 
-Terraform module which deploys a Check Point CloudGuard Network Security Cluster into into a new VPC.
+Terraform module which deploys a Check Point CloudGuard Network Security Cluster into a new VPC.
 
 These types of Terraform resources are supported:
 * [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)

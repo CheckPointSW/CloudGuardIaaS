@@ -27,7 +27,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -51,13 +51,13 @@ variable "template_name" {
 }
 
 variable "template_version" {
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
   default = "20210111"
 }
 
 variable "installation_type" {
-  description = "Installaiton type"
+  description = "Installation type"
   type = string
   default = "management"
 }
@@ -92,7 +92,7 @@ variable "allow_upload_download" {
   type = bool
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -154,7 +154,7 @@ variable "subscription_id" {
 }
 
 variable "client_id" {
-  description = "Aplication ID(Client ID)"
+  description = "Application ID(Client ID)"
   type = string
 }
 

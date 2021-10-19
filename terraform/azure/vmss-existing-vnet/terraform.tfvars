@@ -1,4 +1,4 @@
-#PLEASE reffer to the README.md for accepted values FOR THE VARIABELS BELOW
+#PLEASE refer to the README.md for accepted values FOR THE VARIABLES BELOW
 client_secret                   = "PLEASE ENTER CLIENT SECRET"                                     # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 client_id                       = "PLEASE ENTER CLIENT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 tenant_id                       = "PLEASE ENTER TENANT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -29,7 +29,8 @@ management_name                 = "PLEASE ENTER MANAGEMENT NAME"                
 management_IP                   = "PLEASE ENTER MANAGEMENT IP"                                     # "13.92.42.181"
 management_interface            = "PLEASE ENTER MANAGEMENT INTERFACE"                              # "eth1-private"
 configuration_template_name     = "PLEASE ENTER CONFIGURATION TEMPLATE NAME"                       # "vmss_template"
-notification_email              = "PLEASE ENTER NOTIFICATIN MAIL OR LEAVE EMPTY DOUBLE QUOTES"     # ""
-frontend_load_distribution      = "PLEASE ENTER EXTERNAL LOAD BALANCER SESSION PERSISTANCE"        # "Default"
-backend_load_distribution       = "PLEASE ENTER INTERNAL LOAD BALANCER SESSION PERSISTANCE"        # "Default"
-enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
+notification_email              = "PLEASE ENTER NOTIFICATION MAIL OR LEAVE EMPTY DOUBLE QUOTES"     # ""
+frontend_load_distribution      = "PLEASE ENTER EXTERNAL LOAD BALANCER SESSION PERSISTENCE"        # "Default"
+backend_load_distribution       = "PLEASE ENTER INTERNAL LOAD BALANCER SESSION PERSISTENCE"        # "Default"
+enable_custom_metrics           = "PLEASE ENTER true or false"                                     # false
+enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
