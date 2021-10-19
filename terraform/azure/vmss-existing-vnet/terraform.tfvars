@@ -32,5 +32,5 @@ configuration_template_name     = "PLEASE ENTER CONFIGURATION TEMPLATE NAME"    
 notification_email              = "PLEASE ENTER NOTIFICATION MAIL OR LEAVE EMPTY DOUBLE QUOTES"     # ""
 frontend_load_distribution      = "PLEASE ENTER EXTERNAL LOAD BALANCER SESSION PERSISTENCE"        # "Default"
 backend_load_distribution       = "PLEASE ENTER INTERNAL LOAD BALANCER SESSION PERSISTENCE"        # "Default"
-enable_custom_metrics           = "PLEASE ENTER true or false"                                     # false
+enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
 enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
