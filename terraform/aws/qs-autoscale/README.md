@@ -104,7 +104,7 @@ secret_key = "my-secret-key"
     gateway_instance_type = "c5.xlarge"
     gateways_min_group_size = 2
     gateways_max_group_size = 8
-    gateway_version = "R80.40-PAYG-NGTP"
+    gateway_version = "R81-BYOL"
     gateway_password_hash = "12345678"
     gateway_SICKey = ""
     enable_cloudwatch = true
@@ -165,10 +165,10 @@ secret_key = "my-secret-key"
 | certificate  | Amazon Resource Name (ARN) of an HTTPS Certificate, ignored if the selected protocol is HTTP | string  | n/a | n/a  | no |
 | service_port  | The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS | string | n/a | n/a  | no |
 | gateways_subnets  | Select at least 2 public subnets in the VPC. If you choose to deploy a Security Management Server it will be deployed in the first subnet | list(string) | n/a | n/a  | yes |
-| gateway_instance_type | The instance type of the Security Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge  | c5.xlarge  | no  |
+| gateway_instance_type | The instance type of the Security Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.8xlarge | c5.xlarge  | no  |
 | gateways_min_group_size | The minimal number of Security Gateways | number | n/a | 2 | no |
 | gateways_max_group_size | The maximal number of Security Gateways | number | n/a | 10 | no |
-| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R81-BYOL | no |
 | gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
 | enable_cloudwatch  | Report Check Point specific CloudWatch metrics | bool  | true/false  | false  | no  |

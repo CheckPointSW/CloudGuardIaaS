@@ -259,10 +259,12 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
       os_version = module.common.os_version
       template_name = module.common.template_name
       template_version = module.common.template_version
+      template_type = "terraform"
       is_blink = module.common.is_blink
       bootstrap_script64 = base64encode(var.bootstrap_script)
       location = module.common.resource_group_location
       management_GUI_client_network = var.management_GUI_client_network
+      enable_api = var.mgmt_enable_api
     })
   }
 

@@ -4,8 +4,25 @@ exec 1>/var/log/gcp-startup-script.log 2>&1
 
 echo -e "\nStarting startup-script...\n"
 
-echo "template_name: ${templateName}" >> /etc/cloud-version
-echo "template_version: ${templateVersion}" >> /etc/cloud-version
+cv_path="/etc/cloud-version"
+cv_json_path="/etc/cloud-version.json"
+cv_json_path_tmp="/etc/cloud-version-tmp.json"
+
+if [ -z ${templateType} ]
+then
+      templateType="marketplace"
+else
+      templateType=${templateType}
+fi
+
+echo "template_name: ${templateName}" >> $cv_path
+echo "template_version: ${templateVersion}" >> $cv_path
+echo "template_type: $templateType" >> $cv_path
+
+if test -f $cv_json_path; then
+    cat $cv_json_path | jq '.template_name = "'"${templateName}"'"' | jq '.template_version = "'"${templateVersion}"'"' | jq '.template_type = "'"$templateType"'"' > $cv_json_path_tmp
+    mv $cv_json_path_tmp $cv_json_path
+fi
 
 generatePassword="$(echo ${generatePassword} | tr 'TF' 'tf')"
 allowUploadDownload="${allowUploadDownload}"

@@ -210,6 +210,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | | | |
 | 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
 | | | |
+|  | Addition of "templateType" parameter to "cloud-version" files. |
+| | | |
 
 
 ## License

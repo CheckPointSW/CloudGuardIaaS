@@ -198,6 +198,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | | | |
 | 20210111 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure. |
 | | | |
+|  | Addition of "templateType" parameter to "cloud-version" files. |
+| | | |
 
 ## License
 

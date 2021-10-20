@@ -91,7 +91,7 @@ secret_key = "my-secret-key"
     target_groups = ["arn:aws:tg1/abc123", "arn:aws:tg2/def456"]
 
     // --- Check Point Settings ---
-    gateway_version = "R80.40-PAYG-NGTP"
+    gateway_version = "R81-BYOL"
     admin_shell = "/bin/bash"
     gateway_password_hash = "12345678"
     gateway_SICKey = "12345678"
@@ -134,15 +134,15 @@ secret_key = "my-secret-key"
 | management_server | The name that represents the Security Management Server in the CME configuration | string | n/a | n/a | yes |
 | configuration_template | Name of the provisioning template in the CME configuration | string  | n/a | n/a | yes |
 | gateway_name | The name tag of the Security Gateways instances | string | n/a | Check-Point-ASG-gateway-tf | no |
-| gateway_instance_type | The instance type of the Security Gateways | string | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge| c5.xlarge | no |
+| gateway_instance_type | The instance type of the Security Gateways | string | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.8xlarge| c5.xlarge | no |
 | key_name | The EC2 Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
 | volume_size | Root volume size (GB) - minimum 100 | number  | n/a | 100 | no |
 | enable_volume_encryption | Encrypt Environment instances volume with default AWS KMS key | bool  | true/false | true | no |
 | instances_tags | (Optional) A map of tags as key=value pairs. All tags will be added on all AutoScaling Group instances | map(string)  | n/a | {} | no |
 | minimum_group_size | The minimum number of instances in the Auto Scaling group | number | n/a | 2 | no |
 | maximum_group_size | The maximum number of instances in the Auto Scaling group | number | n/a | 10 | no |
-| target_groups | (Optional) List of Target Group ARNs to associate with the Auto Scaling group | list(string) | n/a | [] | no |
-| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| target_groups | (Optional) List of Target Group ARNs to associate with the Auto Scaling group | list(string) | n/a | [] | no 
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R81-BYOL | no |
 | admin_shell | Set the admin shell to enable advanced command line configuration | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateway_SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |

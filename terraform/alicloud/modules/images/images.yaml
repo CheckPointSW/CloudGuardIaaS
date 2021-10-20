@@ -1,0 +1,25 @@
+Description: Returns a Check Point AliCloud Machine ID (__VERSION__)
+Parameters:
+  Version:
+    Description: Security Gateway or Management Server version
+    Type: String
+    Default: R81-BYOL-GW
+    AllowedValues:
+      - R81-BYOL-GW
+      - R81-BYOL-MGMT
+Mappings:
+  ConverterMap:
+    R81-BYOL-GW:
+      Value: R81BYOLGW
+    R81-BYOL-MGMT:
+      Value: R81BYOLMGMT
+  RegionMap:
+    us-east-1:
+      R81BYOLGW: m-0xiiosvehx9dh2iuln66
+      R81BYOLMGMT: m-0xihpw79tf6fea4s2r9d
+    us-west-1:
+      R81BYOLGW: m-rj9ci70w98v9g80riu5j
+      R81BYOLMGMT: m-rj9dnrmefohxpbsap2xm
+    cn-beijing:
+      R81BYOLGW: m-2zeagivsffh34e0fw9zl
+      R81BYOLMGMT: m-2ze4umbfw5xdvtooskpx

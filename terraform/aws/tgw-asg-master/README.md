@@ -106,7 +106,7 @@ secret_key = "my-secret-key"
   gateway_instance_type = "c5.xlarge"
   gateways_min_group_size = 2
   gateways_max_group_size = 8
-  gateway_version = "R80.40-PAYG-NGTP"
+  gateway_version = "R81-BYOL"
   gateway_password_hash = "12345678"
   gateway_SICKey = ""
   enable_cloudwatch = true
@@ -115,7 +115,7 @@ secret_key = "my-secret-key"
   // --- Check Point CloudGuard Network Security Management Server Configuration ---
   management_deploy = true
   management_instance_type = "m5.xlarge"
-  management_version = "R80.40-PAYG"
+  management_version = "R81-BYOL"
   management_password_hash = "12345678"
   management_permissions = "Create with read-write permissions"
   management_predefined_role = ""
@@ -160,17 +160,17 @@ secret_key = "my-secret-key"
 | enable_instance_connect  | Enable SSH connection over AWS web console. Supporting regions can be found [here](https://aws.amazon.com/about-aws/whats-new/2019/06/introducing-amazon-ec2-instance-connect/) | bool  | true/false  | false  | no  |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
 | gateway_name | (Optional) The name tag of the Security Gateway instances | string | n/a | Check-Point-Gateway | no |
-| gateway_instance_type | The instance type of the Security Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - c5n.18xlarge  | c5.xlarge  | no  |
+| gateway_instance_type | The instance type of the Security Gateways | string  | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.8xlarge  | c5.xlarge  | no  |
 | gateways_min_group_size | The minimal number of Security Gateways | number | n/a | 2 | no |
 | gateways_max_group_size | The maximal number of Security Gateways | number | n/a | 10 | no |
-| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R80.40-PAYG-NGTP | no |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX <br/> - R81-BYOL <br/> - R81-PAYG-NGTP <br/> - R81-PAYG-NGTX <br/> - R81.10-BYOL <br/> - R81.10-PAYG-NGTP <br/> - R81.10-PAYG-NGTX | R81-BYOL | no |
 | gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
 | enable_cloudwatch  | Report Check Point specific CloudWatch metrics | bool  | true/false  | false  | no  |
 | asn | The organization Autonomous System Number (ASN) that identifies the routing domain for the Security Gateways | string | n/a | 6500 | no |
 | management_deploy  | Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section | bool  | true/false  | true  | no  |
 | management_instance_type | The EC2 instance type of the Security Management Server  | string  | - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.12xlarge <br/> - m5.24xlarge  | m5.xlarge  | no  |
-| management_version  | The license to install on the Security Management Server  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG <br/> - R81.10-BYOL <br/> - R81.10-PAYG | R80.40-PAYG  | no  |
+| management_version  | The license to install on the Security Management Server  | string  | - R80.40-BYOL <br/> - R80.40-PAYG <br/> - R81-BYOL <br/> - R81-PAYG <br/> - R81.10-BYOL <br/> - R81.10-PAYG | R81-BYOL  | no  |
 | management_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | management_permissions  | IAM role to attach to the instance profile  | string  | - None (configure later) <br/> - Use existing (specify an existing IAM role name) <br/> - Create with assume role permissions (specify an STS role ARN) <br/> - Create with read permissions <br/> - Create with read-write permissions  | Create with read-write permissions  | no  |
 | management_predefined_role  | ((Optional) A predefined IAM role to attach to the instance profile. Ignored if IAM role is not set to 'Use existing'  | string  | n/a  | ""  | no  |

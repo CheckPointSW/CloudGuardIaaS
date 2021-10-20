@@ -120,10 +120,25 @@ variable "management_GUI_client_network" {
   type = string
 }
 
+variable "mgmt_enable_api" {
+  description = "Enable api access to the management. allowed values: all, management_only, gui_clients, disable"
+  type = string
+  default = "disable"
+}
+
 locals {
   regex_valid_management_GUI_client_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
   // Will fail if var.management_GUI_client_network is invalid
   regex_management_GUI_client_network = regex(local.regex_valid_management_GUI_client_network, var.management_GUI_client_network) == var.management_GUI_client_network ? 0 : "Variable [management_GUI_client_network] must be a valid IPv4 network CIDR."
+
+  mgmt_enable_api_allowed_values = [
+    "disable",
+    "all",
+    "management_only",
+    "gui_clients"
+  ]
+  // will fail if [var.mgmt_enable_api] is invalid:
+  validate_mgmt_enable_api_value = index(local.mgmt_enable_api_allowed_values, var.mgmt_enable_api)
 
   regex_valid_network_cidr = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))|$"
   // Will fail if var.address_space is invalid

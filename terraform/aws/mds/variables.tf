@@ -93,7 +93,7 @@ variable "sts_roles" {
 variable "mds_version" {
   type = string
   description = "Multi-Domain Server version and license"
-  default = "R80.40-BYOL"
+  default = "R81-BYOL"
 }
 module "validate_mds_version" {
   source = "../modules/common/version_license"

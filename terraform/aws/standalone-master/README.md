@@ -105,7 +105,7 @@ secret_key = "my-secret-key"
     }
 
     // --- Check Point Settings ---
-    standalone_version = "R80.40-PAYG-NGTP"
+    standalone_version = "R81-BYOL"
     admin_shell = "/bin/bash"
     standalone_password_hash = "12345678"
 
@@ -147,7 +147,7 @@ secret_key = "my-secret-key"
 | volume_encryption | KMS or CMK key Identifier: Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs') | string | n/a | alias/aws/ebs | no |
 | enable_instance_connect | Enable SSH connection over AWS web console. Supporting regions can be found [here](https://aws.amazon.com/about-aws/whats-new/2019/06/introducing-amazon-ec2-instance-connect/) | bool | true/false | false | no |
 | instance_tags  | (Optional) A map of tags as key=value pairs. All tags will be added to the Standalone EC2 Instance | map(string)  | n/a  | {}  | no  |
-| standalone_version | Security Gateway & Management (Standalone) version and license | string | - R80.40-PAYG-NGTP <br/> - R81-PAYG-NGTP <br/> - R81.10-PAYG-NGTP | R80.40-PAYG-NGTP | no |
+| standalone_version | Security Gateway & Management (Standalone) version and license | string | - R80.40-PAYG-NGTP <br/> - R81-PAYG-NGTP <br/> - R81.10-PAYG-NGTP | R81-BYOL | no |
 | admin_shell | Set the admin shell to enable advanced command line configuration | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | standalone_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
 | resources_tag_name | (optional) | string | n/a | "" | no |
