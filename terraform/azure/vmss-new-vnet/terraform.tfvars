@@ -33,3 +33,4 @@ frontend_load_distribution      = "PLEASE ENTER EXTERNAL LOAD BALANCER SESSION P
 backend_load_distribution       = "PLEASE ENTER INTERNAL LOAD BALANCER SESSION PERSISTENCE"        # "Default"
 enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
 enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
+deployment_mode                 = "PLEASE ENTER DEPLOYMENT MODE"                                   # "Standard"

@@ -12,6 +12,7 @@ vnet_resource_group             = "PLEASE ENTER VIRTUAL NETWORK'S RESOURCE GROUP
 management_subnet_name          = "PLEASE ENTER MGMT SUBNET NAME"                                  # "mgmt-subnet"
 subnet_1st_Address              = "PLEASE ENTER AVAILABLE ADDRESS OF THE SUBNET"                   # "10.0.1.4"
 management_GUI_client_network   = "PLEASE ENTER A MANAGEMENT GUI CLIENT NETWORK"                   # "0.0.0.0/0"
+mgmt_enable_api                 = "PLEASE ENTER FOR WHOM TO ENABLE API ACCESS OR disable"          # "disable"
 admin_password                  = "PLEASE ENTER ADMIN PASSWORD"                                    # "xxxxxxxxxxxx"
 vm_size                         = "PLEASE ENTER VM SIZE"                                           # "Standard_D3_v2"
 disk_size                       = "PLEASE ENTER DISK SIZE"                                         # "110"

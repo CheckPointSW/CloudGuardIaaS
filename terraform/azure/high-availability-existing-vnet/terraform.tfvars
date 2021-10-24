@@ -28,4 +28,4 @@ enable_custom_metrics           = "PLEASE ENTER true or false"                  
 enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
 use_public_ip_prefix            = "PLEASE ENTER true or false"                                     # false
 create_public_ip_prefix         = "PLEASE ENTER true or false"                                     # false
-existing_public_ip_prefix_id    = "PLEASE ENTER IP PREFIX RESOURCE ID"                             #
+existing_public_ip_prefix_id    = "PLEASE ENTER IP PREFIX RESOURCE ID"                             # ""

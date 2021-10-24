@@ -183,6 +183,21 @@ variable "subnet_prefixes" {
 }
 
 //********************* Load Balancers Variables **********************//
+variable "deployment_mode" {
+  description = "The type of the deployment, can be 'Standard' for both load balancers or 'External' for external load balancer or 'Internal for internal load balancer"
+  type = string
+  default = "Standard"
+}
+
+locals {  // locals for 'deployment_mode' allowed values
+  deployment_mode_allowd_values = [
+    "Standard",
+    "External",
+    "Internal"
+  ]
+  // will fail if [var.deployment_mode] is invalid:
+  validate_deployment_mode_value = index(local.deployment_mode_allowd_values, var.deployment_mode)
+}
 
 variable "backend_lb_IP_address" {
   description = "The IP address is defined by its position in the subnet"
