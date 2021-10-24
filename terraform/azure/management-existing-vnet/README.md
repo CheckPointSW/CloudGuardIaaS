@@ -98,6 +98,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **management_GUI_client_network** | Allowed GUI clients - GUI clients network CIDR. | string | 
  |  |  |  |  |  |
+ | **mgmt_enable_api** | Enable api access to the management. | string | - "all"; <br/> - "management_only"; <br/> - "gui_clients" <br/> - "disable";
+ |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
  | **vm_size** | Specifies the size of Virtual Machine | string | "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_F2s", "Standard_F4s", "Standard_F8s", "Standard_F16s", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E20s_v3", "Standard_E32s_v3", "Standard_E64s_v3", "Standard_E64is_v3", "Standard_F4s_v2", "Standard_F8s_v2", "Standard_F16s_v2", "Standard_F32s_v2", "Standard_F64s_v2", "Standard_M8ms", "Standard_M16ms", "Standard_M32ms", "Standard_M64ms", "Standard_M64s", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F16", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E20_v3", "Standard_E32_v3", "Standard_E64_v3", "Standard_E64i_v3", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2" |
@@ -132,6 +134,7 @@ This solution uses the following modules:
     management_subnet_name          = "mgmt-subnet"
     subnet_1st_Address              = "10.0.1.4"
     management_GUI_client_network   = "0.0.0.0/0"
+    mgmt_enable_api                 = "disable"
     admin_password                  = "xxxxxxxxxxxx"
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
@@ -150,6 +153,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
 | | | |
 | 20210111 | First release of Check Point CloudGuard IaaS Management Terraform deployment into an existing Vnet in Azure. |
+| | | |
+|  | Addition of "templateType" parameter to "cloud-version" files. |
 | | | |
 
 ## License
