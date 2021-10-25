@@ -63,6 +63,7 @@ resource "random_id" "random_id" {
 }
 
 resource "azurerm_public_ip" "public-ip-lb" {
+  count = var.deployment_mode != "Internal" ? 1 : 0
   name = "${var.vmss_name}-app-1"
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
@@ -72,67 +73,106 @@ resource "azurerm_public_ip" "public-ip-lb" {
 }
 
 resource "azurerm_lb" "frontend-lb" {
- name = "frontend-lb"
- location = module.common.resource_group_location
- resource_group_name = module.common.resource_group_name
- sku = var.sku
-
- frontend_ip_configuration {
-   name = "${var.vmss_name}-app-1"
-   public_ip_address_id = azurerm_public_ip.public-ip-lb.id
- }
+  count = var.deployment_mode != "Internal" ? 1 : 0
+  name = "frontend-lb"
+  location = module.common.resource_group_location
+  resource_group_name = module.common.resource_group_name
+  sku = var.sku
+  
+  frontend_ip_configuration {
+    name = "${var.vmss_name}-app-1"
+    public_ip_address_id = azurerm_public_ip.public-ip-lb[0].id
+  }
 }
 
 resource "azurerm_lb_backend_address_pool" "frontend-lb-pool" {
- resource_group_name = module.common.resource_group_name
- loadbalancer_id = azurerm_lb.frontend-lb.id
- name = "${var.vmss_name}-app-1"
+  count = var.deployment_mode != "Internal" ? 1 : 0
+  resource_group_name = module.common.resource_group_name
+  loadbalancer_id = azurerm_lb.frontend-lb[0].id
+  name = "${var.vmss_name}-app-1"
 }
 
 resource "azurerm_lb" "backend-lb" {
- name = "backend-lb"
- location = module.common.resource_group_location
- resource_group_name = module.common.resource_group_name
- sku = var.sku
- frontend_ip_configuration {
-   name = "backend-lb"
-   subnet_id = data.azurerm_subnet.backend.id
-   private_ip_address_allocation = "Static"
-   private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefix,var.backend_lb_IP_address)
- }
+  count = var.deployment_mode != "External" ? 1 : 0
+  name = "backend-lb"
+  location = module.common.resource_group_location
+  resource_group_name = module.common.resource_group_name
+  sku = var.sku
+  frontend_ip_configuration {
+    name = "backend-lb"
+    subnet_id = data.azurerm_subnet.backend.id
+    private_ip_address_allocation = "Static"
+    private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefix,var.backend_lb_IP_address)
+  }
 }
 
 resource "azurerm_lb_backend_address_pool" "backend-lb-pool" {
+  count = var.deployment_mode != "External" ? 1 : 0
   name = "backend-lb-pool"
-  loadbalancer_id = azurerm_lb.backend-lb.id
+  loadbalancer_id = azurerm_lb.backend-lb[0].id
   resource_group_name = module.common.resource_group_name
 }
 
 resource "azurerm_lb_probe" "azure_lb_healprob" {
+  count = var.deployment_mode == "Standard" ? 2 : 1
   depends_on = [azurerm_lb.frontend-lb, azurerm_lb.frontend-lb]
-  count = 2
   resource_group_name = module.common.resource_group_name
-  loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
-  name = count.index == 0 ? "${var.vmss_name}-app-1" : "backend-lb"
+  loadbalancer_id = var.deployment_mode == "Standard" ? (count.index == 0 ? azurerm_lb.frontend-lb[0].id : azurerm_lb.backend-lb[0].id) : (var.deployment_mode == "External" ? azurerm_lb.frontend-lb[0].id : azurerm_lb.backend-lb[0].id)
+  name = var.deployment_mode == "Standard" ? (count.index == 0 ? "${var.vmss_name}-app-1" : "backend-lb") : (var.deployment_mode == "External" ? "${var.vmss_name}-app-1" : "backend-lb")
   protocol = var.lb_probe_protocol
   port = var.lb_probe_port
   interval_in_seconds = var.lb_probe_interval
   number_of_probes = var.lb_probe_unhealthy_threshold
 }
 
-resource "azurerm_lb_rule" "lbnatrule" {
-  depends_on = [azurerm_lb.frontend-lb,azurerm_lb_probe.azure_lb_healprob,azurerm_lb.backend-lb]
-  count = 2
+// Standard deployment
+resource "azurerm_lb_rule" "lbnatrule-standard" {
+  count = var.deployment_mode == "Standard" ? 2 : 0
+  depends_on = [azurerm_lb.frontend-lb[0],azurerm_lb_probe.azure_lb_healprob,azurerm_lb.backend-lb[0]]
   resource_group_name = module.common.resource_group_name
-  loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
+  loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb[0].id : azurerm_lb.backend-lb[0].id
   name = count.index == 0 ? "${var.vmss_name}-app-1" : "backend-lb"
   protocol = count.index == 0 ? "Tcp" : "All"
   frontend_port = count.index == 0 ? var.frontend_port : "0"
   backend_port = count.index == 0 ? var.backend_port : "0"
-  backend_address_pool_id = count.index == 0 ? azurerm_lb_backend_address_pool.frontend-lb-pool.id : azurerm_lb_backend_address_pool.backend-lb-pool.id
-  frontend_ip_configuration_name = count.index == 0 ? azurerm_lb.frontend-lb.frontend_ip_configuration[0].name : azurerm_lb.backend-lb.frontend_ip_configuration[0].name
+  backend_address_pool_id = count.index == 0 ? azurerm_lb_backend_address_pool.frontend-lb-pool[0].id : azurerm_lb_backend_address_pool.backend-lb-pool[0].id
+  frontend_ip_configuration_name = count.index == 0 ? azurerm_lb.frontend-lb[0].frontend_ip_configuration[0].name : azurerm_lb.backend-lb[0].frontend_ip_configuration[0].name
   probe_id = azurerm_lb_probe.azure_lb_healprob[count.index].id
   load_distribution = count.index == 0 ? var.frontend_load_distribution : var.backend_load_distribution
+  enable_floating_ip = var.enable_floating_ip
+}
+
+// External deployment
+resource "azurerm_lb_rule" "lbnatrule-external" {
+  count = var.deployment_mode == "External" ? 1 : 0
+  depends_on = [azurerm_lb.frontend-lb[0],azurerm_lb_probe.azure_lb_healprob]
+  resource_group_name = module.common.resource_group_name
+  loadbalancer_id = azurerm_lb.frontend-lb[0].id
+  name = "${var.vmss_name}-app-1"
+  protocol = "Tcp"
+  frontend_port = var.frontend_port
+  backend_port = var.backend_port
+  backend_address_pool_id = azurerm_lb_backend_address_pool.frontend-lb-pool[0].id
+  frontend_ip_configuration_name = azurerm_lb.frontend-lb[0].frontend_ip_configuration[0].name
+  probe_id = azurerm_lb_probe.azure_lb_healprob[0].id
+  load_distribution = var.frontend_load_distribution
+  enable_floating_ip = var.enable_floating_ip
+}
+
+// Internal deployment
+resource "azurerm_lb_rule" "lbnatrule-internal" {
+  count = var.deployment_mode == "Internal" ? 1 : 0
+  depends_on = [azurerm_lb_probe.azure_lb_healprob,azurerm_lb.backend-lb[0]]
+  resource_group_name = module.common.resource_group_name
+  loadbalancer_id = azurerm_lb.backend-lb[0].id
+  name = "backend-lb"
+  protocol = "All"
+  frontend_port = "0"
+  backend_port = "0"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool[0].id
+  frontend_ip_configuration_name = azurerm_lb.backend-lb[0].frontend_ip_configuration[0].name
+  probe_id = azurerm_lb_probe.azure_lb_healprob[0].id
+  load_distribution = var.backend_load_distribution
   enable_floating_ip = var.enable_floating_ip
 }
 
@@ -263,7 +303,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
      ip_configuration {
        name = "ipconfig1"
        subnet_id = data.azurerm_subnet.frontend.id
-       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.frontend-lb-pool.id]
+       load_balancer_backend_address_pool_ids = var.deployment_mode != "Internal" ? [azurerm_lb_backend_address_pool.frontend-lb-pool[0].id]: null
        primary = true
        public_ip_address_configuration {
          name = "${var.vmss_name}-public-ip"
@@ -281,7 +321,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
      ip_configuration {
        name = "ipconfig2"
        subnet_id = data.azurerm_subnet.backend.id
-       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.backend-lb-pool.id]
+       load_balancer_backend_address_pool_ids = var.deployment_mode != "External" ? [azurerm_lb_backend_address_pool.backend-lb-pool[0].id] : null
        primary = true
      }
  }
