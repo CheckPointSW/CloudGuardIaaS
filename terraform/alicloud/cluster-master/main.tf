@@ -1,9 +1,3 @@
-provider "alicloud" {
-  region = var.region
-  access_key = var.alicloud_access_key_ID
-  secret_key = var.alicloud_secret_access_key
-}
-
 // --- VPC ---
 module "launch_vpc" {
   source = "../modules/vpc"
@@ -29,10 +23,6 @@ resource "alicloud_route_table_attachment" "private_rt_to_private_vswitchs" {
 
 module "launch_cluster_into_vpc" {
   source = "../cluster"
-
-  //region = var.region
-  //alicloud_access_key_ID = var.alicloud_access_key_ID
-  //alicloud_secret_access_key = var.alicloud_secret_access_key
 
   vpc_id = module.launch_vpc.vpc_id
   cluster_vswitch_id = module.launch_vpc.public_vswitchs_ids_list[0]

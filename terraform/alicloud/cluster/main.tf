@@ -1,9 +1,3 @@
-provider "alicloud" {
-  region = var.region
-  access_key = var.alicloud_access_key_ID
-  secret_key = var.alicloud_secret_access_key
-}
-
 module "images" {
   source = "../modules/images"
 

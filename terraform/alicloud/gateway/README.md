@@ -15,20 +15,20 @@ These types of Terraform resources are supported:
   
 ## Configuration
 - Best practice is to configure credentials in the Environment variables - [Alicloud provider](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs)
-- Static credentials can be provided by adding an alicloud_access_key_ID and alicloud_secret_access_key in gateway/**terraform.tfvars** file as follows:
 ```
-region = "us-east-1"
-alicloud_access_key_ID = "12345"
-alicloud_secret_access_key = "12345"
+Configure environment variables in Linux:
+
+$ export ALICLOUD_ACCESS_KEY=anaccesskey
+$ export ALICLOUD_SECRET_KEY=asecretkey
+$ export ALICLOUD_REGION=cn-beijing
+
+Configure envrionment variables in Windows:
+  set ALICLOUD_ACCESS_KEY=anaccesskey
+  set ALICLOUD_SECRET_KEY=asecretkey
+  set ALICLOUD_REGION=cn-beijing
+
 ```
-- In addition, you need to call these variables in the provider in gateway/**main.tf** file as follows:
-```
-provider "alicloud" {
-  region     = var.region
-  access_key = var.alicloud_access_key_ID
-  secret_key = var.alicloud_secret_access_key
-}
-```
+
 ## Usage
 - Fill all variables in the gateway/**terraform.tfvars** file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
