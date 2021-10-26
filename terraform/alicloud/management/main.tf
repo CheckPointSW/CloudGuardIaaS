@@ -1,9 +1,3 @@
-provider "alicloud" {
-  region = var.region
-  access_key = var.alicloud_access_key_ID
-  secret_key = var.alicloud_secret_access_key
-}
-
 module "images" {
   source = "../modules/images"
 
@@ -146,6 +140,7 @@ resource "alicloud_instance" "management_instance" {
   vswitch_id = var.vswitch_id
   security_groups = [alicloud_security_group.management_sg.id]
   system_disk_size = var.volume_size
+  system_disk_category = "cloud_essd"
 
   tags = merge({
     Name = var.instance_name

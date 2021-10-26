@@ -1,10 +1,5 @@
 //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
 
-// --- Credentials ---
-//region = "us-east-1"
-//alicloud_access_key_ID = "12345"
-//alicloud_secret_access_key = "12345"
-
 // --- VPC Network Configuration ---
 vpc_id = "vpc-"
 vswitch_id = "vsw-"

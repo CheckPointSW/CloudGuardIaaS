@@ -1,23 +1,3 @@
-// --- provider ---
-variable "region" {
-  type        = string
-  description = "AliCloud region"
-  default     = "us-east-1"
-}
-data "alicloud_regions" "current" {
-  name = var.region
-}
-variable "alicloud_access_key_ID" {
-  type        = string
-  description = "AliCloud Access key ID"
-  default     = ""
-}
-variable "alicloud_secret_access_key" {
-  type        = string
-  description = "AliCloud Secret access key"
-  default     = ""
-}
-
 // --- VPC Network Configuration ---
 variable "vpc_name" {
   type = string
