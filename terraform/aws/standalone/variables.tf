@@ -90,7 +90,7 @@ variable "instance_tags" {
 variable "standalone_version" {
   type = string
   description =  "Security Gateway & Management (Standalone) version and license"
-  default = "R80.40-PAYG-NGTP"
+  default = "R81-BYOL"
 }
 module "validate_standalone_version" {
   source = "../modules/common/version_license"

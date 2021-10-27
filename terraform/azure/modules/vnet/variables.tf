@@ -33,18 +33,18 @@ variable "subnet_prefixes" {
 }
 
 variable "subnet_names" {
-  description = "A list of subnets's names in a Virtual Network"
+  description = "A list of subnet names in a Virtual Network"
   type = list(string)
   default = ["Frontend","Backend"]
 }
 
 variable "tags" {
-  description = "Tags to be associated with Virual Network and subnets"
+  description = "Tags to be associated with Virtual Network and subnets"
   type = map(string)
   default = {}
 }
 variable "nsg_id" {
-  description = "Network security group to be associated with a Virual Network and subnets"
+  description = "Network security group to be associated with a Virtual Network and subnets"
   type = string
 }
 

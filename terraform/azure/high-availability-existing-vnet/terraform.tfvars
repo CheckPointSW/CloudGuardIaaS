@@ -1,4 +1,4 @@
-#PLEASE reffer to the README.md for accepted values FOR THE VARIABELS BELOW
+#PLEASE refer to the README.md for accepted values FOR THE VARIABLES BELOW
 client_secret                   = "PLEASE ENTER CLIENT SECRET"                                     # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 client_id                       = "PLEASE ENTER CLIENT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 tenant_id                       = "PLEASE ENTER TENANT ID"                                         # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -25,3 +25,7 @@ allow_upload_download           = "PLEASE ENTER true or false"                  
 authentication_type             = "PLEASE ENTER AUTHENTICATION TYPE"                               # "Password"
 availability_type               = "PLEASE ENTER AVAILABILITY TYPE"                                 # "Availability Zone"
 enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
+enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
+use_public_ip_prefix            = "PLEASE ENTER true or false"                                     # false
+create_public_ip_prefix         = "PLEASE ENTER true or false"                                     # false
+existing_public_ip_prefix_id    = "PLEASE ENTER IP PREFIX RESOURCE ID"                             # ""

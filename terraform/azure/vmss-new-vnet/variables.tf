@@ -27,7 +27,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -64,13 +64,13 @@ variable "template_name"{
 }
 
 variable "template_version"{
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
   default = "20210111"
 }
 
 variable "installation_type"{
-  description = "Installaiton type"
+  description = "Installation type"
   type = string
   default = "vmss"
 }
@@ -164,7 +164,7 @@ variable "configuration_template_name" {
   type = string
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -177,12 +177,27 @@ variable "address_space" {
 }
 
 variable "subnet_prefixes" {
-  description = "Address prefix to be used for netwok subnets"
+  description = "Address prefix to be used for network subnets"
   type = list(string)
   default = ["10.0.0.0/24","10.0.1.0/24"]
 }
 
 //********************* Load Balancers Variables **********************//
+variable "deployment_mode" {
+  description = "The type of the deployment, can be 'Standard' for both load balancers or 'External' for external load balancer or 'Internal for internal load balancer"
+  type = string
+  default = "Standard"
+}
+
+locals {  // locals for 'deployment_mode' allowed values
+  deployment_mode_allowd_values = [
+    "Standard",
+    "External",
+    "Internal"
+  ]
+  // will fail if [var.deployment_mode] is invalid:
+  validate_deployment_mode_value = index(local.deployment_mode_allowd_values, var.deployment_mode)
+}
 
 variable "backend_lb_IP_address" {
   description = "The IP address is defined by its position in the subnet"
@@ -205,7 +220,7 @@ variable "lb_probe_unhealthy_threshold" {
 }
 
 variable "lb_probe_interval" {
-  description = "Interval in seconds load balancer health probe rule perfoms a check"
+  description = "Interval in seconds load balancer health probe rule performs a check"
   default = 5
 }
 
@@ -291,7 +306,7 @@ variable "subscription_id" {
 }
 
 variable "client_id" {
-  description = "Aplication ID(Client ID)"
+  description = "Application ID(Client ID)"
   type = string
 }
 
@@ -310,4 +325,10 @@ variable "enable_custom_metrics" {
   description = "Enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service."
   type = bool
   default = true
+}
+
+variable "enable_floating_ip" {
+  description = "Indicates whether the load balancers will be deployed with floating IP."
+  type = bool
+  default = false
 }

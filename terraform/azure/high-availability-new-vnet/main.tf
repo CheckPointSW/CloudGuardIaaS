@@ -60,6 +60,21 @@ module "network-security-group" {
   ]
 }
 
+resource "random_id" "random_id" {
+  byte_length = 13
+  keepers = {
+    rg_id = module.common.resource_group_id
+  }
+}
+
+resource "azurerm_public_ip_prefix" "public_ip_prefix" {
+  count = var.use_public_ip_prefix && var.create_public_ip_prefix ? 1 : 0
+  name = "${module.common.resource_group_name}-ipprefix"
+  location = module.common.resource_group_location
+  resource_group_name = module.common.resource_group_name
+  prefix_length = 30
+}
+
 resource "azurerm_public_ip" "public-ip" {
   count = 2
   name = "${var.cluster_name}${count.index+1}_IP"
@@ -67,6 +82,8 @@ resource "azurerm_public_ip" "public-ip" {
   resource_group_name = module.common.resource_group_name
   allocation_method = module.vnet.allocation_method
   sku = var.sku
+  domain_name_label = "${lower(var.cluster_name)}-${count.index+1}-${random_id.random_id.hex}"
+  public_ip_prefix_id = var.use_public_ip_prefix ? (var.create_public_ip_prefix ? azurerm_public_ip_prefix.public_ip_prefix[0].id : var.existing_public_ip_prefix_id) : null
 }
 
 resource "azurerm_public_ip" "cluster-vip" {
@@ -75,6 +92,8 @@ resource "azurerm_public_ip" "cluster-vip" {
   resource_group_name = module.common.resource_group_name
   allocation_method = module.vnet.allocation_method
   sku = var.sku
+  domain_name_label = "${lower(var.cluster_name)}-vip-${random_id.random_id.hex}"
+  public_ip_prefix_id = var.use_public_ip_prefix ? (var.create_public_ip_prefix ? azurerm_public_ip_prefix.public_ip_prefix[0].id : var.existing_public_ip_prefix_id) : null
 
 }
 
@@ -187,6 +206,8 @@ resource "azurerm_public_ip" "public-ip-lb" {
   resource_group_name = module.common.resource_group_name
   allocation_method = module.vnet.allocation_method
   sku = var.sku
+  domain_name_label = "${lower(var.cluster_name)}-${random_id.random_id.hex}"
+  public_ip_prefix_id = var.use_public_ip_prefix ? (var.create_public_ip_prefix ? azurerm_public_ip_prefix.public_ip_prefix[0].id : var.existing_public_ip_prefix_id) : null
 }
 
 resource "azurerm_lb" "frontend-lb" {
@@ -237,6 +258,20 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
   port = var.lb_probe_port
   interval_in_seconds = var.lb_probe_interval
   number_of_probes = var.lb_probe_unhealthy_threshold
+}
+
+resource "azurerm_lb_rule" "backend_lb_rules" {
+  resource_group_name = module.common.resource_group_name
+  loadbalancer_id = azurerm_lb.backend-lb.id
+  name = "backend-lb"
+  protocol = "All"
+  frontend_port = 0
+  backend_port = 0
+  frontend_ip_configuration_name = "backend-lb"
+  load_distribution = "Default"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool.id
+  probe_id = azurerm_lb_probe.azure_lb_healprob[1].id
+  enable_floating_ip = var.enable_floating_ip
 }
 
 //********************** Availability Set **************************//
@@ -347,6 +382,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
       os_version = module.common.os_version
       template_name = module.common.template_name
       template_version = module.common.template_version
+      template_type = "terraform"
       is_blink = module.common.is_blink
       bootstrap_script64 = base64encode(var.bootstrap_script)
       location = module.common.resource_group_location
@@ -436,6 +472,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
       os_version = module.common.os_version
       template_name = module.common.template_name
       template_version = module.common.template_version
+      template_type = "terraform"
       is_blink = module.common.is_blink
       bootstrap_script64 = base64encode(var.bootstrap_script)
       location = module.common.resource_group_location

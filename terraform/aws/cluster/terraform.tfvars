@@ -21,7 +21,7 @@ instance_tags = {
 predefined_role = ""
 
 // --- Check Point Settings ---
-gateway_version = "R80.40-PAYG-NGTP"
+gateway_version = "R81-BYOL"
 admin_shell = "/bin/bash"
 gateway_SICKey = ""
 gateway_password_hash = "12345678"

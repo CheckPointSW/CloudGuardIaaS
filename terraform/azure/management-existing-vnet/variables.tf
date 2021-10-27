@@ -27,7 +27,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password of deployed Virtual Macine. The password must meet the complexity requirements of Azure"
+  description = "Administrator password of deployed Virtual Machine. The password must meet the complexity requirements of Azure"
   type = string
 }
 
@@ -51,13 +51,13 @@ variable "template_name" {
 }
 
 variable "template_version" {
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
   default = "20210111"
 }
 
 variable "installation_type" {
-  description = "Installaiton type"
+  description = "Installation type"
   type = string
   default = "management"
 }
@@ -92,7 +92,7 @@ variable "allow_upload_download" {
   type = bool
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -124,10 +124,25 @@ variable "management_GUI_client_network" {
   type = string
 }
 
+variable "mgmt_enable_api" {
+  description = "Enable api access to the management. allowed values: all, management_only, gui_clients, disable"
+  type = string
+  default = "disable"
+}
+
 locals {
   regex_valid_management_GUI_client_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
   // Will fail if var.management_GUI_client_network is invalid
   regex_management_GUI_client_network = regex(local.regex_valid_management_GUI_client_network, var.management_GUI_client_network) == var.management_GUI_client_network ? 0 : "Variable [management_GUI_client_network] must be a valid IPv4 network CIDR."
+
+  mgmt_enable_api_allowed_values = [
+    "disable",
+    "all",
+    "management_only",
+    "gui_clients"
+  ]
+  // will fail if [var.mgmt_enable_api] is invalid:
+  validate_mgmt_enable_api_value = index(local.mgmt_enable_api_allowed_values, var.mgmt_enable_api)
 
   regex_valid_subnet_1st_Address = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
   // Will fail if var.subnet_1st_Address is invalid
@@ -154,7 +169,7 @@ variable "subscription_id" {
 }
 
 variable "client_id" {
-  description = "Aplication ID(Client ID)"
+  description = "Application ID(Client ID)"
   type = string
 }
 

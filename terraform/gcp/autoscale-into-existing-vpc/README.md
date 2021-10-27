@@ -1,6 +1,6 @@
 # Check Point Autoscale into VPC (MIG) Terraform module for GCP
 
-Terrafrom module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC on GCP.
+Terraform module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC on GCP.
 
 These types of Terraform resources are supported:
 * [Instance Template](https://www.terraform.io/docs/providers/google/r/compute_instance_template.html)
@@ -157,7 +157,7 @@ UDP_traffic = []
 SCTP_traffic = []
 ESP_traffic = []
 ```
-Please leave empty list to which port you want to unable traffic.
+Please leave empty list for a protocol if you want to disable traffic for it.
 
 ## Inputs
 | Name          | Description   | Type          | Allowed values | Default       | Required      |
@@ -201,6 +201,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | Template Version | Description   |
 | ---------------- | ------------- |
 | 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
+| | | |
+|  | Addition of "template_type" parameter to "cloud-version" files. |
 | | | |
 
 ## Outputs

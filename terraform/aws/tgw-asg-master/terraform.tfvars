@@ -19,7 +19,7 @@ gateway_name = "Check-Point-gateway"
 gateway_instance_type = "c5.xlarge"
 gateways_min_group_size = 2
 gateways_max_group_size = 8
-gateway_version = "R80.40-PAYG-NGTP"
+gateway_version = "R81-BYOL"
 gateway_password_hash = "12345678"
 gateway_SICKey = ""
 enable_cloudwatch = true
@@ -28,7 +28,7 @@ asn = "6500"
 // --- Check Point CloudGuard Network Security Management Server Configuration ---
 management_deploy = true
 management_instance_type = "m5.xlarge"
-management_version = "R80.40-PAYG"
+management_version = "R81-BYOL"
 management_password_hash = "12345678"
 management_permissions = "Create with read-write permissions"
 management_predefined_role = ""

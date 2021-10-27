@@ -141,6 +141,10 @@ This solution uses the following modules:
  | **notification_email** | An email address to notify about scaling operations | string | Leave empty double quotes or enter a valid email address |
  |  |  |  |  |  |
  | **enable_custom_metrics** | Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **enable_floating_ip** | Indicates whether the load balancers will be deployed with floating IP. | boolean | true; <br/>false; |
+ |  |  |  |  |  |
+ | **deployment_mode** | Indicates which load balancer need to be deployed. External + Internal, only External, only Internal. | string | Standard (Default); <br/>External; <br/> Internal; |
 
 ## Conditional creation
 To create role assignment and enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service:
@@ -182,10 +186,13 @@ enable_custom_metrics = true
     frontend_load_distribution      = "Default"
     backend_load_distribution       = "Default"
     enable_custom_metrics           = true
+    enable_floating_ip              = false
+    deployment_mode                 = "Standard"
+
 
 ## Deploy Without Public IP
 
-1. By default the VMSS is deployed with public IP
+1. By default, the VMSS is deployed with public IP
 2. To deploy without public IP, remove the "public_ip_address_configuration" block in main.tf
 
 ## Known limitations
@@ -206,6 +213,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 | 20200323 | Remove the domain_name_label variable from the azurerm_public_ip resource |
 | | | |
 | 20200305 | First release of Check Point CloudGuard IaaS VMSS Terraform deployment for Azure |
+| | | |
+|  | Addition of "templateType" parameter to "cloud-version" files. |
 | | | |
 
 
