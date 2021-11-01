@@ -5,11 +5,11 @@
   "parameters": {
     "basics": [
       {
-        "name": "basics settings text block",
+        "name": "CloudGuard VMSS settings text block",
         "type": "Microsoft.Common.TextBlock",
         "visible": true,
         "options": {
-          "text": "Please follow the Check Point CloudGuard IaaS Scale Set Administration Guide.",
+          "text": "Please follow the CloudGuard Network for Azure VMSS R80.10 and Higher Administration Guide.",
           "link": {
             "label": "Administration Guide",
             "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Default.htm"
@@ -60,18 +60,6 @@
         },
         "bladeTitle": "CloudGuard VMSS settings",
         "elements": [
-          {
-            "name": "CloudGuard VMSS settings text block",
-            "type": "Microsoft.Common.TextBlock",
-            "visible": true,
-            "options": {
-              "text": "Please provide the configuration values according to the Deployment Guide.",
-              "link": {
-                "label": "Deployment Guide",
-                "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Default.htm"
-              }
-            }
-          },
           {
             "name": "upgrading",
             "type": "Microsoft.Common.OptionsGroup",
@@ -248,6 +236,26 @@
             }
           },
           {
+            "name": "floatingIP",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Deploy the Load Balancers with floating IP",
+            "defaultValue": "No",
+            "toolTip": "Deploy the Load Balancers with floating IP.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ]
+            },
+            "visible": true
+          },
+          {
             "name": "instanceLevelPublicIP",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the VMSS with instance level Public IP address",
@@ -265,6 +273,101 @@
                 }
               ]
             }
+          },
+          {
+            "name": "publicIPPrefix",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Public IP prefix",
+            "defaultValue": "No",
+            "toolTip": "Define if deploy existsing Public IP Prefix or a new Public IP Prefix.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ]
+            },
+            "visible": "[equals(steps('autoprovision').instanceLevelPublicIP, 'yes')]"
+          },
+          {
+            "name": "createNewIPPrefix",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Create new IP prefiex",
+            "toolTip": "Create new or existsing Public IP Prefix",
+            "defaultValue": "No",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ]
+            },
+            "visible": "[equals(steps('autoprovision').publicIPPrefix, 'yes')]"
+          },
+          {
+            "name": "IPv4Length",
+            "type": "Microsoft.Common.DropDown",
+            "label": "IPv4 IP prefix length",
+            "defaultValue": "/31 (2 addresses)",
+            "toolTip": "Choose the length of the IP prefix for IP v4.",
+            "multiselect": false,
+            "selectAll": false,
+            "filter": false,
+            "multiLine": false,
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/28 (16 addresses)",
+                  "value": "/28 (16 addresses)"
+                },
+                {
+                  "label": "/29 (8 addresses)",
+                  "value": "/29 (8 addresses)"
+                },
+                {
+                  "label": "/30 (4 addresses)",
+                  "value": "/30 (4 addresses)"
+                },
+                {
+                  "label": "/31 (2 addresses)",
+                  "value": "/31 (2 addresses)"
+                }
+              ],
+              "required": true
+            },
+            "visible": "[equals(steps('autoprovision').createNewIPPrefix, 'yes')]"
+          },
+          {
+            "name": "ipPrefixLengthWarning",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('autoprovision').createNewIPPrefix, 'yes')]",
+            "options": {
+              "icon": "Warning",
+              "text": "[concat('NOTE: The VMSS will not be allowed to contain more than ', if(equals(steps('autoprovision').IPv4Length, '/31 (2 addresses)'), '2', if(equals(steps('autoprovision').IPv4Length, '/30 (4 addresses)'), '4', if(equals(steps('autoprovision').IPv4Length, '/29 (8 addresses)'), '8', if(equals(steps('autoprovision').IPv4Length, '/28 (16 addresses)'), '16', '0')))), ' instances')]"
+            }
+          },
+          {
+            "name": "ipPrefixExistingResourceId",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Enter an existing IP prefix resource id",
+            "toolTip": "The resource id of an existing public IP prefix.",
+            "multiLine": false,
+            "constraints": {
+              "regex": "^[a-z0-9A-Z -.:/n]{1,}$",
+              "validationMessage": "Only alphanumeric characters, hyphens, spaces, periods, and colons are allowed.",
+              "required": true
+            },
+            "visible": "[equals(steps('autoprovision').createNewIPPrefix, 'no')]"
           },
           {
             "name": "externalCommunicationInfoBox",
@@ -418,7 +521,7 @@
             "label": "Number of Availability Zones to use",
             "defaultValue": "None",
             "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' centralus eastus2 francecentral northeurope southeastasia westeurope westus2 eastus uksouth  southafricanorth southcentralus germanywestcentral canadacentral japaneast ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia uksouth westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -467,7 +570,7 @@
             "toolTip": "The Azure Dns Zone ID to be used for defining a Record Set with VMSS Instances' public IPs",
             "constraints": {
               "required": true,
-              "regex": "^\/subscriptions\/.*\/providers\/Microsoft.Network\/dnszones\/",
+              "regex": "^/subscriptions/.*/providers/Microsoft.Network/dnszones/",
               "validationMessage": "DNS Zone resource ID must strat with \"/subscriptions/\" and contain \"/providers/Microsoft.Network/dnszones\".The DNS Zone resource ID can be found in the DNS Zone Properties tab"
             },
             "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').instanceLevelPublicIP, 'no')))]"
@@ -519,8 +622,7 @@
                   "label": "Yes",
                   "value": "yes"
                 }
-              ],
-              "required": true
+              ]
             },
             "visible": true
           },
@@ -548,7 +650,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R80.40",
+            "defaultValue": "R81",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -1799,7 +1901,12 @@
       "subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
-      "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]"
+      "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+      "floatingIP": "[steps('autoprovision').floatingIP]",
+      "IPv4Length": "[steps('autoprovision').IPv4Length]",
+      "publicIPPrefix": "[steps('autoprovision').publicIPPrefix]",
+      "createNewIPPrefix": "[steps('autoprovision').createNewIPPrefix]",
+      "ipPrefixExistingResourceId": "[steps('autoprovision').ipPrefixExistingResourceId]"
     }
   }
 }

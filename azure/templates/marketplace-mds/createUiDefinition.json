@@ -5,6 +5,18 @@
   "parameters": {
     "basics": [
       {
+        "name": "CloudGuard MDS deployment guide",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the Check Point MDS Deployment for Azure.",
+          "link": {
+            "label": "MDS Deployment Guide",
+            "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk154436&partition=Basic&product=CloudGuard"
+          }
+        }
+      },
+      {
         "name": "gatewayNameUi",
         "type": "Microsoft.Common.TextBox",
         "label": "Server Name",
@@ -52,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R80.40",
+            "defaultValue": "R81",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
