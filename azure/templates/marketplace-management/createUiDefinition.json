@@ -5,6 +5,18 @@
   "parameters": {
     "basics": [
       {
+        "name": "chkp refrence architecture",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the Check Point Reference Architecture for Azure.",
+          "link": {
+            "label": "Reference Architecture Guide",
+            "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk109360"
+          }
+        }
+      },
+      {
         "name": "gatewayNameUi",
         "type": "Microsoft.Common.TextBox",
         "label": "Server Name",
@@ -52,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R80.40",
+            "defaultValue": "R81",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -367,6 +379,30 @@
             }
           },
           {
+            "name": "enableApi",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Accept Management API calls",
+            "defaultValue": "Management server only",
+            "toolTip": "Select the type of the Management API calls",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Management server only",
+                  "value": "management_only"
+                },
+                {
+                  "label": "All IP Addresses that can be used for GUI clients",
+                  "value": "gui_clients"
+                },
+                {
+                  "label": "All IP addresses",
+                  "value": "all"
+                }
+              ]
+            },
+            "visible": "[not(or(equals(steps('chkp').cloudGuardVersion, 'R81'), equals(steps('chkp').cloudGuardVersion, 'R80.40'), equals(steps('chkp').cloudGuardVersion, 'R80.30')))]"
+          },
+          {
             "visible": "[equals(steps('chkp').installationType, 'management')]",
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
@@ -507,7 +543,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiMGMT25, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25), steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiMGMT25)]",
+      "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiMGMT25, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiMGMT25)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
@@ -521,7 +557,8 @@
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
       "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
-      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]"
+      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
+      "enableApi": "[steps('chkp').enableApi]"
     }
   }
 }

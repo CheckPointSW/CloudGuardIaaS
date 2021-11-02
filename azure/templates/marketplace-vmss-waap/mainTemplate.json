@@ -73,7 +73,6 @@
     "availabilityZonesNum": {
       "type": "int",
       "allowedValues": [
-        0,
         1,
         2,
         3

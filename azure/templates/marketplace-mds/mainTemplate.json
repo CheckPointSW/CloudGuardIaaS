@@ -17,7 +17,7 @@
         "R81 - Bring Your Own License",
         "R81.10 - Bring Your Own License"
       ],
-      "defaultValue": "R80.40 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -117,8 +117,8 @@
       "type": "string",
       "metadata": {
         "description": "Allowed GUI clients"
-       },
-       "defaultValue": "0.0.0.0/0"
+      },
+      "defaultValue": "0.0.0.0/0"
     },
     "sicKey": {
       "type": "securestring",
@@ -193,7 +193,7 @@
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
-        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+        "description": "Use the following URI when deploying a custom template: https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
       },
       "defaultValue": "[deployment().properties.templateLink.uri]"
     },
@@ -203,17 +203,11 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
-    },
-    "Check_PointTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-      }
     }
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20210711",
+    "templateVersion": "20211101",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -283,7 +277,9 @@
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-    "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]"
+    "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
+    "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
   },
   "resources": [
     {
@@ -307,10 +303,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      "kind": "Storage"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -354,11 +347,17 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
           },
           "virtualNetworkExistingRGName": {
-            "value": "[parameters('virtualNetworkExistingRGName')]"
+            "value": "[variables('vnetRGName')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
           }
         }
       }
@@ -374,9 +373,6 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -499,9 +495,6 @@
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -529,14 +522,11 @@
                 "Id": "[variables('publicIPAddressId')]"
               },
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName') ,'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
+                "id": "[resourceId(variables('vnetRGName') ,'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
               }
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -554,10 +544,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-		"hyperVGeneration": "V1"
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        "hyperVGeneration": "V1"
       }
     },
     {
@@ -576,7 +563,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2018-07-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2021-06-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {
@@ -611,9 +598,6 @@
             }
           }
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

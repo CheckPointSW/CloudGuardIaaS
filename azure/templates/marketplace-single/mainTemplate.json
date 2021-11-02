@@ -32,7 +32,7 @@
         "R81.10 - Pay As You Go (NGTP)",
         "R81.10 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R80.40 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -222,7 +222,7 @@
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
-        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+        "description": "Use the following URI when deploying a custom template: https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
       },
       "defaultValue": "[deployment().properties.templateLink.uri]"
     },
@@ -232,12 +232,6 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
-    },
-    "Check_PointTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-      }
     },
     "customMetrics": {
       "type": "string",
@@ -257,7 +251,7 @@
   },
   "variables": {
     "templateName": "single",
-    "templateVersion": "20210711",
+    "templateVersion": "20211101",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -380,16 +374,18 @@
     },
     "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
     "publicIPAddressName": "[parameters('vmName')]",
-    "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+    "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "sicKey": "[parameters('sicKey')]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
-    "vmID": "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]",
+    "vmID": "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
     "customMetrics": "[parameters('customMetrics')]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]"
+    "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+    "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
   },
   "resources": [
     {
@@ -413,10 +409,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      "kind": "Storage"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -476,7 +469,7 @@
             "value": "[parameters('virtualNetworkName')]"
           },
           "virtualNetworkExistingRGName": {
-            "value": "[parameters('virtualNetworkExistingRGName')]"
+            "value": "[variables('vnetRGName')]"
           }
         }
       }
@@ -492,16 +485,13 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
-        "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
+        "[coalesce(resourceId('Microsoft.Resources/deployments/', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[variables('publicIPAddressId')]"
       ],
       "location": "[variables('location')]",
@@ -519,21 +509,18 @@
                 "Id": "[variables('publicIPAddressId')]"
               },
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
               }
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
-        "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]"
+        "[coalesce(resourceId('Microsoft.Resources/deployments/', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments/', 'networkExistingSetup'))]"
       ],
       "location": "[variables('location')]",
       "name": "[variables('nic2Name')]",
@@ -547,14 +534,11 @@
               "privateIPAddress": "[parameters('Subnet2StartAddress')]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
               }
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -572,19 +556,16 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-		"hyperVGeneration": "V1"
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        "hyperVGeneration": "V1"
       }
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2020-06-01",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]",
         "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
       ],
       "location": "[variables('location')]",
@@ -595,7 +576,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2018-07-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2021-06-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {
@@ -604,13 +585,13 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic1Name'))]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', variables('nic1Name'))]",
               "properties": {
                 "primary": true
               }
             },
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nic2Name'))]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', variables('nic2Name'))]",
               "properties": {
                 "primary": false
               }
@@ -636,9 +617,6 @@
             }
           }
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -646,12 +624,14 @@
       "apiVersion": "2020-04-01-preview",
       "type": "Microsoft.Authorization/roleAssignments",
       "name": "[parameters('rbacGuid')]",
-        "properties": {
-          "roleDefinitionId": "[variables('monitoringMetricsPublisher')]",
-          "principalId": "[reference(variables('vmID'), '2019-12-01', 'Full').identity.principalId]",
-          "scope":"[resourceGroup().id]"
-        },
-        "dependsOn": ["[variables('vmID')]"]
+      "properties": {
+        "roleDefinitionId": "[variables('monitoringMetricsPublisher')]",
+        "principalId": "[reference(variables('vmID'), '2019-12-01', 'Full').identity.principalId]",
+        "scope": "[resourceGroup().id]"
+      },
+      "dependsOn": [
+        "[variables('vmID')]"
+      ]
     }
   ],
   "outputs": {
