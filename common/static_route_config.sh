@@ -8,4 +8,6 @@ EXTERNAL_AGW_SUBNET_CIDR=<>
 # https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
 EXTERNAL_VMSS_SUBNET_DEFAULT_GATEWAY=<>
 
-clish -c "set static-route $EXTERNAL_AGW_SUBNET_CIDR nexthop gateway address $EXTERNAL_VMSS_SUBNET_DEFAULT_GATEWAY on"
+clish -c "lock database override"
+
+clish -s -c "set static-route $EXTERNAL_AGW_SUBNET_CIDR nexthop gateway address $EXTERNAL_VMSS_SUBNET_DEFAULT_GATEWAY on"
