@@ -1,0 +1,52 @@
+Description: Returns a Check Point AliCloud Machine ID (__VERSION__)
+Parameters:
+  Version:
+    Description: Security Gateway or Management Server version
+    Type: String
+    Default: R81-BYOL-GW
+    AllowedValues:
+      - R81-BYOL-GW
+      - R81-BYOL-MGMT
+Mappings:
+  ConverterMap:
+    R81-BYOL-GW:
+      Value: R81BYOLGW
+    R81-BYOL-MGMT:
+      Value: R81BYOLMGMT
+  RegionMap:
+    cn-qingdao:
+      R81BYOLMGMT: m-m5egsli84eafi88ij1ar
+      R81BYOLGW: m-m5e31nudi6mfkqhqx0th
+    cn-beijing:
+      R81BYOLMGMT: m-2ze0g0k5eize7onq8ve4
+      R81BYOLGW: m-2ze3bpa0o5cvlyrdv9ei
+    cn-zhangjiakou:
+      R81BYOLMGMT: m-8vb5g6a3ehtpe39yanve
+      R81BYOLGW: m-8vbdc1hcvfnm3kmhwvl4
+    cn-huhehaote:
+      R81BYOLMGMT: m-hp35ucwnll0r2nz4e40x
+      R81BYOLGW: m-hp3fppxij3v1a5s11925
+    cn-hangzhou:
+      R81BYOLMGMT: m-bp18eahm3m5jrh75go58
+      R81BYOLGW: m-bp12cxaffzv0kset2b6t
+    cn-shanghai:
+      R81BYOLMGMT: m-uf6bqt7z7xqz3m5gmn9k
+      R81BYOLGW: m-uf66wtmh7t7b4fkx7sja
+    cn-shenzhen:
+      R81BYOLMGMT: m-wz99njena32w6uo92tyk
+      R81BYOLGW: m-wz99njena32w6uo92tyj
+    cn-hongkong:
+      R81BYOLMGMT: m-j6c6x7p9hxfm2ntxjwyj
+      R81BYOLGW: m-j6cdls5a0h7mifm1rm3x
+    ap-southeast-1:
+      R81BYOLMGMT: m-t4ndowfkjeuncle20tz2
+      R81BYOLGW: m-t4n7hyrfpo4apku1lxo3
+    us-east-1:
+      R81BYOLGW: m-0xiiosvehx9dh2iuln66
+      R81BYOLMGMT: m-0xihpw79tf6fea4s2r9d
+    us-west-1:
+      R81BYOLGW: m-rj9ci70w98v9g80riu5j
+      R81BYOLMGMT: m-rj9dnrmefohxpbsap2xm
+    cn-beijing:
+      R81BYOLGW: m-2zeagivsffh34e0fw9zl
+      R81BYOLMGMT: m-2ze4umbfw5xdvtooskpx

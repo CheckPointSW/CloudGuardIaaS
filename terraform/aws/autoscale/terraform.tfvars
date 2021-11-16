@@ -28,7 +28,7 @@ maximum_group_size = 10
 target_groups = ["arn:aws:tg1/abc123", "arn:aws:tg2/def456"]
 
 // --- Check Point Settings ---
-gateway_version = "R80.40-PAYG-NGTP"
+gateway_version = "R81-BYOL"
 admin_shell = "/bin/bash"
 gateway_password_hash = "12345678"
 gateway_SICKey = "12345678"

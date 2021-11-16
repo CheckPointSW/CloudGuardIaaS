@@ -32,7 +32,7 @@
         "R81.10 - Pay As You Go (NGTP)",
         "R81.10 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R80.40 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -122,30 +122,19 @@
       },
       "defaultValue": "[concat(resourceGroup().name, '-vnet')]"
     },
-    "upgrading": {
-      "type": "string",
-      "defaultValue": "no",
-      "allowedValues": [
-        "no",
-        "yes"
-      ],
-      "metadata": {
-        "Description": "Indicates whether the user in upgrading the CloudGuard VMSS solution"
-      }
-    },
     "virtualNetworkAddressPrefix": {
-        "type": "string",
-        "metadata": {
-            "description": "The address prefix of the virtual network"
-        },
-        "defaultValue": "10.0.0.0/16"
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the virtual network"
+      },
+      "defaultValue": "10.0.0.0/16"
     },
     "virtualNetworkIpv6AddressPrefix": {
-        "type": "string",
-        "metadata": {
-            "description": "The IPv6 address prefix of the virtual network"
-        },
-        "defaultValue": "ace:cab:deca::/48"
+      "type": "string",
+      "metadata": {
+        "description": "The IPv6 address prefix of the virtual network"
+      },
+      "defaultValue": "ace:cab:deca::/48"
     },
     "subnet1Name": {
       "type": "string",
@@ -162,11 +151,11 @@
       "defaultValue": "10.0.1.0/24"
     },
     "Subnet1Ipv6Prefix": {
-        "type": "string",
-        "metadata": {
-            "description": "The IPv6 address prefix of the 1st subnet"
-        },
-        "defaultValue": "ace:cab:deca:deed::/64"
+      "type": "string",
+      "metadata": {
+        "description": "The IPv6 address prefix of the 1st subnet"
+      },
+      "defaultValue": "ace:cab:deca:deed::/64"
     },
     "subnet2Name": {
       "type": "string",
@@ -183,18 +172,11 @@
       "defaultValue": "10.0.2.0/24"
     },
     "Subnet2Ipv6Prefix": {
-        "type": "string",
-        "metadata": {
-            "description": "The IPv6 address prefix of the 2nd subnet"
-        },
-        "defaultValue": "ace:cab:deca:deee::/64"
-    },
-    "subnet2StartAddress": {
       "type": "string",
       "metadata": {
-        "description": "The first available address on the 2nd subnet"
+        "description": "The IPv6 address prefix of the 2nd subnet"
       },
-      "defaultValue": "10.0.2.4"
+      "defaultValue": "ace:cab:deca:deee::/64"
     },
     "vnetNewOrExisting": {
       "type": "string",
@@ -284,42 +266,6 @@
         "Premium_LRS"
       ]
     },
-    "appLoadDistribution": {
-      "type": "string",
-      "allowedValues": [
-        "Default",
-        "SourceIP",
-        "SourceIPProtocol"
-      ],
-      "defaultValue": "Default",
-      "metadata": {
-        "description": "The External Load Balancer distribution method"
-      }
-    },
-    "ilbLoadDistribution": {
-      "type": "string",
-      "allowedValues": [
-        "Default",
-        "SourceIP",
-        "SourceIPProtocol"
-      ],
-      "defaultValue": "Default",
-      "metadata": {
-        "description": "The Internal Load Balancer distribution method"
-      }
-    },
-    "deploymentMode": {
-      "type": "string",
-      "allowedValues": [
-        "Standard",
-        "ILBOnly",
-        "ELBOnly"
-      ],
-      "defaultValue": "Standard",
-      "metadata": {
-        "description": "Solution deployment architecture."
-      }
-    },
     "sourceImageVhdUri": {
       "type": "string",
       "defaultValue": "noCustomUri",
@@ -345,7 +291,7 @@
       "metadata": {
         "description": "The base URI where artifacts required by this template are located including a trailing '/'"
       },
-      "defaultValue": "[deployment().properties.templateLink.uri]"
+      "defaultValue": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
     },
     "_artifactsLocationSasToken": {
       "type": "securestring",
@@ -381,24 +327,18 @@
     },
     "customMetrics": {
       "type": "string",
-        "allowedValues": [
-          "no",
-          "yes"
-        ],
-        "defaultValue": "yes",
-        "metadata": {
-          "Description": "Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring"
-        }
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "yes",
+      "metadata": {
+        "Description": "Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring"
+      }
     },
     "rbacGuid": {
       "type": "string",
       "defaultValue": "[newGuid()]"
-    },
-    "Check_PointTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-      }
     }
   },
   "variables": {
@@ -409,11 +349,11 @@
     "subnetv6AddressRange": "[parameters('Subnet1IPv6Prefix')]",
     "subnet2v6AddressRange": "[parameters('Subnet2IPv6Prefix')]",
     "virtualNetworkName": "[parameters('virtualNetworkName')]",
-    "subnetName":  "[parameters('Subnet1Name')]",
+    "subnetName": "[parameters('Subnet1Name')]",
     "subnet2Name": "[parameters('Subnet2Name')]",
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20200921",
+    "templateVersion": "20211101",
     "location": "[parameters('location')]",
     "subnet-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "subnet2-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet2Name'))]",
@@ -544,22 +484,30 @@
         "idleTimeoutInMinutes": 15
       }
     },
-    "upgrading": "[equals(parameters('upgrading'), 'yes')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "azureFunctionSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/azure-func-sami.json', parameters('_artifactsLocationSasToken')))]",
-    "vnetID": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', variables('virtualNetworkName')), resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
+      "australiaeast",
+      "brazilsouth",
+      "canadacentral",
       "centralus",
+      "eastus",
       "eastus2",
       "francecentral",
+      "germanywestcentral",
+      "japaneast",
+      "koreacentral",
       "northeurope",
+      "norwayeast",
+      "southafricanorth",
+      "southcentralus",
       "southeastasia",
+      "uksouth",
       "westeurope",
       "westus2",
-      "eastus",
-      "uksouth"
+      "westus3"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
     "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
@@ -573,8 +521,7 @@
       "x-chkp-management-interface": "[variables('mgmtInterfaceName')]",
       "x-chkp-topology": "eth0:external,eth1:internal",
       "x-chkp-anti-spoofing": "eth0:false,eth1:false",
-      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]",
-      "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]"
     },
     "uniqueTags": {
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
@@ -589,7 +536,7 @@
   },
   "resources": [
     {
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2021-01-01",
       "name": "pid-23952014-097a-4aed-ade6-0d4b5c278517",
       "type": "Microsoft.Resources/deployments",
       "properties": {
@@ -602,208 +549,208 @@
       }
     },
     {
-        "apiVersion": "2020-05-01",
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "lbpublicip-v4",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "Standard"
-        },
-        "properties": {
-            "publicIPAllocationMethod": "Static"
-        }
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "lbpublicip-v4",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static"
+      }
     },
     {
-        "apiVersion": "2020-05-01",
-        "type": "Microsoft.Network/publicIPAddresses",
-        "name": "lbpublicip-v6",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "Standard"
-        },
-        "properties": {
-            "publicIPAllocationMethod": "Static",
-            "publicIPAddressVersion": "IPv6"
-        }
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "lbpublicip-v6",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv6"
+      }
     },
     {
-        "apiVersion": "2020-05-01",
-        "name": "frontend-lb",
-        "type": "Microsoft.Network/loadBalancers",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "Standard"
-        },
-        "dependsOn": [
-            "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v4')]",
-            "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v6')]"
+      "apiVersion": "2020-05-01",
+      "name": "frontend-lb",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v4')]",
+        "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v6')]"
+      ],
+      "properties": {
+        "frontendIpConfigurations": [
+          {
+            "name": "LB-v4",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'lbpublicip-v4')]"
+              }
+            }
+          },
+          {
+            "name": "LB-v6",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v6')]"
+              }
+            }
+          }
         ],
-        "properties": {
-            "frontendIpConfigurations": [
-            {
-                "name": "LB-v4",
-                "properties": {
-                "publicIPAddress": {
-                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', 'lbpublicip-v4')]"
-                }
-                }
-            },
-            {
-                "name": "LB-v6",
-                "properties": {
-                "publicIPAddress": {
-                    "id": "[resourceId('Microsoft.Network/publicIPAddresses','lbpublicip-v6')]"
-                }
-                }
-            }
-            ],
-            "backendAddressPools": [
-            {
-                "name": "frontend-LBBAP-v4"
-            },
-            {
-                "name": "frontend-LBBAP-v6"
-            }
-            ],
-            "loadBalancingRules": [
-            {
-                "properties": {
-                "frontendIPConfiguration": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'frontend-lb', 'LB-v4')]"
-                },
-                "backendAddressPool": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v4')]"
-                },
-                "probe": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'frontend-lb', 'lb-probe')]"
-                },
-                "protocol": "Tcp",
-                "frontendPort": 443,
-                "backendPort": 443,
-                "idleTimeoutInMinutes": 4
-                },
-                "name": "frontend-lb-rule-v4"
-            },
-            {
-                "properties": {
-                "frontendIPConfiguration": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'frontend-lb', 'LB-v6')]"
-                },
-                "backendAddressPool": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v6')]"
-                },
-                "probe": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'frontend-lb', 'lb-probe')]"
-                },
-                "protocol": "Tcp",
-                "frontendPort": 443,
-                "backendPort": 443
-                },
-                "name": "frontend-lb-rule-v6"
-            }
-            ],
-            "probes": [
-            {
-                "properties": {
-                "protocol": "Tcp",
-                "port": 22,
-                "intervalInSeconds": 5,
-                "numberOfProbes": 2
-                },
-                "name": "lb-probe"
-            }
-            ]
-        }
-    },
-    {
-        "apiVersion": "2020-05-01",
-        "name": "backend-lb",
-        "type": "Microsoft.Network/loadBalancers",
-        "location": "[parameters('location')]",
-        "sku": {
-            "name": "Standard"
-        },
-        "dependsOn": [
-            "[coalesce(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]"
+        "backendAddressPools": [
+          {
+            "name": "frontend-LBBAP-v4"
+          },
+          {
+            "name": "frontend-LBBAP-v6"
+          }
         ],
-        "properties": {
-            "frontendIpConfigurations": [
-            {
-                "name": "LB-v4",
-                "properties": {
-                    "subnet": {
-                    "id": "[variables('subnet2-id')]"
-                }
-                }
-            }
-            ],
-            "backendAddressPools": [
-            {
-                "name": "backend-LBBAP-v4"
-            }
-            ],
-            "loadBalancingRules": [
-            {
-                "properties": {
-                "frontendIPConfiguration": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'backend-lb', 'LB-v4')]"
-                },
-                "backendAddressPool": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'backend-lb', 'backend-LBBAP-v4')]"
-                },
-                "probe": {
-                    "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'backend-lb', 'lb-probe')]"
-                },
-                "protocol": "Tcp",
-                "frontendPort": 443,
-                "backendPort": 443,
-                "idleTimeoutInMinutes": 4
-                },
-                "name": "backend-lb-rule-v4"
-            }
-            ],
-            "probes": [
-            {
-                "properties": {
-                "protocol": "Tcp",
-                "port": 22,
-                "intervalInSeconds": 5,
-                "numberOfProbes": 2
-                },
-                "name": "lb-probe"
-            }
-            ]
-        }
+        "loadBalancingRules": [
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'frontend-lb', 'LB-v4')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v4')]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'frontend-lb', 'lb-probe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 443,
+              "idleTimeoutInMinutes": 4
+            },
+            "name": "frontend-lb-rule-v4"
+          },
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'frontend-lb', 'LB-v6')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v6')]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'frontend-lb', 'lb-probe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 443
+            },
+            "name": "frontend-lb-rule-v6"
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 22,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            },
+            "name": "lb-probe"
+          }
+        ]
+      }
     },
     {
-        "apiVersion": "2020-05-01",
-        "type": "Microsoft.Network/networkSecurityGroups",
-        "name": "vmss-nsg",
-        "location": "[parameters('location')]",
-        "properties": {
-            "securityRules": [
-            {
-                "name": "allow-all-inbound",
-                "properties": {
-                "description": "Allow all inbound traffic",
-                "protocol": "TCP",
-                "sourcePortRange": "*",
-                "destinationPortRange": "*",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 1001,
-                "direction": "Inbound"
-                }
+      "apiVersion": "2021-01-01",
+      "name": "backend-lb",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[coalesce(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]"
+      ],
+      "properties": {
+        "frontendIpConfigurations": [
+          {
+            "name": "LB-v4",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnet2-id')]"
+              }
             }
-            ]
-        }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "backend-LBBAP-v4"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'backend-lb', 'LB-v4')]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'backend-lb', 'backend-LBBAP-v4')]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', 'backend-lb', 'lb-probe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 443,
+              "backendPort": 443,
+              "idleTimeoutInMinutes": 4
+            },
+            "name": "backend-lb-rule-v4"
+          }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 22,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            },
+            "name": "lb-probe"
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2020-05-01",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "vmss-nsg",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "allow-all-inbound",
+            "properties": {
+              "description": "Allow all inbound traffic",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1001,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "type": "Microsoft.Network/routeTables",
       "name": "[variables('VMSSBackend')]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2021-03-01",
       "location": "[parameters('location')]",
       "properties": {
         "disableBgpRoutePropagation": false,
@@ -822,7 +769,7 @@
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
       "type": "Microsoft.Network/routeTables",
       "name": "[variables('VMSSFrontend')]",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2021-03-01",
       "location": "[parameters('location')]",
       "properties": {
         "disableBgpRoutePropagation": false,
@@ -845,55 +792,55 @@
       }
     },
     {
-        "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-        "apiVersion": "2019-07-01",
-        "type": "Microsoft.Network/virtualNetworks",
-        "name": "[variables('virtualNetworkName')]",
-        "location": "[parameters('location')]",
-        "dependsOn": [
+      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+      "apiVersion": "2021-03-01",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
         "[resourceId('Microsoft.Network/routeTables', variables('VMSSFrontend'))]",
         "[resourceId('Microsoft.Network/routeTables', variables('VMSSBackend'))]"
       ],
-        "properties": {
-            "dhcpOptions": {
-                "dnsServers": [
-                    "cafe:43::",
-                    "cafe:45::"
-                ]
-            },
-            "addressSpace": {
-                "addressPrefixes": [
-                    "[variables('vnetv4AddressRange')]",
-                    "[variables('vnetv6AddressRange')]"
-                ]
-            },
-            "subnets": [
-                {
-                    "name": "[variables('subnetName')]",
-                    "properties": {
-                        "addressPrefixes": [
-                            "[variables('subnetv4AddressRange')]",
-                            "[variables('subnetv6AddressRange')]"
-                        ],
-                        "routeTable": {
-                            "id": "[resourceId('Microsoft.Network/routeTables', variables('VMSSFrontend'))]"
-                        }
-                    }
-                },
-                {
-                    "name": "[variables('subnet2Name')]",
-                    "properties": {
-                        "addressPrefixes": [
-                            "[variables('subnet2v4AddressRange')]",
-                            "[variables('subnet2v6AddressRange')]"
-                        ],
-                        "routeTable": {
-                            "id": "[resourceId('Microsoft.Network/routeTables', variables('VMSSBackend'))]"
-                        }
-                    }
-                }
-            ]
-        }
+      "properties": {
+        "dhcpOptions": {
+          "dnsServers": [
+            "cafe:43::",
+            "cafe:45::"
+          ]
+        },
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vnetv4AddressRange')]",
+            "[variables('vnetv6AddressRange')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefixes": [
+                "[variables('subnetv4AddressRange')]",
+                "[variables('subnetv6AddressRange')]"
+              ],
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('VMSSFrontend'))]"
+              }
+            }
+          },
+          {
+            "name": "[variables('subnet2Name')]",
+            "properties": {
+              "addressPrefixes": [
+                "[variables('subnet2v4AddressRange')]",
+                "[variables('subnet2v6AddressRange')]"
+              ],
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', variables('VMSSBackend'))]"
+              }
+            }
+          }
+        ]
+      }
     },
     {
       "condition": "[equals(variables('customMetrics'), 'yes')]",
@@ -902,22 +849,18 @@
       "name": "[parameters('rbacGuid')]",
       "properties": {
         "roleDefinitionId": "[variables('monitoringMetricsPublisher')]",
-        "principalId": "[reference(variables('vmssID'), '2019-12-01', 'Full').identity.principalId]",
+        "principalId": "[reference(variables('vmssID'), '2021-03-01', 'Full').identity.principalId]",
         "scope": "[resourceGroup().id]"
       },
       "dependsOn": [
         "[variables('vmssID')]"
-      ],
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      ]
     },
-
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
       "name": "networkExistingSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2021-01-01",
       "resourceGroup": "[parameters('virtualNetworkExistingRGName')]",
       "properties": {
         "mode": "Incremental",
@@ -948,7 +891,7 @@
       "condition": "[and(equals(parameters('remoteAccessVpn'), 'yes'),or(contains(parameters('cloudGuardVersion'),'R80.40'),contains(parameters('cloudGuardVersion'),'R81')))]",
       "name": "azureFunctionSetup",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-11-01",
+      "apiVersion": "2021-01-01",
       "resourceGroup": "[resourceGroup().name]",
       "properties": {
         "mode": "Incremental",
@@ -981,20 +924,17 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2021-06-01",
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      "kind": "Storage"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2021-07-01",
       "name": "[variables('customImage')]",
       "location": "[variables('resourceGroup').location]",
       "properties": {
@@ -1006,14 +946,11 @@
             "storageAccountType": "Standard_LRS"
           }
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion": "2018-10-01",
+      "apiVersion": "2021-07-01",
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
@@ -1062,23 +999,23 @@
                 "properties": {
                   "networkSecurityGroup": {
                     "id": "[resourceId('Microsoft.Network/networkSecurityGroups','vmss-nsg')]"
-                },
+                  },
                   "primary": true,
                   "enableIPForwarding": false,
                   "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
                   "ipConfigurations": [
-					{
+                    {
                       "name": "ipconfig1IPV6",
                       "properties": {
                         "primary": true,
                         "subnet": {
                           "id": "[variables('subnet-id')]"
                         },
-                        "privateIPAddressVersion":"IPv6",
+                        "privateIPAddressVersion": "IPv6",
                         "loadBalancerBackendAddressPools": [
-                            {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v6')]"
-                            }
+                          {
+                            "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v6')]"
+                          }
                         ]
                       }
                     },
@@ -1086,15 +1023,15 @@
                       "name": "ipconfig1",
                       "properties": {
                         "primary": false,
-                        "privateIPAddressVersion":"IPv4",
+                        "privateIPAddressVersion": "IPv4",
                         "publicIpAddressConfiguration": "[if(equals(parameters('instanceLevelPublicIP'),'yes'), variables('publicIPProperties'), json('null'))]",
                         "subnet": {
                           "id": "[variables('subnet-id')]"
                         },
                         "loadBalancerBackendAddressPools": [
-                            {
-                                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v4')]"
-                            }
+                          {
+                            "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'frontend-lb', 'frontend-LBBAP-v4')]"
+                          }
                         ]
                       }
                     }
@@ -1118,7 +1055,7 @@
                         "subnet": {
                           "id": "[variables('subnet2-id')]"
                         },
-                        "privateIPAddressVersion":"IPv6"
+                        "privateIPAddressVersion": "IPv6"
                       }
                     },
                     {
@@ -1137,7 +1074,7 @@
           "diagnosticsProfile": {
             "bootDiagnostics": {
               "enabled": "true",
-              "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
+              "storageUri": "[reference(variables('storageAccountId'), '2021-06-01').primaryEndpoints.blob]"
             }
           }
         },
@@ -1214,9 +1151,6 @@
             ]
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ]

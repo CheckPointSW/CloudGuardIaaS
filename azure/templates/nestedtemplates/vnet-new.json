@@ -57,12 +57,6 @@
       "metadata": {
         "description": "The first avaialable address on the 2nd subnet"
       }
-        },
-        "Check_PointTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-            }
     }
   },
   "variables": {},
@@ -90,9 +84,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -111,9 +102,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -151,9 +139,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],
