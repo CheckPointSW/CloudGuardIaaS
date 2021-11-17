@@ -84,6 +84,7 @@ function post_status() {
 EOF
     fi
 
+    echo "Creating dynamic objects"
     create_dynamic_objects $installSecurityManagement
 
     if "$installSecurityGateway" ; then
@@ -148,6 +149,7 @@ EOF
         fi
     fi
 }
+
 clish -c 'set user admin shell ${shell}' -s
 
 case "${installationType}" in
@@ -258,3 +260,4 @@ if $config_cmd ; then
 else
     post_status false false
 fi
+echo -e "\nFinished startup script"
