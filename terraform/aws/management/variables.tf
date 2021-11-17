@@ -98,7 +98,7 @@ variable "sts_roles" {
 variable "management_version" {
   type = string
   description = "Management version and license"
-  default = "R80.40-PAYG"
+  default = "R81-BYOL"
 }
 module "validate_management_version" {
   source = "../modules/common/version_license"

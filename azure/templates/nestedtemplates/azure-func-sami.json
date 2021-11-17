@@ -56,12 +56,6 @@
       "containerName": {
           "type": "string",
           "defaultValue": "azure-function"
-        },
-        "Check_PointTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-            }
       }
     },
     "variables": {
@@ -76,23 +70,20 @@
     },
     "resources": [
         {
-            "apiVersion": "2020-04-01-preview",
+            "apiVersion": "2021-06-01",
             "type": "Microsoft.Authorization/roleAssignments",
             "name": "[parameters('rbacGuid')]",
             "properties": {
                 "roleDefinitionId": "[variables('Reader')]",
-                "principalId": "[reference(variables('functionAppId'), '2019-08-01', 'Full').identity.principalId]",
+                "principalId": "[reference(variables('functionAppId'), '2021-02-01', 'Full').identity.principalId]",
                 "scope": "[resourceGroup().id]"
             },
              "dependsOn": [
                 "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
-            ],
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
+            ]
         },
         {
-            "apiVersion": "2020-06-01",
+            "apiVersion": "2021-06-01",
             "name": "[variables('functionAppName')]",
             "type": "Microsoft.Web/sites",
             "kind": "functionapp,linux",
@@ -117,7 +108,7 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2020-08-01-preview').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-06-01').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
                         },
                         {
                             "name": "WEBSITE_RUN_FROM_PACKAGE",
@@ -125,11 +116,11 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2018-05-01-preview').InstrumentationKey]"
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2021-06-01').InstrumentationKey]"
                         },
                         {
                             "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2018-05-01-preview').ConnectionString]"
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2021-06-01').ConnectionString]"
                         },
                         {
                             "name": "SUBSCRIPTION_ID",
@@ -168,14 +159,11 @@
                 },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "reserved": true
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         },
         {
           "type": "Microsoft.Web/serverfarms",
-          "apiVersion": "2019-08-01",
+          "apiVersion": "2021-02-01",
           "name": "[variables('hostingPlanName')]",
           "location": "[parameters('location')]",
           "sku": {
@@ -188,13 +176,10 @@
           "kind": "linux",
           "properties": {
               "reserved": true
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
           }
         },
         {
-            "apiVersion": "2020-08-01-preview",
+            "apiVersion": "2021-06-01",
             "type": "Microsoft.Storage/storageAccounts",
             "name": "[variables('storageAccountName')]",
             "location": "[parameters('location')]",
@@ -207,28 +192,22 @@
             "resources": [
                 {
                   "type": "blobServices/containers",
-                  "apiVersion": "2020-08-01-preview",
+                  "apiVersion": "2021-06-01",
                   "name": "[concat('default/', parameters('containerName'))]",
                   "dependsOn": [
                     "[variables('storageAccountName')]"
                   ]
                 }
-            ],
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-            }
+            ]
         },
         {
-            "apiVersion": "2020-02-02-preview",
+            "apiVersion": "2021-06-01",
             "name": "[variables('functionAppName')]",
             "type": "microsoft.insights/components",
             "location": "[parameters('location')]",
             "properties": {
                 "Application_Type": "web",
                 "Request_Source": "IbizaWebAppExtensionCreate"
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
             }
         }
     ]

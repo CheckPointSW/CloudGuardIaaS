@@ -25,7 +25,7 @@
         "R81.10 - Pay As You Go (NGTP)",
         "R81.10 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R80.40 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Check Point CloudGuard version"
       }
@@ -54,6 +54,46 @@
       "metadata": {
         "description": "Administrator SSH public key"
       }
+    },
+    "floatingIP": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "no",
+      "metadata": {
+        "description": "Deploy the Load Balancers with floating IP"
+      }
+    },
+    "publicIPPrefix": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "no",
+      "metadata": {
+        "description": "Use public IP prefix"
+      }
+    },
+    "createNewIPPrefix": {
+      "type": "string",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "defaultValue": "no",
+      "metadata": {
+        "description": "Create new public IP prefix"
+      }
+    },
+    "ipPrefixExistingResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource id of the existing IP prefix"
+      },
+      "defaultValue": ""
     },
     "vmName": {
       "type": "string",
@@ -228,7 +268,7 @@
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
-        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+        "description": "Use the following URI when deploying a custom template: https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
       },
       "defaultValue": "[deployment().properties.templateLink.uri]"
     },
@@ -238,12 +278,6 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
-    },
-    "Check_PointTags": {
-      "type": "object",
-      "defaultValue": {
-        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-      }
     },
     "customMetrics": {
       "type": "string",
@@ -259,7 +293,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20210711",
+    "templateVersion": "20211101",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -338,6 +372,7 @@
       "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
     },
     "imageReference": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('imageReferenceMarketplace'), variables('imageReferenceCustomUri'))]",
+    "enableFloatingIP": "[equals(parameters('floatingIP'), 'yes')]",
     "nic1Name": "eth0",
     "nic2Name": "eth1",
     "elbName": "frontend-lb",
@@ -400,7 +435,7 @@
     ],
     "roleDefinitionId": "[if(equals(parameters('role'), 'Contributor'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c'), parameters('role'))]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "azureCloud": "[not(or(startsWith(variables('location'), 'china'), startsWith(variables('location'), 'germany')))]",
+    "azureCloud": "[not(startsWith(variables('location'), 'china'))]",
     "managedSystemAssigned": "[if(not(variables('azureCloud')), 'no', parameters('managedSystemAssigned'))]",
     "subnet2PrivateAddresses": [
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]",
@@ -422,28 +457,60 @@
     "installationType": "cluster",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
     "availabilityZonesLocations": [
+      "australiaeast",
+      "brazilsouth",
+      "canadacentral",
       "centralus",
+      "eastus",
       "eastus2",
       "francecentral",
+      "germanywestcentral",
+      "japaneast",
+      "koreacentral",
       "northeurope",
-      "southeastasia",
-      "westeurope",
-      "westus2",
-      "eastus",
-      "uksouth",
+      "norwayeast",
       "southafricanorth",
       "southcentralus",
-      "germanywestcentral",
-      "canadacentral",	
-      "japaneast"
+      "southeastasia",
+      "uksouth",
+      "westeurope",
+      "westus2",
+      "westus3"
     ],
     "availabilitySetProperty": {
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
     },
     "useAZ": "[and(contains(variables('availabilityZonesLocations'), variables('location')), equals(parameters('availabilityOptions'), 'Availability Zones'))]",
-    "customMetrics": "[parameters('customMetrics')]"
+    "customMetrics": "[parameters('customMetrics')]",
+    "emptyString": "none",
+    "ipPrefixNewName": "[concat(parameters('vmName'), '-ipprefix')]",
+    "ipPrefixExistingResourceId": "[if(equals(parameters('publicIPPrefix'), 'yes'), parameters('ipPrefixExistingResourceId'), variables('emptyString'))]",
+    "ipNewPrefixId": "[resourceId('Microsoft.Network/publicIPPrefixes',variables('ipPrefixNewName'))]",
+    "publicIPNewPrefixId": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('ipNewPrefixId'), json('null'))]",
+    "usepublicIPPrefix": "[if(equals(parameters('createNewIPPrefix'),'yes'), variables('publicIPNewPrefixId'), variables('ipPrefixExistingResourceId'))]",
+    "publicIPPrefixProperty": {
+      "Id": "[variables('usepublicIPPrefix')]"
+    },
+    "prefixDependsOn": "[if(equals(parameters('publicIPPrefix'), 'yes'), if(equals(parameters('createNewIPPrefix'), 'yes'), variables('publicIPNewPrefixId'), variables('ipNewPrefixId')), variables('ipNewPrefixId'))]",
+    "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
   },
   "resources": [
+    {
+      "condition": "[and(equals(parameters('createNewIPPrefix'), 'yes'), equals(parameters('publicIPPrefix'), 'yes'))]",
+      "apiVersion": "2020-06-01",
+      "type": "Microsoft.Network/publicIPPrefixes",
+      "name": "[variables('ipPrefixNewName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "prefixLength": "30",
+        "publicIPAddressVersion": "IPv4"
+      },
+      "sku": {
+        "name": "Standard",
+        "tier": "Regional"
+      }
+    },
     {
       "apiVersion": "2020-06-01",
       "name": "pid-6f13b00a-7546-4ab2-be9f-c66815cc6c8b-partnercenter",
@@ -465,10 +532,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
-      }
+      "kind": "Storage"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -525,7 +589,7 @@
             "value": "[parameters('virtualNetworkName')]"
           },
           "virtualNetworkExistingRGName": {
-            "value": "[parameters('virtualNetworkExistingRGName')]"
+            "value": "[variables('vnetRGName')]"
           }
         }
       }
@@ -541,14 +605,14 @@
       },
       "sku": {
         "name": "Aligned"
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[variables('prefixDependsOn')]"
+      ],
       "location": "[variables('location')]",
       "name": "[variables('elbPublicIPName')]",
       "sku": {
@@ -559,15 +623,16 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        },
+        "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       }
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[variables('prefixDependsOn')]"
+      ],
       "location": "[variables('location')]",
       "name": "[concat(parameters('vmName'), copyIndex(1))]",
       "sku": {
@@ -582,15 +647,16 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        },
+        "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       }
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[variables('prefixDependsOn')]"
+      ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
       "sku": {
@@ -601,10 +667,8 @@
         "publicIPAllocationMethod": "Static",
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-vip-', uniquestring(resourceGroup().id, deployment().name))]"
-        }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        },
+        "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
       }
     },
     {
@@ -633,7 +697,7 @@
                 "Id": "[variables('gwPublicIPIds')[0]]"
               },
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -652,14 +716,11 @@
                 "Id": "[variables('haPublicIPId')]"
               },
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
               }
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -687,7 +748,7 @@
                 "Id": "[variables('gwPublicIPIds')[1]]"
               },
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -697,9 +758,6 @@
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -727,7 +785,7 @@
               "privateIPAddress": "[variables('subnet2PrivateAddresses')[copyIndex()]]",
               "privateIPAllocationMethod": "Static",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet2Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet2Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -737,9 +795,6 @@
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -757,10 +812,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-		"hyperVGeneration": "V1"
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        "hyperVGeneration": "V1"
       }
     },
     {
@@ -787,7 +839,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2018-07-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2021-04-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {
@@ -828,9 +880,6 @@
             }
           }
         }
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -850,7 +899,10 @@
             "name": "LoadBalancerFrontend",
             "properties": {
               "publicIPAddress": {
-                "id": "[variables('elbPublicIPId')]"
+                "id": "[variables('elbPublicIPId')]",
+                "publicIPPrefix": {
+                  "id": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('usepublicIPPrefix'), json('null'))]"
+                }
               }
             }
           }
@@ -871,9 +923,6 @@
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -891,10 +940,7 @@
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionId')]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2018-10-01', 'Full').identity.principalId]"
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2021-07-01', 'Full').identity.principalId]"
       }
     },
     {
@@ -916,7 +962,7 @@
               "privateIPAllocationMethod": "Static",
               "privateIPAddress": "[variables('internalLBPrivateIPAddress')]",
               "subnet": {
-                "id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet2Name'))]"
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet2Name'))]"
               }
             }
           }
@@ -943,7 +989,7 @@
               "frontendPort": 0,
               "backendPort": 0,
               "loadDistribution": "Default",
-              "enableFloatingIP": false
+              "enableFloatingIP": "[variables('enableFloatingIP')]"
             }
           }
         ],
@@ -958,9 +1004,6 @@
             }
           }
         ]
-      },
-      "tags": {
-        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

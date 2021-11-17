@@ -237,7 +237,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   name = var.vmss_name
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
-  zones = local.availability_zones_num_condition
+  zones = var.availability_zones_num== "0"? null:local.availability_zones_num_condition
   overprovision = false
 
   dynamic "identity" {

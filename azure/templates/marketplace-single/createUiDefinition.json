@@ -5,6 +5,18 @@
   "parameters": {
     "basics": [
       {
+        "name": "basics settings text block",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the Check Point Reference Architecture for Azure.",
+          "link": {
+            "label": "Reference Architecture Guide",
+            "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk109360"
+          }
+        }
+      },
+      {
         "name": "gatewayNameUi",
         "type": "Microsoft.Common.TextBox",
         "label": "VM Name",
@@ -52,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R80.40",
+            "defaultValue": "R81",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -68,7 +80,7 @@
                   "label": "R81",
                   "value": "R81"
                 },
-		{
+                {
                   "label": "R81.10",
                   "value": "R81.10"
                 }

@@ -1,16 +1,10 @@
 #!/bin/bash
 
-exec 1>/var/log/gcp-startup-script.log 2>&1
-
-echo -e "\nStarting startup-script...\n"
-
-echo "template_name: ${templateName}" >> /etc/cloud-version
-echo "template_version: ${templateVersion}" >> /etc/cloud-version
-
 generatePassword="$(echo ${generatePassword} | tr 'TF' 'tf')"
 allowUploadDownload="${allowUploadDownload}"
 
-
+echo "template_name: ${templateName}" >> /etc/cloud-version
+echo "template_version: ${templateVersion}" >> /etc/cloud-version
 function get_router() {
     local interface="$1"
     local subnet_router_meta_path="computeMetadata/v1/instance/network-interfaces/$interface/gateway"
@@ -122,6 +116,26 @@ EOF
         ##########
     fi
 
+    if [ "$installSecurityManagement" -a "Management only" = "${installationType}" ] ; then
+        public_ip="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
+        declare -i attempts=0
+        declare -i max_attempts=80
+        mgmt_cli -r true discard
+        result=$?
+        while [ $result -ne 0 ] && [ $attempts -lt $max_attempts ]
+        do
+            attempts=$attempts+1
+            sleep 30
+            mgmt_cli -r true discard
+            result=$?
+        done
+        generic_objects="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json)"
+        uid="$(echo $generic_objects | jq .objects | jq .[0] | jq .uid)"
+        if [ ! -z "$public_ip" ] && [ ! -z "$(uid:1:-1)" ] ; then
+            mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
+        fi
+    fi
+
     if "$need_boot" ; then
         if [ "${enableMonitoring}" = "True" ] ; then
             chkconfig --add gcp-statd
@@ -135,10 +149,9 @@ EOF
         fi
     fi
 }
-echo "Configuring user admin shell to ${shell}"
-clish -c 'set user admin shell '"${shell}"'' -s
 
-echo "Starting First Time Wizard"
+clish -c 'set user admin shell ${shell}' -s
+
 case "${installationType}" in
 "Gateway only")
     installSecurityGateway=true
@@ -217,7 +230,6 @@ blink_conf="$blink_conf&download_info=$allowUploadDownload"
 blink_conf="$blink_conf&upload_info=$allowUploadDownload"
 
 conf="$conf&$blink_conf"
-
 if "$generatePassword" ; then
     blink_password="$(get-cloud-data.sh \
         computeMetadata/v1/instance/attributes/adminPasswordSourceMetadata)"

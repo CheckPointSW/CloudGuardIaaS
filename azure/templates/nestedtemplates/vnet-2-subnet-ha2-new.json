@@ -51,12 +51,6 @@
       "metadata": {
         "description": "Name of the network security group"
       }
-        },
-        "Check_PointTags": {
-            "type": "object",
-            "defaultValue": {
-                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
-            }
     }
   },
   "variables": {
@@ -107,9 +101,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -119,9 +110,6 @@
       "name": "[parameters('Subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -139,9 +127,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     },
     {
@@ -181,9 +166,6 @@
             }
           }
         ]
-            },
-            "tags": {
-                "provider": "[toUpper(parameters('Check_PointTags').provider)]"
       }
     }
   ],

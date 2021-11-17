@@ -29,7 +29,7 @@ enable_cloudwatch = true
 // --- Check Point CloudGuard Network Security Management Server Configuration ---
 management_deploy = true
 management_instance_type = "m5.xlarge"
-management_version = "R80.40-PAYG"
+management_version = "R81-BYOL"
 management_password_hash = "12345678"
 gateways_policy = "Standard"
 gateways_blades = true
