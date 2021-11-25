@@ -69,7 +69,8 @@ locals { // locals for 'os_version' allowed values
   os_version_allowed_values = [
     "R80.30",
     "R80.40",
-    "R81"
+    "R81",
+    "R81.10"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
@@ -147,7 +148,8 @@ locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r8030",
     "check-point-cg-r8040",
-    "check-point-cg-r81"
+    "check-point-cg-r81",
+    "check-point-cg-r8110"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
