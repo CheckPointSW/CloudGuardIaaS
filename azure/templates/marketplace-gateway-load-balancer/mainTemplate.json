@@ -345,7 +345,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20211101",
+    "templateVersion": "20211129",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
@@ -467,20 +467,28 @@
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
+      "australiaeast",
+      "brazilsouth",
+      "canadacentral",
       "centralus",
+      "eastasia",
+      "eastus",
       "eastus2",
       "francecentral",
+      "germanywestcentral",
+      "japaneast",
+      "koreacentral",
       "northeurope",
-      "southeastasia",
-      "westeurope",
-      "westus2",
-      "eastus",
-      "uksouth",
+      "norwayeast",
       "southafricanorth",
       "southcentralus",
-      "germanywestcentral",
-      "canadacentral",
-      "japaneast"
+      "southeastasia",
+      "swedencentral",
+      "uksouth",
+      "usgovvirginia",
+      "westeurope",
+      "westus2",
+      "westus3"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
     "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), 'eth0-private')]",
@@ -666,6 +674,11 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2021-06-01",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
+      },
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -692,7 +705,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion": "2020-06-01",
+      "apiVersion": "2021-07-01",
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",

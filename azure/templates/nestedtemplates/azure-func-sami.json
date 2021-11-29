@@ -70,12 +70,12 @@
     },
     "resources": [
         {
-            "apiVersion": "2021-06-01",
+            "apiVersion": "2021-04-01-preview",
             "type": "Microsoft.Authorization/roleAssignments",
             "name": "[parameters('rbacGuid')]",
             "properties": {
                 "roleDefinitionId": "[variables('Reader')]",
-                "principalId": "[reference(variables('functionAppId'), '2021-02-01', 'Full').identity.principalId]",
+                "principalId": "[reference(variables('functionAppId'), '2021-03-01', 'Full').identity.principalId]",
                 "scope": "[resourceGroup().id]"
             },
              "dependsOn": [
@@ -83,7 +83,7 @@
             ]
         },
         {
-            "apiVersion": "2021-06-01",
+            "apiVersion": "2021-02-01",
             "name": "[variables('functionAppName')]",
             "type": "Microsoft.Web/sites",
             "kind": "functionapp,linux",
@@ -116,11 +116,11 @@
                         },
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2021-06-01').InstrumentationKey]"
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
                         },
                         {
                             "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2021-06-01').ConnectionString]"
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
                         },
                         {
                             "name": "SUBSCRIPTION_ID",
@@ -201,7 +201,7 @@
             ]
         },
         {
-            "apiVersion": "2021-06-01",
+            "apiVersion": "2020-02-02",
             "name": "[variables('functionAppName')]",
             "type": "microsoft.insights/components",
             "location": "[parameters('location')]",

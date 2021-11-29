@@ -1116,7 +1116,7 @@
           {
             "name": "managedSystemAssigned",
             "type": "Microsoft.Common.OptionsGroup",
-            "visible": "[not(equals(substring(location(), 0, 5), 'china'))]",
+            "visible": true,
             "label": "Create a System Assigned Identity",
             "toolTip": "Automatically create a Service Principal for this deployment.",
             "defaultValue": "Yes",
@@ -1139,7 +1139,7 @@
             "label": "Availability options",
             "defaultValue": "Availability Set",
             "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia uksouth westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
