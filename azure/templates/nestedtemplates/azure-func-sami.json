@@ -76,7 +76,8 @@
             "properties": {
                 "roleDefinitionId": "[variables('Reader')]",
                 "principalId": "[reference(variables('functionAppId'), '2021-03-01', 'Full').identity.principalId]",
-                "scope": "[resourceGroup().id]"
+                "scope": "[resourceGroup().id]",
+                "PrincipalType": "ServicePrincipal"
             },
              "dependsOn": [
                 "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
