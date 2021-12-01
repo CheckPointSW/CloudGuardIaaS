@@ -5,6 +5,27 @@
   "parameters": {
     "basics": [
       {
+        "name": "publicPreviewInfoBox",
+        "type": "Microsoft.Common.InfoBox",
+        "visible": true,
+        "options": {
+        "icon": "Warning",
+        "text": "This solution is currently supported as a public preview, the purpose of this is to obtain feedback prior to the full commercial release of such product, solution or service. The following terms will apply in addition to the general terms and conditions. Any solution released under Public Preview:\n\n1. Is excluded from the Service Level Agreement.\n\n2. May not be covered by customer support.\n\n3. May be changed or discontinued by Check Point Software Technologies at any time without notice."
+      }
+      },
+      {
+        "name": "basics settings text block",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the CloudGuard Network for Azure VMSS Gateway Load Balancer Public Preview R81.10 and Higher Administration Guide.",
+          "link": {
+            "label": "Administration Guide",
+            "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_Azure_VMSS_GWLB/Default.htm"
+          }
+        }
+      },
+      {
         "name": "gatewayScaleSetNameUi",
         "type": "Microsoft.Common.TextBox",
         "label": "Gateway scale set name",
@@ -280,7 +301,7 @@
             "label": "Number of Availability Zones to use",
             "defaultValue": "None",
             "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia uksouth westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {

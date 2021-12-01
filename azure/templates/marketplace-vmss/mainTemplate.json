@@ -467,7 +467,7 @@
     "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
-    "templateVersion": "20211101",
+    "templateVersion": "20211129",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -607,6 +607,7 @@
       "brazilsouth",
       "canadacentral",
       "centralus",
+      "eastasia",
       "eastus",
       "eastus2",
       "francecentral",
@@ -618,7 +619,9 @@
       "southafricanorth",
       "southcentralus",
       "southeastasia",
+      "swedencentral",
       "uksouth",
+      "usgovvirginia",
       "westeurope",
       "westus2",
       "westus3"
@@ -888,6 +891,11 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2021-04-01",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
+      },
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -914,7 +922,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
-      "apiVersion": "2020-06-01",
+      "apiVersion": "2021-07-01",
       "name": "[parameters('vmName')]",
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",

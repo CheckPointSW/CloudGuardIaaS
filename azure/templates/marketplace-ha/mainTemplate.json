@@ -293,7 +293,7 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20211101",
+    "templateVersion": "20211129",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -435,8 +435,6 @@
     ],
     "roleDefinitionId": "[if(equals(parameters('role'), 'Contributor'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c'), parameters('role'))]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "azureCloud": "[not(startsWith(variables('location'), 'china'))]",
-    "managedSystemAssigned": "[if(not(variables('azureCloud')), 'no', parameters('managedSystemAssigned'))]",
     "subnet2PrivateAddresses": [
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]",
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),2)))]"
@@ -461,6 +459,7 @@
       "brazilsouth",
       "canadacentral",
       "centralus",
+      "eastasia",
       "eastus",
       "eastus2",
       "francecentral",
@@ -472,7 +471,9 @@
       "southafricanorth",
       "southcentralus",
       "southeastasia",
+      "swedencentral",
       "uksouth",
+      "usgovvirginia",
       "westeurope",
       "westus2",
       "westus3"
@@ -528,6 +529,11 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2021-04-01",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "allowBlobPublicAccess": false,
+        "minimumTlsVersion": "TLS1_2"
+      },
       "location": "[variables('location')]",
       "sku": {
         "name": "[variables('storageAccountType')]"
@@ -817,7 +823,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2020-06-01",
+      "apiVersion": "2021-07-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
@@ -833,7 +839,7 @@
         "count": "[variables('count')]"
       },
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
-      "identity": "[if(equals(variables('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
+      "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
@@ -926,7 +932,7 @@
       }
     },
     {
-      "condition": "[equals(variables('managedSystemAssigned'), 'yes')]",
+      "condition": "[equals(parameters('managedSystemAssigned'), 'yes')]",
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-04-01-preview",
       "name": "[guid(resourceGroup().id, concat(parameters('vmName'), copyIndex(1)))]",
