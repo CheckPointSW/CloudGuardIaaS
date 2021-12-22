@@ -214,7 +214,7 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
 //********************** Virtual Machines **************************//
 locals {
   SSH_authentication_type_condition = var.authentication_type == "SSH Public Key" ? true : false
-  availability_zones_num_condition = var.availability_zones_num == "0" ? ["0"] : var.availability_zones_num == "1" ? ["1"] : var.availability_zones_num == "2" ? ["1", "2"] : ["1", "2", "3"]
+  availability_zones_num_condition = var.availability_zones_num == "0" ? null : var.availability_zones_num == "1" ? ["1"] : var.availability_zones_num == "2" ? ["1", "2"] : ["1", "2", "3"]
   custom_image_condition = var.source_image_vhd_uri == "noCustomUri" ? false : true
   management_interface_name = split("-", var.management_interface)[0]
   management_ip_address_type = split("-", var.management_interface)[1]
@@ -237,7 +237,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
   name = var.vmss_name
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
-  zones = var.availability_zones_num== "0"? null:local.availability_zones_num_condition
+  zones = local.availability_zones_num_condition
   overprovision = false
 
   dynamic "identity" {
