@@ -5,7 +5,9 @@
 
 # Instructions:
 # In order to use custom management script refer to: Cloud Management Extension R80.10 and Higher Administration Guide
-# Important: This is a placeholder script and you should implement __add and __delete functions.
+# The script runs on the Security Management server just after the policy is installed when a gateway is provisioned,
+# and at the beginning of the deprovisioning process.
+# Important: This is a placeholder script, and you should implement __add and __delete functions.
 
 import collections
 import os
@@ -82,11 +84,23 @@ def __parse_arguments(args):
 
 
 def __add(gateway_name, script_args: list):
+    """
+    Being called when:
+     1. A Security Gateway is added
+     2. After a configuration update (for example, a load balancer configuration change or a template/generation change)
+    In the case of a configuration update the __delete function will be called and afterwards the __add function
+    """
     logger.info(f'Starting add for gateway: {gateway_name}')
     # TODO - put your custom add code here
 
 
 def __delete(gateway_name, script_args: list):
+    """
+    Being called when:
+     1. A Security Gateway is deleted
+     2. After a configuration update (for example, a load balancer configuration change or a template/generation change)
+    In the case of a configuration update the __delete function will be called and afterwards the __add function
+    """
     logger.info(f'Starting delete for gateway: {gateway_name}')
     # TODO - put your custom delete code here
 
