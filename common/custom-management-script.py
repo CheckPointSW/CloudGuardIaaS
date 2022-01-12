@@ -86,9 +86,11 @@ def __parse_arguments(args):
 def __add(gateway_name, script_args: list):
     """
     Being called when:
-     1. A Security Gateway is added
-     2. After a configuration update (for example, a load balancer configuration change or a template/generation change)
-    In the case of a configuration update the __delete function will be called and afterwards the __add function
+     1. Security Gateway is added
+     2. After the following updates:
+      - Generation value modification in CME template
+      - Load Balancer configuration change when the auto-nat feature is enabled (enabled by default in AWS)
+      In the case of the above updates, the __delete function will be called and afterwards the __add function
     """
     logger.info(f'Starting add for gateway: {gateway_name}')
     # TODO - put your custom add code here
@@ -97,9 +99,11 @@ def __add(gateway_name, script_args: list):
 def __delete(gateway_name, script_args: list):
     """
     Being called when:
-     1. A Security Gateway is deleted
-     2. After a configuration update (for example, a load balancer configuration change or a template/generation change)
-    In the case of a configuration update the __delete function will be called and afterwards the __add function
+     1. Security Gateway is deleted
+     2. After the following updates:
+      - Generation value modification in CME template
+      - Load Balancer configuration change when the auto-nat feature is enabled (enabled by default in AWS)
+      In the case of the above updates, the __delete function will be called and afterwards the __add function
     """
     logger.info(f'Starting delete for gateway: {gateway_name}')
     # TODO - put your custom delete code here
