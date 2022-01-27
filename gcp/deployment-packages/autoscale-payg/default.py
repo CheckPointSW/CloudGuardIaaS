@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Convenience module to hold default constants for C2D components.
+"""Convinence module to hold default constants for C2D components.
 
 There should not be any logic in this module. Its purpose is to simplify
 analysis of commonly used GCP and properties names and identify the names
@@ -23,7 +23,7 @@ C2D_IMAGES = 'click-to-deploy-images'
 # URL constants
 COMPUTE_URL_BASE = 'https://www.googleapis.com/compute/v1/'
 
-# Deployment Manager constructs
+# Deploymen Manager constructs
 REFERENCE_PREFIX = '$(ref.'
 
 # Commonly used in properties namespace

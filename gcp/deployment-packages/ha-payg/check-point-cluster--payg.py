@@ -23,7 +23,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20210811'
+TEMPLATE_VERSION = '20220127'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
@@ -150,8 +150,7 @@ EOF
         ##########
     fi
 
-    if $installSecurityManagement ; then
-        set +e
+    if [ "$installSecurityManagement" -a "Management only" = "{installationType}" ] ; then
         public_ip="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
         declare -i attempts=0
         declare -i max_attempts=80
@@ -169,7 +168,6 @@ EOF
         if [ ! -z "$public_ip" ] && [ ! -z "${{uid:1:-1}}" ] ; then
             mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
         fi
-        set -e
     fi
 
     if "$need_boot" ; then
@@ -532,7 +530,7 @@ def create_firewall_rules(prop, net_prop_name, net_name, net_cidr):
 
 def make_firewall_rule(protocol, source_ranges, deployment, net_prop_name,
                        net_name, net_cidr):
-    fw_rule_name = '%s-%s-%s' % (deployment, net_prop_name, protocol)
+    fw_rule_name = '%s-%s-%s' % (deployment[:40], net_prop_name, protocol)
     ranges_list = source_ranges.split(',')
     ranges = []
     for source_range in ranges_list:
