@@ -166,7 +166,7 @@ properties:
         diskTypeProperty: diskType
   autoscalingVersion:
     type: string
-    default: R81 Autoscaling
+    default: R81.10 Autoscaling
     enum:
       - R80.30 Autoscaling
       - R80.40 Autoscaling

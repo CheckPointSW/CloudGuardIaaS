@@ -28,7 +28,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20210912'
+TEMPLATE_VERSION = '20220127'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -601,11 +601,13 @@ def generate_config(context):
         passwd = ''
     resources.append(gw)
     netlist = list(networks)
+
     if GATEWAY in tags:
         for i in range(len(netlist)):
             network = netlist[i]
             fw_rule_name_prefix = set_name_and_truncate(
-                '{}-{}'.format(deployment[:23], network[:18]),
+                gen_fw_rule_name_deployment_network_prefix(
+                    deployment, network),
                 '-allow-all-to-chkp-{}'.format(i + 1))
             firewall_rules = create_firewall_rules(
                 prop, network, fw_rule_name_prefix)
@@ -644,7 +646,8 @@ def generate_config(context):
                     resources.append({
                         'type': 'compute.v1.firewall',
                         'name': set_name_and_truncate(
-                            '{}-{}'.format(deployment[:23], network[:18]),
+                            gen_fw_rule_name_deployment_network_prefix(
+                                deployment, network),
                             '-gateways-to-management-{}'.format(i + 1)),
                         'properties': {
                             'network': 'global/networks/' + network,
@@ -662,7 +665,8 @@ def generate_config(context):
                 resources.append({
                     'type': 'compute.v1.firewall',
                     'name': set_name_and_truncate(
-                        '{}-{}'.format(deployment[:23], network[:18]),
+                        gen_fw_rule_name_deployment_network_prefix(deployment,
+                                                                   network),
                         '-allow-gui-clients-{}'.format(i + 1)),
                     'properties': {
                         'network': 'global/networks/' + network,
@@ -677,7 +681,8 @@ def generate_config(context):
                     }
                 })
             fw_rule_name_prefix = set_name_and_truncate(
-                '{}-{}'.format(deployment[:23], network[:18]),
+                gen_fw_rule_name_deployment_network_prefix(
+                    deployment, network),
                 '-allow-all-to-chkp-{}'.format(i + 1))
             firewall_rules = create_firewall_rules(
                 prop, network, fw_rule_name_prefix, True, uid)
@@ -723,3 +728,8 @@ def generate_config(context):
         }
     ]
     return common.MakeResource(resources, outputs)
+
+
+def gen_fw_rule_name_deployment_network_prefix(deployment_name, network_name):
+    return '{}-{}'. \
+        format(deployment_name[:20], network_name[:16])
