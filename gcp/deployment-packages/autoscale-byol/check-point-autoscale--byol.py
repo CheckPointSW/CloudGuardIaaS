@@ -18,7 +18,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20220127'
+TEMPLATE_VERSION = '20220130'
 
 startup_script = '''
 #!/bin/bash
