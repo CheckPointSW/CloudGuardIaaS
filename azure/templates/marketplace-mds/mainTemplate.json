@@ -17,7 +17,7 @@
         "R81 - Bring Your Own License",
         "R81.10 - Bring Your Own License"
       ],
-      "defaultValue": "R81 - Bring Your Own License",
+      "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -58,6 +58,19 @@
       "defaultValue": "Standard_DS5_v2",
       "metadata": {
         "description": "Size of the VM"
+      }
+    },
+    "adminShell": {
+      "type": "string",
+      "defaultValue": "/etc/cli.sh",
+      "allowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ],
+      "metadata": {
+        "Description": "The default shell for the admin user"
       }
     },
     "virtualNetworkName": {
@@ -207,7 +220,7 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20211129",
+    "templateVersion": "20220130",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
@@ -232,7 +245,7 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {

@@ -64,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81",
+            "defaultValue": "R81.10",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -351,6 +351,33 @@
             }
           },
           {
+            "name": "adminShell",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Default shell for the admin user",
+            "defaultValue": "/etc/cli.sh",
+            "toolTip": "The default shell for the admin user",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/etc/cli.sh",
+                  "value": "/etc/cli.sh"
+                },
+                {
+                  "label": "/bin/bash",
+                  "value": "/bin/bash"
+                },
+                {
+                  "label": "/bin/csh",
+                  "value": "/bin/csh"
+                },
+                {
+                  "label": "/bin/tcsh",
+                  "value": "/bin/tcsh"
+                }
+              ]
+            }
+          },
+          {
             "name": "managementGUIClientNetwork",
             "type": "Microsoft.Common.TextBox",
             "label": "Allowed GUI clients",
@@ -558,7 +585,8 @@
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
       "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "enableApi": "[steps('chkp').enableApi]"
+      "enableApi": "[steps('chkp').enableApi]",
+      "adminShell": "[steps('chkp').adminShell]"
     }
   }
 }

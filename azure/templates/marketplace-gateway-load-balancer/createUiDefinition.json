@@ -640,6 +640,33 @@
             "count": "[steps('autoprovision').vmCount]"
           },
           {
+            "name": "adminShell",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Default shell for the admin user",
+            "defaultValue": "/etc/cli.sh",
+            "toolTip": "The default shell for the admin user",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/etc/cli.sh",
+                  "value": "/etc/cli.sh"
+                },
+                {
+                  "label": "/bin/bash",
+                  "value": "/bin/bash"
+                },
+                {
+                  "label": "/bin/csh",
+                  "value": "/bin/csh"
+                },
+                {
+                  "label": "/bin/tcsh",
+                  "value": "/bin/tcsh"
+                }
+              ]
+            }
+          },
+          {
             "name": "sicKeyUi",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
@@ -829,7 +856,8 @@
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
       "subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
       "subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
-      "subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]"
+      "subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
+      "adminShell": "[steps('chkp').adminShell]"
     }
   }
 }
