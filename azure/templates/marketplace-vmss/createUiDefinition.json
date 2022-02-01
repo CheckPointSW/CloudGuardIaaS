@@ -650,7 +650,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81",
+            "defaultValue": "R81.10",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -1691,6 +1691,33 @@
             "count": "[steps('autoprovision').vmCount]"
           },
           {
+            "name": "adminShell",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Default shell for the admin user",
+            "defaultValue": "/etc/cli.sh",
+            "toolTip": "The default shell for the admin user",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/etc/cli.sh",
+                  "value": "/etc/cli.sh"
+                },
+                {
+                  "label": "/bin/bash",
+                  "value": "/bin/bash"
+                },
+                {
+                  "label": "/bin/csh",
+                  "value": "/bin/csh"
+                },
+                {
+                  "label": "/bin/tcsh",
+                  "value": "/bin/tcsh"
+                }
+              ]
+            }
+          },
+          {
             "name": "sicKeyUi",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
@@ -1906,7 +1933,8 @@
       "IPv4Length": "[steps('autoprovision').IPv4Length]",
       "publicIPPrefix": "[steps('autoprovision').publicIPPrefix]",
       "createNewIPPrefix": "[steps('autoprovision').createNewIPPrefix]",
-      "ipPrefixExistingResourceId": "[steps('autoprovision').ipPrefixExistingResourceId]"
+      "ipPrefixExistingResourceId": "[steps('autoprovision').ipPrefixExistingResourceId]",
+      "adminShell": "[steps('chkp').adminShell]"
     }
   }
 }
