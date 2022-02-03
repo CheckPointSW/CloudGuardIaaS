@@ -37,6 +37,30 @@ In case you want to deploy a custom template that is not listed follow this step
 5. ## Review and create stack.
     In this window, make sure all configured correctly. 
     If everything is correct, press "Create stack" and deploy the stack.
+
+---
+
+# Check Point's Templates
+
+**Table of Contents**
+
+* [Gateway Load Balancer (GWLB) Auto Scaling Group](#gateway-load-balancer-gwlb-auto-scaling-group)
+* [Security Gateway](#security-gateway)
+* [Security Cluster](#security-cluster)
+* [Security Gateway Auto Scaling](#security-gateway-auto-scaling)
+* [Transit Gateway Auto Scaling Group](#transit-gateway-auto-scaling-group)
+* [Transit Gateway Cross Availability Zone Cluster](#transit-gateway-cross-availability-zone-cluster)
+* [Cross Availability Zone Cluster](#cross-availability-zone-cluster)
+* [Security Management Server](#security-management-server)
+* [Multi-Domain Management Server](#multi-domain-management-server)
+* [Security Management Server & Security Gateway (Standalone Deployment)](#security-management-server--security-gateway-standalone-deployment)
+* [General](#general)
+
+
+
+<br/>
+<br/>
+
 ## Gateway Load Balancer (GWLB) Auto Scaling Group
 <table width="80%">
     <thead>
