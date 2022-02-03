@@ -1,0 +1,515 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploy a Check Point Cluster in a new VPC (20211212)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "VPC Network Configuration"
+          },
+          "Parameters": [
+            "AvailabilityZone",
+            "VpcCidr",
+            "ExternalSubnetCidr",
+            "InternalSubnetCidr"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Cluster Network Configuration"
+          },
+          "Parameters": [
+            "ClusterExternalAddr",
+            "MemberAExternalAddr",
+            "MemberBExternalAddr",
+            "ClusterInternalAddr",
+            "MemberAInternalAddr",
+            "MemberBInternalAddr"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EC2 Instance Configuration"
+          },
+          "Parameters": [
+            "InstanceType",
+            "KeyName",
+            "PredefinedRole",
+            "VolumeSize",
+            "VolumeEncryption",
+            "EnableInstanceConnect"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point Settings"
+          },
+          "Parameters": [
+            "Version",
+            "Shell",
+            "PasswordHash",
+            "SICKey",
+            "AllowUploadDownload",
+            "NTPPrimary",
+            "NTPSecondary"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "AvailabilityZone": {
+          "default": "Availability zone"
+        },
+        "VpcCidr": {
+          "default": "VPC CIDR"
+        },
+        "ExternalSubnetCidr": {
+          "default": "External subnet CIDR"
+        },
+        "InternalSubnetCidr": {
+          "default": "Internal subnet CIDR"
+        },
+        "ClusterExternalAddr": {
+          "default": "Cluster external address"
+        },
+        "MemberAExternalAddr": {
+          "default": "Member A external address"
+        },
+        "MemberBExternalAddr": {
+          "default": "Member B external address"
+        },
+        "ClusterInternalAddr": {
+          "default": "Cluster internal address"
+        },
+        "MemberAInternalAddr": {
+          "default": "Member A internal address"
+        },
+        "MemberBInternalAddr": {
+          "default": "Member B internal address"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "Version": {
+          "default": "Version & license"
+        },
+        "PredefinedRole": {
+          "default": "Existing IAM role name"
+        },
+        "EnableInstanceConnect": {
+          "default": "Enable AWS Instance Connect"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "VolumeSize": {
+          "default": "Root volume size (GB)"
+        },
+        "VolumeEncryption": {
+          "default": "Volume encryption KMS key identifier"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload & download"
+        },
+        "NTPPrimary": {
+          "default": "Primary NTP server"
+        },
+        "NTPSecondary": {
+          "default": "Secondary NTP server"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "InstanceType": {
+      "Description": "c4 and t2 instance types are supported only up to version R80.10 and c5 are supported only with R80.20 and above",
+      "Type": "String",
+      "Default": "c5.xlarge",
+      "AllowedValues": [
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge",
+        "c4.8xlarge",
+        "c5.large",
+        "c5.xlarge",
+        "c5.2xlarge",
+        "c5.4xlarge",
+        "c5.9xlarge",
+        "c5.18xlarge",
+        "c5n.large",
+        "c5n.xlarge",
+        "c5n.2xlarge",
+        "c5n.4xlarge",
+        "c5n.9xlarge",
+        "c5n.18xlarge",
+        "t2.xlarge",
+        "t2.2xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "VpcCidr": {
+      "Description": "The CIDR block for your VPC",
+      "Type": "String",
+      "Default": "10.0.0.0/16"
+    },
+    "AvailabilityZone": {
+      "Description": "The availability zone in which to deploy the cluster",
+      "Type": "AWS::EC2::AvailabilityZone::Name",
+      "MinLength": "1"
+    },
+    "ExternalSubnetCidr": {
+      "Description": "The external subnet of the cluster",
+      "Type": "String",
+      "Default": "10.0.0.0/24"
+    },
+    "ClusterExternalAddr": {
+      "Description": "The private address of the cluster on the external subnet",
+      "Type": "String",
+      "Default": "10.0.0.10"
+    },
+    "MemberAExternalAddr": {
+      "Description": "The private address of member A on the external subnet",
+      "Type": "String",
+      "Default": "10.0.0.20"
+    },
+    "MemberBExternalAddr": {
+      "Description": "The private address of member B on the external subnet",
+      "Type": "String",
+      "Default": "10.0.0.30"
+    },
+    "ClusterInternalAddr": {
+      "Description": "The private address of the cluster on the internal subnet",
+      "Type": "String",
+      "Default": "10.0.1.10"
+    },
+    "MemberAInternalAddr": {
+      "Description": "The private address of member A on the internal subnet",
+      "Type": "String",
+      "Default": "10.0.1.20"
+    },
+    "MemberBInternalAddr": {
+      "Description": "The private address of member B on the internal subnet",
+      "Type": "String",
+      "Default": "10.0.1.30"
+    },
+    "InternalSubnetCidr": {
+      "Description": "The internal subnet of the cluster",
+      "Type": "String",
+      "Default": "10.0.1.0/24"
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": "1"
+    },
+    "Version": {
+      "Type": "String",
+      "Default": "R80.30-PAYG-NGTP",
+      "AllowedValues": [
+        "R77.30-BYOL",
+        "R77.30-PAYG-NGTP",
+        "R80.10-BYOL",
+        "R80.10-PAYG-NGTP",
+        "R80.10-PAYG-NGTX",
+        "R80.20-BYOL",
+        "R80.20-PAYG-NGTP",
+        "R80.20-PAYG-NGTX",
+        "R80.30-BYOL",
+        "R80.30-PAYG-NGTP",
+        "R80.30-PAYG-NGTX",
+        "R80.40-BYOL",
+        "R80.40-PAYG-NGTP",
+        "R80.40-PAYG-NGTX"
+      ]
+    },
+    "PasswordHash": {
+      "Description": "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) (optional)",
+      "NoEcho": "true",
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+    },
+    "PredefinedRole": {
+      "Description": "A predefined IAM role to attach to the cluster profile (optional)",
+      "Type": "String",
+      "Default": ""
+    },
+    "EnableInstanceConnect": {
+      "Description": "Ec2 Instance Connect is not supported with versions prior to R80.40",
+      "Default": "false",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "SICKey": {
+      "Description": "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "MinLength": "8",
+      "Type": "String",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "At least 8 alpha numeric characters"
+    },
+    "VolumeSize": {
+      "Type": "Number",
+      "MinValue": "100",
+      "Default": "100"
+    },
+    "VolumeEncryption": {
+      "Description": "KMS or CMK key Identifier: Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs'). Will be ignored for versions lower than R80.30",
+      "Type": "String",
+      "Default": "alias/aws/ebs"
+    },
+    "Shell": {
+      "Description": "Change the admin shell to enable advanced command line configuration",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "AllowUploadDownload": {
+      "Description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "NTPPrimary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "169.254.169.123",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "NTPSecondary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "0.pool.ntp.org",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    }
+  },
+  "Resources": {
+    "InfraStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/utils/infrastructure.json",
+        "Parameters": {
+          "VpcCidr": {
+            "Ref": "VpcCidr"
+          },
+          "AvailabilityZone": {
+            "Ref": "AvailabilityZone"
+          },
+          "ExternalSubnetCidr": {
+            "Ref": "ExternalSubnetCidr"
+          },
+          "InternalSubnetCidr": {
+            "Ref": "InternalSubnetCidr"
+          },
+          "ResourcesTagName": {
+            "Ref": "AWS::StackName"
+          }
+        }
+      }
+    },
+    "ClusterStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/cluster/cluster-into-vpc.json",
+        "Parameters": {
+          "InstanceType": {
+            "Ref": "InstanceType"
+          },
+          "VPC": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.VPC"
+            ]
+          },
+          "ExternalSubnet": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.ExternalSubnet"
+            ]
+          },
+          "InternalSubnet": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.InternalSubnet"
+            ]
+          },
+          "AvailabilityZone": {
+            "Ref": "AvailabilityZone"
+          },
+          "ClusterExternalAddr": {
+            "Ref": "ClusterExternalAddr"
+          },
+          "MemberAExternalAddr": {
+            "Ref": "MemberAExternalAddr"
+          },
+          "MemberBExternalAddr": {
+            "Ref": "MemberBExternalAddr"
+          },
+          "ClusterInternalAddr": {
+            "Ref": "ClusterInternalAddr"
+          },
+          "MemberAInternalAddr": {
+            "Ref": "MemberAInternalAddr"
+          },
+          "MemberBInternalAddr": {
+            "Ref": "MemberBInternalAddr"
+          },
+          "KeyName": {
+            "Ref": "KeyName"
+          },
+          "Version": {
+            "Ref": "Version"
+          },
+          "PasswordHash": {
+            "Ref": "PasswordHash"
+          },
+          "PredefinedRole": {
+            "Ref": "PredefinedRole"
+          },
+          "EnableInstanceConnect": {
+            "Ref": "EnableInstanceConnect"
+          },
+          "SICKey": {
+            "Ref": "SICKey"
+          },
+          "VolumeSize": {
+            "Ref": "VolumeSize"
+          },
+          "VolumeEncryption": {
+            "Ref": "VolumeEncryption"
+          },
+          "Shell": {
+            "Ref": "Shell"
+          },
+          "AllowUploadDownload": {
+            "Ref": "AllowUploadDownload"
+          },
+          "NTPPrimary": {
+            "Ref": "NTPPrimary"
+          },
+          "NTPSecondary": {
+            "Ref": "NTPSecondary"
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ClusterPublicAddress": {
+      "Description": "The public address of the cluster",
+      "Value": {
+        "Fn::GetAtt": [
+          "ClusterStack",
+          "Outputs.ClusterPublicAddress"
+        ]
+      }
+    },
+    "MemberAPublicAddress": {
+      "Description": "The public address of member A",
+      "Value": {
+        "Fn::GetAtt": [
+          "ClusterStack",
+          "Outputs.MemberAPublicAddress"
+        ]
+      }
+    },
+    "MemberASSH": {
+      "Description": "SSH command to member A",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh admin@",
+            {
+              "Fn::GetAtt": [
+                "ClusterStack",
+                "Outputs.MemberAPublicAddress"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "MemberAURL": {
+      "Description": "URL to the member A portal",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "ClusterStack",
+                "Outputs.MemberAPublicAddress"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "MemberBPublicAddress": {
+      "Description": "The public address of member B",
+      "Value": {
+        "Fn::GetAtt": [
+          "ClusterStack",
+          "Outputs.MemberBPublicAddress"
+        ]
+      }
+    },
+    "MemberBSSH": {
+      "Description": "SSH command to member B",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh admin@",
+            {
+              "Fn::GetAtt": [
+                "ClusterStack",
+                "Outputs.MemberBPublicAddress"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "MemberBURL": {
+      "Description": "URL to the member B portal",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "ClusterStack",
+                "Outputs.MemberBPublicAddress"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

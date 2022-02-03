@@ -1,0 +1,230 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy Check Point Gateways for a transit VPC hub (20211212)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Network Configuration
+      Parameters:
+      - VPC
+      - PublicSubnetA
+      - PublicSubnetB
+      - PrivateSubnetA
+      - PrivateSubnetB
+    - Label:
+        default: EC2 Instances Configuration
+      Parameters:
+      - GatewayName
+      - InstanceType
+      - KeyPairName
+    - Label:
+        default: Check Point Settings
+      Parameters:
+      - ASN
+      - License
+      - SICKey
+      - Shell
+      - PasswordHash
+      - AllowUploadDownload
+    - Label:
+        default: Automatic Provisioning with Security Management Server Settings (optional)
+      Parameters:
+      - ControlGatewayOverPrivateOrPublicAddress
+      - ManagementServer
+      - ConfigurationTemplate
+    ParameterLabels:
+      PublicSubnetA:
+        default: Public subnet 1 
+      PublicSubnetB:
+        default: Public subnet 2
+      PrivateSubnetA:
+        default: Private subnet 1
+      PrivateSubnetB:
+        default: Private subnet 2
+      ASN:
+        default: BGP ASN
+      GatewayName:
+        default: Gateway Name
+      InstanceType:
+        default: Instance type
+      KeyPairName:
+        default: Key name
+      License:
+        default: Version & license
+      SICKey:
+        default: SIC key
+      Shell:
+        default: Admin shell
+      PasswordHash:
+        default: Password hash
+      AllowUploadDownload:
+        default: Allow upload & download
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: you must select a VPC.
+  PublicSubnetA:
+    Description: Select a public subnet for the first Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the first Security Gateway
+  PublicSubnetB:
+    Description: Select a public subnet for the second Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the second Security Gateway
+  PrivateSubnetA:
+    Description: Select a private subnet for the first Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the first Security Gateway
+  PrivateSubnetB:
+    Description: Select a private subnet for the second Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the second Security Gateway
+  GatewayName:
+    Description: The value for the name tag of the gateway instance
+    Type: String
+    Default: transit-gateway
+  InstanceType:
+    Description: c4 and t2 instance types are supported only with version R80.10 and c5 are supported only with R80.20 and R80.30
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - c5.9xlarge
+    - c5.18xlarge
+    - t2.xlarge
+    - t2.2xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyPairName:
+    Description: The EC2 Key Pair to allow SSH access to the Security Gateways
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: '1'
+  ASN:
+    Description: The organization Autonomous System Number (ASN) that identifies the routing domain for the Security Gateways
+    Type: String
+    AllowedPattern: '[0-9]*'
+    Default: 65000
+  License:
+    Description: The license to install on the Security Gateways
+    Type: String
+    Default: R80.30-PAYG-NGTP
+    AllowedValues:
+    - R80.10-BYOL
+    - R80.10-PAYG-NGTP
+    - R80.10-PAYG-NGTX
+    - R80.20-BYOL
+    - R80.20-PAYG-NGTP
+    - R80.20-PAYG-NGTX
+    - R80.30-BYOL
+    - R80.30-PAYG-NGTP
+    - R80.30-PAYG-NGTX
+  SICKey:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters
+    NoEcho: 'true'
+    MinLength: '8'
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: At least 8 alpha numeric characters
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+    - /etc/cli.sh
+    - /bin/bash
+    - /bin/csh
+    - /bin/tcsh
+  PasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -1 PASSWORD" to get the PASSWORD's hash) (optional)
+    Default: ''
+    Type: String
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  AllowUploadDownload:
+    Description: Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point
+    Type: String
+    Default: 'true'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address
+    Default: public
+    Type: String
+    AllowedValues:
+    - private
+    - public
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration
+    Type: String
+    Default: ''
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration
+    Type: String
+    Default: ''
+Resources:
+  GatewayA:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/deprecated/cluster/transit-gateway.yaml
+      Parameters:
+        GatewayName: !Ref GatewayName
+        InstanceType: !Ref InstanceType
+        KeyPairName: !Ref KeyPairName
+        VPC: !Ref VPC
+        PublicSubnetId: !Ref PublicSubnetA
+        PrivateSubnetId: !Ref PrivateSubnetA
+        License: !Ref License
+        ASN: !Ref ASN
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+        PasswordHash: !Ref PasswordHash
+        Shell: !Ref Shell
+        SICKey: !Ref SICKey
+        AllowUploadDownload: !Ref AllowUploadDownload
+  GatewayB:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/deprecated/cluster/transit-gateway.yaml
+      Parameters:
+        GatewayName: !Ref GatewayName
+        InstanceType: !Ref InstanceType
+        KeyPairName: !Ref KeyPairName
+        VPC: !Ref VPC
+        PublicSubnetId: !Ref PublicSubnetB
+        PrivateSubnetId: !Ref PrivateSubnetB
+        License: !Ref License
+        ASN: !Ref ASN
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+        PasswordHash: !Ref PasswordHash
+        Shell: !Ref Shell
+        SICKey: !Ref SICKey
+        AllowUploadDownload: !Ref AllowUploadDownload
+Outputs:
+  PublicAddressA:
+    Description: The public address of the 1st gateway
+    Value: !GetAtt GatewayA.Outputs.PublicAddress
+  PublicAddressB:
+    Description: The public address of the 2nd gateway
+    Value: !GetAtt GatewayB.Outputs.PublicAddress
