@@ -1,6 +1,6 @@
 ## General
 
-<table width="80%">
+<table>
     <thead>
         <tr>
             <th>Description</th>
