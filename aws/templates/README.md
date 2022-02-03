@@ -13,23 +13,30 @@ You can use these templates as-is or as building blocks for customizing your own
 
 * Some stacks may "roll back" automatically after 1 hour, with an error "WaitCondition timed out" If this happens, please check Internet access is working, either through AWS (Internet Gateway (IGW) assigned to the VPC, routetables with a default route and assigned to the relevant subnet(s), and Elastic IP (EIP) assigned, etc), or through another method like external proxy, or route to on-prem, for example. 
 
-**Table of Contents**
 
-* Gateway Load Balancer (GWLB) Auto Scaling Group
-* Security Gateway
-* Security Cluster
-* Security Gateway Auto Scaling
-* Transit Gateway Auto Scaling Group
-* Transit Gateway Cross Availability Zone Cluster
-* Cross Availability Zone Cluster
-* Security Management Server
-* Multi-Domain Management Server
-* Security Management Server & Security Gateway (Standalone Deployment)
-* General
+# Manual Deployment
+In case you want to deploy a custom template that is not listed follow this steps:
+1. ## Create Stack
+    When in the CloudFormation service, click on "Create stack" button.
+    ![Step 1](https://i.imgur.com/EOTQuTX.png)
 
-<br/>
-<br/>
+2. ## Upload desired template
+    Use this menu to upload your custom template (yaml/json file)
+    ![Step 2](https://i.imgur.com/DszwjN6.png)
+    After the file is uploaded, click next.
 
+3. ## Specify stack details
+    In this menu you'll need to specify the custom parameters for your template based on the template that you've uploaded.
+    ![Step 3](https://i.imgur.com/rHyyiF8.png)
+    When you done, click next.
+
+4. ## Configure stack options
+    If you need to configure your stack options (e.g. tags, iam role, and etc.) you can do it in this menu. 
+    Click next to move to the review page.
+
+5. ## Review and create stack.
+    In this window, make sure all configured correctly. 
+    If everything is correct, press "Create stack" and deploy the stack.
 ## Gateway Load Balancer (GWLB) Auto Scaling Group
 <table width="80%">
     <thead>

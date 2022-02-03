@@ -15,13 +15,13 @@ You can use these templates as-is or as building blocks for customizing your own
 
 **Table of Contents**
 
-* Security Gateway
-* Security Cluster
-* Security Gateway Auto Scaling
-* Transit Gateway Auto Scaling Group
-* Security Transit VPC
-* Security Management Server
-* Multi-Domain Management Server
+* [Security Gateway](#security-gateway)
+* [Security Cluster](#security-cluster)
+* [Security Gateway Auto Scaling](#security-gateway-auto-scaling)
+* [Transit Gateway Auto Scaling Group](#transit-gateway-auto-scaling-group)
+* [Security Transit VPC](#security-transit-vpc)
+* [Security Management Server](#security-management-server)
+* [Multi-Domain Management Server](#multi-domain-management-server)
 
 <br/>
 <br/>
