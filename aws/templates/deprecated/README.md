@@ -1,4 +1,4 @@
-# Deprecated CloudFormation Templates
+# Deprecated AWS CloudFormation Templates
 
 [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html) is an Amazon Web Services (AWS) service that enables modeling and setting up resources inside AWS in an automated fashion.
 
@@ -46,9 +46,9 @@ You can use these templates as-is or as building blocks for customizing your own
             <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/deprecated/gateway/gateway.json&stackName=Check-Point-Gateway">Launch Stack</a></td>
         </tr>
         <tr>
-        <td>Deploys a Security Gateway into an existing VPC.</td>
-        <td>R80.30</td>
-        <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/deprecated/gateway/gateway-into-vpc.json&stackName=Check-Point-Gateway">Launch Stack</a></td>
+            <td>Deploys a Security Gateway into an existing VPC.</td>
+            <td>R80.30</td>
+            <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/deprecated/gateway/gateway-into-vpc.json&stackName=Check-Point-Gateway">Launch Stack</a></td>
         </tr>
     </tbody>
 </table>
@@ -212,7 +212,7 @@ You can use these templates as-is or as building blocks for customizing your own
     </thead>
     <tbody>
         <tr>
-            <td rowspan="2">
+            <td>
            Deploys and configures a Multi-Domain Security Management Server. <br/><br/> For more details, refer to <a href="https://supportcenter.us.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk143213">sk143213</a>.
             </td>
             <td>Deploys a Multi-Domain Security Management Server into an existing VPC.</td>
