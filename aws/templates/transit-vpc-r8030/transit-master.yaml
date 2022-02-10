@@ -1,0 +1,241 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy Check Point Gateways for a transit VPC hub (20211212)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Network Configuration
+      Parameters:
+      - VpcCidr
+      - AvailabilityZones
+      - PublicSubnetCidrA
+      - PublicSubnetCidrB
+      - PrivateSubnetCidrA
+      - PrivateSubnetCidrB
+    - Label:
+        default: EC2 Instances Configuration
+      Parameters:
+      - GatewayName
+      - InstanceType
+      - KeyPairName
+    - Label:
+        default: Check Point Settings
+      Parameters:
+      - ASN
+      - License
+      - SICKey
+      - Shell
+      - PasswordHash
+      - AllowUploadDownload
+    - Label:
+        default: Automatic Provisioning with Security Management Server Settings (optional)
+      Parameters:
+      - ControlGatewayOverPrivateOrPublicAddress
+      - ManagementServer
+      - ConfigurationTemplate
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      VpcCidr:
+        default: VPC CIDR
+      PublicSubnetCidrA:
+        default: Public subnet 1 CIDR
+      PublicSubnetCidrB:
+        default: Public subnet 2 CIDR
+      PrivateSubnetCidrA:
+        default: Private subnet 1 CIDR
+      PrivateSubnetCidrB:
+        default: Private subnet 2 CIDR
+      ASN:
+        default: BGP ASN
+      GatewayName:
+        default: Gateway Name
+      InstanceType:
+        default: Instance type
+      KeyPairName:
+        default: Key name
+      License:
+        default: Version & license
+      SICKey:
+        default: SIC key
+      Shell:
+        default: Admin shell
+      PasswordHash:
+        default: Password hash
+      AllowUploadDownload:
+        default: Allow upload & download
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+Parameters:
+  VpcCidr:
+    Description: CIDR block for the VPC
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Default: '10.0.0.0/16'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  AvailabilityZones:
+    Description: The Availability Zones (AZs) to use for the subnets in the VPC. Select two (the logical order is preserved)
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    MinLength: 1
+  PublicSubnetCidrA:
+    Description: CIDR block for public subnet 1 located in the 1st Availability Zone
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Default: '10.0.0.0/24'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  PublicSubnetCidrB:
+    Description: CIDR block for public subnet 2 located in the 2nd Availability Zone
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Default: '10.0.2.0/24'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  PrivateSubnetCidrA:
+    Description: CIDR block for private subnet 1 located in the 1st Availability Zone
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Default: '10.0.1.0/24'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  PrivateSubnetCidrB:
+    Description: CIDR block for private subnet 2 located in the 2nd Availability Zone
+    Type: String
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$"
+    Default: '10.0.3.0/24'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  GatewayName:
+    Description: The value for the name tag of the gateway instance
+    Type: String
+    Default: transit-gateway
+  InstanceType:
+    Description: c4 and t2 instance types are supported only with version R80.10 and c5 are supported only with R80.20 and R80.30
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - c5.9xlarge
+    - c5.18xlarge
+    - t2.xlarge
+    - t2.2xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyPairName:
+    Description: The EC2 Key Pair to allow SSH access to the Security Gateways
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: '1'
+  ASN:
+    Description: The organization Autonomous System Number (ASN) that identifies the routing domain for the Security Gateways
+    Type: String
+    AllowedPattern: '[0-9]*'
+    Default: 65000
+  License:
+    Description: The license to install on the Security Gateways
+    Type: String
+    Default: R80.30-PAYG-NGTP
+    AllowedValues:
+    - R80.10-BYOL
+    - R80.10-PAYG-NGTP
+    - R80.10-PAYG-NGTX
+    - R80.20-BYOL
+    - R80.20-PAYG-NGTP
+    - R80.20-PAYG-NGTX
+    - R80.30-BYOL
+    - R80.30-PAYG-NGTP
+    - R80.30-PAYG-NGTX
+  SICKey:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters
+    NoEcho: 'true'
+    MinLength: '8'
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: At least 8 alpha numeric characters
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+    - /etc/cli.sh
+    - /bin/bash
+    - /bin/csh
+    - /bin/tcsh
+  PasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -1 PASSWORD" to get the PASSWORD's hash) (optional)
+    Default: ''
+    Type: String
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  AllowUploadDownload:
+    Description: Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point
+    Type: String
+    Default: 'true'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address
+    Default: public
+    Type: String
+    AllowedValues:
+    - private
+    - public
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration
+    Type: String
+    Default: ''
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration
+    Type: String
+    Default: ''
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      Parameters:
+        VPCCIDR: !Ref VpcCidr
+        AvailabilityZones: !Join
+        - ','
+        - !Ref AvailabilityZones
+        NumberOfAZs: 2
+        PublicSubnet1CIDR: !Ref PublicSubnetCidrA
+        PublicSubnet2CIDR: !Ref PublicSubnetCidrB
+        PrivateSubnet1CIDR: !Ref PrivateSubnetCidrA
+        PrivateSubnet2CIDR: !Ref PrivateSubnetCidrB
+  TransitStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/deprecated/cluster/transit.yaml
+      Parameters:
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        PublicSubnetA: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PublicSubnetB: !GetAtt VPCStack.Outputs.PublicSubnet2ID
+        PrivateSubnetA: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
+        PrivateSubnetB: !GetAtt VPCStack.Outputs.PrivateSubnet2ID
+        GatewayName: !Ref GatewayName
+        InstanceType: !Ref InstanceType
+        KeyPairName: !Ref KeyPairName
+        ASN: !Ref ASN
+        License: !Ref License
+        SICKey: !Ref SICKey
+        Shell: !Ref Shell
+        PasswordHash: !Ref PasswordHash
+        AllowUploadDownload: !Ref AllowUploadDownload
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+Outputs:
+  PublicAddressA:
+    Description: The public address of the 1st gateway
+    Value: !GetAtt TransitStack.Outputs.PublicAddressA
+  PublicAddressB:
+    Description: The public address of the 2nd gateway
+    Value: !GetAtt TransitStack.Outputs.PublicAddressB

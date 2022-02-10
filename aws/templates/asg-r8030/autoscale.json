@@ -1,0 +1,1188 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Create an Auto Scaling group of Check Point gateways (20211212)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "VPC Network Configuration"
+          },
+          "Parameters": [
+            "VPC",
+            "Subnets"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Automatic Provisioning with Security Management Server Settings"
+          },
+          "Parameters": [
+            "ControlGatewayOverPrivateOrPublicAddress",
+            "ManagementServer",
+            "ConfigurationTemplate"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EC2 Instances Configuration"
+          },
+          "Parameters": [
+            "Name",
+            "InstanceType",
+            "KeyName",
+            "VolumeSize",
+            "VolumeEncryption",
+            "EnableInstanceConnect"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Auto Scaling Configuration"
+          },
+          "Parameters": [
+            "MinSize",
+            "MaxSize",
+            "AdminEmail",
+            "LoadBalancers",
+            "TargetGroups"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point Settings"
+          },
+          "Parameters": [
+            "License",
+            "Shell",
+            "PasswordHash",
+            "SICKey",
+            "AllowUploadDownload",
+            "EnableCloudWatch",
+            "BootstrapScript"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Proxy Configuration (optional)"
+          },
+          "Parameters": [
+            "ELBType",
+            "ELBPort",
+            "ELBClients"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPC": {
+          "default": "VPC"
+        },
+        "Subnets": {
+          "default": "Subnets"
+        },
+        "ELBType": {
+          "default": "Proxy type"
+        },
+        "ELBPort": {
+          "default": "Proxy port"
+        },
+        "ELBClients": {
+          "default": "Allowed proxy clients"
+        },
+        "AdminEmail": {
+          "default": "Email address"
+        },
+        "LoadBalancers": {
+          "default": "Load Balancers"
+        },
+        "TargetGroups": {
+          "default": "Target Groups"
+        },
+        "MinSize": {
+          "default": "Minimum group size"
+        },
+        "MaxSize": {
+          "default": "Maximum group size"
+        },
+        "ControlGatewayOverPrivateOrPublicAddress": {
+          "default": "Gateways addresses"
+        },
+        "ManagementServer": {
+          "default": "Management Server"
+        },
+        "ConfigurationTemplate": {
+          "default": "Configuration template"
+        },
+        "Name": {
+          "default": "Name"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "EnableInstanceConnect": {
+          "default": "Enable AWS Instance Connect"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "VolumeSize": {
+          "default": "Root volume size (GB)"
+        },
+        "VolumeEncryption": {
+          "default": "Enable volume encryption"
+        },
+        "License": {
+          "default": "Version & license"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload & download"
+        },
+        "EnableCloudWatch": {
+          "default": "CloudWatch metrics"
+        },
+        "BootstrapScript": {
+          "default": "Bootstrap Script"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "VPC": {
+      "Description": "Select an existing VPC",
+      "Type": "AWS::EC2::VPC::Id",
+      "MinLength": "1"
+    },
+    "Subnets": {
+      "Description": "Select at least 2 subnets in the VPC",
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "MinLength": "1"
+    },
+    "ControlGatewayOverPrivateOrPublicAddress": {
+      "Description": "Determines if the gateways are provisioned using their private or public address",
+      "Default": "private",
+      "Type": "String",
+      "AllowedValues": [
+        "private",
+        "public"
+      ]
+    },
+    "ELBPort": {
+      "Default": "8080",
+      "Type": "Number"
+    },
+    "ELBType": {
+      "Default": "none",
+      "AllowedValues": [
+        "none",
+        "internal",
+        "internet-facing"
+      ],
+      "Type": "String"
+    },
+    "ELBClients": {
+      "Type": "String",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    },
+    "MinSize": {
+      "Description": "The minimal number of gateways in the Auto Scaling group",
+      "Default": "2",
+      "Type": "Number",
+      "MinValue": "1"
+    },
+    "MaxSize": {
+      "Description": "The maximal number of gateways in the Auto Scaling group",
+      "Default": "10",
+      "Type": "Number",
+      "MinValue": "1"
+    },
+    "ManagementServer": {
+      "Description": "The name that represents the Security Management Server in the automatic provisioning configuration",
+      "Type": "String",
+      "MinLength": "1"
+    },
+    "ConfigurationTemplate": {
+      "Description": "A name of a gateway configuration template in the automatic provisioning configuration",
+      "Type": "String",
+      "MinLength": "1"
+    },
+    "Name": {
+      "Type": "String",
+      "Default": "Check-Point-Gateway"
+    },
+    "InstanceType": {
+      "Description": "c4 and t2 instance types are supported only up to version R80.10 and c5 are supported only with R80.20 and above",
+      "Type": "String",
+      "Default": "c5.xlarge",
+      "AllowedValues": [
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge",
+        "c4.8xlarge",
+        "c5.large",
+        "c5.xlarge",
+        "c5.2xlarge",
+        "c5.4xlarge",
+        "c5.9xlarge",
+        "c5.18xlarge",
+        "c5n.large",
+        "c5n.xlarge",
+        "c5n.2xlarge",
+        "c5n.4xlarge",
+        "c5n.9xlarge",
+        "c5n.18xlarge",
+        "t2.xlarge",
+        "t2.2xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "AdminEmail": {
+      "Description": "Notifications about scaling events will be sent to this email address (optional)",
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "(|([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?))",
+      "ConstraintDescription": "must be a valid email address."
+    },
+    "LoadBalancers": {
+      "Description": "An optional list of Classic Load Balancers associated with this Auto Scaling group (comma separated list of LB names, without spaces)",
+      "Type": "String",
+      "Default": ""
+    },
+    "VolumeSize": {
+      "Type": "Number",
+      "MinValue": "100",
+      "Default": "100"
+    },
+    "VolumeEncryption": {
+      "Description": "Encrypt Auto Scaling instances volume with default AWS KMS key. Will be ignored for versions lower than R80.30",
+      "Default": "true",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "TargetGroups": {
+      "Description": "An optional list of Target Groups to associate with the Auto Scaling group (comma separated list of ARNs, without spaces)",
+      "Type": "String",
+      "Default": ""
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": "1",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "EnableInstanceConnect": {
+      "Description": "Ec2 Instance Connect is not supported with versions prior to R80.40",
+      "Default": "false",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "PasswordHash": {
+      "Description": "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) (optional)",
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*",
+      "NoEcho": "true"
+    },
+    "AllowUploadDownload": {
+      "Description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "SICKey": {
+      "Description": "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "MinLength": "8",
+      "Type": "String",
+      "AllowedPattern": "[a-zA-Z0-9]*",
+      "ConstraintDescription": "At least 8 alpha numeric characters"
+    },
+    "License": {
+      "Type": "String",
+      "Default": "R80.30-PAYG-NGTP",
+      "AllowedValues": [
+        "R77.30-BYOL",
+        "R77.30-PAYG-NGTP",
+        "R80.10-BYOL",
+        "R80.10-PAYG-NGTP",
+        "R80.10-PAYG-NGTX",
+        "R80.20-BYOL",
+        "R80.20-PAYG-NGTP",
+        "R80.20-PAYG-NGTX",
+        "R80.30-BYOL",
+        "R80.30-PAYG-NGTP",
+        "R80.30-PAYG-NGTX",
+        "R80.40-BYOL",
+        "R80.40-PAYG-NGTP",
+        "R80.40-PAYG-NGTX"
+      ]
+    },
+    "Shell": {
+      "Description": "Change the admin shell to enable advanced command line configuration",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "EnableCloudWatch": {
+      "Description": "Report Check Point specific CloudWatch metrics",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "false"
+    },
+    "BootstrapScript": {
+      "Description": "An optional script with comma separated commands to run on the initial boot",
+      "Type": "CommaDelimitedList",
+      "Default": "",
+      "NoEcho": "true"
+    }
+  },
+  "Conditions": {
+    "R80.30": {
+      "Fn::Equals": [
+        {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Split": [
+                "-",
+                {
+                  "Ref": "License"
+                }
+              ]
+            }
+          ]
+        },
+        "R80.30"
+      ]
+    },
+    "R80.40": {
+      "Fn::Equals": [
+        {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Split": [
+                "-",
+                {
+                  "Ref": "License"
+                }
+              ]
+            }
+          ]
+        },
+        "R80.40"
+      ]
+    },
+    "EnableEncryptedVolume": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "VolumeEncryption"
+            },
+            "true"
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Condition": "R80.30"
+            },
+            {
+              "Condition": "R80.40"
+            }
+          ]
+        }
+      ]
+    },
+    "AdminEmail": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AdminEmail"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "CreateELB": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "ELBType"
+            },
+            "none"
+          ]
+        }
+      ]
+    },
+    "EnableInstanceConnect": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableInstanceConnect"
+        },
+        "true"
+      ]
+    },
+    "ProvidedLoadBalancers": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "LoadBalancers"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "ProvidedTargetGroups": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "TargetGroups"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "EnableCloudWatch": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableCloudWatch"
+        },
+        "true"
+      ]
+    },
+    "ProvidedPassHash": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "PasswordHash"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "BlinkConfig": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Fn::Select": [
+                0,
+                {
+                  "Fn::Split": [
+                    "-",
+                    {
+                      "Ref": "License"
+                    }
+                  ]
+                }
+              ]
+            },
+            "R77.30"
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "CheckPointGateway": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "EnableCloudWatch",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "CheckPointGateway",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudwatch:PutMetricData"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Condition": "EnableCloudWatch",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "CheckPointGateway"
+          }
+        ]
+      }
+    },
+    "AMI": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml",
+        "Parameters": {
+          "Version": {
+            "Fn::If": [
+              "BlinkConfig",
+              {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "License"
+                    },
+                    "GW"
+                  ]
+                ]
+              },
+              {
+                "Ref": "License"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "NotificationTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Condition": "AdminEmail",
+      "Properties": {
+        "Subscription": [
+          {
+            "Endpoint": {
+              "Ref": "AdminEmail"
+            },
+            "Protocol": "email"
+          }
+        ]
+      }
+    },
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Condition": "CreateELB",
+      "Properties": {
+        "CrossZone": "true",
+        "Listeners": [
+          {
+            "LoadBalancerPort": {
+              "Ref": "ELBPort"
+            },
+            "InstancePort": {
+              "Ref": "ELBPort"
+            },
+            "Protocol": "TCP"
+          }
+        ],
+        "HealthCheck": {
+          "Target": {
+            "Fn::Join": [
+              ":",
+              [
+                "TCP",
+                {
+                  "Ref": "ELBPort"
+                }
+              ]
+            ]
+          },
+          "HealthyThreshold": "3",
+          "UnhealthyThreshold": "5",
+          "Interval": "30",
+          "Timeout": "5"
+        },
+        "Scheme": {
+          "Ref": "ELBType"
+        },
+        "Subnets": {
+          "Ref": "Subnets"
+        },
+        "Policies": [
+          {
+            "PolicyName": "EnableProxyProtocol",
+            "PolicyType": "ProxyProtocolPolicyType",
+            "Attributes": [
+              {
+                "Name": "ProxyProtocol",
+                "Value": "true"
+              }
+            ],
+            "InstancePorts": [
+              {
+                "Ref": "ELBPort"
+              }
+            ]
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "Ref": "ELBSecurityGroup"
+          }
+        ]
+      }
+    },
+    "PermissiveSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "_",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "PermissiveSecurityGroup"
+                ]
+              ]
+            }
+          }
+        ],
+        "GroupDescription": "Permissive security group",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "GatewayGroup": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "VPCZoneIdentifier": {
+          "Ref": "Subnets"
+        },
+        "LaunchConfigurationName": {
+          "Ref": "LaunchConfig"
+        },
+        "MinSize": {
+          "Ref": "MinSize"
+        },
+        "MaxSize": {
+          "Ref": "MaxSize"
+        },
+        "LoadBalancerNames": {
+          "Fn::If": [
+            "ProvidedLoadBalancers",
+            {
+              "Fn::If": [
+                "CreateELB",
+                {
+                  "Fn::Split": [
+                    ",",
+                    {
+                      "Fn::Join": [
+                        ",",
+                        [
+                          {
+                            "Ref": "LoadBalancers"
+                          },
+                          {
+                            "Ref": "ElasticLoadBalancer"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "Fn::Split": [
+                    ",",
+                    {
+                      "Ref": "LoadBalancers"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "Fn::If": [
+                "CreateELB",
+                [
+                  {
+                    "Ref": "ElasticLoadBalancer"
+                  }
+                ],
+                [
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        "TargetGroupARNs": {
+          "Fn::If": [
+            "ProvidedTargetGroups",
+            {
+              "Fn::Split": [
+                ",",
+                {
+                  "Ref": "TargetGroups"
+                }
+              ]
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "NotificationConfiguration": {
+          "Fn::If": [
+            "AdminEmail",
+            {
+              "TopicARN": {
+                "Ref": "NotificationTopic"
+              },
+              "NotificationTypes": [
+                "autoscaling:EC2_INSTANCE_LAUNCH",
+                "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+                "autoscaling:EC2_INSTANCE_TERMINATE",
+                "autoscaling:EC2_INSTANCE_TERMINATE_ERROR"
+              ]
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "Name"
+            },
+            "PropagateAtLaunch": "true"
+          },
+          {
+            "Key": "x-chkp-tags",
+            "Value": {
+              "Fn::Join": [
+                ":",
+                [
+                  {
+                    "Fn::Join": [
+                      "=",
+                      [
+                        "management",
+                        {
+                          "Ref": "ManagementServer"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "=",
+                      [
+                        "template",
+                        {
+                          "Ref": "ConfigurationTemplate"
+                        }
+                      ]
+                    ]
+                  },
+                  {
+                    "Fn::Join": [
+                      "=",
+                      [
+                        "ip-address",
+                        {
+                          "Ref": "ControlGatewayOverPrivateOrPublicAddress"
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              ]
+            },
+            "PropagateAtLaunch": "true"
+          }
+        ]
+      }
+    },
+    "LaunchConfig": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "AssociatePublicIpAddress": "true",
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "ImageId": {
+          "Fn::GetAtt": [
+            "AMI",
+            "Outputs.ImageId"
+          ]
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "PermissiveSecurityGroup"
+          }
+        ],
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": {
+                "Fn::If": [
+                  "EnableEncryptedVolume",
+                  "true",
+                  "false"
+                ]
+              },
+              "VolumeType": "gp2",
+              "VolumeSize": {
+                "Ref": "VolumeSize"
+              }
+            }
+          }
+        ],
+        "IamInstanceProfile": {
+          "Fn::If": [
+            "EnableCloudWatch",
+            {
+              "Ref": "InstanceProfile"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "logfile=/var/log/aws-user-data.log",
+                "> ${logfile}",
+                "exec 1>>${logfile} 2>>${logfile}",
+                "echo template_name: autoscale >> /etc/cloud-version",
+                "echo template_version: 20211212 >> /etc/cloud-version",
+                {
+                  "Fn::If": [
+                    "ProvidedPassHash",
+                    {
+                      "Fn::Join": [
+                        "\n",
+                        [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "pwd_hash='",
+                                {
+                                  "Ref": "PasswordHash"
+                                },
+                                "'"
+                              ]
+                            ]
+                          },
+                          "echo \"set admin password\"",
+                          "clish -c \"set user admin password-hash $pwd_hash\" -s"
+                        ]
+                      ]
+                    },
+                    "pwd_hash=\"$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)\""
+                  ]
+                },
+                {
+                  "Fn::Sub": "enable_cloudwatch=${EnableCloudWatch}"
+                },
+                {
+                  "Fn::Sub": "clish -c \"set user admin shell ${Shell}\" -s"
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "sic=$(echo '",
+                      {
+                        "Fn::Base64": {
+                          "Ref": "SICKey"
+                        }
+                      },
+                      "' | base64 --decode)"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "enable_eic='",
+                      {
+                        "Fn::If": [
+                          "EnableInstanceConnect",
+                          {
+                            "Ref": "EnableInstanceConnect"
+                          },
+                          {
+                            "Ref": "AWS::NoValue"
+                          }
+                        ]
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::If": [
+                    "BlinkConfig",
+                    {
+                      "Fn::Sub": "blink_config -s \"gateway_cluster_member=false&ftw_sic_key='$sic'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'\""
+                    },
+                    {
+                      "Fn::Sub": "config_system -s \"install_security_gw=true&install_ppak=true&gateway_cluster_member=false&install_security_managment=false&ftw_sic_key='$sic'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}\""
+                    }
+                  ]
+                },
+                "addr=\"$(ip addr show dev eth0 | awk \"/inet/{print \\$2; exit}\" | cut -d / -f 1)\"",
+                "dynamic_objects -n LocalGateway -r \"$addr\" \"$addr\" -a",
+                "if \"$enable_cloudwatch\"; then",
+                "  echo '{\"version\":\"1\"}' > $FWDIR/conf/cloudwatch.json",
+                "  cloudwatch start",
+                "fi",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "bootstrap=$(echo '",
+                      {
+                        "Fn::Base64": {
+                          "Fn::Join": [
+                            "; ",
+                            {
+                              "Ref": "BootstrapScript"
+                            }
+                          ]
+                        }
+                      },
+                      "' | base64 --decode)"
+                    ]
+                  ]
+                },
+                "eval $bootstrap",
+                "test -z \"$enable_eic\" || {",
+                "echo \"enabling ec2 instance connect\"",
+                "if [ -d \"/etc/ec2-instance-connect\" ]; then",
+                "    ec2-instance-connect-config on",
+                "else",
+                "    echo \"Could not enable eic, not supported in versions R80.30 and below\"",
+                "fi",
+                "}",
+                {
+                  "Fn::If": [
+                    "BlinkConfig",
+                    {
+                      "Ref": "AWS::NoValue"
+                    },
+                    [
+                      "echo \"Rebooting...\"",
+                      "shutdown -r now"
+                    ]
+                  ]
+                },
+                ""
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "SecurityGatewayScaleUpPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "GatewayGroup"
+        },
+        "Cooldown": "300",
+        "ScalingAdjustment": "1"
+      }
+    },
+    "SecurityGatewayScaleDownPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Properties": {
+        "AdjustmentType": "ChangeInCapacity",
+        "AutoScalingGroupName": {
+          "Ref": "GatewayGroup"
+        },
+        "Cooldown": "300",
+        "ScalingAdjustment": "-1"
+      }
+    },
+    "CPUAlarmHigh": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Scale-up if CPU > 80% for 10 minutes",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "300",
+        "EvaluationPeriods": "2",
+        "Threshold": "80",
+        "AlarmActions": [
+          {
+            "Ref": "SecurityGatewayScaleUpPolicy"
+          }
+        ],
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "GatewayGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "GreaterThanThreshold"
+      }
+    },
+    "CPUAlarmLow": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Scale-down if CPU < 60% for 10 minutes",
+        "MetricName": "CPUUtilization",
+        "Namespace": "AWS/EC2",
+        "Statistic": "Average",
+        "Period": "300",
+        "EvaluationPeriods": "2",
+        "Threshold": "60",
+        "AlarmActions": [
+          {
+            "Ref": "SecurityGatewayScaleDownPolicy"
+          }
+        ],
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": {
+              "Ref": "GatewayGroup"
+            }
+          }
+        ],
+        "ComparisonOperator": "LessThanThreshold"
+      }
+    },
+    "ELBSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Condition": "CreateELB",
+      "Properties": {
+        "GroupDescription": "ELB security group",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "CidrIp": {
+              "Ref": "ELBClients"
+            },
+            "FromPort": {
+              "Ref": "ELBPort"
+            },
+            "ToPort": {
+              "Ref": "ELBPort"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "URL": {
+      "Description": "The URL of the Proxy",
+      "Condition": "CreateELB",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": [
+                "ElasticLoadBalancer",
+                "DNSName"
+              ]
+            }
+          ]
+        ]
+      }
+    },
+    "SecurityGroup": {
+      "Description": "The Security Group of the Auto Scaling group",
+      "Value": {
+        "Fn::GetAtt": [
+          "PermissiveSecurityGroup",
+          "GroupId"
+        ]
+      }
+    }
+  }
+}
