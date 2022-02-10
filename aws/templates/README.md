@@ -18,11 +18,11 @@ You can use these templates as-is or as building blocks for customizing your own
 ## 2. Navigate to CloudFormation service
 ## 3. Click on "Create stack" button.
 When in the CloudFormation service, click on "Create stack" button and then select "With new resources (standard)".  
-![Step 1](../../images/step1_aws.png)
+![Step 1](../images/step1_aws.png)
 
 ## 4. Upload desired template
 Use this menu to upload your custom template (yaml/json file)
-![Step 2](../../images/step2_aws.png)
+![Step 2](../images/step2_aws.png)
 After the file is uploaded, click next.
 
 ## 5. Enter the desired template's parameters
