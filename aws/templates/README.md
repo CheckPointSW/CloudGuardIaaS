@@ -3,8 +3,6 @@
 [CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html) is an Amazon Web Services (AWS) service that enables modeling and setting up resources inside AWS in an automated fashion.
 
 
-The table below lists CloudFormation templates provided and maintained by Check Point that simplify the deployment of Check Point security solutions in AWS.  
-
 You can use these templates as-is or as building blocks for customizing your own templates.
 
 **Notes:**
@@ -15,7 +13,7 @@ You can use these templates as-is or as building blocks for customizing your own
 
 
 # Manual Deployment
-In case you want to deploy a custom template that is not listed follow this steps:
+
 ## 1. Login to AWS Console
 ## 2. Navigate to CloudFormation service
 ## 3. Click on "Create stack" button.
