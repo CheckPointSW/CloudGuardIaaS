@@ -173,7 +173,7 @@ Parameters:
   GatewayVersion:
     Description: The license to install on the Security Gateways
     Type: String
-    Default: R80.40-PAYG-NGTP
+    Default: R81.10-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP

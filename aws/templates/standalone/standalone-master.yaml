@@ -135,7 +135,7 @@ Parameters:
     Description: Select BYOL if you plan on using your own license or PAYG if you
       wish to pay as you go
     Type: String
-    Default: R80.40-PAYG-NGTP
+    Default: R81.10-PAYG-NGTP
     AllowedValues:
       - R80.40-PAYG-NGTP
       - R81-PAYG-NGTP

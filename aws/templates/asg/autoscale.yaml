@@ -174,7 +174,7 @@ Parameters:
     Default: ''
   GatewayVersion:
     Type: String
-    Default: R80.40-PAYG-NGTP
+    Default: R81.10-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP
@@ -391,6 +391,7 @@ Resources:
           Ebs:
             Encrypted: !Ref EnableVolumeEncryption
             VolumeType: gp2
+            VolumeSize: !Ref VolumeSize
             VolumeSize: !Ref VolumeSize
       IamInstanceProfile: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
       UserData:
