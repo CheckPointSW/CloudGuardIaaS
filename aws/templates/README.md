@@ -16,27 +16,22 @@ You can use these templates as-is or as building blocks for customizing your own
 
 # Manual Deployment
 In case you want to deploy a custom template that is not listed follow this steps:
-1. ## Create Stack
-    When in the CloudFormation service, click on "Create stack" button.
-    ![Step 1](../../images/step1_aws.png)
+## 1. Login to AWS Console
+## 2. Navigate to CloudFormation service
+## 3. Click on "Create stack" button.
+When in the CloudFormation service, click on "Create stack" button and then select "With new resources (standard)".  
+![Step 1](../../images/step1_aws.png)
 
-2. ## Upload desired template
-    Use this menu to upload your custom template (yaml/json file)
-    ![Step 2](../../images/step2_aws.png)
-    After the file is uploaded, click next.
+## 4. Upload desired template
+Use this menu to upload your custom template (yaml/json file)
+![Step 2](../../images/step2_aws.png)
+After the file is uploaded, click next.
 
-3. ## Specify stack details
-    In this menu you'll need to specify the custom parameters for your template based on the template that you've uploaded.
-    ![Step 3](../../images/step3_aws.png)
-    When you done, click next.
+## 5. Enter the desired template's parameters
 
-4. ## Configure stack options
-    If you need to configure your stack options (e.g. tags, iam role, and etc.) you can do it in this menu. 
-    Click next to move to the review page.
+## 6. Configure stack options
 
-5. ## Review and create stack.
-    In this window, make sure all configured correctly. 
-    If everything is correct, press "Create stack" and deploy the stack.
+## 7. Review and create stack.
 
 
 
