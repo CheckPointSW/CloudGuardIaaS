@@ -15,6 +15,7 @@ Metadata:
           - GatewayInstanceType
           - KeyName
           - VolumeSize
+          - VolumeType
           - EnableVolumeEncryption
           - EnableInstanceConnect
       - Label:
@@ -59,6 +60,8 @@ Metadata:
         default: Key name
       VolumeSize:
         default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
       EnableVolumeEncryption:
         default: Enable volume encryption
       EnableInstanceConnect:
@@ -137,6 +140,13 @@ Parameters:
     Type: Number
     Default: 100
     MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
   EnableVolumeEncryption:
     Description: Encrypt Auto Scaling instances volume with default AWS KMS key
     Type: String
@@ -390,8 +400,7 @@ Resources:
         - DeviceName: '/dev/xvda'
           Ebs:
             Encrypted: !Ref EnableVolumeEncryption
-            VolumeType: gp2
-            VolumeSize: !Ref VolumeSize
+            VolumeType: !Ref VolumeType
             VolumeSize: !Ref VolumeSize
       IamInstanceProfile: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
       UserData:

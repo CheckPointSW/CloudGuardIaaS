@@ -18,6 +18,7 @@ Metadata:
           - KeyName
           - AllocatePublicAddress
           - VolumeSize
+          - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
       - Label:
@@ -61,6 +62,8 @@ Metadata:
         default: Allocate an Elastic IP
       VolumeSize:
         default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
       VolumeEncryption:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
@@ -144,6 +147,13 @@ Parameters:
     Type: Number
     Default: 100
     MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
   VolumeEncryption:
     Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
     Type: String
@@ -339,7 +349,7 @@ Resources:
           Ebs:
             Encrypted: !If [EncryptedVolume, true, false]
             KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: gp2
+            VolumeType: !Ref VolumeType
             VolumeSize: !Ref VolumeSize
       UserData:
         'Fn::Base64':
