@@ -32,6 +32,7 @@ provider "google" {
    ```
     compute.addresses.get
     compute.addresses.use
+    compute.addresses.create
     compute.disks.create
     compute.disks.delete
     compute.firewalls.create
@@ -39,6 +40,7 @@ provider "google" {
     compute.firewalls.get
     compute.images.get
     compute.images.useReadOnly
+    compute.images.getFromFamily
     compute.instanceTemplates.create
     compute.instanceTemplates.delete
     compute.instanceTemplates.get
@@ -49,17 +51,20 @@ provider "google" {
     compute.instances.get
     compute.instances.setMetadata
     compute.instances.setTags
+    compute.instances.setLabels
     compute.networks.get
     compute.networks.updatePolicy
     compute.regions.list
     compute.subnetworks.get
     compute.subnetworks.use
     compute.subnetworks.useExternalIp
+    compute.zones.get
     iam.serviceAccountKeys.get
     iam.serviceAccountKeys.list
     iam.serviceAccounts.actAs
     iam.serviceAccounts.get
     iam.serviceAccounts.list
+    iam.serviceAccounts.set
    ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
