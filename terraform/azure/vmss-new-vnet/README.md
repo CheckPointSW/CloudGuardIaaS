@@ -110,9 +110,9 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
  |  |  |  |  |  |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r8110"; |
  |  |  |  |  |  |
- | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; |
+ | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; <br/>"R81.10"; |
  |  |  |  |  |  |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it |
  |  |  |  |  |  |
@@ -145,6 +145,8 @@ This solution uses the following modules:
  | **enable_floating_ip** | Indicates whether the load balancers will be deployed with floating IP. | boolean | true; <br/>false; |
  |  |  |  |  |  |
  | **deployment_mode** | Indicates which load balancer need to be deployed. External + Internal, only External, only Internal. | string | Standard (Default); <br/>External; <br/> Internal; |
+ |  |  |  |  |  |
+ | **admin_shell** | Enables to select different admin shells | string | /etc/cli.sh; <br/>/bin/bash; <br/>/bin/csh; <br/>/bin/tcsh; |
 
 ## Conditional creation
 To create role assignment and enable CloudGuard metrics in order to send statuses and statistics collected from VMSS instances to the Azure Monitor service:
@@ -153,10 +155,10 @@ enable_custom_metrics = true
 ```
 
 ## Example
-    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-vmss-terraform"
     location                        = "eastus"
@@ -170,8 +172,8 @@ enable_custom_metrics = true
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
     vm_os_sku                       = "sg-byol"
-    vm_os_offer                     = "check-point-cg-r8030"
-    os_version                      = "R80.30"
+    vm_os_offer                     = "check-point-cg-r8110"
+    os_version                      = "R81.10"
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     authentication_type             = "Password"
@@ -188,6 +190,7 @@ enable_custom_metrics = true
     enable_custom_metrics           = true
     enable_floating_ip              = false
     deployment_mode                 = "Standard"
+    admin_shell                     = "/etc/cli.sh"
 
 
 ## Deploy Without Public IP
@@ -206,6 +209,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20220111 | - Added support to select different shells. |
+| | | |
 | 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image <br/> - Fix zones filed for scale set be installed as multi-zone <br/> - Modify "management_interface" variable and tags regarding managing the Gateways in the Scale Set |
 | | | |
 | 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Add support for R81.<br/> - Add public IP addresses support.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - Avoid role-assignment re-creation when re-applying |

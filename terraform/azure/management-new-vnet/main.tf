@@ -265,6 +265,7 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
       location = module.common.resource_group_location
       management_GUI_client_network = var.management_GUI_client_network
       enable_api = var.mgmt_enable_api
+      admin_shell = var.admin_shell
     })
   }
 

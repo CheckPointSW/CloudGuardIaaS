@@ -106,6 +106,17 @@ variable "os_version" {
   type = string
 }
 
+locals { // locals for 'vm_os_offer' allowed values
+  os_version_allowed_values = [
+    "R80.30",
+    "R80.40",
+    "R81",
+    "R81.10"
+  ]
+  // will fail if [var.os_version] is invalid:
+  validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
+}
+
 variable "vm_os_sku" {
   description = "The sku of the image to be deployed."
   type = string
@@ -162,6 +173,22 @@ locals { // locals for 'management_interface' allowed values
 variable "configuration_template_name" {
   description = "The configuration template name as it appears in the configuration file"
   type = string
+}
+
+variable "admin_shell" {
+  description = "The admin shell to configure on machine or the first time"
+  type = string
+}
+
+locals {
+  admin_shell_allowed_values = [
+    "/etc/cli.sh",
+    "/bin/bash",
+    "/bin/csh",
+    "/bin/tcsh"
+  ]
+  // Will fail if [var.admin_shell] is invalid
+  validate_admin_shell_value = index(local.admin_shell_allowed_values, var.admin_shell)
 }
 
 //********************** Networking Variables **************************//
@@ -286,7 +313,8 @@ locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r8030",
     "check-point-cg-r8040",
-    "check-point-cg-r81"
+    "check-point-cg-r81",
+    "check-point-cg-r8110"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)

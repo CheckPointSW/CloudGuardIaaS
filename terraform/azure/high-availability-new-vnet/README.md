@@ -108,9 +108,9 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above |
  |  |  |  |  |  |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r8110"; |
  |  |  |  |  |  |
- | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; |
+ | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; <br/>"R81.10"; |
  |  |  |  |  |  |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it |
  |  |  |  |  |  |
@@ -129,6 +129,8 @@ This solution uses the following modules:
  | **create_public_ip_prefix** | Indicates whether the public IP prefix will created or an existing will be used. | boolean | true; <br/>false; |
  |  |  |  |  |  |
  | **existing_public_ip_prefix_id** | The existing public IP prefix resource id. | string | Existing public IP prefix resource id |
+ |  |  |  |  |  |
+ | **admin_shell** | Enables to select different admin shells | string | /etc/cli.sh; <br/>/bin/bash; <br/>/bin/csh; <br/>/bin/tcsh; |
 
 ## Conditional creation
 - To deploy the solution based on Azure Availability Set and create a new Availability Set for the virtual machines:
@@ -156,10 +158,10 @@ availability_type = "Availability Zone"
   ```
 
 ## Example
-    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-ha-terraform"
     cluster_name                    = "checkpoint-ha-terraform"
@@ -172,8 +174,8 @@ availability_type = "Availability Zone"
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
     vm_os_sku                       = "sg-byol"
-    vm_os_offer                     = "check-point-cg-r8030"
-    os_version                      = "R80.30"
+    vm_os_offer                     = "check-point-cg-r8110"
+    os_version                      = "R81.10"
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     authentication_type             = "Password"
@@ -183,12 +185,15 @@ availability_type = "Availability Zone"
     use_public_ip_prefix            = false
     create_public_ip_prefix         = false
     existing_public_ip_prefix_id    = ""
+    admin_shell                     = "/etc/cli.sh"
     
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20220111 | - Added support to select different shells. |
+| | | |
 | 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
 | | | |
 | 20210111 |- Update terraform version to 0.14.3 <br/> - Update azurerm version to 2.17.0 <br/> - Add authentication_type variable for choosing the authentication type. <br/> - Merge ha-availability-set-new-vnet and ha-availability-zones-new-vnet deployments to one deployment.<br/> - Adding support for R81.<br/> - Add support to CloudGuards metrics. <br/> - Update resources for NSG https://github.com/CheckPointSW/CloudGuardIaaS/issues/67 <br/> - The cluster member current state is kept when redeploying. <br/> - Avoid role-assignment re-creation when re-apply |
