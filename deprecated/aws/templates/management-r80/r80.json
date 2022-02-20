@@ -1,0 +1,725 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys a Check Point R80 management server (20180821)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Network Configuration"
+          },
+          "Parameters": [
+            "VPC",
+            "Subnet"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point management Settings"
+          },
+          "Parameters": [
+            "InstanceType",
+            "KeyName",
+            "AdminSubnet",
+            "GatewaysAddresses",
+            "PasswordHash"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Advanced"
+          },
+          "Parameters": [
+            "Primary",
+            "SICKey",
+            "Shell",
+            "Hostname",
+            "AllocatePublicAddress",
+            "VolumeSize",
+            "AllowUploadDownload",
+            "NTPPrimary",
+            "NTPSecondary"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPC": {
+          "default": "VPC"
+        },
+        "Subnet": {
+          "default": "Subnet"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "AdminSubnet": {
+          "default": "Administrator Addresses"
+        },
+        "GatewaysAddresses": {
+          "default": "Gateways Addresses"
+        },
+        "Hostname": {
+          "default": "Hostname"
+        },
+        "AllocatePublicAddress": {
+          "default": "Allocate an EIP"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "Primary": {
+          "default": "Primary management"
+        },
+        "VolumeSize": {
+          "default": "Volume size"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload and download"
+        },
+        "NTPPrimary": {
+          "default": "Primary NTP"
+        },
+        "NTPSecondary": {
+          "default": "Secondary NTP"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "VPC": {
+      "Description": "Select an existing VPC",
+      "Type": "AWS::EC2::VPC::Id",
+      "MinLength": "1"
+    },
+    "Subnet": {
+      "Description": "Select a subnet in the VPC",
+      "Type": "AWS::EC2::Subnet::Id",
+      "MinLength": "1"
+    },
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "m4.xlarge",
+      "AllowedValues": [
+        "m4.large",
+        "m4.xlarge",
+        "m4.2xlarge",
+        "m4.4xlarge",
+        "m4.10xlarge",
+        "m3.large",
+        "m3.xlarge",
+        "m3.2xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "AdminSubnet": {
+      "Description": "Addresses of allowed SmartConsole, WebUI and SSH clients in CIDR notation",
+      "Type": "String",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$"
+    },
+    "GatewaysAddresses": {
+      "Description": "Addresses of Check Point gateways in CIDR notation",
+      "Type": "String",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$"
+    },
+    "PasswordHash": {
+      "Description": "The admin user password hash (hint, use \"openssl passwd -1\")",
+      "MinLength": "1",
+      "Type": "String",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+    },
+    "Hostname": {
+      "Description": "(optional) The hostname",
+      "AllowedPattern": "^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$",
+      "ConstraintDescription": "A valid hostname label or an empty string",
+      "Type": "String"
+    },
+    "AllocatePublicAddress": {
+      "Description": "Allocate an Elastic IP address for the management server. Note: make sure the subnet has a route to the internet",
+      "Default": "true",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "SICKey": {
+      "Description": "Mandatory only if deploying a secondary Management Server, the Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "Default": "",
+      "Type": "String",
+      "AllowedPattern": "(|[a-zA-Z0-9]{8,})",
+      "ConstraintDescription": "Can be empty if this is a primary management server. Otherwise, at least 8 alpha numeric characters"
+    },
+    "Shell": {
+      "Description": "The user admin shell",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "Primary": {
+      "Description": "Determines if this is the primary management server or not",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "NTPPrimary": {
+      "Description": "(optional) Primary NTP server",
+      "Type": "String",
+      "Default": "0.pool.ntp.org",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "NTPSecondary": {
+      "Description": "(optional) Secondary NTP server",
+      "Type": "String",
+      "Default": "1.pool.ntp.org",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "VolumeSize": {
+      "Description": "(optional) Size of the root volume",
+      "Type": "Number",
+      "MinValue": "100",
+      "Default": "100"
+    },
+    "AllowUploadDownload": {
+      "Description": "Automatically download Blade Contracts and other important data from Check Point and improve product by sending data",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    }
+  },
+  "Conditions": {
+    "HostnameGiven": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "Hostname"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "AllocatePublicAddress": {
+      "Fn::Equals": [
+        {
+          "Ref": "AllocatePublicAddress"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "AMI": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/CloudFormationTemplate/amis.json",
+        "Parameters": {
+          "Version": "R80"
+        }
+      }
+    },
+    "ReadyHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Condition": "AllocatePublicAddress",
+      "Properties": {}
+    },
+    "ReadyCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Condition": "AllocatePublicAddress",
+      "DependsOn": [
+        "Instance"
+      ],
+      "Properties": {
+        "Handle": {
+          "Ref": "ReadyHandle"
+        },
+        "Timeout": "3600"
+      }
+    },
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Management security group",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": {
+              "Ref": "GatewaysAddresses"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 257,
+            "ToPort": 257
+          },
+          {
+            "CidrIp": {
+              "Ref": "GatewaysAddresses"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 18191,
+            "ToPort": 18191
+          },
+          {
+            "CidrIp": {
+              "Ref": "GatewaysAddresses"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 18210,
+            "ToPort": 18210
+          },
+          {
+            "CidrIp": {
+              "Ref": "GatewaysAddresses"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 18264,
+            "ToPort": 18264
+          },
+          {
+            "CidrIp": {
+              "Ref": "AdminSubnet"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22
+          },
+          {
+            "CidrIp": {
+              "Ref": "AdminSubnet"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 443,
+            "ToPort": 443
+          },
+          {
+            "CidrIp": {
+              "Ref": "AdminSubnet"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 18190,
+            "ToPort": 18190
+          },
+          {
+            "CidrIp": {
+              "Ref": "AdminSubnet"
+            },
+            "IpProtocol": "tcp",
+            "FromPort": 19009,
+            "ToPort": 19009
+          }
+        ]
+      }
+    },
+    "CheckPointManagementRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "CheckPointManagement",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeVpcs",
+                    "ec2:DescribeSecurityGroups",
+                    "elasticloadbalancing:DescribeLoadBalancers",
+                    "elasticloadbalancing:DescribeTags",
+                    "elasticloadbalancing:DescribeListeners",
+                    "elasticloadbalancing:DescribeTargetGroups",
+                    "elasticloadbalancing:DescribeRules",
+                    "elasticloadbalancing:DescribeTargetHealth",
+                    "autoscaling:DescribeAutoScalingGroups"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "CheckPointManagementRole"
+          }
+        ]
+      }
+    },
+    "Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "Tags": [
+          {
+            "Fn::If": [
+              "HostnameGiven",
+              {
+                "Key": "Name",
+                "Value": {
+                  "Ref": "Hostname"
+                }
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          }
+        ],
+        "ImageId": {
+          "Fn::GetAtt": [
+            "AMI",
+            "Outputs.ImageId"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "IamInstanceProfile": {
+          "Ref": "InstanceProfile"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "NetworkInterfaces": [
+          {
+            "DeviceIndex": "0",
+            "AssociatePublicIpAddress": "false",
+            "Description": "eth0",
+            "GroupSet": [
+              {
+                "Ref": "InstanceSecurityGroup"
+              }
+            ],
+            "DeleteOnTermination": "true",
+            "SubnetId": {
+              "Ref": "Subnet"
+            }
+          }
+        ],
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "VolumeType": "gp2",
+              "VolumeSize": {
+                "Ref": "VolumeSize"
+              }
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "echo template_name: r80 >> /etc/cloud-version",
+                "echo template_version: 20180821 >> /etc/cloud-version",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "primary='",
+                      {
+                        "Ref": "Primary"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "secondary=false",
+                "$primary || secondary=true",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "sic=$(echo '",
+                      {
+                        "Fn::Base64": {
+                          "Ref": "SICKey"
+                        }
+                      },
+                      "' | base64 --decode)"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "hname='",
+                      {
+                        "Ref": "Hostname"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "wait_handle='",
+                      {
+                        "Fn::If": [
+                          "AllocatePublicAddress",
+                          {
+                            "Ref": "ReadyHandle"
+                          },
+                          {
+                            "Ref": "AWS::NoValue"
+                          }
+                        ]
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "instance_id=\"$(curl_cli -s -S 169.254.169.254/latest/meta-data/instance-id)\"",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "pwd_hash='",
+                      {
+                        "Ref": "PasswordHash"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "allow_upload_download='",
+                      {
+                        "Ref": "AllowUploadDownload"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "ntp1='",
+                      {
+                        "Ref": "NTPPrimary"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "ntp2='",
+                      {
+                        "Ref": "NTPSecondary"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "shell='",
+                      {
+                        "Ref": "Shell"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "admin_subnet='",
+                      {
+                        "Ref": "AdminSubnet"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >$CPDIR/tmp/wait-handle.crt",
+                "cat $CPDIR/conf/ca-bundle.crt >>$CPDIR/tmp/wait-handle.crt",
+                "if $primary; then",
+                "   sic=notused",
+                "elif test -z \"$sic\"; then",
+                "    curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"FAILURE\", \"Reason\" : \"SIC key must be provided if installing a non primary management server\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"None\"}' \"$wait_handle\"",
+                "    exit 1",
+                "fi",
+                "test -z \"$pwd_hash\" || {",
+                "   echo \"set admin password\"",
+                "   clish -c \"set user admin password-hash $pwd_hash\" -s",
+                "}",
+                "test -z \"$hname\" || {",
+                "   echo \"set hostname\"",
+                "   clish -c \"set hostname $hname\" -s",
+                "}",
+                "test -z \"$ntp1\" || {",
+                "   echo \"set primary NTP server\"",
+                "   clish -c \"set ntp server primary $ntp1 version 4\" -s",
+                "   test -z \"$ntp2\" || {",
+                "       echo \"set secondary NTP server\"",
+                "       clish -c \"set ntp server secondary $ntp2 version 4\" -s",
+                "   }",
+                "   clish -c \"set ntp active on\" -s",
+                "}",
+                "admin_subnet_ip=\"$(echo $admin_subnet | cut -d '/' -f 1)\"",
+                "admin_subnet_bits=\"$(echo $admin_subnet | cut -d '/' -f 2)\"",
+                "echo \"set admin shell\"",
+                "clish -c \"set user admin shell $shell\" -s",
+                "conf=\"install_security_gw=false\"",
+                "conf=\"${conf}&install_security_managment=true\"",
+                "conf=\"${conf}&install_mgmt_primary=$primary\"",
+                "conf=\"${conf}&install_mgmt_secondary=$secondary\"",
+                "conf=\"${conf}&mgmt_admin_radio=gaia_admin\"",
+                "conf=\"${conf}&mgmt_gui_clients_radio=network\"",
+                "conf=\"${conf}&mgmt_gui_clients_ip_field=${admin_subnet_ip}\"",
+                "conf=\"${conf}&mgmt_gui_clients_subnet_field=${admin_subnet_bits}\"",
+                "conf=\"${conf}&ftw_sic_key=$sic\"",
+                "conf=\"${conf}&download_info=$allow_upload_download\"",
+                "conf=\"${conf}&upload_info=$allow_upload_download\"",
+                "config_system -s \"$conf\"",
+                "rc=$?",
+                "if test -n \"$wait_handle\"; then",
+                "    if test $rc -ne 0; then",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"FAILURE\", \"Reason\" : \"First time wizard failed\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"None\"}' \"$wait_handle\"",
+                "    else",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\", \"Reason\" : \"Instance Configuration Complete\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"Configuration completed.\"}' \"$wait_handle\"",
+                "    fi",
+                "fi",
+                "chkconfig --add autoprovision",
+                "service autoprovision start",
+                ""
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "PublicAddress": {
+      "Type": "AWS::EC2::EIP",
+      "Condition": "AllocatePublicAddress",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "AddressAssoc": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Condition": "AllocatePublicAddress",
+      "Properties": {
+        "InstanceId": {
+          "Ref": "Instance"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "PublicAddress",
+            "AllocationId"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "PublicAddress": {
+      "Condition": "AllocatePublicAddress",
+      "Description": "The public address of the management server",
+      "Value": {
+        "Ref": "PublicAddress"
+      }
+    },
+    "SSH": {
+      "Condition": "AllocatePublicAddress",
+      "Description": "SSH command",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh admin@",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      }
+    },
+    "URL": {
+      "Condition": "AllocatePublicAddress",
+      "Description": "URL to the portal",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      }
+    }
+  }
+}

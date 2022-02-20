@@ -1,0 +1,486 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys a Check Point Gateway with two NICs and runs the First Time Wizard (20180821)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Network Configuration"
+          },
+          "Parameters": [
+            "VPC",
+            "Subnet",
+            "PrivateAddr",
+            "Subnet2",
+            "PrivateAddr2",
+            "HasInternet"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point Settings"
+          },
+          "Parameters": [
+            "InstanceType",
+            "Version",
+            "KeyName",
+            "SICKey",
+            "Shell",
+            "PasswordHash",
+            "AllowUploadDownload",
+            "Name"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPC": {
+          "default": "VPC"
+        },
+        "Subnet": {
+          "default": "External Subnet"
+        },
+        "Subnet2": {
+          "default": "Internal Subnet"
+        },
+        "PrivateAddr": {
+          "default": "External private IP address"
+        },
+        "PrivateAddr2": {
+          "default": "Internal private IP address"
+        },
+        "HasInternet": {
+          "default": "Allocate an Elastic IP address for the instance"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "Version": {
+          "default": "Version"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload and download"
+        },
+        "Name": {
+          "default": "Gateway instance Name"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "VPC": {
+      "Description": "Select an existing VPC",
+      "Type": "AWS::EC2::VPC::Id",
+      "MinLength": "1"
+    },
+    "Subnet": {
+      "Description": "The gateway's external subnet",
+      "Type": "AWS::EC2::Subnet::Id",
+      "MinLength": "1"
+    },
+    "Subnet2": {
+      "Description": "The gateway's internal subnet. Should be in the same AZ as the external subnet",
+      "Type": "AWS::EC2::Subnet::Id",
+      "MinLength": "1"
+    },
+    "PrivateAddr": {
+      "Description": "IP address in the External Subnet",
+      "Type": "String",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}$"
+    },
+    "PrivateAddr2": {
+      "Description": "IP address in the Internal Subnet",
+      "Type": "String",
+      "AllowedPattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}$"
+    },
+    "HasInternet": {
+      "Description": "Is the VPC connected to the Internet",
+      "Default": "true",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "c4.xlarge",
+      "AllowedValues": [
+        "m3.medium",
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "Version": {
+      "Description": "Security Gateway version",
+      "Type": "String",
+      "Default": "BYOL",
+      "AllowedValues": [
+        "BYOL",
+        "PAYG"
+      ]
+    },
+    "PasswordHash": {
+      "Description": "The admin user password hash (hint, use \"openssl passwd -1\")",
+      "MinLength": "1",
+      "Type": "String",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+    },
+    "AllowUploadDownload": {
+      "Description": "Improve product experience by sending data to Check Point. Automatically download Blade Contracts and other important data",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "SICKey": {
+      "Description": "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "Default": "",
+      "Type": "String",
+      "AllowedPattern": "(|[a-zA-Z0-9]{8,})"
+    },
+    "Shell": {
+      "Description": "The user admin shell",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "Name": {
+      "Description": "The name for the instance",
+      "Type": "String",
+      "Default": "Check Point SG"
+    }
+  },
+  "Conditions": {
+    "HasInternet": {
+      "Fn::Equals": [
+        {
+          "Ref": "HasInternet"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "AMI": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3.amazonaws.com/CloudFormationTemplate/amis.json",
+        "Parameters": {
+          "Version": {
+            "Ref": "Version"
+          }
+        }
+      }
+    },
+    "ReadyHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Condition": "HasInternet",
+      "Properties": {}
+    },
+    "ReadyCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Condition": "HasInternet",
+      "DependsOn": [
+        "Instance"
+      ],
+      "Properties": {
+        "Handle": {
+          "Ref": "ReadyHandle"
+        },
+        "Timeout": "3600"
+      }
+    },
+    "NetworkInterface": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "Description": "eth0",
+        "PrivateIpAddresses": [
+          {
+            "PrivateIpAddress": {
+              "Ref": "PrivateAddr"
+            },
+            "Primary": "true"
+          }
+        ],
+        "SourceDestCheck": "false",
+        "GroupSet": [
+          {
+            "Ref": "InstanceSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "Subnet"
+        }
+      }
+    },
+    "NetworkInterface2": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "Description": "eth1",
+        "PrivateIpAddress": {
+          "Ref": "PrivateAddr2"
+        },
+        "SourceDestCheck": "false",
+        "GroupSet": [
+          {
+            "Ref": "InstanceSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "Subnet2"
+        }
+      }
+    },
+    "InstanceSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Permissive security group",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "Instance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "Name"
+            }
+          }
+        ],
+        "ImageId": {
+          "Fn::GetAtt": [
+            "AMI",
+            "Outputs.ImageId"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "echo template_name: gateway-2-nic-existing-vpc >> /etc/cloud-version",
+                "echo template_version: 20180821 >> /etc/cloud-version",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "pwd_hash='",
+                      {
+                        "Ref": "PasswordHash"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "sic=$(echo '",
+                      {
+                        "Fn::Base64": {
+                          "Ref": "SICKey"
+                        }
+                      },
+                      "' | base64 --decode)"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "wait_handle='",
+                      {
+                        "Fn::If": [
+                          "HasInternet",
+                          {
+                            "Ref": "ReadyHandle"
+                          },
+                          {
+                            "Ref": "AWS::NoValue"
+                          }
+                        ]
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "instance_id=\"$(curl_cli -s -S 169.254.169.254/latest/meta-data/instance-id)\"",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "shell='",
+                      {
+                        "Ref": "Shell"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "allow_upload_download='",
+                      {
+                        "Ref": "AllowUploadDownload"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >$CPDIR/tmp/wait-handle.crt",
+                "cat $CPDIR/conf/ca-bundle.crt >>$CPDIR/tmp/wait-handle.crt",
+                "test -z \"$pwd_hash\" || {",
+                "   echo \"set admin password\"",
+                "   clish -c \"set user admin password-hash $pwd_hash\" -s",
+                "}",
+                "clish -c \"set user admin shell $shell\" -s",
+                "config_system -s \"install_security_gw=true&install_ppak=true&gateway_cluster_member=false&install_security_managment=false&ftw_sic_key='$sic'&upload_info=${allow_upload_download}&download_info=${allow_upload_download}\"",
+                "rc=$?",
+                "if test -n \"$wait_handle\"; then",
+                "    if test $rc -ne 0; then",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"FAILURE\", \"Reason\" : \"First time wizard failed\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"None\"}' \"$wait_handle\"",
+                "    else",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\", \"Reason\" : \"Instance Configuration Complete\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"Configuration completed.\"}' \"$wait_handle\"",
+                "    fi",
+                "fi",
+                "shutdown -r now",
+                ""
+              ]
+            ]
+          }
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "NetworkInterfaces": [
+          {
+            "DeviceIndex": "0",
+            "NetworkInterfaceId": {
+              "Ref": "NetworkInterface"
+            }
+          },
+          {
+            "DeviceIndex": "1",
+            "NetworkInterfaceId": {
+              "Ref": "NetworkInterface2"
+            }
+          }
+        ]
+      }
+    },
+    "PublicAddress": {
+      "Type": "AWS::EC2::EIP",
+      "Condition": "HasInternet",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "AddressAssoc": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Condition": "HasInternet",
+      "Properties": {
+        "NetworkInterfaceId": {
+          "Ref": "NetworkInterface"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "PublicAddress",
+            "AllocationId"
+          ]
+        },
+        "PrivateIpAddress": {
+          "Fn::GetAtt": [
+            "NetworkInterface",
+            "PrimaryPrivateIpAddress"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "PublicAddress": {
+      "Description": "The public address of the gateway",
+      "Value": {
+        "Ref": "PublicAddress"
+      },
+      "Condition": "HasInternet"
+    },
+    "SSH": {
+      "Description": "SSH command",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh admin@",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      },
+      "Condition": "HasInternet"
+    },
+    "URL": {
+      "Description": "URL to the portal",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      },
+      "Condition": "HasInternet"
+    }
+  }
+}
