@@ -392,6 +392,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
       cluster_name = var.cluster_name
       external_private_addresses = azurerm_network_interface.nic_vip.ip_configuration[1].private_ip_address
       enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
+      admin_shell = var.admin_shell
     })
   }
 
@@ -482,6 +483,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
       cluster_name = var.cluster_name
       external_private_addresses = cidrhost(module.vnet.subnet_prefixes[0], 7)
       enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
+      admin_shell = var.admin_shell
     })
   }
 

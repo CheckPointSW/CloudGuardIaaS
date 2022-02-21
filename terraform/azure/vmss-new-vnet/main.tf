@@ -289,6 +289,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       sic_key=var.sic_key
       vnet=module.vnet.subnet_prefixes[0]
       enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
+      admin_shell = var.admin_shell
     })
   }
 

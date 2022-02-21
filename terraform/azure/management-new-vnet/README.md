@@ -108,23 +108,25 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "mgmt-byol" - BYOL license for R80.30 and above; <br/>"mgmt-25" - PAYG for R80.30 and above; |
  |  |  |  |  |  |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r8110"; |
  |  |  |  |  |  |
- | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; |
+ | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; <br/>"R81.10"; |
  |  |  |  |  |  |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it |
  |  |  |  |  |  |
  | **allow_upload_download** | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | boolean | true; <br/>false; |
  |  |  |  |  |  |
  | **authentication_type** | Specifies whether a password authentication or SSH Public Key authentication should be used | string | "Password"; <br/>"SSH Public Key"; |
+ |  |  |  |  |  |
+ | **admin_shell** | Enables to select different admin shells | string | /etc/cli.sh; <br/>/bin/bash; <br/>/bin/csh; <br/>/bin/tcsh; |
 
 
 
 ## Example
-    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_secret                   = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    client_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    tenant_id                       = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    subscription_id                 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     source_image_vhd_uri            = "noCustomUri"
     resource_group_name             = "checkpoint-mgmt-terraform"
     mgmt_name                       = "checkpoint-mgmt-terraform"
@@ -138,17 +140,20 @@ This solution uses the following modules:
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
     vm_os_sku                       = "mgmt-byol"
-    vm_os_offer                     = "check-point-cg-r8030"
-    os_version                      = "R80.30"
+    vm_os_offer                     = "check-point-cg-r8110"
+    os_version                      = "R81.10"
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     authentication_type             = "Password"
+    admin_shell                     = "/etc/cli.sh"
     
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20220111 | - Added support to select different shells. |
+| | | |
 | 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
 | | | |
 | 20210111 | First release of Check Point CloudGuard IaaS Management Terraform deployment into a new Vnet in Azure. |

@@ -94,7 +94,7 @@ resource "google_compute_instance" "gateway" {
     initialize_params {
       size = var.bootDiskSizeGb
       type = local.disk_type_condition
-      image = var.image_name
+      image = "checkpoint-public/${var.image_name}"
     }
   }
   network_interface {

@@ -5,9 +5,18 @@ locals {
   // will fail if [var.license] is invalid:
   validate_license = index(local.license_allowed_values, upper(var.license))
 
-  split_image_name = split("-", var.image_name)
-  // will fail if the image license name is unmatched to var.license:
-  validate_image_name =index(local.split_image_name, lower(var.license)) >=0 && (index(local.split_image_name, "single") >=0 || ((replace(var.image_name,"cluster" ,"smth") == var.image_name)&&replace(var.image_name,"MIG" ,"smth") == var.image_name)) ? 0 : index(local.split_image_name,"INVALID IMAGE NAME")
+  installation_type_allowed_values = [
+    "Gateway only",
+    "Management only",
+    "Standalone"
+  ]
+  // Will fail if the installation type is none of the above
+  validate_installation_type = index(local.installation_type_allowed_values, var.installationType)
+
+  regex_validate_mgmt_image_name = "check-point-r8[0-1][1-4]0-(byol|payg)-[0-9]{3}-([0-9]{3}|[a-z]+)-v[0-9]{8,}"
+  regex_validate_single_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-single-[0-9]{3}-([0-9]{3}|[a-z]+)-v[0-9]{8,}"
+  // will fail if the image name is not in the right syntax
+  validate_image_name = var.installationType != "Gateway only" && length(regexall(local.regex_validate_mgmt_image_name, var.image_name)) > 0 ? 0 : (var.installationType == "Gateway only" && length(regexall(local.regex_validate_single_image_name, var.image_name)) > 0 ? 0 : index(split("-", var.image_name), "INVALID IMAGE NAME"))
   regex_valid_admin_SSH_key = "^(^$|ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3})"
   // Will fail if var.admin_SSH_key is invalid
   regex_admin_SSH_key = regex(local.regex_valid_admin_SSH_key, var.admin_SSH_key) == var.admin_SSH_key ? 0 : "Please enter a valid SSH public key or leave empty"
