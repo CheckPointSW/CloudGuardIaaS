@@ -1,7 +1,7 @@
 # Deprecated AWS CloudFormation templates
 This directory contains deprecated CloudGuard IaaS solution templates.
 
-# How to deploy the templates
+# How to manually deploy the templates
 To deploy a CloudFormation template, follow these instructions:
 1. Log in and navigate to the [AWS CloudForamtion page](https://console.aws.amazon.com/cloudformation/)
 2. Click "*Create stack*"
