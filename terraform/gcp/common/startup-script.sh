@@ -131,7 +131,7 @@ EOF
         done
         generic_objects="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json)"
         uid="$(echo $generic_objects | jq .objects | jq .[0] | jq .uid)"
-        if [ ! -z "$public_ip" ] && [ ! -z "$(uid:1:-1)" ] ; then
+        if [ ! -z "$public_ip" ] && [ ! -z "${uid:1:-1}" ] ; then
             mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
         fi
     fi
