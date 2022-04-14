@@ -168,3 +168,8 @@ variable "management_bootstrap_script" {
   description = "(Optional) Semicolon (;) separated commands to run on the initial boot"
   default = ""
 }
+variable "volume_type" {
+  type = string
+  description = "General Purpose SSD Volume Type"
+  default = "gp3"
+}

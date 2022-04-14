@@ -11,7 +11,12 @@ locals {
     "c5n.2xlarge",
     "c5n.4xlarge",
     "c5n.9xlarge",
-    "c5n.18xlarge"
+    "c5n.18xlarge",
+	"m5.large",
+	"m5.xlarge",
+	"m5.2xlarge",
+	"m5.4xlarge",
+	"m5.8xlarge"
   ]
   mgmt_types = [
     "m5.large",

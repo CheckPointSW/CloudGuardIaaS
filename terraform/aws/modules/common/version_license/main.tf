@@ -28,6 +28,11 @@ locals {
     "R81-PAYG-NGTP",
     "R81.10-PAYG-NGTP"
   ]
+  gwlb_gw_versions = [
+    "R80.40-BYOL",
+    "R80.40-PAYG-NGTP",
+    "R80.40-PAYG-NGTX"
+    ]
 }
 
 locals {
@@ -35,6 +40,7 @@ locals {
   mgmt_values = var.chkp_type == "management" ? local.mgmt_versions : []
   mds_values = var.chkp_type == "mds" ? local.mds_versions : []
   standalone_values = var.chkp_type == "standalone" ? local.standalone_versions : []
-  allowed_values = coalescelist(local.gw_values, local.mgmt_values, local.standalone_values, local.mds_values)
+  gwlb_gw_values = var.chkp_type == "gwlb_gw" ? local.gwlb_gw_versions  : []
+  allowed_values = coalescelist(local.gw_values, local.mgmt_values, local.standalone_values, local.mds_values, local.gwlb_gw_values)
   is_allowed_type = index(local.allowed_values, var.version_license)
 }
