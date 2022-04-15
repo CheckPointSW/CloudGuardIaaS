@@ -1,0 +1,173 @@
+# Check Point CloudGuard Network Auto Scaling GWLB Terraform module for AWS
+
+Terraform module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC.
+
+These types of Terraform resources are supported:
+* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
+* [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
+* [Security group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
+* [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
+
+
+See the [CloudGuard Auto Scaling for AWS](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CloudGuard_Network_for_AWS_AutoScaling_DeploymentGuide/Topics-AWS-AutoScale-DG/Check-Point-CloudGuard-Network-for-AWS.htm) for additional information
+
+This solution uses the following modules:
+- /terraform/aws/modules/amis
+
+## Configurations
+
+The **main.tf** file includes the following provider configuration block used to configure the credentials for the authentication with AWS, as well as a default region for your resources:
+```
+provider "aws" {
+    region = var.region
+    access_key = var.aws_access_key_ID
+    secret_key = var.aws_secret_access_key
+}
+```
+The provider credentials can be provided either as static credentials or as [Environment Variables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables).
+- Static credentials can be provided by adding an access_key and secret_key in /terraform/aws/autoscale/**terraform.tfvars** file as follows:
+```
+region     = "us-east-1"
+access_key = "my-access-key"
+secret_key = "my-secret-key"
+```
+- In case the Environment Variables are used, perform modifications described below:<br/>
+  a. The next lines in main.tf file, in the provider aws resource, need to be commented:
+  ```
+  provider "aws" {
+  //    region = var.region
+  //    access_key = var.aws_access_key_ID
+  //    secret_key = var.aws_secret_access_key
+  }
+  ```
+
+## Usage
+- Fill all variables in the /terraform/aws/autoscale/**terraform.tfvars** file with proper values (see below for variables descriptions).
+- From a command line initialize the Terraform configuration directory:
+    ```
+    terraform init
+    ```
+- Create an execution plan:
+    ```
+    terraform plan
+    ```
+- Create or modify the deployment:
+    ```
+    terraform apply
+    ```
+
+- Variables are configured in /terraform/aws/autoscale/**terraform.tfvars** file as follows:
+
+  ```
+    //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
+
+    // --- Environment ---
+    prefix = "env1"
+    asg_name = "autoscaling_group"
+
+    // --- VPC Network Configuration ---
+    vpc_id = "vpc-12345678"
+    subnet_ids = ["subnet-abc123", "subnet-def456"]
+
+    // --- Automatic Provisioning with Security Management Server Settings ---
+    gateways_provision_address_type = "private"
+    management_server = "mgmt_env1"
+    configuration_template = "tmpl_env1"
+
+    // --- EC2 Instances Configuration ---
+    gateway_name = "asg_gateway"
+    gateway_instance_type = "c5.xlarge"
+    key_name = "privatekey"
+    instances_tags = {
+      key1 = "value1"
+      key2 = "value2"
+    }
+
+    // --- Auto Scaling Configuration ---
+    minimum_group_size = 2
+    maximum_group_size = 10
+    target_groups = ["arn:aws:tg1/abc123", "arn:aws:tg2/def456"]
+
+    // --- Check Point Settings ---
+    gateway_version = "R80.40-BYOL"
+    admin_shell = "/bin/bash"
+    gateway_password_hash = "12345678"
+    gateway_SICKey = "12345678"
+    enable_instance_connect = false
+    allow_upload_download = true
+    enable_cloudwatch = false
+    gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+
+
+
+- Conditional creation
+    - To enable cloudwatch for ASG:
+  ```
+  enable_cloudwatch = true
+  ```
+  Note: enabling cloudwatch will automatically create IAM role with cloudwatch:PutMetricData permission
+- To tear down your resources:
+    ```
+    terraform destroy
+    ```
+
+
+
+## Inputs
+| Name          | Description   | Type          | Allowed values | Default       | Required      |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| prefix   | (Optional) Instances name prefix  | string  | n/a | ""  | no |
+| asg_name  | Autoscaling Group name  | string  | n/a | Check-Point-ASG-tf  | no |
+| vpc_id | The VPC id in which to deploy | string | n/a | n/a | yes |
+| subnet_ids | List of public subnet IDs to launch resources into. Recommended at least 2 | list(string) | n/a | n/a | yes |
+| gateways_provision_address_type | Determines if the gateways are provisioned using their private or public address.| string | - private <br/> - public | private | no |
+| management_server | The name that represents the Security Management Server in the CME configuration | string | n/a | n/a | yes |
+| configuration_template | Name of the provisioning template in the CME configuration | string  | n/a | n/a | yes |
+| gateway_name | The name tag of the Security Gateways instances | string | n/a | Check-Point-ASG-gateway-tf | no |
+| gateway_instance_type | The instance type of the Security Gateways | string | - c5.large <br/> - c5.xlarge <br/> - c5.2xlarge <br/> - c5.4xlarge <br/> - c5.9xlarge <br/> - c5.18xlarge <br/> - c5n.large <br/> - c5n.xlarge <br/> - c5n.2xlarge <br/> - c5n.4xlarge <br/> - c5n.9xlarge <br/> - m5.large <br/> - m5.xlarge <br/> - m5.2xlarge <br/> - m5.4xlarge <br/> - m5.8xlarge| c5.xlarge | no |
+| key_name | The EC2 Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
+| volume_size | Root volume size (GB) - minimum 100 | number  | n/a | 100 | no |
+| enable_volume_encryption | Encrypt Environment instances volume with default AWS KMS key | bool  | true/false | true | no |
+| instances_tags | (Optional) A map of tags as key=value pairs. All tags will be added on all AutoScaling Group instances | map(string)  | n/a | {} | no |
+| minimum_group_size | The minimum number of instances in the Auto Scaling group | number | n/a | 2 | no |
+| maximum_group_size | The maximum number of instances in the Auto Scaling group | number | n/a | 10 | no |
+| target_groups | (Optional) List of Target Group ARNs to associate with the Auto Scaling group | list(string) | n/a | [] | no |
+| gateway_version | Gateway version and license | string | - R80.40-BYOL <br/> - R80.40-PAYG-NGTP <br/> - R80.40-PAYG-NGTX | R80.40-BYOL | no |
+| admin_shell | Set the admin shell to enable advanced command line configuration | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
+| gateway_password_hash | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash) | string | n/a | "" | no |
+| gateway_SICKey | The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters) | string | n/a | n/a | yes |
+| enable_instance_connect | Enable SSH connection over AWS web console. Supporting regions can be found [here](https://aws.amazon.com/about-aws/whats-new/2019/06/introducing-amazon-ec2-instance-connect/) | bool | true/false | false | no |
+| allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
+| enable_cloudwatch | Report Check Point specific CloudWatch metrics | bool | true/false | false | no |
+| gateway_bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
+| volume_type                      | General Purpose SSD Volume Type                                                                                                  | string | - gp3 <br/> - gp2                                                                                                                                                                                                                                                                                      | gp3             | no       |
+
+
+## Outputs
+| Name  | Description |
+| ------------- | ------------- |
+| autoscale_autoscaling_group_name  | The name of the deployed AutoScaling Group  |
+| autoscale_autoscaling_group_arn  | The ARN for the deployed AutoScaling Group  |
+| autoscale_autoscaling_group_availability_zones  | The AZs on which the Autoscaling Group is configured  |
+| autoscale_autoscaling_group_desired_capacity  | The deployed AutoScaling Group's desired capacity of instances |
+| autoscale_autoscaling_group_min_size  | The deployed AutoScaling Group's minimum number of instances  |
+| autoscale_autoscaling_group_max_size  | The deployed AutoScaling Group's maximum number  of instances  |
+| autoscale_autoscaling_group_target_group_arns  | The deployed AutoScaling Group's configured target groups  |
+| autoscale_autoscaling_group_subnets  | The subnets on which the deployed AutoScaling Group is configured |
+| autoscale_launch_configuration_id  | The id of the Launch Configuration  |
+| autoscale_autoscale_security_group_id  | The deployed AutoScaling Group's security group id  |
+| autoscale_iam_role_name  | The deployed AutoScaling Group's IAM role name (if created)  |
+
+## Revision History
+In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description                                                             |
+| ---------------- |-------------------------------------------------------------------------|
+| 20220414 | First release of Check Point Auto Scaling GWLB Terraform module for AWS |
+
+
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details

@@ -8,7 +8,8 @@ locals {
     "gateway",
     "management",
     "mds",
-    "standalone"]
+    "standalone",
+    "gwlb_gw"]
   // Will fail if var.chkp_type is invalid
   validate_chkp_type = index(local.type_allowed_values, var.chkp_type)
 }

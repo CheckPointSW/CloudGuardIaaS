@@ -135,7 +135,7 @@ resource "aws_instance" "management-instance" {
 
   ebs_block_device {
     device_name = "/dev/xvda"
-    volume_type = "gp2"
+    volume_type = var.volume_type
     volume_size = var.volume_size
     encrypted = local.volume_encryption_condition
     kms_key_id = local.volume_encryption_condition ? var.volume_encryption : ""

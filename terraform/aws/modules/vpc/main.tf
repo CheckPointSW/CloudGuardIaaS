@@ -33,6 +33,19 @@ resource "aws_subnet" "private_subnets" {
   }
 }
 
+// --- tgw Subnets ---
+resource "aws_subnet" "tgw_subnets" {
+  for_each = var.tgw_subnets_map
+
+  vpc_id = aws_vpc.vpc.id
+  availability_zone = each.key
+  cidr_block = cidrsubnet(aws_vpc.vpc.cidr_block, var.subnets_bit_length, each.value)
+  tags = {
+    Name = format("tgw subnet %s", each.value)
+  }
+}
+
+
 // --- Routes ---
 resource "aws_route_table" "public_subnet_rtb" {
   vpc_id = aws_vpc.vpc.id
@@ -50,3 +63,4 @@ resource "aws_route_table_association" "public_rtb_to_public_subnets" {
   route_table_id = aws_route_table.public_subnet_rtb.id
   subnet_id = each.value
 }
+

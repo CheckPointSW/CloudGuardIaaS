@@ -43,5 +43,6 @@ variable "listener_port" {
 variable "certificate_arn" {
   type = string
   description = "The ARN of the default server certificate. Exactly one certificate is required if the protocol is HTTPS or TLS. "
+  default = ""
 }
 
