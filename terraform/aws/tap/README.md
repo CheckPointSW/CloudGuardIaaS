@@ -6,9 +6,9 @@ To learn about Check Point's TAP solution, click [here](CheckPoint_NOW_onboardin
 
 
 These types of Terraform resources are supported:
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html) - TAP Gateway
-* [AWS CloudFormation Stack](https://www.terraform.io/docs/providers/aws/r/cloudformation_stack.html) - creates Traffic Mirror Filter and Target 
-* [AWS Lambdas](https://www.terraform.io/docs/providers/aws/r/lambda_function.html) - TAP Lambda, TAP Termination Lambda
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance) - TAP Gateway
+* [AWS CloudFormation Stack](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) - creates Traffic Mirror Filter and Target 
+* [AWS Lambdas](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) - TAP Lambda, TAP Termination Lambda
 
 Learn more about [TAP Lambda](#TAP-Lambda) and [TAP Termination Lambda](#TAP-Termination-Lambda)
 

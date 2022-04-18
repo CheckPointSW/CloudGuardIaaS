@@ -3,16 +3,16 @@
 Terraform module which deploys a Check Point CloudGuard Network Security Gateway Auto Scaling Group for Transit Gateway with an optional Management Server in a new VPC.
 
 These types of Terraform resources are supported:
-* [VPC](https://www.terraform.io/docs/providers/aws/r/vpc.html)
-* [Subnet](https://www.terraform.io/docs/providers/aws/r/subnet.html)
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [Security Group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
+* [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc)
+* [Subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet)
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Network interface](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface)
 * [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
-* [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html)
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
-* [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
-* [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
+* [EIP](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eip)
+* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
+* [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
 
 See the [CloudGuard Network for AWS Transit Gateway R80.10 and Higher Deployment Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_AWS_Transit_Gateway/Content/Topics-AWS-TGW-R80-10-AG/Introduction.htm) for additional information
 

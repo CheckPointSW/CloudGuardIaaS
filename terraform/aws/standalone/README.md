@@ -3,11 +3,11 @@
 Terraform module which deploys a Check Point CloudGuard Network Security Gateway & Management (Standalone) instance into an existing VPC.
 
 These types of Terraform resources are supported:
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [Security group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
-* [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html) - conditional creation
-* [Route](https://www.terraform.io/docs/providers/aws/r/route.html) - conditional creation
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [Security group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Network interface](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface)
+* [EIP](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eip) - conditional creation
+* [Route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) - conditional creation
 
 
 This solution uses the following modules:
