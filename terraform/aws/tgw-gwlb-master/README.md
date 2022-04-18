@@ -1,13 +1,15 @@
 # Check Point CloudGuard Network Gateway Load Balancer for Transit Gateway Terraform Master module for AWS
 
 Terraform module which deploys an AWS Auto Scaling group configured for Gateway Load Balancer into new Centralized Security VPC for Transit Gateway.
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [Security Group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Load Balancer](https://www.terraform.io/docs/providers/aws/r/lb.html)
-* [Load Balancer Target Group](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html)
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
-* [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
-* [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
+
+These types of Terraform resources are supported:
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Load Balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb)
+* [Load Balancer Target Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group)
+* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
+* [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
 
 See the [Check Point CloudGuard Gateway Load Balancer on AWS](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_AWS_Centralized_Gateway_Load_Balancer/Content/Topics-AWS-GWLB-VPC-DG/Introduction.htm) for additional information
 

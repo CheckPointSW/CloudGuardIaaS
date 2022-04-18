@@ -3,12 +3,12 @@
 Terraform module which deploys a Check Point CloudGuard Network Security Gateway into a new VPC.
 
 These types of Terraform resources are supported:
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [VPC](https://www.terraform.io/docs/providers/aws/r/vpc.html)
-* [Security group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
-* [Route](https://www.terraform.io/docs/providers/aws/r/route.html)
-* [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html) - conditional creation
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc)
+* [Security group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Network interface](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface)
+* [Route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route)
+* [EIP](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/eip) - conditional creation
 
 
 See the [Automatically Provision a CloudGuard Security Gateway in AWS](https://supportcenter.us.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk131434) for additional information

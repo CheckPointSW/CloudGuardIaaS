@@ -3,12 +3,12 @@
 Terraform module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC.
 
 These types of Terraform resources are supported:
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
-* [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
-* [Security group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
+* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
+* [Security group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
 * [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
-* [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
-* [Proxy Elastic Load Balancer](https://www.terraform.io/docs/providers/aws/r/elb.html) - conditional creation
+* [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
+* [Proxy Elastic Load Balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/proxy_protocol_policy) - conditional creation
 
 
 See the [CloudGuard Auto Scaling for AWS](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk112575) for additional information

@@ -3,10 +3,10 @@
 Terraform module which deploys a Check Point CloudGuard Network Multi-Domain Server into an existing VPC.
 
 These types of Terraform resources are supported:
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [Security Group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
-* [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Network interface](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_interface)
+* [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
 
 See the [Multi-Domain Management Deployment on AWS](https://supportcenter.us.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk143213) for additional information
 

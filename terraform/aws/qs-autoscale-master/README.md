@@ -3,16 +3,16 @@
 Terraform module which deploys a Check Point CloudGuard Network Security Gateway Auto Scaling Group, an external ALB/NLB, and optionally a Security Management Server and a web server Auto Scaling Group in a new VPC.
 
 These types of Terraform resources are supported:
-* [VPC](https://www.terraform.io/docs/providers/aws/r/vpc.html)
-* [Subnet](https://www.terraform.io/docs/providers/aws/r/subnet.html)
-* [Route](https://www.terraform.io/docs/providers/aws/r/route.html)
-* [Security Group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
-* [Load Balancer](https://www.terraform.io/docs/providers/aws/r/lb.html)
-* [Load Balancer Target Group](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html)
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
-* [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
-* [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
-* [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
+* [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc)
+* [Subnet](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet)
+* [Route](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route)
+* [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
+* [Load Balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb)
+* [Load Balancer Target Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group)
+* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
+* [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
+* [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
 
 See the [Check Point CloudGuard Auto Scaling on AWS](https://aws.amazon.com/quickstart/architecture/check-point-cloudguard/) for additional information
 
