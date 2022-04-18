@@ -1,6 +1,8 @@
 # Check Point CloudGuard Network Gateway Load Balancer for Transit Gateway Terraform module for AWS
 
 Terraform module which deploys an AWS Auto Scaling group configured for Gateway Load Balancer into existing Centralized Security VPC for Transit Gateway.
+
+These types of Terraform resources are supported:
 * [AWS Instance](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance)
 * [VPC](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc)
 * [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
