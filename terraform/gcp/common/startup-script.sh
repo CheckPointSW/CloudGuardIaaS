@@ -15,9 +15,11 @@ function get_router() {
 function set_mgmt_if() {
     mgmtNIC="${mgmtNIC}"
     local mgmt_int="eth0"
-    if [ "X$mgmtNIC" == "XEphemeral Public IP (eth0)" ]; then
+    if [ "X$mgmtNIC" == "XEphemeral Public IP (eth0)" ]
+    then
         mgmt_int="eth0"
-    elif [ "X$mgmtNIC" == "XPrivate IP (eth1)" ]; then
+    elif [ "X$mgmtNIC" == "XPrivate IP (eth1)" ]
+    then
         mgmt_int="eth1"
     fi
     local set_mgmt_if_out="$(clish -s -c "set management interface $mgmt_int")"
@@ -66,8 +68,10 @@ function post_status() {
     local value
     local instance_id
 
-    if "${hasInternet}" ; then
-        if "$is_success" ; then
+    if "${hasInternet}"
+    then
+        if "$is_success"
+        then
             status="success"
             value="Success"
         else
@@ -84,10 +88,10 @@ function post_status() {
 EOF
     fi
 
-    echo "Creating dynamic objects"
     create_dynamic_objects $installSecurityManagement
 
-    if "$installSecurityGateway" ; then
+    if "$installSecurityGateway"
+    then
 
         set_internal_static_routes
         set_mgmt_if
@@ -96,7 +100,8 @@ EOF
         # DA Self update
 
         DAselfUpdateHappening=$(dbget installer:self_update_in_progress)
-        if [ "X$DAselfUpdateHappening" == "X1" ]; then
+        if [ "X$DAselfUpdateHappening" == "X1" ]
+        then
             oldDApid=$(pidof DAService)
             countdown=121
             while [ $((--countdown)) -gt 0 ]
@@ -104,11 +109,13 @@ EOF
                 sleep 1
                 DApid=$(pidof DAService)
 
-                if [ "$(DApid:-$oldDApid)" -ne "$oldDApid" ]; then
+                if [ "$(DApid:-$oldDApid)" -ne "$oldDApid" ]
+                then
                     break
                 fi
             done
-            if [ $countdown -eq 0 ]; then
+            if [ $countdown -eq 0 ]
+            then
                 dbset installer:self_update_in_progress
             fi
         fi
@@ -116,7 +123,8 @@ EOF
         ##########
     fi
 
-    if [ "$installSecurityManagement" -a "Management only" = "${installationType}" ] ; then
+    if [ "$installSecurityManagement" -a "Management only" = "${installationType}" ]
+    then
         public_ip="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)"
         declare -i attempts=0
         declare -i max_attempts=80
@@ -131,25 +139,30 @@ EOF
         done
         generic_objects="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json)"
         uid="$(echo $generic_objects | jq .objects | jq .[0] | jq .uid)"
-        if [ ! -z "$public_ip" ] && [ ! -z "${uid:1:-1}" ] ; then
-            mgmt_cli -r true set-generic-object uid $uid ipaddr $public_ip
+        uid="$(echo "$uid" | cut -c 2- | rev | cut -c 2- | rev)"
+
+        if [ ! -z "$public_ip" ] && [ ! -z "$uid" ]
+        then
+            mgmt_cli -r true set-generic-object uid "$uid" ipaddr "$public_ip"
         fi
     fi
 
-    if "$need_boot" ; then
-        if [ "${enableMonitoring}" = "True" ] ; then
+    if "$need_boot"
+    then
+        if [ "${enableMonitoring}" = "True" ]
+        then
             chkconfig --add gcp-statd
         fi
         shutdown -r now
     else
         service gcpd restart
-        if [ "${enableMonitoring}" = "True" ] ; then
+        if [ "${enableMonitoring}" = "True" ]
+        then
             chkconfig --add gcp-statd
             service gcp-statd start
         fi
     fi
 }
-
 clish -c 'set user admin shell ${shell}' -s
 
 case "${installationType}" in
@@ -193,13 +206,16 @@ case "${installationType}" in
 esac
 
 conf="install_security_gw=$installSecurityGateway"
-if $installSecurityGateway ; then
+if $installSecurityGateway
+then
     conf="$conf&install_ppak=true"
     blink_conf="gateway_cluster_member=$gatewayClusterMember"
 fi
 conf="$conf&install_security_managment=$installSecurityManagement"
-if $installSecurityManagement ; then
-    if "$generatePassword" ; then
+if $installSecurityManagement
+then
+    if "$generatePassword"
+    then
         managementAdminPassword="$(get-cloud-data.sh \
             computeMetadata/v1/instance/attributes/adminPasswordSourceMetadata)"
         conf="$conf&mgmt_admin_name=admin"
@@ -211,7 +227,8 @@ if $installSecurityManagement ; then
     managementGUIClientNetwork="${managementGUIClientNetwork}"
     conf="$conf&install_mgmt_primary=true"
 
-    if [ "0.0.0.0/0" = "$managementGUIClientNetwork" ]; then
+    if [ "0.0.0.0/0" = "$managementGUIClientNetwork" ]
+    then
         conf="$conf&mgmt_gui_clients_radio=any"
     else
         conf="$conf&mgmt_gui_clients_radio=network"
@@ -230,7 +247,8 @@ blink_conf="$blink_conf&download_info=$allowUploadDownload"
 blink_conf="$blink_conf&upload_info=$allowUploadDownload"
 
 conf="$conf&$blink_conf"
-if "$generatePassword" ; then
+if "$generatePassword"
+then
     blink_password="$(get-cloud-data.sh \
         computeMetadata/v1/instance/attributes/adminPasswordSourceMetadata)"
 else
@@ -239,16 +257,20 @@ else
 fi
 blink_conf="$blink_conf&admin_password_regular=$blink_password"
 
-if [ "Gateway only" = "${installationType}" ] || [ "Cluster" = "${installationType}" ] || [ "AutoScale" = "${installationType}" ]; then
+if [ "Gateway only" = "${installationType}" ] || [ "Cluster" = "${installationType}" ] || [ "AutoScale" = "${installationType}" ]
+then
     config_cmd="blink_config -s $blink_conf"
 else
     config_cmd="config_system -s $conf"
 fi
 
-if $config_cmd ; then
-    if "$installSecurityManagement" ; then
+if $config_cmd
+then
+    if "$installSecurityManagement"
+    then
         post_status true "$installSecurityGateway"
-    elif [ "Cluster" = "${installationType}" ] ; then
+    elif [ "Cluster" = "${installationType}" ]
+    then
         mgmt_subnet_gw="$(get-cloud-data.sh computeMetadata/v1/instance/network-interfaces/1/gateway)"
         sed -i 's/__CLUSTER_PUBLIC_IP_NAME__/'"${primary_cluster_address_name}"'/g' /etc/fw/conf/gcp-ha.json
         sed -i 's/__SECONDARY_PUBLIC_IP_NAME__/'"${secondary_cluster_address_name}"'/g' /etc/fw/conf/gcp-ha.json
@@ -260,4 +282,3 @@ if $config_cmd ; then
 else
     post_status false false
 fi
-echo -e "\nFinished startup script"
