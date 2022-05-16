@@ -66,9 +66,27 @@
         "storageAccountName": "[substring(concat('azurefunction',uniqueString(variables('resourceGroup').id)),0,21)]",
         "applicationInsightsName": "[parameters('appName')]",
         "Reader": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
-        "functionAppId": "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        "functionAppId": "[resourceId('Microsoft.Web/sites', parameters('appName'))]",
+        "workspaceName": "[concat('workspace-',parameters('appName'))]",
+		"workspaceId" : "[resourceId('Microsoft.OperationalInsights/workspaces', concat('workspace-',parameters('appName')))]"
     },
     "resources": [
+        {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "name": "[variables('workspaceName')]",
+          "apiVersion": "2021-06-01",
+          "location": "[parameters('location')]",
+          "properties": {
+              "sku": {
+                  "name": "pergb2018"
+              },
+              "features": {
+                  "searchVersion": 1,
+                  "legacy": 0,
+                  "enableLogAccessUsingOnlyResourcePermissions": "true"
+              }
+          }
+        },
         {
             "apiVersion": "2021-04-01-preview",
             "type": "Microsoft.Authorization/roleAssignments",
@@ -208,7 +226,8 @@
             "location": "[parameters('location')]",
             "properties": {
                 "Application_Type": "web",
-                "Request_Source": "IbizaWebAppExtensionCreate"
+                "Request_Source": "IbizaWebAppExtensionCreate",
+                "WorkspaceResourceId": "[variables('workspaceId')]"
             }
         }
     ]
