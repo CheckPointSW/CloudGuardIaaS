@@ -480,7 +480,7 @@
     "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
-    "templateVersion": "20220130",
+    "templateVersion": "20220512",
     "location": "[parameters('location')]",
     "offers": {
       "R80.30 - Bring Your Own License": "BYOL",
