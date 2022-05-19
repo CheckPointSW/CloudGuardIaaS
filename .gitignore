@@ -138,3 +138,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+azure/templates/marketplace-stack-management/.DS_Store
+azure/templates/.DS_Store
+azure/templates/marketplace-stack-ha/.DS_Store
