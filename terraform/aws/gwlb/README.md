@@ -199,7 +199,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | Template Version | Description   |
 | ---------------- | ------------- |
 | 20220414 | First release of Check Point CloudGuard Network Gateway Load Balancer module for AWS |
-
+| 20220523 | Fix Cross zone load balancing |
 
 
 ## License
