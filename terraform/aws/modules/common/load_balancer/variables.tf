@@ -45,4 +45,8 @@ variable "certificate_arn" {
   description = "The ARN of the default server certificate. Exactly one certificate is required if the protocol is HTTPS or TLS. "
   default = ""
 }
-
+variable "cross_zone_load_balancing"{
+ type = bool
+ default = false
+ description = "Select 'true' to enable cross-az load balancing. NOTE! this may cause a spike in cross-az charges."
+}
