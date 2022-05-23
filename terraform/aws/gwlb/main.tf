@@ -19,6 +19,7 @@ module "gateway_load_balancer" {
   load_balancer_protocol = "GENEVE"
   target_group_port = 6081
   listener_port = 6081
+  cross_zone_load_balancing = var.enable_cross_zone_load_balancing
 }
 
 resource "aws_vpc_endpoint_service" "gwlb_endpoint_service" {
@@ -54,7 +55,7 @@ module "autoscale_gwlb" {
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
   admin_shell = var.admin_shell
-  gateway_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; echo 'Updating cloud-version file'; cv_path='/etc/cloud-version'\n if test -f \"$cv_path\"; then sed -i '/template_name/c\\template_name: autoscale_gwlb' /etc/cloud-version; fi; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"autoscale_gwlb\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; echo -e '\nFinished Bootstrap script\n'"
+  gateway_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; echo 'Updating cloud-version file'; cv_path='/etc/cloud-version'\n if test -f \"$cv_path\"; then sed -i '/template_name/c\\template_name: autoscale_gwlb' /etc/cloud-version; fi; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"autoscale_gwlb\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; fi; echo -e '\nFinished Bootstrap script\n'"
   gateways_provision_address_type = var.gateways_provision_address_type
   management_server = local.deploy_management_condition ? var.management_server : ""
   configuration_template = local.deploy_management_condition ? var.configuration_template : ""
