@@ -5,6 +5,7 @@ resource "aws_lb" "load_balancer" {
   subnets = var.instances_subnets
   security_groups = var.security_groups
   tags = var.tags
+  enable_cross_zone_load_balancing = var.cross_zone_load_balancing
 }
 resource "aws_lb_target_group" "lb_target_group" {
   name  = substr(format("%s-%s", "${var.prefix_name}-TG", replace(uuid(), "-", "")), 0, 32)
