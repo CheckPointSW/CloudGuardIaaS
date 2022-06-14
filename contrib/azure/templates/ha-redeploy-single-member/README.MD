@@ -11,8 +11,9 @@ The template is specially useful in the following use cases:
 
 The logic of the template is to simply replace one VM and re-attach the old NIC’s and Public addresses and deploy on the same resource group as the old VM. 
 
-#NOTE 1: IAM roles must be configured manually since the template fails to update the resource group.
-#NOTE 2: Deploys a new Storage account dedicated to the new deployed VM.
+NOTE 1: IAM roles must be configured manually since the template fails to update the resource group.
+
+NOTE 2: Deploys a new Storage account dedicated to the new deployed VM.
 
 ## How to deploy the template:
 
