@@ -199,8 +199,6 @@ enable_custom_metrics = true
 
 ## Known limitations
 
-1.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
-2.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
 
 ## Revision History
 
