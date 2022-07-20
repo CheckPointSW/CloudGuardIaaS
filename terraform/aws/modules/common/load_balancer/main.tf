@@ -1,6 +1,5 @@
 resource "random_id" "unique-identifier" {
     keepers = {
-        # Generate a new ID only when a new resource group is defined
         prefix = var.prefix_name
     }
     byte_length = 8
