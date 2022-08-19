@@ -1,9 +1,3 @@
-provider "google" {
-  credentials = file(var.service_account_path)
-  project = var.project
-  region = var.region
-}
-
 resource "random_string" "random_string" {
   length = 5
   special = false
@@ -11,9 +5,11 @@ resource "random_string" "random_string" {
   keepers = {}
 }
 data "google_compute_network" "external_network" {
+  project = var.project
   name = var.external_network_name
 }
 data "google_compute_network" "internal_network" {
+  project = var.project
   name = var.internal_network_name
 }
 resource "random_string" "random_sic_key" {
@@ -24,6 +20,7 @@ resource "random_string" "random_sic_key" {
 resource "google_compute_instance_template" "instance_template" {
   name = "${var.prefix}-tmplt-${random_string.random_string.result}"
   machine_type = var.machine_type
+  project = var.project
   can_ip_forward = true
 
 
@@ -114,6 +111,7 @@ resource "google_compute_instance_template" "instance_template" {
 resource "google_compute_firewall" "ICMP_firewall_rules" {
   count = local.ICMP_traffic_condition
   name = "${var.prefix}-icmp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "icmp"
@@ -125,6 +123,7 @@ resource "google_compute_firewall" "ICMP_firewall_rules" {
 resource "google_compute_firewall" "TCP_firewall_rules" {
   count = local.TCP_traffic_condition
   name = "${var.prefix}-tcp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "tcp"
@@ -136,6 +135,7 @@ resource "google_compute_firewall" "TCP_firewall_rules" {
 resource "google_compute_firewall" "UDP_firewall_rules" {
   count = local.UDP_traffic_condition
   name = "${var.prefix}-udp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "udp"
@@ -147,6 +147,7 @@ resource "google_compute_firewall" "UDP_firewall_rules" {
 resource "google_compute_firewall" "SCTP_firewall_rules" {
   count = local.SCTP_traffic_condition
   name = "${var.prefix}-sctp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "sctp"
@@ -158,6 +159,7 @@ resource "google_compute_firewall" "SCTP_firewall_rules" {
 resource "google_compute_firewall" "ESP_firewall_rules" {
   count = local.ESP_traffic_condition
   name = "${var.prefix}-esp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "esp"
@@ -169,6 +171,7 @@ resource "google_compute_firewall" "ESP_firewall_rules" {
 resource "google_compute_region_instance_group_manager" "instance_group_manager" {
   region = var.region
   name = "${var.prefix}-igm-${random_string.random_string.result}"
+  project = var.project
   version {
     instance_template = google_compute_instance_template.instance_template.id
     name = "${var.prefix}-tmplt"
@@ -178,6 +181,7 @@ resource "google_compute_region_instance_group_manager" "instance_group_manager"
 resource "google_compute_region_autoscaler" "autoscaler" {
   region = var.region
   name = "${var.prefix}-autoscaler-${random_string.random_string.result}"
+  project = var.project
   target = google_compute_region_instance_group_manager.instance_group_manager.id
 
   autoscaling_policy {

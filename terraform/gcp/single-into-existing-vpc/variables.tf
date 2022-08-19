@@ -1,8 +1,3 @@
-variable "service_account_path" {
-  type = string
-  description = "User service account path in JSON format - From the service account key page in the Cloud Console choose an existing account or create a new one. Next, download the JSON key file. Name it something you can remember, store it somewhere secure on your machine, and supply the path to the location is stored."
-  default = ""
-}
 variable "project" {
   type = string
   description = "Personal project id. The project indicates the default GCP project all of your resources will be created in."

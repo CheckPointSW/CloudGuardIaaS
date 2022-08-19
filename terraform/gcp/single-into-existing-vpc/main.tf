@@ -1,9 +1,3 @@
-provider "google" {
-  credentials = file(var.service_account_path)
-  project = var.project
-  zone = var.zone
-}
-
 resource "random_string" "random_string" {
   length = 5
   special = false
@@ -12,6 +6,7 @@ resource "random_string" "random_string" {
 }
 data "google_compute_network" "external_network" {
   name = var.network[0]
+  project = var.project
 }
 resource "random_string" "random_sic_key" {
   length = 12
@@ -21,6 +16,7 @@ resource "random_string" "random_sic_key" {
 resource "google_compute_firewall" "ICMP_firewall_rules" {
   count = local.ICMP_traffic_condition
   name = "${var.prefix}-icmp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "icmp"
@@ -32,6 +28,7 @@ resource "google_compute_firewall" "ICMP_firewall_rules" {
 resource "google_compute_firewall" "TCP_firewall_rules" {
   count = local.TCP_traffic_condition
   name = "${var.prefix}-tcp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "tcp"
@@ -43,6 +40,7 @@ resource "google_compute_firewall" "TCP_firewall_rules" {
 resource "google_compute_firewall" "UDP_firewall_rules" {
   count = local.UDP_traffic_condition
   name = "${var.prefix}-udp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "udp"
@@ -58,6 +56,7 @@ resource "random_string" "generated_password" {
 resource "google_compute_firewall" "SCTP_firewall_rules" {
   count = local.SCTP_traffic_condition
   name = "${var.prefix}-sctp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "sctp"
@@ -69,6 +68,7 @@ resource "google_compute_firewall" "SCTP_firewall_rules" {
 resource "google_compute_firewall" "ESP_firewall_rules" {
   count = local.ESP_traffic_condition
   name = "${var.prefix}-esp-${random_string.random_string.result}"
+  project = var.project
   network = data.google_compute_network.external_network.self_link
   allow {
     protocol = "esp"
@@ -81,6 +81,7 @@ resource "google_compute_firewall" "ESP_firewall_rules" {
 resource "google_compute_instance" "gateway" {
   name = "${var.prefix}-${random_string.random_string.result}"
   description = "Check Point Security ${replace(var.installationType,"(Standalone)","--")==var.installationType?split(" ",var.installationType)[0]:" Gateway and Management"}"
+  project = var.project
   zone = var.zone
   labels = {goog-dm = "${var.prefix}-${random_string.random_string.result}"}
   tags =replace(var.installationType,"(Standalone)","--")==var.installationType?[
@@ -210,4 +211,5 @@ resource "google_compute_instance" "gateway" {
 }
 resource "google_compute_address" "static" {
   name = "ipv4-address"
+  project = var.project
 }

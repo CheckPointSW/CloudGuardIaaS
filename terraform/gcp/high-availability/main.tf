@@ -1,9 +1,3 @@
-provider "google" {
-  credentials = file(var.service_account_path)
-  project = var.project
-  region = var.region
-}
-
 resource "random_string" "random_string" {
   length = 5
   special = false
@@ -18,6 +12,7 @@ module "cluster_network_and_subnet" {
   type = "cluster"
   network_cidr = var.cluster_network_cidr
   private_ip_google_access = true
+  project = var.project
   region = var.region
   network_name = var.cluster_network_name
 }
@@ -29,6 +24,7 @@ module "cluster_ICMP_firewall_rules" {
   source_ranges = var.cluster_ICMP_traffic
   rule_name = "${var.prefix}-cluster-icmp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "cluster_TCP_firewall_rules" {
   count = local.cluster_TCP_traffic_condition
@@ -38,6 +34,7 @@ module "cluster_TCP_firewall_rules" {
   source_ranges = var.cluster_TCP_traffic
   rule_name = "${var.prefix}-cluster-tcp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "cluster_UDP_firewall_rules" {
   count = local.cluster_UDP_traffic_condition
@@ -47,6 +44,7 @@ module "cluster_UDP_firewall_rules" {
   source_ranges = var.cluster_UDP_traffic
   rule_name = "${var.prefix}-cluster-udp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "cluster_SCTP_firewall_rules" {
   count = local.cluster_SCTP_traffic_condition
@@ -56,6 +54,7 @@ module "cluster_SCTP_firewall_rules" {
   source_ranges = var.cluster_SCTP_traffic
   rule_name = "${var.prefix}-cluster-sctp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "cluster_ESP_firewall_rules" {
   count = local.cluster_ESP_traffic_condition
@@ -65,6 +64,7 @@ module "cluster_ESP_firewall_rules" {
   source_ranges = var.cluster_ESP_traffic
   rule_name = "${var.prefix}-cluster-esp-${random_string.random_string.result}"
   network = local.create_cluster_network_condition ? module.cluster_network_and_subnet.new_created_network_link : module.cluster_network_and_subnet.existing_network_link
+  project = var.project
 }
 
 module "mgmt_network_and_subnet" {
@@ -76,6 +76,7 @@ module "mgmt_network_and_subnet" {
   private_ip_google_access = false
   region = var.region
   network_name = var.mgmt_network_name
+  project = var.project
 }
 module "mgmt_ICMP_firewall_rules" {
   count = local.mgmt_ICMP_traffic_condition
@@ -85,6 +86,7 @@ module "mgmt_ICMP_firewall_rules" {
   source_ranges = var.mgmt_ICMP_traffic
   rule_name = "${var.prefix}-mgmt-icmp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "mgmt_TCP_firewall_rules" {
   count = local.mgmt_TCP_traffic_condition
@@ -94,6 +96,7 @@ module "mgmt_TCP_firewall_rules" {
   source_ranges = var.mgmt_TCP_traffic
   rule_name = "${var.prefix}-mgmt-tcp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "mgmt_UDP_firewall_rules" {
   count = local.mgmt_UDP_traffic_condition
@@ -103,6 +106,7 @@ module "mgmt_UDP_firewall_rules" {
   source_ranges = var.mgmt_UDP_traffic
   rule_name = "${var.prefix}-mgmt-udp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "mgmt_SCTP_firewall_rules" {
   count = local.mgmt_SCTP_traffic_condition
@@ -112,6 +116,7 @@ module "mgmt_SCTP_firewall_rules" {
   source_ranges = var.mgmt_SCTP_traffic
   rule_name = "${var.prefix}-mgmt-sctp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
+  project = var.project
 }
 module "mgmt_ESP_firewall_rules" {
   count = local.mgmt_ESP_traffic_condition
@@ -121,6 +126,7 @@ module "mgmt_ESP_firewall_rules" {
   source_ranges = var.mgmt_ESP_traffic
   rule_name = "${var.prefix}-mgmt-esp-${random_string.random_string.result}"
   network = local.create_mgmt_network_condition ? module.mgmt_network_and_subnet.new_created_network_link : module.mgmt_network_and_subnet.existing_network_link
+  project = var.project
 }
 
 module "internal_network1_and_subnet" {
@@ -130,6 +136,7 @@ module "internal_network1_and_subnet" {
   type = "internal-network1"
   network_cidr = var.internal_network1_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network1_name
 }
@@ -142,6 +149,7 @@ module "internal_network2_and_subnet" {
   type = "internal-network2"
   network_cidr = var.internal_network2_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network2_name
 }
@@ -154,6 +162,7 @@ module "internal_network3_and_subnet" {
   type = "internal-network3"
   network_cidr = var.internal_network3_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network3_name
 }
@@ -166,6 +175,7 @@ module "internal_network4_and_subnet" {
   type = "internal-network4"
   network_cidr = var.internal_network4_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network4_name
 }
@@ -178,6 +188,7 @@ module "internal_network5_and_subnet" {
   type = "internal-network5"
   network_cidr = var.internal_network5_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network5_name
 }
@@ -190,15 +201,18 @@ module "internal_network6_and_subnet" {
   type = "internal-network6"
   network_cidr = var.internal_network6_cidr
   private_ip_google_access = false
+  project = var.project
   region = var.region
   network_name = var.internal_network6_name
 }
 resource "google_compute_address" "primary_cluster_ip_ext_address" {
   name = "${var.prefix}-primary-cluster-address-${random_string.random_string.result}"
+  project = var.project
   region = var.region
 }
 resource "google_compute_address" "secondary_cluster_ip_ext_address" {
   name = "${var.prefix}-secondary-cluster-address-${random_string.random_string.result}"
+  project = var.project
   region = var.region
 }
 resource "random_string" "generated_password" {

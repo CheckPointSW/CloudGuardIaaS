@@ -1,5 +1,4 @@
 # --- Google Provider ---
-service_account_path                        = "PLEASE ENTER SERVICE_ACCOUNT_PATH"                                        # "service-accounts/service-account-file-name.json"
 project                                     = "PLEASE ENTER PROJECT"                                                     # "project-name"
 
 # --- Check Point Deployment---

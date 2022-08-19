@@ -16,3 +16,8 @@ output "new_created_subnet_name" {
 output "existing_network_name" {
   value = data.google_compute_network.network_name[*].name
 }
+variable "project" {
+  type = string
+  description = "Personal project id. The project indicates the default GCP project all of your resources will be created in."
+  default = ""
+}

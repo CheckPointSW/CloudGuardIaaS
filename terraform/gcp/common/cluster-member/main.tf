@@ -5,12 +5,14 @@ locals {
 
 resource "google_compute_address" "member_ip_address" {
   name = "${var.member_name}-address"
+  project = var.project
   region = var.region
 }
 
 resource "google_compute_instance" "cluster_member" {
   name = var.member_name
   description = "CloudGuard Highly Available Security Cluster"
+  project = var.project
   zone = var.zone
   tags = [
     "checkpoint-gateway"]
@@ -89,7 +91,7 @@ resource "google_compute_instance" "cluster_member" {
   }
 
   service_account {
-    
+
     scopes = [
       "https://www.googleapis.com/auth/monitoring.write",
       "https://www.googleapis.com/auth/compute",

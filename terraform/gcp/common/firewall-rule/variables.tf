@@ -11,6 +11,11 @@ variable "rule_name" {
   type = string
   description = "Firewall rule name."
 }
+variable "project" {
+  type = string
+  description = "Personal project id. The project indicates the default GCP project all of your resources will be created in."
+  default = ""
+}
 variable "network" {
   type = list(string)
   description = "The name or self_link of the network to attach this firewall to."

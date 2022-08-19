@@ -1,9 +1,3 @@
-provider "google" {
-  credentials = file(var.service_account_path)
-  project     = var.project
-  region      = var.region
-}
-
 resource "random_string" "mig_random_string" {
   length = 5
   special = false
@@ -12,22 +6,26 @@ resource "random_string" "mig_random_string" {
 }
 resource "google_compute_network" "external_network" {
   name = "${var.prefix}-ext-network-${random_string.mig_random_string.result}"
+  project = var.project
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "external_subnetwork" {
   name = "${var.prefix}-ext-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.external_subnetwork_ip_cidr_range
+  project = var.project
   region = var.region
   network = google_compute_network.external_network.id
 }
 
 resource "google_compute_network" "internal_network" {
   name = "${var.prefix}-int-network-${random_string.mig_random_string.result}"
+  project = var.project
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "internal_subnetwork" {
   name = "${var.prefix}-int-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.internal_subnetwork_ip_cidr_range
+  project = var.project
   region = var.region
   network = google_compute_network.internal_network.id
 }
