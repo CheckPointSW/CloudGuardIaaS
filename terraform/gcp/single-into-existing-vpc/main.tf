@@ -101,6 +101,7 @@ resource "google_compute_instance" "gateway" {
   network_interface {
     network = var.network[0]
     subnetwork = var.subnetwork[0]
+    subnetwork_project = var.project
     dynamic "access_config" {
       for_each = var.externalIP == "None"? []:[1]
       content {
@@ -115,6 +116,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network1_network[0]
       subnetwork = var.internal_network1_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -123,6 +125,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network2_network[0]
       subnetwork = var.internal_network2_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -131,6 +134,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network3_network[0]
       subnetwork = var.internal_network3_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -139,6 +143,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network4_network[0]
       subnetwork = var.internal_network4_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -147,6 +152,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network5_network[0]
       subnetwork = var.internal_network5_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -155,6 +161,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network6_network[0]
       subnetwork = var.internal_network6_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -163,6 +170,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network7_network[0]
       subnetwork = var.internal_network7_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -171,6 +179,7 @@ resource "google_compute_instance" "gateway" {
     content {
       network = var.internal_network8_network[0]
       subnetwork = var.internal_network8_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
 

@@ -38,6 +38,7 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
     network = data.google_compute_network.external_network.self_link
     subnetwork = var.external_subnetwork_name
+    subnetwork_project = var.project
     dynamic "access_config" {
       for_each = local.mgmt_nic_condition ? [
         1] : []
@@ -50,6 +51,7 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
     network = data.google_compute_network.internal_network.self_link
     subnetwork = var.internal_subnetwork_name
+    subnetwork_project = var.project
   }
 
   scheduling {
