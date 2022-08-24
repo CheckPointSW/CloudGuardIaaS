@@ -33,6 +33,7 @@ resource "google_compute_instance" "cluster_member" {
   network_interface {
     network = var.cluster_network[0]
     subnetwork = var.cluster_network_subnetwork[0]
+    subnetwork_project = var.project
   }
   network_interface {
     network = var.mgmt_network[0]
@@ -47,6 +48,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network1_network[0]
       subnetwork = var.internal_network1_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -55,6 +57,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network2_network[0]
       subnetwork = var.internal_network2_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -63,6 +66,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network3_network[0]
       subnetwork = var.internal_network3_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -71,6 +75,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network4_network[0]
       subnetwork = var.internal_network4_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -79,6 +84,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network5_network[0]
       subnetwork = var.internal_network5_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
   dynamic "network_interface" {
@@ -87,6 +93,7 @@ resource "google_compute_instance" "cluster_member" {
     content {
       network = var.internal_network6_network[0]
       subnetwork = var.internal_network6_subnetwork[0]
+      subnetwork_project = var.project
     }
   }
 
