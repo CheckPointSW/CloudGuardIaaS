@@ -41,6 +41,7 @@ resource "google_compute_instance" "cluster_member" {
     access_config {
       nat_ip = google_compute_address.member_ip_address.address
     }
+    subnetwork_project = var.project
   }
   dynamic "network_interface" {
     for_each = var.num_internal_networks >= 1 ? [
