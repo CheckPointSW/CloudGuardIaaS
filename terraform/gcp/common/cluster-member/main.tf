@@ -30,6 +30,10 @@ resource "google_compute_instance" "cluster_member" {
     }
   }
 
+  lifecycle {
+    ignore_changes = "network_interface.0.access_config"
+  }
+
   network_interface {
     network = var.cluster_network[0]
     subnetwork = var.cluster_network_subnetwork[0]
