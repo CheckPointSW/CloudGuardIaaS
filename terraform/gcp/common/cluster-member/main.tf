@@ -31,7 +31,9 @@ resource "google_compute_instance" "cluster_member" {
   }
 
   lifecycle {
-    ignore_changes = "network_interface.0.access_config"
+    ignore_changes = [
+      network_interface.0.access_config,
+    ]
   }
 
   network_interface {
