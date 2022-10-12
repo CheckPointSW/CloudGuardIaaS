@@ -47,6 +47,7 @@ module "autoscale_gwlb" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   minimum_group_size = var.minimum_group_size
   maximum_group_size = var.maximum_group_size
   gateway_version = var.gateway_version

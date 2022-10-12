@@ -75,6 +75,8 @@ resource "aws_instance" "standalone-instance" {
   instance_type = var.standalone_instance_type
   key_name = var.key_name
 
+  disable_api_termination = var.disable_instance_termination
+
   ami = module.amis.ami_id
   user_data = templatefile("${path.module}/standalone_user_data.sh", {
     // script's arguments

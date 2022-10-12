@@ -138,6 +138,8 @@ resource "aws_instance" "mds-instance" {
   key_name = var.key_name
   iam_instance_profile = local.use_role == 1 ? aws_iam_instance_profile.mds_instance_profile[0].id : ""
 
+  disable_api_termination = var.disable_instance_termination
+
   ami = module.amis.ami_id
   user_data = templatefile("${path.module}/mds_user_data.sh", {
     // script's arguments

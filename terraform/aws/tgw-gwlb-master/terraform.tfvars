@@ -34,6 +34,7 @@ key_name = ""
 enable_volume_encryption = true
 volume_size = 100
 enable_instance_connect = false
+disable_instance_termination = false
 allow_upload_download = true
 management_server = "CP-Management-gwlb-tf"
 configuration_template = "gwlb-configuration"

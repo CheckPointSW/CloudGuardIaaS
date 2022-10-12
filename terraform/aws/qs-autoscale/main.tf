@@ -54,6 +54,7 @@ module "autoscale" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   minimum_group_size = var.gateways_min_group_size
   maximum_group_size = var.gateways_max_group_size
   target_groups = list(module.external_load_balancer.target_group_arn)

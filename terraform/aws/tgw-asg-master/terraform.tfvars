@@ -12,6 +12,7 @@ subnets_bit_length = 8
 key_name = "privatekey"
 enable_volume_encryption = true
 enable_instance_connect = false
+disable_instance_termination = false
 allow_upload_download = true
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---

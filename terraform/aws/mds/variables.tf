@@ -66,6 +66,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Multi-Domain Server EC2 Instance"

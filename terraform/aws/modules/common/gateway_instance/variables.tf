@@ -113,3 +113,8 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}

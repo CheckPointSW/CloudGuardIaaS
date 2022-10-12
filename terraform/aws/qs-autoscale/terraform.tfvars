@@ -9,6 +9,7 @@ vpc_id = "vpc-12345678"
 key_name = "privatekey"
 enable_volume_encryption = true
 enable_instance_connect = false
+disable_instance_termination = false
 allow_upload_download = true
 provision_tag = "quickstart"
 load_balancers_type = "Application Load Balancer"

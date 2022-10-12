@@ -27,6 +27,7 @@ module "gwlb" {
   enable_volume_encryption = var.enable_volume_encryption
   volume_size = var.volume_size
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination  = var.disable_instance_termination
   allow_upload_download = var.allow_upload_download
   management_server = var.management_server
   configuration_template = var.configuration_template

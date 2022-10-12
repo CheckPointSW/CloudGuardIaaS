@@ -47,6 +47,7 @@ module "management" {
   allocate_and_associate_eip = true
   volume_encryption = var.enable_volume_encryption ? "alias/aws/ebs" : ""
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   iam_permissions = var.management_permissions
   predefined_role = var.management_predefined_role
   management_version = var.management_version
