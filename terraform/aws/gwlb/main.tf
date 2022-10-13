@@ -58,8 +58,9 @@ module "autoscale_gwlb" {
   admin_shell = var.admin_shell
   gateway_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; echo 'Updating cloud-version file'; cv_path='/etc/cloud-version'\n if test -f \"$cv_path\"; then sed -i '/template_name/c\\template_name: autoscale_gwlb' /etc/cloud-version; fi; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"autoscale_gwlb\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; fi; echo -e '\nFinished Bootstrap script\n'"
   gateways_provision_address_type = var.gateways_provision_address_type
-  management_server = var.management_server
-  configuration_template = var.configuration_template
+  allocate_public_IP = var.allocate_public_IP
+  management_server = local.deploy_management_condition ? var.management_server : ""
+  configuration_template = local.deploy_management_condition ? var.configuration_template : ""
   volume_type = var.volume_type
 }
 

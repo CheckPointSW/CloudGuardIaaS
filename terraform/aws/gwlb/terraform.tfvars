@@ -30,6 +30,7 @@ gateway_version = "R80.40-BYOL"
 gateway_password_hash = "12345678"
 gateway_SICKey = ""
 gateways_provision_address_type = "private"
+allocate_public_IP = false
 enable_cloudwatch = false
 
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---

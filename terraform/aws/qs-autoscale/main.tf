@@ -57,7 +57,7 @@ module "autoscale" {
   disable_instance_termination = var.disable_instance_termination
   minimum_group_size = var.gateways_min_group_size
   maximum_group_size = var.gateways_max_group_size
-  target_groups = list(module.external_load_balancer.target_group_arn)
+  target_groups = tolist([module.external_load_balancer.target_group_arn])
   gateway_version = var.gateway_version
   gateway_password_hash = var.gateway_password_hash
   gateway_SICKey = var.gateway_SICKey

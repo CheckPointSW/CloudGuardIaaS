@@ -10,6 +10,7 @@ subnet_ids = ["subnet-abc123", "subnet-def456"]
 
 // --- Automatic Provisioning with Security Management Server Settings ---
 gateways_provision_address_type = "private"
+allocate_public_IP = false
 management_server = "mgmt_env1"
 configuration_template = "tmpl_env1"
 
