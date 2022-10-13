@@ -22,6 +22,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - GatewayPredefinedRole
+          - TerminationProtection
       - Label:
           default: Check Point Settings
         Parameters:
@@ -65,6 +66,8 @@ Metadata:
         default: Enable AWS Instance Connect
       GatewayPredefinedRole:
         default: Existing IAM role name
+      TerminationProtection:
+        default: Termination Protection
       GatewayVersion:
         default: Version & license
       Shell:
@@ -87,7 +90,7 @@ Metadata:
         default: Secondary NTP server
 Parameters:
   VPC:
-    Description: Select an existing VPC
+    Description: Select an existing VPC.
     Type: AWS::EC2::VPC::Id
     MinLength: 1
   PublicSubnet:
@@ -99,15 +102,15 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   InternalRouteTable:
-    Description: Set 0.0.0.0/0 route to the Active Cluster member instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Cluster, this requires manual configuration in the Route Table. (optional)
+    Description: The route table id in which to set 0.0.0.0/0 route to the Active Cluster member instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Cluster, this requires manual configuration in the route table. (optional)
     Type: String
     Default: ''
   GatewayName:
-    Description: The name tag of the Security Gateway instances (optional)
+    Description: The name tag of the Security Gateway instances. (optional)
     Type: String
     Default: Check-Point-Cluster
   GatewayInstanceType:
-    Description: The instance type of the Secutiry Gateway
+    Description: The instance type of the Secutiry Gateway.
     Type: String
     Default: c5.xlarge
     AllowedValues:
@@ -175,7 +178,7 @@ Parameters:
       - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
@@ -198,20 +201,27 @@ Parameters:
       - gp3
       - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Enable SSH connection over AWS web console
+    Description: Enable SSH connection over AWS web console.
     Type: String
     Default: false
     AllowedValues:
       - true
       - false
   GatewayPredefinedRole:
-    Description: A predefined IAM role to attach to the cluster profile (optional)
+    Description: A predefined IAM role to attach to the cluster profile. (optional)
     Type: String
     Default: ''
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.10-BYOL
@@ -226,7 +236,7 @@ Parameters:
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -235,32 +245,32 @@ Parameters:
       - /bin/csh
       - /bin/tcsh
   GatewayPasswordHash:
-    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD".
       to get the PASSWORD's hash) (optional)
     Type: String
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
   GatewaySICKey:
-    Description: The Secure Internal Communication key creates trusted connections
+    Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
       8 alphanumeric characters
     Type: String
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
-    ConstraintDescription: At least 8 alpha numeric characters
+    ConstraintDescription: At least 8 alpha numeric characters.
     NoEcho: true
   ResourcesTagName:
-    Description: Name tag prefix of the resources (optional)
+    Description: Name tag prefix of the resources (optional).
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The host name will be appended with member-a/b accordingly (optional)
+    Description: The host name will be appended with member-a/b accordingly. (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
+    Description: Automatically download updates and share statistical data for product improvement purpose.
       Improve product experience by sending data to Check Point
     Type: String
     Default: true
@@ -268,7 +278,7 @@ Parameters:
       - true
       - false
   GatewayBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -321,7 +331,7 @@ Resources:
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Permissive security group
+      GroupDescription: Permissive security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: -1
@@ -337,7 +347,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     DependsOn: PermissiveSecurityGroup
     Properties:
-      Description: Member A external
+      Description: Member A external.
       SecondaryPrivateIpAddressCount: 1
       SourceDestCheck: false
       GroupSet: [!Ref PermissiveSecurityGroup]
@@ -353,7 +363,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     DependsOn: PermissiveSecurityGroup
     Properties:
-      Description: Member B external
+      Description: Member B external.
       SourceDestCheck: false
       GroupSet: [!Ref PermissiveSecurityGroup]
       SubnetId: !Ref PublicSubnet
@@ -368,7 +378,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     DependsOn: PermissiveSecurityGroup
     Properties:
-      Description: Member A internal
+      Description: Member A internal.
       SecondaryPrivateIpAddressCount: 1
       GroupSet: [!Ref PermissiveSecurityGroup]
       SourceDestCheck: false
@@ -384,7 +394,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     DependsOn: PermissiveSecurityGroup
     Properties:
-      Description: Member B internal
+      Description: Member B internal.
       GroupSet: [!Ref PermissiveSecurityGroup]
       SourceDestCheck: false
       SubnetId: !Ref PrivateSubnet
@@ -432,6 +442,7 @@ Resources:
         - DeviceIndex: 1
           NetworkInterfaceId: !Ref MemberAInternalInterface
       IamInstanceProfile: !Ref ClusterInstanceProfile
+      DisableApiTermination: !Ref TerminationProtection
       UserData:
         'Fn::Base64':
           !Join
@@ -563,6 +574,7 @@ Resources:
         - DeviceIndex: 1
           NetworkInterfaceId: !Ref MemberBInternalInterface
       IamInstanceProfile: !Ref ClusterInstanceProfile
+      DisableApiTermination: !Ref TerminationProtection
       UserData:
         'Fn::Base64':
           !Join
@@ -710,29 +722,29 @@ Resources:
       PrivateIpAddress: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
 Outputs:
   ClusterPublicAddress:
-    Description: The public address of the cluster
+    Description: The public address of the cluster.
     Value: !Ref ClusterPublicAddress
   MemberAPublicAddress:
     Condition: AllocateAddress
-    Description: The public address of member A
+    Description: The public address of member A.
     Value: !Ref MemberAPublicAddress
   MemberASSH:
     Condition: AllocateAddress
-    Description: SSH command to member A
+    Description: SSH command to member A.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref MemberAPublicAddress]]
   MemberAURL:
     Condition: AllocateAddress
-    Description: URL to the member A portal
+    Description: URL to the member A portal.
     Value: !Join ['', ['https://', !Ref MemberAPublicAddress]]
   MemberBPublicAddress:
     Condition: AllocateAddress
-    Description: The public address of member B
+    Description: The public address of member B.
     Value: !Ref MemberBPublicAddress
   MemberBSSH:
     Condition: AllocateAddress
-    Description: SSH command to member B
+    Description: SSH command to member B.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref MemberBPublicAddress]]
   MemberBURL:
     Condition: AllocateAddress
-    Description: URL to the member B portal
+    Description: URL to the member B portal.
     Value: !Join ['', ['https://', !Ref MemberBPublicAddress]]

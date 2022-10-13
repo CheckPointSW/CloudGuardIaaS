@@ -21,6 +21,7 @@ Metadata:
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
+          - TerminationProtection
       - Label:
           default: Check Point Settings
         Parameters:
@@ -68,6 +69,8 @@ Metadata:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
       GatewayVersion:
         default: Gateway Version & license
       Shell:
@@ -96,7 +99,7 @@ Metadata:
         default: Configuration template
 Parameters:
   AvailabilityZone:
-    Description: The availability zone in which to deploy the instance
+    Description: The availability zone in which to deploy the instance.
     Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
   VPCCIDR:
@@ -104,20 +107,20 @@ Parameters:
     Type: String
     Default: 10.0.0.0/16
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   PublicSubnetCIDR:
-    Description: The public subnet of the Security Gateway
+    Description: The public subnet of the Security Gateway.
     Type: String
     Default: 10.0.10.0/24
   PrivateSubnetCIDR:
-    Description: The private subnet of the Security Gateway
+    Description: The private subnet of the Security Gateway.
     Type: String
     Default: 10.0.11.0/24
   GatewayName:
     Type: String
     Default: Check-Point-Gateway
   GatewayInstanceType:
-    Description: The instance type of the Secutiry Gateways
+    Description: The instance type of the Secutiry Gateways.
     Type: String
     Default: c5.xlarge
     AllowedValues:
@@ -185,7 +188,7 @@ Parameters:
       - m6a.24xlarge
     ConstraintDescription: Must be a valid EC2 instance type
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
@@ -207,11 +210,18 @@ Parameters:
       - gp3
       - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Ec2 Instance Connect is not supported with versions prior to R80.40
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
     AllowedValues:
@@ -231,7 +241,7 @@ Parameters:
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -242,19 +252,19 @@ Parameters:
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections
       between Check Point components. Choose a random string consisting of at least
-      8 alphanumeric characters
+      8 alphanumeric characters.
     Type: String
     AllowedPattern: '[a-zA-Z0-9]{8,}'
     NoEcho: true
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash) (optional)
+      to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ResourcesTagName:
-    Description: The name tag of the resources (optional)
+    Description: The name tag of the resources. (optional)
     Type: String
     Default: ''
   GatewayHostname:
@@ -262,17 +272,16 @@ Parameters:
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
   GatewayBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -287,7 +296,7 @@ Parameters:
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
   ControlGatewayOverPrivateOrPublicAddress:
-    Description: Determines if the Security Gateway is provisioned using its private
+    Description: Determines if the Security Gateway is provisioned using its private.
       or public address
     Type: String
     Default: private
@@ -295,12 +304,12 @@ Parameters:
       - private
       - public
   ManagementServer:
-    Description: The name that represents the Security Management Server in the automatic
-      provisioning configuration
+    Description: The name that represents the Security Management Server in the automatic.
+      provisioning configuration.
     Type: String
   ConfigurationTemplate:
-    Description: A name of a Security Gateway configuration template in the automatic
-      provisioning configuration
+    Description: A name of a Security Gateway configuration template in the automatic.
+      provisioning configuration.
     Type: String
 Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
@@ -351,6 +360,7 @@ Resources:
         VolumeType: !Ref VolumeType
         VolumeEncryption: !Ref VolumeEncryption
         EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewaySICKey: !Ref GatewaySICKey
@@ -367,22 +377,22 @@ Resources:
 Outputs:
   CheckPointInstancePublicAddress:
     Condition: AllocateAddress
-    Description: The public address of the Check Point instance
+    Description: The public address of the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.PublicAddress
   CheckPointInstanceSSH:
     Condition: AllocateAddress
-    Description: SSH command to the Check Point instance
+    Description: SSH command to the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.SSH
   CheckPointInstanceURL:
     Condition: AllocateAddress
     Description: URL to the portal
     Value: !GetAtt GatewayStack.Outputs.URL
   ManagementName:
-    Description: The name that represents the Security Management Server
+    Description: The name that represents the Security Management Server.
     Value: !Ref ManagementServer
   ConfigurationTemplateName:
     Description: The name that represents the configuration template. Configurations
       required to automatically provision the Gateways in the Auto Scaling Group,
       such as what Security Policy to install and which Blades to enable, will be
-      placed under this template name
+      placed under this template name.
     Value: !Ref ConfigurationTemplate

@@ -102,19 +102,19 @@ Metadata:
         default: Allowed proxy clients
 Parameters:
   VPC:
-    Description: Select an existing VPC
+    Description: Select an existing VPC.
     Type: AWS::EC2::VPC::Id
     MinLength: 1
   GatewaysSubnets:
-    Description: Select at least 2 public subnets in the VPC
+    Description: Select at least 2 public subnets in the VPC.
     Type: List<AWS::EC2::Subnet::Id>
     MinLength: 2
   GatewayName:
-    Description: The name tag of the Security Gateway instances (optional)
+    Description: The name tag of the Security Gateway instances. (optional)
     Type: String
     Default: Check-Point-Gateway
   GatewayInstanceType:
-    Description: The instance type of the Secutiry Gateways
+    Description: The instance type of the Secutiry Gateways.
     Type: String
     Default: c5.xlarge
     AllowedValues:
@@ -182,7 +182,7 @@ Parameters:
       - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instances
+    Description: The EC2 Key Pair to allow SSH access to the instances.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
@@ -198,37 +198,37 @@ Parameters:
       - gp3
       - gp2
   EnableVolumeEncryption:
-    Description: Encrypt Auto Scaling instances volume with default AWS KMS key
+    Description: Encrypt Auto Scaling instances volume with default AWS KMS key.
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
   EnableInstanceConnect:
-    Description: Enable SSH connection over AWS web console
+    Description: Enable SSH connection over AWS web console.
     Type: String
     Default: false
     AllowedValues:
       - true
       - false
   GatewaysMinSize:
-    Description: The minimal number of gateways in the Auto Scaling group
+    Description: The minimal number of gateways in the Auto Scaling group.
     Type: Number
     Default: 2
     MinValue: 1
   GatewaysMaxSize:
-    Description: The maximal number of gateways in the Auto Scaling group
+    Description: The maximal number of gateways in the Auto Scaling group.
     Type: Number
     Default: 10
     MinValue: 1
   AdminEmail:
-    Description: Notifications about scaling events will be sent to this email address (optional)
+    Description: Notifications about scaling events will be sent to this email address. (optional)
     Type: String
     Default: ''
     AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
     ConstraintDescription: Must be a valid email address.
   GatewaysTargetGroups:
-    Description: A list of Target Groups to associate with the Auto Scaling
+    Description: A list of Target Groups to associate with the Auto Scaling.
       group (comma separated list of ARNs, without spaces) (optional)
     Type: String
     Default: ''
@@ -246,7 +246,7 @@ Parameters:
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -255,22 +255,22 @@ Parameters:
       - /bin/csh
       - /bin/tcsh
   GatewayPasswordHash:
-    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD".
       to get the PASSWORD's hash) (optional)
     Type: String
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
   GatewaySICKey:
-    Description: The Secure Internal Communication key creates trusted connections
+    Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
       8 alphanumeric characters.
     Type: String
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
-    ConstraintDescription: At least 8 alpha numeric characters
+    ConstraintDescription: At least 8 alpha numeric characters.
     NoEcho: true
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
+    Description: Automatically download updates and share statistical data for product improvement purpose.
       Improve product experience by sending data to Check Point
     Type: String
     Default: true
@@ -278,31 +278,31 @@ Parameters:
       - true
       - false
   CloudWatch:
-    Description: Report Check Point specific CloudWatch metrics
+    Description: Report Check Point specific CloudWatch metrics.
     Type: String
     Default: false
     AllowedValues:
       - true
       - false
   GatewayBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
   ControlGatewayOverPrivateOrPublicAddress:
-    Description: Determines if the gateways are provisioned using their private or public address
+    Description: Determines if the gateways are provisioned using their private or public address.
     Type: String
     Default: private
     AllowedValues:
       - private
       - public
   ManagementServer:
-    Description: The name that represents the Security Management Server in the automatic provisioning configuration
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
     Type: String
     Default: management-server
     MinLength: 1
   ConfigurationTemplate:
-    Description: A name of a gateway configuration template in the automatic provisioning configuration
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
     Type: String
     Default: ASG-configuration
     MinLength: 1
@@ -402,7 +402,7 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['_', [!Ref 'AWS::StackName', PermissiveSecurityGroup]]
-      GroupDescription: Permissive security group
+      GroupDescription: Permissive security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: -1
@@ -529,7 +529,7 @@ Resources:
   CPUAlarmHigh:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: Scale-up if CPU > 80% for 10 minutes
+      AlarmDescription: Scale-up if CPU > 80% for 10 minutes.
       MetricName: CPUUtilization
       Namespace: AWS/EC2
       Statistic: Average
@@ -545,7 +545,7 @@ Resources:
   CPUAlarmLow:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: Scale-down if CPU < 60% for 10 minutes
+      AlarmDescription: Scale-down if CPU < 60% for 10 minutes.
       MetricName: CPUUtilization
       Namespace: AWS/EC2
       Statistic: Average
@@ -562,7 +562,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Condition: CreateELB
     Properties:
-      GroupDescription: ELB security group
+      GroupDescription: ELB security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -571,9 +571,9 @@ Resources:
           ToPort: !Ref ELBPort
 Outputs:
   URL:
-    Description: The URL of the Proxy
+    Description: The URL of the Proxy.
     Condition: CreateELB
     Value: !Join ['', ['http://', !GetAtt ElasticLoadBalancer.DNSName]]
   SecurityGroup:
-    Description: The Security Group of the Auto Scaling group
+    Description: The Security Group of the Auto Scaling group.
     Value: !GetAtt PermissiveSecurityGroup.GroupId

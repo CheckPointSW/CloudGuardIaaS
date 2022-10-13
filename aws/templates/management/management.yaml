@@ -19,6 +19,7 @@ Metadata:
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
+          - TerminationProtection
       - Label:
           default: IAM Permissions (ignored when the installation is not Primary Management
             Server)
@@ -66,6 +67,8 @@ Metadata:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
       ManagementPermissions:
         default: IAM role
       ManagementPredefinedRole:
@@ -100,20 +103,20 @@ Metadata:
         default: Secondary NTP server
 Parameters:
   VPC:
-    Description: Select an existing VPC
+    Description: Select an existing VPC.
     Type: AWS::EC2::VPC::Id
     MinLength: 1
   ManagementSubnet:
     Description: To access the instance from the internet, make sure the subnet has
-      a route to the internet
+      a route to the internet.
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   ManagementName:
-    Description: The Management name tag
+    Description: The Management name tag.
     Type: String
     Default: Check-Point-Management
   ManagementInstanceType:
-    Description: The instance type of the Security Management Server
+    Description: The instance type of the Security Management Server.
     Type: String
     Default: m5.xlarge
     AllowedValues:
@@ -180,12 +183,12 @@ Parameters:
       - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
   AllocatePublicAddress:
-    Description: Allocate an elastic IP for the Management
+    Description: Allocate an elastic IP for the Management.
     Type: String
     Default: true
     AllowedValues:
@@ -203,18 +206,25 @@ Parameters:
       - gp3
       - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Enable SSH connection over AWS web console
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
     AllowedValues:
       - true
       - false
   ManagementPermissions:
-    Description: IAM role to attach to the instance profile
+    Description: IAM role to attach to the instance profile.
     Type: String
     Default: Create with read permissions
     AllowedValues:
@@ -224,18 +234,18 @@ Parameters:
       - Create with read permissions
       - Create with read-write permissions
   ManagementPredefinedRole:
-    Description: A predefined IAM role to attach to the instance profile. Ignored
+    Description: A predefined IAM role to attach to the instance profile. Ignored.
       if IAM role is not set to 'Use existing'
     Type: String
     Default: ''
   ManagementSTSRoles:
     Description: The IAM role will be able to assume these STS Roles (comma separated
       list of ARNs, without spaces). Ignored if IAM role is set to 'None' or 'Use
-      existing'
+      existing'.
     Type: CommaDelimitedList
     Default: ''
   ManagementVersion:
-    Description: The license to install on the Security Management Server
+    Description: The license to install on the Security Management Server.
     Type: String
     Default: R81.10-BYOL
     AllowedValues:
@@ -246,7 +256,7 @@ Parameters:
       - R81.10-BYOL
       - R81.10-PAYG
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -256,7 +266,7 @@ Parameters:
       - /bin/tcsh
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash) (optional)
+      to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
@@ -266,9 +276,9 @@ Parameters:
     Type: String
     Default: mgmt-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   PrimaryManagement:
-    Description: Determines if this is the primary Management Server or not
+    Description: Determines if this is the primary Management Server or not.
     Type: String
     Default: true
     AllowedValues:
@@ -278,16 +288,15 @@ Parameters:
     Description: >-
       Mandatory only if deploying a secondary Management Server, the Secure Internal
       Communication key creates trusted connections between Check Point components.
-      Choose a random string consisting of at least 8 alphanumeric characters
+      Choose a random string consisting of at least 8 alphanumeric characters.
     Type: String
     Default: ''
     AllowedPattern: '(|[a-zA-Z0-9]{8,})'
     ConstraintDescription: Can be empty if this is a primary Management Server. Otherwise,
-      at least 8 alpha numeric characters
+      at least 8 alpha numeric characters.
     NoEcho: true
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
@@ -295,24 +304,24 @@ Parameters:
       - false
   AdminCIDR:
     Description: Allow web, SSH, and graphical clients only from this network to communicate
-      with the Management Server
+      with the Management Server.
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewaysAddresses:
     Description: Allow gateways only from this network to communicate with the Management
-      Server
+      Server.
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewayManagement:
     Description: Select 'Over the internet' if any of the gateways you wish to manage
-      are not directly accessed via their private IP address
+      are not directly accessed via their private IP address.
     Type: String
     Default: Locally managed
     AllowedValues:
       - Locally managed
       - Over the internet
   ManagementBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -450,6 +459,7 @@ Resources:
             KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
             VolumeType: !Ref VolumeType
             VolumeSize: !Ref VolumeSize
+      DisableApiTermination: !Ref TerminationProtection
       UserData:
         'Fn::Base64':
           !Join
@@ -591,13 +601,13 @@ Resources:
 Outputs:
   PublicAddress:
     Condition: EIP
-    Description: The public address of the Management Server
+    Description: The public address of the Management Server.
     Value: !Ref PublicAddress
   SSH:
     Condition: EIP
-    Description: SSH command
+    Description: SSH command.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
   URL:
     Condition: EIP
-    Description: URL to the portal
+    Description: URL to the portal.
     Value: !Join ['', ['https://', !Ref PublicAddress]]
