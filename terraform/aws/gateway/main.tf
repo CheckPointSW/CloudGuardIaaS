@@ -79,4 +79,5 @@ module "common_gateway_instance" {
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
 }

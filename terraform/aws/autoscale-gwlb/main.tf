@@ -37,7 +37,7 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
   instance_type = var.gateway_instance_type
   key_name = var.key_name
   security_groups = [aws_security_group.permissive_sg.id]
-  associate_public_ip_address = true
+  associate_public_ip_address = var.allocate_public_IP
   iam_instance_profile = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
 
   root_block_device {

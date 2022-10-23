@@ -1,5 +1,7 @@
 locals {
   gw_types = [
+    "c4.large",
+    "c4.xlarge",
     "c5.large",
     "c5.xlarge",
     "c5.2xlarge",

@@ -11,6 +11,7 @@ key_name = "privatekey"
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
 enable_instance_connect = false
+disable_instance_termination = false
 instance_tags = {
   key1 = "value1"
   key2 = "value2"

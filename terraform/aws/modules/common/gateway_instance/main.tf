@@ -27,6 +27,8 @@ resource "aws_instance" "gateway_instance" {
   instance_type = var.gateway_instance_type
   key_name = var.key_name
 
+  disable_api_termination = var.disable_instance_termination
+
   ami = var.ami_id
   user_data = templatefile("${path.module}/gw_user_data.sh", {
     // script's arguments

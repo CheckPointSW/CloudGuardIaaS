@@ -18,9 +18,11 @@ Metadata:
           - KeyName
           - AllocatePublicAddress
           - VolumeSize
+          - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
           - GatewayPredefinedRole
+          - TerminationProtection
       - Label:
           default: Check Point Settings
         Parameters:
@@ -56,12 +58,16 @@ Metadata:
         default: Allocate Elastic IPs
       VolumeSize:
         default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
       VolumeEncryption:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
       GatewayPredefinedRole:
         default: Existing IAM role name
+      TerminationProtection:
+        default: Termination Protection
       GatewayVersion:
         default: Version & license
       Shell:
@@ -84,36 +90,38 @@ Metadata:
         default: Secondary NTP server
 Parameters:
   AvailabilityZone:
-    Description: The availability zone in which to deploy the cluster
+    Description: The availability zone in which to deploy the cluster.
     Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
   VPCCIDR:
-    Description: The CIDR block for your VPC
+    Description: The CIDR block for your VPC.
     Type: String
     Default: 10.0.0.0/16
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   PublicSubnetCIDR:
     Description: The external subnet of the cluster. The cluster's public IPs will be generated from this subnet.
     Type: String
     Default: 10.0.10.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   PrivateSubnetCIDR:
     Description: The internal subnet of the cluster. The cluster's private IPs will be generated from this subnet.
     Type: String
     Default: 10.0.11.0/24
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   GatewayName:
-    Description: The name tag of the Security Gateway instances (optional)
+    Description: The name tag of the Security Gateway instances. (optional)
     Type: String
     Default: Check-Point-Cluster
   GatewayInstanceType:
-    Description: The instance type of the Secutiry Gateway
+    Description: The instance type of the Secutiry Gateway.
     Type: String
     Default: c5.xlarge
     AllowedValues:
+      - c4.large
+      - c4.xlarge
       - c5.large
       - c5.xlarge
       - c5.2xlarge
@@ -126,9 +134,57 @@ Parameters:
       - c5n.4xlarge
       - c5n.9xlarge
       - c5n.18xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.12xlarge
+      - m6i.24xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.12xlarge
+      - c6i.24xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.12xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.12xlarge
+      - r5n.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.12xlarge
+      - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
   AllocatePublicAddress:
@@ -142,21 +198,35 @@ Parameters:
     Type: Number
     Default: 100
     MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Enable SSH connection over AWS web console
+    Description: Enable SSH connection over AWS web console.
     Default: false
     Type: String
     AllowedValues:
       - true
       - false
   GatewayPredefinedRole:
-    Description: A predefined IAM role to attach to the cluster profile (optional)
+    Description: A predefined IAM role to attach to the cluster profile. (optional)
     Type: String
     Default: ''
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.10-BYOL
@@ -171,7 +241,7 @@ Parameters:
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -180,40 +250,39 @@ Parameters:
       - /bin/csh
       - /bin/tcsh
   GatewayPasswordHash:
-    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD".
       to get the PASSWORD's hash) (optional)
     Type: String
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
   GatewaySICKey:
-    Description: The Secure Internal Communication key creates trusted connections
+    Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
       8 alphanumeric characters
     Type: String
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
-    ConstraintDescription: At least 8 alpha numeric characters
+    ConstraintDescription: At least 8 alpha numeric characters.
     NoEcho: true
   ResourcesTagName:
-    Description: Name tag prefix of the resources (optional)
+    Description: Name tag prefix of the resources (optional).
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The host name will be appended with member-a/b accordingly (optional)
+    Description: The host name will be appended with member-a/b accordingly. (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
   GatewayBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -263,9 +332,11 @@ Resources:
         KeyName: !Ref KeyName
         AllocatePublicAddress: !Ref AllocatePublicAddress
         VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
         VolumeEncryption: !Ref VolumeEncryption
         EnableInstanceConnect: !Ref EnableInstanceConnect
         GatewayPredefinedRole: !Ref GatewayPredefinedRole
+        TerminationProtection: !Ref TerminationProtection
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
@@ -278,29 +349,29 @@ Resources:
         NTPSecondary: !Ref NTPSecondary
 Outputs:
   ClusterPublicAddress:
-    Description: The public address of the cluster
+    Description: The public address of the cluster.
     Value: !GetAtt ClusterStack.Outputs.ClusterPublicAddress
   MemberAPublicAddress:
     Condition: AllocateAddress
-    Description: The public address of member A
+    Description: The public address of member A.
     Value: !GetAtt ClusterStack.Outputs.MemberAPublicAddress
   MemberASSH:
     Condition: AllocateAddress
-    Description: SSH command to member A
+    Description: SSH command to member A.
     Value: !GetAtt ClusterStack.Outputs.MemberASSH
   MemberAURL:
     Condition: AllocateAddress
-    Description: URL to the member A portal
+    Description: URL to the member A portal.
     Value: !GetAtt ClusterStack.Outputs.MemberAURL
   MemberBPublicAddress:
     Condition: AllocateAddress
-    Description: The public address of member B
+    Description: The public address of member B.
     Value: !GetAtt ClusterStack.Outputs.MemberBPublicAddress
   MemberBSSH:
     Condition: AllocateAddress
-    Description: SSH command to member B
+    Description: SSH command to member B.
     Value: !GetAtt ClusterStack.Outputs.MemberBSSH
   MemberBURL:
     Condition: AllocateAddress
-    Description: URL to the member B portal
+    Description: URL to the member B portal.
     Value: !GetAtt ClusterStack.Outputs.MemberBURL

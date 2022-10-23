@@ -64,6 +64,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"

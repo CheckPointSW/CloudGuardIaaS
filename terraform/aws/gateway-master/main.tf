@@ -45,6 +45,7 @@ module "launch_gateway_into_vpc" {
   volume_size = var.volume_size
   volume_encryption = var.volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   instance_tags = var.instance_tags
   gateway_version = var.gateway_version
   admin_shell = var.admin_shell

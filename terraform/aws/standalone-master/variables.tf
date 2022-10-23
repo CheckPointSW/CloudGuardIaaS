@@ -82,6 +82,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Standalone EC2 Instance"
@@ -92,7 +97,7 @@ variable "instance_tags" {
 variable "standalone_version" {
   type = string
   description =  "Gateway & Management (Standalone) version and license"
-  default = "R81-BYOL"
+  default = "R81-PAYG-NGTP"
 }
 module "validate_standalone_version" {
   source = "../modules/common/version_license"

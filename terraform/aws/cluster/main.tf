@@ -122,6 +122,8 @@ resource "aws_instance" "member-a-instance" {
   key_name = var.key_name
   iam_instance_profile = aws_iam_instance_profile.cluster_instance_profile.id
 
+  disable_api_termination = var.disable_instance_termination
+
   ami = module.amis.ami_id
   user_data = templatefile("${path.module}/cluster_member_a_user_data.sh", {
     // script's arguments
@@ -171,6 +173,8 @@ resource "aws_instance" "member-b-instance" {
   instance_type = var.gateway_instance_type
   key_name = var.key_name
   iam_instance_profile = aws_iam_instance_profile.cluster_instance_profile.id
+
+  disable_api_termination = var.disable_instance_termination
 
   ami = module.amis.ami_id
   user_data = templatefile("${path.module}/cluster_member_b_user_data.sh", {

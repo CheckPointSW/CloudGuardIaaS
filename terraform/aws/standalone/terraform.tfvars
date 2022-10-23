@@ -14,13 +14,14 @@ allocate_and_associate_eip = true
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
 enable_instance_connect = false
+disable_instance_termination = false
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
 }
 
 // --- Check Point Settings ---
-standalone_version = "R81-BYOL"
+standalone_version = "R81-PAYG-NGTP"
 admin_shell = "/bin/bash"
 standalone_password_hash = "12345678"
 
