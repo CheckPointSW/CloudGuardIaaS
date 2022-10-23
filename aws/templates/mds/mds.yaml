@@ -446,8 +446,6 @@ Resources:
             - '        sleep 30'
             - '    done'
             - 'fi'
-            - 'chkconfig --add autoprovision'
-            - 'service autoprovision start'
             - 'if [[ -n ${bootstrap} ]]; then'
             - '    echo "Invoking bootstrap script"'
             - '    eval ${bootstrap}'

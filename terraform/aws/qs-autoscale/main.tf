@@ -54,7 +54,6 @@ module "autoscale" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
-  disable_instance_termination = var.disable_instance_termination
   minimum_group_size = var.gateways_min_group_size
   maximum_group_size = var.gateways_max_group_size
   target_groups = tolist([module.external_load_balancer.target_group_arn])
@@ -84,6 +83,7 @@ module "management" {
   key_name = var.key_name
   volume_encryption = var.enable_volume_encryption ? "alias/aws/ebs" : ""
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   iam_permissions = "Create with read-write permissions"
   management_version = var.management_version
   management_password_hash = var.management_password_hash

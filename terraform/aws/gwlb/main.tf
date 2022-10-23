@@ -47,7 +47,6 @@ module "autoscale_gwlb" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
-  disable_instance_termination = var.disable_instance_termination
   minimum_group_size = var.minimum_group_size
   maximum_group_size = var.maximum_group_size
   gateway_version = var.gateway_version
@@ -81,6 +80,7 @@ module "management" {
   allocate_and_associate_eip = true
   volume_encryption = var.enable_volume_encryption ? "alias/aws/ebs" : ""
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   management_version = var.management_version
   management_password_hash = var.management_password_hash
   allow_upload_download = var.allow_upload_download

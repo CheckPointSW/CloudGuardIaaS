@@ -580,8 +580,6 @@ Resources:
             - '        mgmt_cli -r true set-generic-object uid "${uid}" ipaddr "${pub_addr}"'
             - '    fi'
             - 'fi'
-            - 'chkconfig --add autoprovision'
-            - 'service autoprovision start'
             - 'if [[ -n ${bootstrap} ]]; then'
             - '    echo "Invoking bootstrap script"'
             - '    eval ${bootstrap}'
