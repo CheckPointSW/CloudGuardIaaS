@@ -81,8 +81,6 @@ if $primary; then
 fi
 
 echo "Running service autoprovision start..."
-chkconfig --add autoprovision
-service autoprovision start
 
 if ${EnableInstanceConnect}; then
     if [ -d "/etc/ec2-instance-connect" ]; then

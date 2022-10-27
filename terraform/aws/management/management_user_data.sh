@@ -73,8 +73,6 @@ if test $rc -eq 0 && $primary; then
     done
 fi
 echo "Running service autoprovision start..."
-chkconfig --add autoprovision
-service autoprovision start
 
 if ${AllocateElasticIP} && [[ "${GatewayManagement}" == "Over the internet" ]]; then
     addr="$(ip addr show dev eth0 | sed -n -e 's|^ *inet \([^/]*\)/.* eth0$|\1|p')"
