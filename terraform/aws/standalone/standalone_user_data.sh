@@ -65,8 +65,6 @@ if ${EnableInstanceConnect}; then
 fi
 
 echo "Running service autoprovision start..."
-chkconfig --add autoprovision
-service autoprovision start
 
 if [[ -n "${StandaloneBootstrapScript}" ]]; then
     echo "Running Bootstrap commands"
