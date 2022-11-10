@@ -62,7 +62,6 @@ properties:
     type: string
     default: R81.10 Cluster
     enum:
-      - R80.30 Cluster
       - R80.40 Cluster
       - R81 Cluster
       - R81.10 Cluster

@@ -12,8 +12,6 @@ LICENSE = 'byol'
 LICENCE_TYPE = 'single'
 
 VERSIONS = {
-    'R80.30': 'r8030',
-    'R80.30-GW': 'r8030-gw',
     'R80.40': 'r8040',
     'R80.40-GW': 'r8040-gw',
     'R81': 'r81',

@@ -43,7 +43,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 ## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
 | ------------- | ------------- | ------------- | -------------  |
-| **ha_version** | High Availability Version | string | R80.30 Cluster;<br/>R80.40 Cluster; |
+| **ha_version** | High Availability Version | string | R80.40 Cluster;<br/>R81.00 Cluster;<br/>R81.10 Cluster; |
 |  |  |  |  |  |
 | **zoneA** | Member A Zone. The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
 |  |  |  |  |  |
@@ -130,7 +130,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 | **internal-network1-subnetwork-name** | 1st internal subnet ID. Assigns the instance an IPv4 address from the subnetwork’s range.<br/>If you have specified a CIDR block above, this subnetwork will not be used.<br/> Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network. | string | Available subnetwork in the chosen network  |
 |  |  |  |  |  |
 ## Example
-    ha_version: "R80.30 Cluster"
+    ha_version: "R81.10 Cluster"
     zoneA: "asia-east1-a"
     zoneB: "asia-east1-a"
     machineType: "n1-standard-4"
