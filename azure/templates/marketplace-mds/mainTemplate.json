@@ -12,7 +12,6 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.30 - Bring Your Own License",
         "R80.40 - Bring Your Own License",
         "R81 - Bring Your Own License",
         "R81.10 - Bring Your Own License"
@@ -220,17 +219,15 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20220130",
+    "templateVersion": "20221109",
     "location": "[parameters('location')]",
     "offers": {
-      "R80.30 - Bring Your Own License": "BYOL",
       "R80.40 - Bring Your Own License": "BYOL",
       "R81 - Bring Your Own License": "BYOL",
       "R81.10 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.30 - Bring Your Own License": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R81 - Bring Your Own License": "R81",
       "R81.10 - Bring Your Own License": "R8110"
