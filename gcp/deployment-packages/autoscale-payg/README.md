@@ -93,7 +93,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 
 ## Example
-    autoscalingVersion: "R8.10 Autoscaling"
+    autoscalingVersion: "R81.10 Autoscaling"
     managementName: "mgmt"
     AutoProvTemplate: "template"
     instanceSSHKey: "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
