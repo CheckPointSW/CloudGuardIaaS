@@ -1,0 +1,7 @@
+{
+  "defaultDeploymentType": "MULTI_VM",
+  "imageName": "check-point-r8110-gw-payg-mig-335-985-v20220126",
+  "projectId": "checkpoint-public",
+  "templateName": "nonexistent_template",
+  "useSolutionPackage": "true"
+}
