@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
+    "tagsByResource": {
       "type": "object",
       "defaultValue": {}
     },
@@ -95,7 +95,8 @@
       "name": "[parameters('subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/routeTables",
@@ -112,7 +113,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -147,7 +149,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -172,7 +175,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {

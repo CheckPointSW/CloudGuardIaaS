@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
-      "type": "object",
-      "defaultValue": {}
-    },
     "location": {
       "type": "string"
     },
@@ -41,6 +37,10 @@
     },
     "vxlanTunnelInternalIdentifier": {
       "type": "int"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -136,7 +136,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     }
   ],
   "outputs": {

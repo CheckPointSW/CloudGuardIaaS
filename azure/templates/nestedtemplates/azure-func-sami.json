@@ -2,10 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "tagsByResource":{
-            "type": "object",
-            "defaultValue": {}
-          },
         "subscriptionId": {
             "type": "string",
             "defaultValue": "[subscription().subscriptionId]",
@@ -60,6 +56,10 @@
       "containerName": {
           "type": "string",
           "defaultValue": "azure-function"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
       }
     },
     "variables": {
@@ -89,7 +89,8 @@
                   "legacy": 0,
                   "enableLogAccessUsingOnlyResourcePermissions": "true"
               }
-          }
+          },
+          "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.OperationalInsights/workspaces'), parameters('tagsByResource')['Microsoft.OperationalInsights/workspaces'], json('{}')) ]"
         },
         {
             "apiVersion": "2021-04-01-preview",
@@ -103,7 +104,8 @@
             },
              "dependsOn": [
                 "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
-            ]
+            ],
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
         },
         {
             "apiVersion": "2021-02-01",
@@ -182,7 +184,8 @@
                 },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "reserved": true
-            }
+            },
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Web/sites'), parameters('tagsByResource')['Microsoft.Web/sites'], json('{}')) ]"
         },
         {
           "type": "Microsoft.Web/serverfarms",
@@ -199,7 +202,8 @@
           "kind": "linux",
           "properties": {
               "reserved": true
-          }
+          },
+          "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Web/serverfarms'), parameters('tagsByResource')['Microsoft.Web/serverfarms'], json('{}')) ]"
         },
         {
             "apiVersion": "2021-06-01",
@@ -221,7 +225,8 @@
                     "[variables('storageAccountName')]"
                   ]
                 }
-            ]
+            ],
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
         },
         {
             "apiVersion": "2020-02-02",
@@ -232,7 +237,8 @@
                 "Application_Type": "web",
                 "Request_Source": "IbizaWebAppExtensionCreate",
                 "WorkspaceResourceId": "[variables('workspaceId')]"
-            }
+            },
+            "tags": "[ if(contains(parameters('tagsByResource'), 'microsoft.insights/components'), parameters('tagsByResource')['microsoft.insights/components'], json('{}')) ]"
         }
     ]
 }

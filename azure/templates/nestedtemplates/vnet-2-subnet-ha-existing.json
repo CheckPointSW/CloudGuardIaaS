@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
-      "type": "object",
-      "defaultValue": {}
-    },
     "location": {
       "type": "string"
     },
@@ -28,7 +24,11 @@
     },
     "deployNsg": {
       "type": "bool",
-      "defaultValue": true
+      "defaultValue": false
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -62,7 +62,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {

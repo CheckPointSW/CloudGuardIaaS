@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
-      "type": "object",
-      "defaultValue": {}
-    },
     "location": {
       "type": "string"
     },
@@ -82,6 +78,10 @@
     },
     "apiVersion": {
       "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -119,7 +119,8 @@
       "name": "[parameters('Subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/routeTables",
@@ -137,7 +138,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -172,7 +174,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     }
   ],
   "outputs": {

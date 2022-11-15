@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
-      "type": "object",
-      "defaultValue": {}
-    },
     "location": {
       "type": "string"
     },
@@ -55,6 +51,10 @@
       "metadata": {
         "description": "Name of the network security group"
       }
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -105,7 +105,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/routeTables",
@@ -114,7 +115,8 @@
       "name": "[parameters('Subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/routeTables",
@@ -131,7 +133,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -170,13 +173,18 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     }
   ],
   "outputs": {
     "vnetId": {
       "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
       "type": "string"
+    },
+    "vnetAddressPrefixes": {
+      "value": "[parameters('virtualNetworkAddressPrefixes')]",
+      "type": "array"
     }
   }
 }

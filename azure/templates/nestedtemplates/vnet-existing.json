@@ -2,10 +2,6 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "tagsByResource":{
-      "type": "object",
-      "defaultValue": {}
-    },
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
@@ -19,6 +15,10 @@
         "description": "Resource Group of the existing virtual network"
       },
       "defaultValue": ""
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -28,6 +28,10 @@
   "outputs": {
     "vnetId": {
       "value": "[variables('vnetId')]",
+      "type": "string"
+    },
+    "vnetAddressPrefix": {
+      "value": "[reference(variables('vnetId'),'2018-11-01').addressSpace.addressPrefixes[0]]",
       "type": "string"
     }
   }
