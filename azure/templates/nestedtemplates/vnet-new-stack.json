@@ -144,19 +144,13 @@
           {
             "name": "[parameters('subnet1Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]"
-              }
+              "addressPrefix": "[parameters('subnet1Prefix')]"
             }
           },
           {
             "name": "[parameters('subnet2Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet2Prefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]"
-              }
+              "addressPrefix": "[parameters('subnet2Prefix')]"
             }
           }
         ]
