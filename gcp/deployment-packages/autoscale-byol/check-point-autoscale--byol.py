@@ -11,7 +11,6 @@ LICENSE = 'byol'
 LICENCE_TYPE = 'mig'
 
 VERSIONS = {
-    'R80.30-GW': 'r8030-gw',
     'R80.40-GW': 'r8040-gw',
     'R81-GW': 'r81-gw',
     'R81.10-GW': 'r8110-gw'
@@ -361,7 +360,7 @@ def create_instance_template(context,
                              name,
                              nics,
                              depends_on=None,
-                             gw_version=VERSIONS['R80.30-GW']):
+                             gw_version=VERSIONS['R81.10-GW']):
     if 'gw' in gw_version:
         license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
     else:
