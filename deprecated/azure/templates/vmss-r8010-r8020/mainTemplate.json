@@ -17,10 +17,7 @@
         "R80.10 - Pay As You Go (NGTX)",
         "R80.20 - Bring Your Own License",
         "R80.20 - Pay As You Go (NGTP)",
-        "R80.20 - Pay As You Go (NGTX)",
-        "R80.30 - Bring Your Own License",
-        "R80.30 - Pay As You Go (NGTP)",
-        "R80.30 - Pay As You Go (NGTX)"
+        "R80.20 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R80.20 - Bring Your Own License",
       "metadata": {
@@ -389,10 +386,7 @@
       "R80.10 - Pay As You Go (NGTX)": "NGTX",
       "R80.20 - Bring Your Own License": "BYOL",
       "R80.20 - Pay As You Go (NGTP)": "NGTP",
-      "R80.20 - Pay As You Go (NGTX)": "NGTX",
-      "R80.30 - Bring Your Own License": "BYOL",
-      "R80.30 - Pay As You Go (NGTP)": "NGTP-V2",
-      "R80.30 - Pay As You Go (NGTX)": "NGTX-V2"
+      "R80.20 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -401,10 +395,7 @@
       "R80.10 - Pay As You Go (NGTX)": "R8010",
       "R80.20 - Bring Your Own License": "R8020",
       "R80.20 - Pay As You Go (NGTP)": "R8020",
-      "R80.20 - Pay As You Go (NGTX)": "R8020",
-      "R80.30 - Bring Your Own License": "R8030",
-      "R80.30 - Pay As You Go (NGTP)": "R8030",
-      "R80.30 - Pay As You Go (NGTX)": "R8030"
+      "R80.20 - Pay As You Go (NGTX)": "R8020"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "isBlink": true,
