@@ -554,7 +554,6 @@
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
-    "azureFunctionSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/azure-func-sami.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
