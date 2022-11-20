@@ -36,6 +36,7 @@ Metadata:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
+          - CloudWatch
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -82,6 +83,8 @@ Metadata:
         default: Gateway Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       GatewayBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -235,6 +238,9 @@ Parameters:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -277,6 +283,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   GatewayBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -299,6 +312,8 @@ Conditions:
   CreateRole: !Equals [!Ref GatewayPredefinedRole, '']
   ProvidedPassHash: !Not [!Equals [!Ref GatewayPasswordHash, '']]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  EmptyHostName: !Equals [!Ref GatewayHostname, '']
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
 Resources:
   ClusterReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -322,6 +337,14 @@ Resources:
     Properties:
       Path: /
       Roles: [!If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]]
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      Parameters:
+          PolicyName: !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+          PolicyRole: !If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -448,109 +471,19 @@ Resources:
           !Join
           - |+
 
-          - - '#!/bin/bash'
-            - 'set -e'
-            - 'logfile=/var/log/aws-user-data.log'
-            - '> ${logfile}'
-            - 'exec 1>>${logfile} 2>>${logfile}'
-            - 'function report-status() {'
-            - '    local rc=$?'
-            - '    local status=""'
-            - '    local reason="Security Gateway configuration"'
-            - '    local data=""'
-            - '    set +e'
-            - '    printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >${CPDIR}/tmp/wait-handle.crt'
-            - '    cat ${CPDIR}/conf/ca-bundle.crt >>${CPDIR}/tmp/wait-handle.crt'
-            - '    if [[ ${rc} -eq 0 ]]; then'
-            - '        status="SUCCESS"'
-            - '        reason+=" completed"'
-            - '        data="Configuration completed."'
-            - '    else'
-            - '        status="FAILURE"'
-            - '        reason+=" failed"'
-            - '        data="None"'
-            - '    fi'
-            - '    echo "Reporting status ${status}: ${reason}"'
-            - '    curl_cli -s -S --cacert ${CPDIR}/tmp/wait-handle.crt -X PUT -H "Content-Type:" --data-binary "{\"Status\" : \"${status}\", \"Reason\" : \"${reason}\", \"UniqueId\" : \"${instance_id}\", \"Data\": \"${data}\"}" "${wait_handle}"'
-            - '}'
-            - 'echo -e "\nStarting user-data\n"'
-            - 'echo "Setting up parameters"'
-            - !Sub 'pwd_hash=''${GatewayPasswordHash}'' ; shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
-            - !If [AllocateAddress, !Sub 'wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
-            - !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ' | base64 -d)"']]
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ' | base64 -d)"']]
-            - 'echo "Generating TOKEN"'
-            - 'TOKEN=`curl_cli -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 3600"`'
-            - 'if [[ -z ${TOKEN} ]]; then'
-            - '    exit 1'
-            - 'fi'
-            - 'echo "Getting instance id"'
-            - 'instance_id="$(curl_cli -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)"'
-            - 'if [[ -n ${wait_handle} ]] && [[ -n ${eip} ]]; then'
-            - '    trap report-status EXIT'
-            - 'fi'
-            - 'template="cluster"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'echo "Updating cloud-version file"'
-            - 'if test -f ${cv_path}; then'
-            - '    echo template_name: ${template} >> ${cv_path}'
-            - '    echo template_version: 20211212 >> ${cv_path}'
-            - 'fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then'
-            - '    cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' | jq ''.template_version = "20211212"'' > ${cv_json_path_tmp}'
-            - '    mv ${cv_json_path_tmp} ${cv_json_path}'
-            - 'fi'
-            - 'if [[ -n ${eip} ]]; then'
-            - '    echo "Resetting alias ip"'
-            - '    clish -c "delete interface eth0 alias eth0:1" -s || true'
-            - '    clish -c "add interface eth0 alias ${eip}/32" -s'
-            - 'fi'
-            - 'if [[ -z ${pwd_hash} ]]; then'
-            - '    echo "Generating random password hash"'
-            - '    pwd_hash="$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)"'
-            - 'fi'
-            - 'echo "Setting admin shell to ${shell}"'
-            - 'clish -c "set user admin shell ${shell}" -s'
-            - 'if [[ -n ${ntp1} ]]; then'
-            - '    echo "Setting primary NTP server to ${ntp1}"'
-            - '    clish -c "set ntp server primary ${ntp1} version 4" -s'
-            - '    if [[ -n ${ntp2} ]]; then'
-            - '        echo "Setting secondary NTP server to ${ntp2}"'
-            - '        clish -c "set ntp server secondary ${ntp2} version 4" -s'
-            - '    fi'
-            - 'fi'
-            - 'if [[ -n ${hostname} ]]; then'
-            - '    hostname+="-member-a"'
-            - '    echo "Setting hostname to ${hostname}"'
-            - '    clish -c "set hostname ${hostname}" -s'
-            - 'fi'
-            - 'echo "Starting First Time Wizard"'
-            - 'blink_config -s "gateway_cluster_member=true&ftw_sic_key=${sic}&upload_info=${allow_info}&download_info=${allow_info}&admin_hash=${pwd_hash}"'
-            - 'echo "Setting admin password"'
-            - 'clish -c "set user admin password-hash ${pwd_hash}" -s'
-            - 'if ${eic}; then'
-            - '    echo "Enabling ec2 instance connect"'
-            - '    if [[ -d "/etc/ec2-instance-connect" ]]; then'
-            - '        ec2-instance-connect-config on'
-            - '    else'
-            - '        echo "Could not enable eic, /etc/ec2-instance-connect was not found"'
-            - '    fi'
-            - 'fi'
-            - 'echo "Setting LocalGatewayExternal dynamic object"'
-            - 'addr_ex="$(ip addr show dev eth0 | awk ''/inet/{print $2; exit}'' | cut -d / -f 1)"'
-            - 'dynamic_objects -n LocalGatewayExternal -r ${addr_ex} ${addr_ex} -a || true'
-            - 'echo "Setting LocalGatewayInternal dynamic object"'
-            - 'addr_int="$(ip addr show dev eth1 | awk ''/inet/{print $2; exit}'' | cut -d / -f 1)"'
-            - 'dynamic_objects -n LocalGatewayInternal -r ${addr_int} ${addr_int} -a || true'
-            - 'if [[ -n ${bootstrap} ]]; then'
-            - '    echo "Invoking bootstrap script"'
-            - '    eval ${bootstrap}'
-            - 'fi'
-            - 'echo "Rebooting..."'
-            - 'shutdown -r now'
+          - - '#cloud-config'
+            - 'runcmd:'
+            - '  - |'
+            - '    set -e'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
+            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
+            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
     DependsOn: [MemberBExternalInterface, MemberBInternalInterface]
@@ -580,109 +513,19 @@ Resources:
           !Join
           - |+
 
-          - - '#!/bin/bash'
-            - 'set -e'
-            - 'logfile=/var/log/aws-user-data.log'
-            - '> ${logfile}'
-            - 'exec 1>>${logfile} 2>>${logfile}'
-            - 'function report-status() {'
-            - '    local rc=$?'
-            - '    local status=""'
-            - '    local reason="Security Gateway configuration"'
-            - '    local data=""'
-            - '    set +e'
-            - '    printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >${CPDIR}/tmp/wait-handle.crt'
-            - '    cat ${CPDIR}/conf/ca-bundle.crt >>${CPDIR}/tmp/wait-handle.crt'
-            - '    if [[ ${rc} -eq 0 ]]; then'
-            - '        status="SUCCESS"'
-            - '        reason+=" completed"'
-            - '        data="Configuration completed."'
-            - '    else'
-            - '        status="FAILURE"'
-            - '        reason+=" failed"'
-            - '        data="None"'
-            - '    fi'
-            - '    echo "Reporting status ${status}: ${reason}"'
-            - '    curl_cli -s -S --cacert ${CPDIR}/tmp/wait-handle.crt -X PUT -H "Content-Type:" --data-binary "{\"Status\" : \"${status}\", \"Reason\" : \"${reason}\", \"UniqueId\" : \"${instance_id}\", \"Data\": \"${data}\"}" "${wait_handle}"'
-            - '}'
-            - 'echo -e "\nStarting user-data\n"'
-            - 'echo "Setting up parameters"'
-            - !Sub 'pwd_hash=''${GatewayPasswordHash}'' ; shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
-            - !If [AllocateAddress, !Sub 'wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
-            - !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ' | base64 -d)"']]
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ' | base64 -d)"']]
-            - 'echo "Generating TOKEN"'
-            - 'TOKEN=`curl_cli -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 3600"`'
-            - 'if [[ -z ${TOKEN} ]]; then'
-            - '    exit 1'
-            - 'fi'
-            - 'echo "Getting instance id"'
-            - 'instance_id="$(curl_cli -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)"'
-            - 'if [[ -n ${wait_handle} ]] && [[ -n ${eip} ]]; then'
-            - '    trap report-status EXIT'
-            - 'fi'
-            - 'template="cluster"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'echo "Updating cloud-version file"'
-            - 'if test -f ${cv_path}; then'
-            - '    echo template_name: ${template} >> ${cv_path}'
-            - '    echo template_version: 20211212 >> ${cv_path}'
-            - 'fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then'
-            - '    cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' | jq ''.template_version = "20211212"'' > ${cv_json_path_tmp}'
-            - '    mv ${cv_json_path_tmp} ${cv_json_path}'
-            - 'fi'
-            - 'if [[ -n ${eip} ]]; then'
-            - '    echo "Resetting alias ip"'
-            - '    clish -c "delete interface eth0 alias eth0:1" -s || true'
-            - '    clish -c "add interface eth0 alias ${eip}/32" -s'
-            - 'fi'
-            - 'if [[ -z ${pwd_hash} ]]; then'
-            - '    echo "Generating random password hash"'
-            - '    pwd_hash="$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)"'
-            - 'fi'
-            - 'echo "Setting admin shell to ${shell}"'
-            - 'clish -c "set user admin shell ${shell}" -s'
-            - 'if [[ -n ${ntp1} ]]; then'
-            - '    echo "Setting primary NTP server to ${ntp1}"'
-            - '    clish -c "set ntp server primary ${ntp1} version 4" -s'
-            - '    if [[ -n ${ntp2} ]]; then'
-            - '        echo "Setting secondary NTP server to ${ntp2}"'
-            - '        clish -c "set ntp server secondary ${ntp2} version 4" -s'
-            - '    fi'
-            - 'fi'
-            - 'if [[ -n ${hostname} ]]; then'
-            - '    hostname+="-member-b"'
-            - '    echo "Setting hostname to ${hostname}"'
-            - '    clish -c "set hostname ${hostname}" -s'
-            - 'fi'
-            - 'echo "Starting First Time Wizard"'
-            - 'blink_config -s "gateway_cluster_member=true&ftw_sic_key=${sic}&upload_info=${allow_info}&download_info=${allow_info}&admin_hash=${pwd_hash}"'
-            - 'echo "Setting admin password"'
-            - 'clish -c "set user admin password-hash ${pwd_hash}" -s'
-            - 'if ${eic}; then'
-            - '    echo "Enabling ec2 instance connect"'
-            - '    if [[ -d "/etc/ec2-instance-connect" ]]; then'
-            - '        ec2-instance-connect-config on'
-            - '    else'
-            - '        echo "Could not enable eic, /etc/ec2-instance-connect was not found"'
-            - '    fi'
-            - 'fi'
-            - 'echo "Setting LocalGatewayExternal dynamic object"'
-            - 'addr_ex="$(ip addr show dev eth0 | awk ''/inet/{print $2; exit}'' | cut -d / -f 1)"'
-            - 'dynamic_objects -n LocalGatewayExternal -r ${addr_ex} ${addr_ex} -a || true'
-            - 'echo "Setting LocalGatewayInternal dynamic object"'
-            - 'addr_int="$(ip addr show dev eth1 | awk ''/inet/{print $2; exit}'' | cut -d / -f 1)"'
-            - 'dynamic_objects -n LocalGatewayInternal -r ${addr_int} ${addr_int} -a || true'
-            - 'if [[ -n ${bootstrap} ]]; then'
-            - '    echo "Invoking bootstrap script"'
-            - '    eval ${bootstrap}'
-            - 'fi'
-            - 'echo "Rebooting..."'
-            - 'shutdown -r now'
+          - - '#cloud-config'
+            - 'runcmd:'
+            - '  - |'
+            - '    set -e'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
+            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
+            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['.', !Select [0, !Split ['-', !Ref GatewayVersion]]]]}]
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
   ClusterPublicAddress:
     Type: AWS::EC2::EIP
     Properties:

@@ -38,6 +38,7 @@ Metadata:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
+          - CloudWatch
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -88,6 +89,8 @@ Metadata:
         default: Gateway Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       GatewayBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -293,12 +296,19 @@ Parameters:
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
     Description: >-
       Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
     AllowedValues:
       - true
       - false
@@ -368,6 +378,7 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary

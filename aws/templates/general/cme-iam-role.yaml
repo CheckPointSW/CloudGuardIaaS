@@ -28,7 +28,7 @@ Parameters:
       - Create with read-write permissions
       - Create with assume role permissions (specify an STS role ARN)
   STSRoles:
-    Description: The IAM role will be able to assume these STS Roles (comma separated list of ARNs, without spaces)
+    Description: The IAM role will be able to assume these STS Roles (comma separated list of ARNs, without spaces).
     Type: String
     Default: ''
   TrustedAccount:
@@ -141,8 +141,8 @@ Resources:
                 - !Ref 'AWS::NoValue'
 Outputs:
   CMEIAMRole:
-    Description: The IAM role
+    Description: The IAM role.
     Value: !Ref CMEIAMRole
   CMEARNRole:
-    Description: The IAM role ARN
+    Description: The IAM role ARN.
     Value: !GetAtt CMEIAMRole.Arn

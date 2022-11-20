@@ -40,6 +40,7 @@ Metadata:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
+          - CloudWatch
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -94,6 +95,8 @@ Metadata:
         default: Gateway Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       GatewayBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -316,6 +319,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   GatewayBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -387,6 +397,7 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary
