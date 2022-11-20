@@ -12,9 +12,6 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.30 - Bring Your Own License",
-        "R80.30 - Pay As You Go (NGTP)",
-        "R80.30 - Pay As You Go (NGTX)",
         "R80.40 - Bring Your Own License",
         "R80.40 - Pay As You Go (NGTP)",
         "R80.40 - Pay As You Go (NGTX)",
@@ -306,14 +303,11 @@
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20220130",
+    "templateVersion": "20221109",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
     "offers": {
-      "R80.30 - Bring Your Own License": "BYOL",
-      "R80.30 - Pay As You Go (NGTP)": "NGTP-V2",
-      "R80.30 - Pay As You Go (NGTX)": "NGTX-V2",
       "R80.40 - Bring Your Own License": "BYOL",
       "R80.40 - Pay As You Go (NGTP)": "NGTP",
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
@@ -326,9 +320,6 @@
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.30 - Bring Your Own License": "R8030",
-      "R80.30 - Pay As You Go (NGTP)": "R8030",
-      "R80.30 - Pay As You Go (NGTX)": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R80.40 - Pay As You Go (NGTP)": "R8040",
       "R80.40 - Pay As You Go (NGTX)": "R8040",

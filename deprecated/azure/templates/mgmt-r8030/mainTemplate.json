@@ -12,14 +12,10 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.40 - Bring Your Own License",
-        "R80.40 - Pay As You Go (MGMT25)",
-        "R81 - Bring Your Own License",
-        "R81 - Pay As You Go (MGMT25)",
-        "R81.10 - Bring Your Own License",
-        "R81.10 - Pay As You Go (MGMT25)"
+        "R80.30 - Bring Your Own License",
+        "R80.30 - Pay As You Go (MGMT25)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R80.30 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -153,18 +149,6 @@
       },
       "defaultValue": ""
     },
-    "enableApi": {
-      "type": "string",
-      "metadata": {
-        "description": "Accept Management API calls (NOTE: Works only in version R81.10 and above)"
-      },
-      "defaultValue": "management_only",
-      "allowedValues": [
-        "management_only",
-        "gui_clients",
-        "all"
-      ]
-    },
     "allowDownloadFromUploadToCheckPoint": {
       "type": "string",
       "allowedValues": [
@@ -227,24 +211,16 @@
   },
   "variables": {
     "templateName": "management",
-    "templateVersion": "20221109",
+    "templateVersion": "20220130",
     "location": "[parameters('location')]",
     "offers": {
-      "R80.40 - Bring Your Own License": "BYOL",
-      "R80.40 - Pay As You Go (MGMT25)": "MGMT25",
-      "R81 - Bring Your Own License": "BYOL",
-      "R81 - Pay As You Go (MGMT25)": "MGMT25",
-      "R81.10 - Bring Your Own License": "BYOL",
-      "R81.10 - Pay As You Go (MGMT25)": "MGMT25"
+      "R80.30 - Bring Your Own License": "BYOL",
+      "R80.30 - Pay As You Go (MGMT25)": "MGMT25"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.40 - Bring Your Own License": "R8040",
-      "R80.40 - Pay As You Go (MGMT25)": "R8040",
-      "R81 - Bring Your Own License": "R81",
-      "R81 - Pay As You Go (MGMT25)": "R81",
-      "R81.10 - Bring Your Own License": "R8110",
-      "R81.10 - Pay As You Go (MGMT25)": "R8110"
+      "R80.30 - Bring Your Own License": "R8030",
+      "R80.30 - Pay As You Go (MGMT25)": "R8030"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "adminUsername": "notused",
@@ -253,7 +229,8 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'enableApi=\"', parameters('enableApi'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
+    "customData64": "[base64(variables('customData'))]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -597,6 +574,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[variables('identity')]",
       "properties": {
+        "UserData": "[variables('customData64')]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
@@ -620,7 +598,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[variables('adminUsername')]",
           "computerName": "[toLower(parameters('vmName'))]",
-          "customData": "[base64(variables('customData'))]",
+          "customData": "[variables('customData64')]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
