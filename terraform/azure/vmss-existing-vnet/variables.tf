@@ -108,7 +108,6 @@ variable "os_version" {
 
 locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
-    "R80.30",
     "R80.40",
     "R81",
     "R81.10"
@@ -305,13 +304,12 @@ locals { // locals for 'frontend_load_distribution' allowed values
 //********************** Scale Set variables *******************//
 
 variable "vm_os_offer" {
-  description = "The name of the offer of the image that you want to deploy.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
+  description = "The name of the offer of the image that you want to deploy.Choose from: check-point-cg-r8040, check-point-cg-r81, check-point-cg-r8110"
   type = string
 }
 
 locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
-    "check-point-cg-r8030",
     "check-point-cg-r8040",
     "check-point-cg-r81",
     "check-point-cg-r8110"
