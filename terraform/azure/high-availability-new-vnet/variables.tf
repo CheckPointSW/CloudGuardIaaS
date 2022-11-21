@@ -95,7 +95,6 @@ variable "os_version" {
 
 locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
-    "R80.30",
     "R80.40",
     "R81",
     "R81.10"
@@ -110,13 +109,12 @@ variable "vm_os_sku" {
 }
 
 variable "vm_os_offer" {
-  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
+  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8040, check-point-cg-r81, check-point-cg-r8110"
   type = string
 }
 
 locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
-    "check-point-cg-r8030",
     "check-point-cg-r8040",
     "check-point-cg-r81",
     "check-point-cg-r8110"
