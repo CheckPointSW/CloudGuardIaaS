@@ -11,6 +11,10 @@ locals {
   provided_roue_table = var.private_route_table == "" ? 0 : 1
   internal_route_table_condition = var.private_route_table != "" ? 1 : 0
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   regex_valid_gateway_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.gateway_SIC_Key is invalid
   regex_gateway_sic_result = regex(local.regex_valid_gateway_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SIC_Key] must be at least 8 alphanumeric characters"
@@ -31,4 +35,10 @@ locals {
   regex_valid_secondary_ntp = "^[\\.a-zA-Z0-9\\-]*$"
   // Will fail if var.secondary_ntp is invalid
   regex_secondary_ntp = regex(local.regex_valid_secondary_ntp, var.secondary_ntp) == var.secondary_ntp ? 0 : "Variable [secondary_ntp] must be a valid ntp"
+  //Splits the version and licence and returns the os version
+  version_split = element(split("-", var.gateway_version), 0)
+
+  gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
+  gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
+  gateway_password_hash_base64=base64encode(var.gateway_password_hash)
 }

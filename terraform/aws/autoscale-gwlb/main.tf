@@ -7,7 +7,8 @@ provider "aws" {
 module "amis" {
   source = "../modules/amis"
   version_license = var.gateway_version
-  amis_url = "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml"
+  amis_url = local.is_gwlb_ami == true ? "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml" : "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml"
+
 }
 
 resource "aws_security_group" "permissive_sg" {
@@ -46,15 +47,16 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
     encrypted = var.enable_volume_encryption
   }
 
-  user_data = templatefile("${path.module}/asg_userdata.sh", {
+  user_data = templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     EnableCloudWatch = var.enable_cloudwatch,
     EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
+    SICKey = local.gateway_SICkey_base64,
     AllowUploadDownload = var.allow_upload_download,
-    BootstrapScript = var.gateway_bootstrap_script
+    BootstrapScript = local.gateway_bootstrap_script64,
+    OsVersion = local.version_split
   })
 }
 resource "aws_autoscaling_group" "asg" {

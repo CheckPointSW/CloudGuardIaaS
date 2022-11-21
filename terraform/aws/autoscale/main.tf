@@ -46,15 +46,16 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
     encrypted = var.enable_volume_encryption
   }
 
-  user_data = templatefile("${path.module}/asg_user_data.sh", {
+  user_data = templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     EnableCloudWatch = var.enable_cloudwatch,
     EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
+    SICKey = local.gateway_SICkey_base64,
     AllowUploadDownload = var.allow_upload_download,
-    BootstrapScript = var.gateway_bootstrap_script
+    BootstrapScript = local.gateway_bootstrap_script64,
+    OsVersion = local.version_split
   })
 }
 resource "aws_autoscaling_group" "asg" {

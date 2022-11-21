@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py sicKey=\"${SICKey}\" installationType=\"mds\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"__VERSION__\" templateName=\"mds\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" primary=\"${IsPrimary}\" secondary=\"${IsSecondary}\" adminSubnet=\"${AdminSubnet}\" bootstrapScript64=\"${BootstrapScript}\"

@@ -19,6 +19,10 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   gateway_management_allowed_values = [
     "Locally managed",
     "Over the internet"]
@@ -46,4 +50,15 @@ locals {
   regex_valid_sic_key = "(|[a-zA-Z0-9]{8,})"
   // Will fail if var.SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.SICKey) == var.SICKey ? 0 : "Variable [SICKey] must be at least 8 alphanumeric characters"
+
+  //Splits the version and licence and returns the os version
+  version_split = element(split("-", var.management_version), 0)
+
+  management_bootstrap_script64 = base64encode(var.management_bootstrap_script)
+  management_SICkey_base64=base64encode(var.SICKey)
+  management_password_hash_base64=base64encode(var.management_password_hash)
+
+  manage_over_the_internet = var.gateway_management == "Over the internet" ? true : false
+  manage_over_internet_and_EIP = var.allocate_and_associate_eip && local.manage_over_the_internet ? true : false
+  pub_mgmt = local.manage_over_internet_and_EIP ? true : false
 }

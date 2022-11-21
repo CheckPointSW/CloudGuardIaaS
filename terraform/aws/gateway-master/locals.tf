@@ -11,6 +11,10 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   regex_valid_gateway_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.gateway_SIC_Key is invalid
   regex_gateway_sic_result = regex(local.regex_valid_gateway_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SIC_Key] must be at least 8 alphanumeric characters."

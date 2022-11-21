@@ -16,6 +16,10 @@ locals {
   // will fail if [var.gateway_management] is invalid:
   validate_gateway_management = index(local.gateway_management_allowed_values, var.gateway_management)
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   regex_valid_management_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
   // Will fail if var.management_password_hash is invalid
   regex_management_password_hash = regex(local.regex_valid_management_password_hash, var.management_password_hash) == var.management_password_hash ? 0 : "Variable [management_password_hash] must be a valid password hash"

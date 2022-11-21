@@ -78,16 +78,18 @@ resource "aws_instance" "standalone-instance" {
   disable_api_termination = var.disable_instance_termination
 
   ami = module.amis.ami_id
-  user_data = templatefile("${path.module}/standalone_user_data.sh", {
+  user_data = templatefile("${path.module}/standalone_userdata.yaml", {
     // script's arguments
     Hostname = var.standalone_hostname,
-    PasswordHash = var.standalone_password_hash,
+    PasswordHash = local.standalone_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
     AdminSubnet = var.admin_cidr,
     EnableInstanceConnect = var.enable_instance_connect,
-    StandaloneBootstrapScript = var.standalone_bootstrap_script
+    StandaloneBootstrapScript = local.standalone_bootstrap_script64
+    AllocateElasticIP = var.allocate_and_associate_eip
+    OsVersion = local.version_split
   })
 }
