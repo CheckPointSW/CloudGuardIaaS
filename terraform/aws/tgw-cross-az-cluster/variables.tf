@@ -160,6 +160,11 @@ variable "allow_upload_download" {
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
 }
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
+}
 variable "gateway_bootstrap_script" {
   type = string
   description = "(Optional) An optional script with semicolon (;) separated commands to run on the initial boot"

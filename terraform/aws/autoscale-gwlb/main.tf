@@ -113,24 +113,11 @@ resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_document.json
   path = "/"
 }
-data "aws_iam_policy_document" "policy_document" {
-  version = "2012-10-17"
-  statement {
-    actions = ["cloudwatch:PutMetricData"]
-    effect = "Allow"
-    resources = ["*"]
-  }
-}
-resource "aws_iam_policy" "policy" {
-  count = local.create_iam_role
-  name_prefix = format("%s-iam_policy", local.asg_name)
-
-  policy = data.aws_iam_policy_document.policy_document.json
-}
-resource "aws_iam_role_policy_attachment" "attachment" {
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
   count = local.create_iam_role
   role = aws_iam_role.role[count.index].name
-  policy_arn = aws_iam_policy.policy[count.index].arn
+  tag_name = local.asg_name
 }
 resource "aws_iam_instance_profile" "instance_profile" {
   count = local.create_iam_role

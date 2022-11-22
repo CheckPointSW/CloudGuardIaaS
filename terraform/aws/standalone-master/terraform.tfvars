@@ -33,6 +33,7 @@ standalone_password_hash = "12345678"
 resources_tag_name = "tag-name"
 standalone_hostname = "standalone-tf"
 allow_upload_download = true
+enable_cloudwatch = false
 standalone_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 primary_ntp = ""
 secondary_ntp = ""

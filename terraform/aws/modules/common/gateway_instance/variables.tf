@@ -69,6 +69,10 @@ variable "ami_id" {
   type = string
   description = "The AMI to use for the instance"
 }
+variable "iam_instance_profile_id" {
+  type = string
+  description = "The IAM instance profile id"
+}
 variable "gateway_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
@@ -97,6 +101,11 @@ variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
+}
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
 }
 variable "primary_ntp" {
   type = string

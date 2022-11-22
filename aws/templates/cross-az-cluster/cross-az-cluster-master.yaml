@@ -281,7 +281,7 @@ Parameters:
     ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
     Description: Automatically download updates and share statistical data for product improvement purpose.
-      Improve product experience by sending data to Check Point0
+      Improve product experience by sending data to Check Point.
     Type: String
     Default: true
     AllowedValues:

@@ -19,6 +19,36 @@ module "common_permissive_sg" {
   gateway_name = var.standalone_name
 }
 
+resource "aws_iam_instance_profile" "standalone_instance_profile" {
+  count = local.enable_cloudwatch_policy
+  path = "/"
+  role = aws_iam_role.standalone_iam_role[count.index].name
+}
+
+resource "aws_iam_role" "standalone_iam_role" {
+  count = local.enable_cloudwatch_policy
+  assume_role_policy = data.aws_iam_policy_document.standalone_role_assume_policy_document.json
+  path = "/"
+}
+
+data "aws_iam_policy_document" "standalone_role_assume_policy_document" {
+  version = "2012-10-17"
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
+  count = local.enable_cloudwatch_policy
+  role = aws_iam_role.standalone_iam_role[count.index].name
+  tag_name = var.resources_tag_name != "" ? var.resources_tag_name : var.standalone_name
+}
 resource "aws_network_interface" "public_eni" {
   subnet_id = var.public_subnet_id
   security_groups = [module.common_permissive_sg.permissive_sg_id]
@@ -74,6 +104,7 @@ resource "aws_instance" "standalone-instance" {
   }
   instance_type = var.standalone_instance_type
   key_name = var.key_name
+  iam_instance_profile = (local.enable_cloudwatch_policy == 1 ? aws_iam_instance_profile.standalone_instance_profile[0].id : "")
 
   disable_api_termination = var.disable_instance_termination
 
@@ -83,6 +114,7 @@ resource "aws_instance" "standalone-instance" {
     Hostname = var.standalone_hostname,
     PasswordHash = local.standalone_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
+    EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,

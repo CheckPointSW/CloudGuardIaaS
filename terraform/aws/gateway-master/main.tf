@@ -53,6 +53,7 @@ module "launch_gateway_into_vpc" {
   gateway_password_hash = var.gateway_password_hash
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download
+  enable_cloudwatch = var.enable_cloudwatch
   gateway_bootstrap_script = var.gateway_bootstrap_script
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp

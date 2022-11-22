@@ -1,4 +1,4 @@
 #cloud-config
 runcmd:
   - |
-    python3 /etc/cloud_config.py sicKey=\"${SICKey}\" installationType=\"cluster\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"__VERSION__\" templateName=\"cluster\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" allocatePublicAddress=\"${AllocateAddress}\" bootstrapScript64=\"${GatewayBootstrapScript}\"
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"cluster\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"__VERSION__\" templateName=\"cluster\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" allocatePublicAddress=\"${AllocateAddress}\" bootstrapScript64=\"${GatewayBootstrapScript}\"

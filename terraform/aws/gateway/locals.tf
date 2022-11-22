@@ -7,6 +7,8 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
+  enable_cloudwatch_policy = var.enable_cloudwatch ? 1 : 0
+
   regex_valid_key_name = "[\\S\\s]+[\\S]+"
   // will fail if var.key_name is invalid
   regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"

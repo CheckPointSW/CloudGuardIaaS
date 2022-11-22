@@ -26,6 +26,7 @@ resource "aws_instance" "gateway_instance" {
 
   instance_type = var.gateway_instance_type
   key_name = var.key_name
+  iam_instance_profile = var.iam_instance_profile_id
 
   disable_api_termination = var.disable_instance_termination
 
@@ -38,6 +39,7 @@ resource "aws_instance" "gateway_instance" {
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     Hostname = var.gateway_hostname,
     AllowUploadDownload = var.allow_upload_download,
+    EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     EnableInstanceConnect = var.enable_instance_connect,

@@ -31,6 +31,7 @@ gateway_password_hash = ""
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
+enable_cloudwatch = false
 gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 primary_ntp = ""
 secondary_ntp = ""

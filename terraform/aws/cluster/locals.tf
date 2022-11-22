@@ -7,6 +7,7 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
+  enable_cloudwatch_policy = var.enable_cloudwatch ? 1 : 0
   create_iam_role = var.predefined_role == "" ? 1 : 0
   provided_roue_table = var.private_route_table == "" ? 0 : 1
   internal_route_table_condition = var.private_route_table != "" ? 1 : 0
