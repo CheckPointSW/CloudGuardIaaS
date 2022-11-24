@@ -14,7 +14,8 @@
       "allowedValues": [
         "R80.40 - Bring Your Own License",
         "R81 - Bring Your Own License",
-        "R81.10 - Bring Your Own License"
+        "R81.10 - Bring Your Own License",
+        "R81.20 - Bring Your Own License"
       ],
       "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
@@ -219,21 +220,22 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20221109",
+    "templateVersion": "20221123",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
       "R81 - Bring Your Own License": "BYOL",
-      "R81.10 - Bring Your Own License": "BYOL"
+      "R81.10 - Bring Your Own License": "BYOL",
+      "R81.20 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R80.40 - Bring Your Own License": "R8040",
       "R81 - Bring Your Own License": "R81",
-      "R81.10 - Bring Your Own License": "R8110"
+      "R81.10 - Bring Your Own License": "R8110",
+      "R81.20 - Bring Your Own License": "R8120"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
-    "adminUsername": "notused",
     "isBlink": "[bool('false')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
@@ -596,7 +598,7 @@
         },
         "osProfile": {
           "adminPassword": "[parameters('adminPassword')]",
-          "adminUsername": "[variables('adminUsername')]",
+          "adminUsername": "[concat('not','used')]",
           "computerName": "[toLower(parameters('vmName'))]",
           "customData": "[base64(variables('customData'))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
