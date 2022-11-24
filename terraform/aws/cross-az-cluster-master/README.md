@@ -11,7 +11,7 @@ These types of Terraform resources are supported:
 * [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html)
 * [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
 
-See the [Deploying a Check Point Cluster in AWS (Amazon Web Services)](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk104418) for additional information
+See the [Deploying a Check Point Cluster in AWS (Amazon Web Services)](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Default.htm) for additional information
 
 This solution uses the following modules:
 - /terraform/aws/cross-az-cluster

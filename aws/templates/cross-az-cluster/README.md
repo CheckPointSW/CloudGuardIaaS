@@ -11,7 +11,7 @@
     <tbody>
         <tr>
             <td rowspan="2" width="40%">
-                Deploys two Security Gateways, each in a different Availability Zone.<br/><br/>For more details, refer to <a href="https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Transit_Gateway_High_Availability/Default.htm">CloudGuard Transit Gateway High Availability for AWS R80.40 Administration Guide</a>.
+                Deploys two Security Gateways, each in a different Availability Zone.<br/><br/>For more details, refer to <a href="https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Default.htm">CloudGuard Transit Gateway High Availability for AWS R80.40 Administration Guide</a>.
             </td>
             <td width="40%">Creates a new VPC and deploys a Cross Availability Zone Cluster of Security Gateways into it.</td>
             <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/cluster/cross-az-cluster-master.yaml&stackName=Check-Point-Cross-AZ-Cluster"><img src="../../images/launch.png"/></a></td>
