@@ -88,7 +88,7 @@ secret_key = "my-secret-key"
       predefined_role = ""
 
       // --- Check Point Settings ---
-      gateway_version = "R81-BYOL"
+      gateway_version = "R81.20-BYOL"
       admin_shell = "/bin/bash"
       gateway_SICKey = ""
       gateway_password_hash = "12345678"

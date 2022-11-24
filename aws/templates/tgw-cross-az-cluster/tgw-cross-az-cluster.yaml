@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys a Check Point TGW Cross Availabilty Zone Cluster into an
   existing VPC
-  (__VERSION__)
+  (20221123)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

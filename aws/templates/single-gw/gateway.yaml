@@ -467,7 +467,7 @@ Resources:
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       KeyName: !Ref KeyName
       NetworkInterfaces:
         - DeviceIndex: 0

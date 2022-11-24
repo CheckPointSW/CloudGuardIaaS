@@ -478,7 +478,7 @@ Resources:
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-            - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
   PublicAddress:
     Type: AWS::EC2::EIP
     Condition: EIP
