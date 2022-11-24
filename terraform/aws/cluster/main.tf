@@ -29,6 +29,13 @@ module "cluster_iam_role" {
   count = local.create_iam_role
 }
 
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
+  count = local.enable_cloudwatch_policy
+  role = aws_iam_instance_profile.cluster_instance_profile.role
+  tag_name = var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name
+}
+
 resource "aws_network_interface" "member_a_external_eni" {
   subnet_id = var.public_subnet_id
   security_groups = [module.common_permissive_sg.permissive_sg_id]
@@ -125,19 +132,21 @@ resource "aws_instance" "member-a-instance" {
   disable_api_termination = var.disable_instance_termination
 
   ami = module.amis.ami_id
-  user_data = templatefile("${path.module}/cluster_member_a_user_data.sh", {
+  user_data = templatefile("${path.module}/cluster_member_a_userdata.yaml", {
     // script's arguments
     Hostname = var.gateway_hostname,
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
+    EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
     EnableInstanceConnect = var.enable_instance_connect,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
-    SICKey = var.gateway_SICKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
+    SICKey = local.gateway_SICkey_base64,
     MemberAPublicAddress =  aws_eip.member_a_eip[0].public_ip,
-    AllocateAddress = var.allocate_and_associate_eip
+    AllocateAddress = var.allocate_and_associate_eip,
+    OsVersion = local.version_split
   })
 }
 
@@ -177,19 +186,21 @@ resource "aws_instance" "member-b-instance" {
   disable_api_termination = var.disable_instance_termination
 
   ami = module.amis.ami_id
-  user_data = templatefile("${path.module}/cluster_member_b_user_data.sh", {
+  user_data = templatefile("${path.module}/cluster_member_b_userdata.yaml", {
     // script's arguments
     Hostname = var.gateway_hostname,
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
+    EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
     EnableInstanceConnect = var.enable_instance_connect,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
-    SICKey = var.gateway_SICKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
+    SICKey = local.gateway_SICkey_base64,
     MemberBPublicAddress =  aws_eip.member_b_eip[0].public_ip,
-    AllocateAddress = var.allocate_and_associate_eip
+    AllocateAddress = var.allocate_and_associate_eip,
+    OsVersion = local.version_split
   })
 }
 

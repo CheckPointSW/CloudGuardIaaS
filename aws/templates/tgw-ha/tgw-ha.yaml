@@ -1,19 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point TGW HA cross AZ Cluster in a new VPC (20211212)
+Description: Deploys a Check Point TGW HA Cluster into an existing VPC (20211212)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: VPC Network Configuration
         Parameters:
-          - AvailabilityZones
-          - VPCCIDR
-          - PublicSubnet1CIDR
-          - PublicSubnet2CIDR
-          - PrivateSubnet1CIDR
-          - PrivateSubnet2CIDR
-          - TgwSubnet1CIDR
-          - TgwSubnet2CIDR
+          - VPC
+          - PublicSubnetA
+          - PublicSubnetB
+          - PrivateSubnetA
+          - PrivateSubnetB
+          - TgwHASubnetA
+          - TgwHASubnetB
+          - InternalRouteTable
       - Label:
           default: EC2 Instance Configuration
         Parameters:
@@ -40,26 +40,27 @@ Metadata:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
+          - CloudWatch
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
     ParameterLabels:
-      AvailabilityZones:
-        default: Availability Zones
-      VPCCIDR:
-        default: VPC CIDR
-      PublicSubnet1CIDR:
-        default: Public subnet 1 CIDR
-      PublicSubnet2CIDR:
-        default: Public subnet 2 CIDR
-      PrivateSubnet1CIDR:
-        default: Private subnet 1 CIDR
-      PrivateSubnet2CIDR:
-        default: Private subnet 2 CIDR
-      TgwSubnet1CIDR:
-        default: TGW HA subnet 1 CIDR
-      TgwSubnet2CIDR:
-        default: TGW HA subnet 2 CIDR
+      VPC:
+        default: VPC
+      PublicSubnetA:
+        default: Public subnet 1
+      PublicSubnetB:
+        default: Public subnet 2
+      PrivateSubnetA:
+        default: Private subnet 1
+      PrivateSubnetB:
+        default: Private subnet 2
+      TgwHASubnetA:
+        default: TGW HA subnet 1
+      TgwHASubnetB:
+        default: TGW HA subnet 2
+      InternalRouteTable:
+        default: Internal route table
       GatewayName:
         default: Gateway Name
       GatewayInstanceType:
@@ -94,6 +95,8 @@ Metadata:
         default: Gateway Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       GatewayBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -101,57 +104,50 @@ Metadata:
       NTPSecondary:
         default: Secondary NTP server
 Parameters:
-  AvailabilityZones:
-    Description: The Availability Zones (AZs) to use for the subnets in the VPC. Select two (the logical order is preserved).
-    Type: List<AWS::EC2::AvailabilityZone::Name>
-    MinLength: 2
-  VPCCIDR:
-    Description: The CIDR block of the provided VPC.
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: you must select a VPC.
+  PublicSubnetA:
+    Description: Select a public subnet for the first Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the first Security Gateway.
+  PublicSubnetB:
+    Description: Select a public subnet for the second Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the second Security Gateway.
+  PrivateSubnetA:
+    Description: Select a private subnet for the first Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the first Security Gateway.
+  PrivateSubnetB:
+    Description: Select a private subnet for the second Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the second Security Gateway.
+  TgwHASubnetA:
+    Description: Select a TGW HA subnet for the first Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a TGW HA subnet for the first Security Gateway.
+  TgwHASubnetB:
+    Description: Select a TGW HA subnet for the second Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a TGW HAsubnet for the second Security Gateway.
+  InternalRouteTable:
+    Description: Set 0.0.0.0/0 route to the Active Cluster member instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Cluster, this requires manual configuration in the Route Table. (optional)
     Type: String
-    Default: 10.0.0.0/16
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  PublicSubnet1CIDR:
-    Description: CIDR block for public subnet 1 located in the 1st Availability Zone.
-    Type: String
-    Default: 10.0.10.0/24
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  PublicSubnet2CIDR:
-    Description: CIDR block for public subnet 2 located in the 2nd Availability Zone.
-    Type: String
-    Default: 10.0.20.0/24
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  PrivateSubnet1CIDR:
-    Description: CIDR block for private subnet 1 located in the 1st Availability Zone.
-    Type: String
-    Default: 10.0.11.0/24
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  PrivateSubnet2CIDR:
-    Description: CIDR block for private subnet 2 located in the 2nd Availability Zone.
-    Type: String
-    Default: 10.0.21.0/24
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  TgwSubnet1CIDR:
-    Description: CIDR block for TGW HA subnet 1 located in the 1st Availability Zone.
-    Type: String
-    Default: 10.0.12.0/24
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
-  TgwSubnet2CIDR:
-    Description: CIDR block for TGW HA subnet 2 located in the 2nd Availability Zone.
-    Type: String
-    Default: 10.0.22.0/24
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+    Default: ''
   GatewayName:
     Description: The name tag of the Security Gateway instances. (optional)
     Type: String
     Default: Check-Point-Cluster
   GatewayInstanceType:
-    Description: The instance type of the Secutiry Gateway.
     Type: String
     Default: c5.xlarge
     AllowedValues:
@@ -219,13 +215,14 @@ Parameters:
       - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Description: The EC2 Key Pair to allow SSH access to the Security Gateways.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
   AllocatePublicAddress:
-    Description: Allocate an Elastic IP for each cluster member, in addition to the shared cluster Elastic IP.
-    Type: String
+    Description: When choosing "false", make sure the cluster members can connect to an ec2 endpoint.
     Default: true
+    Type: String
     AllowedValues:
       - true
       - false
@@ -246,8 +243,8 @@ Parameters:
     Default: alias/aws/ebs
   EnableInstanceConnect:
     Description: Enable SSH connection over AWS web console.
-    Default: false
     Type: String
+    Default: false
     AllowedValues:
       - true
       - false
@@ -263,6 +260,7 @@ Parameters:
       - true
       - false
   GatewayVersion:
+    Description: The license to install on the Security Gateways.
     Type: String
     Default: R81.10-BYOL
     AllowedValues:
@@ -285,16 +283,16 @@ Parameters:
       - /bin/csh
       - /bin/tcsh
   GatewayPasswordHash:
-    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash). (optional)
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to
+      get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
   GatewaySICKey:
-    Description: The Secure Internal Communication key creates trusted connections
-      between Check Point components. Choose a random string consisting of at least
-      8 alphanumeric characters.
+    Description: The Secure Internal Communication key creates trusted connections between
+      Check Point components. Choose a random string consisting of at least 8
+      alphanumeric characters.
     Type: String
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
     ConstraintDescription: At least 8 alpha numeric characters.
@@ -310,9 +308,17 @@ Parameters:
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
     ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Description: >-
+      Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
     AllowedValues:
       - true
       - false
@@ -334,41 +340,16 @@ Parameters:
 Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
 Resources:
-  VPCStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
-      Parameters:
-        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
-        NumberOfAZs: 2
-        VPCCIDR: !Ref VPCCIDR
-        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
-        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
-        PrivateSubnet1CIDR: !Ref PrivateSubnet1CIDR
-        PrivateSubnet2CIDR: !Ref PrivateSubnet2CIDR
-        CreateAttachmentSubnets: true
-        AttachmentSubnet1CIDR: !Ref TgwSubnet1CIDR
-        AttachmentSubnet2CIDR: !Ref TgwSubnet2CIDR
-  InternalRouteTable:
-    Type: AWS::EC2::RouteTable
-    DependsOn: VPCStack
-    Properties:
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-      Tags:
-        - Key: Name
-          Value: Private Subnets Route Table
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/tgw-ha.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/geo-cluster.yaml
       Parameters:
-        VPC: !GetAtt VPCStack.Outputs.VPCID
-        PublicSubnetA: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        PublicSubnetB: !GetAtt VPCStack.Outputs.PublicSubnet2ID
-        PrivateSubnetA: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
-        PrivateSubnetB: !GetAtt VPCStack.Outputs.PrivateSubnet2ID
-        TgwHASubnetA: !GetAtt VPCStack.Outputs.AttachmentSubnet1ID
-        TgwHASubnetB: !GetAtt VPCStack.Outputs.AttachmentSubnet2ID
+        VPC: !Ref VPC
+        PublicSubnetA: !Ref PublicSubnetA
+        PublicSubnetB: !Ref PublicSubnetB
+        PrivateSubnetA: !Ref PrivateSubnetA
+        PrivateSubnetB: !Ref PrivateSubnetB
         InternalRouteTable: !Ref InternalRouteTable
         GatewayName: !Ref GatewayName
         GatewayInstanceType: !Ref GatewayInstanceType
@@ -387,9 +368,36 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary
+  TGWRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: TGW Subnets
+  TGWDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: ClusterStack
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NetworkInterfaceId: !GetAtt ClusterStack.Outputs.MemberAExternalInterface
+      RouteTableId: !Ref TGWRouteTable
+  TGWNSubnet1RouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: TGWRouteTable
+    Properties:
+      RouteTableId: !Ref TGWRouteTable
+      SubnetId: !Ref TgwHASubnetA
+  TGWSubnet2RouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: TGWRouteTable
+    Properties:
+      RouteTableId: !Ref TGWRouteTable
+      SubnetId: !Ref TgwHASubnetB
 Outputs:
   MemberAPublicAddress:
     Condition: AllocateAddress

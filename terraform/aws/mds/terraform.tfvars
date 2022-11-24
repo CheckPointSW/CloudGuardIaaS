@@ -23,7 +23,7 @@ predefined_role = ""
 sts_roles = []
 
 // --- Check Point Settings ---
-mds_version = "R81-BYOL"
+mds_version = "R81.10-BYOL"
 mds_admin_shell = "/bin/bash"
 mds_password_hash = "12345678"
 

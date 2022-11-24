@@ -1,0 +1,29 @@
+#cloud-config
+network:
+  version: 1
+  config:
+  - type: bridge
+    name: br0
+    mtu: *eth0-mtu
+    subnets:
+      - address: *eth0-private
+        type: static
+        gateway: *default-gateway
+        dns_nameservers:
+        - *eth0-dns1
+    bridge_interfaces:
+      - eth0
+kernel_parameters:
+  sim:
+    - sim_geneve_enabled=1
+    - sim_geneve_br_dev=br0
+  fw:
+
+    - fwtls_bridge_mode_inspection=1
+    - fw_geneve_enabled=1
+bootcmd:
+    - echo "brctl hairpin br0 eth0 on" >> /etc/rc.local
+    - echo "cpprod_util CPPROD_SetValue \"fw1\" \"AwsGwlb\" 4 1 1" >> /etc/rc.local
+runcmd:
+  - |
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"autoscale\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20221123\" templateName=\"autoscale\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" passwordHash=\"${PasswordHash}\" bootstrapScript64=\"${BootstrapScript}\"

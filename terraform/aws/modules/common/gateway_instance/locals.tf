@@ -22,4 +22,11 @@ locals {
   regex_gateway_hostname = regex(local.regex_valid_gateway_hostname, var.gateway_hostname) == var.gateway_hostname ? 0 : "Variable [lambda_scheduled_interval] must be a valid hostname label or an empty string"
 
   volume_encryption_condition = var.volume_encryption != "" ? true : false
+
+  //Splits the version and licence and returns the os version
+  version_split = element(split("-", var.gateway_version), 0)
+
+  gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
+  gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
+  gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
 }

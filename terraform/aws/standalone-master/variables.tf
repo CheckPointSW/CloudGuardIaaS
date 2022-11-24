@@ -97,7 +97,7 @@ variable "instance_tags" {
 variable "standalone_version" {
   type = string
   description =  "Gateway & Management (Standalone) version and license"
-  default = "R81-PAYG-NGTP"
+  default = "R81.10-PAYG-NGTP"
 }
 module "validate_standalone_version" {
   source = "../modules/common/version_license"
@@ -131,6 +131,11 @@ variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
+}
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
 }
 variable "standalone_bootstrap_script" {
   type = string

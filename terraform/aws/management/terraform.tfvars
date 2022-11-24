@@ -24,7 +24,7 @@ predefined_role = ""
 sts_roles = []
 
 // --- Check Point Settings ---
-management_version = "R81-BYOL"
+management_version = "R81.10-BYOL"
 admin_shell = "/bin/bash"
 management_password_hash = "12345678"
 

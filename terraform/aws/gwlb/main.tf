@@ -10,6 +10,7 @@ module "gateway_load_balancer" {
   instances_subnets = var.subnet_ids
   prefix_name = var.gateway_load_balancer_name
   internal = true
+
   security_groups = []
   tags = {
     x-chkp-management = var.management_server

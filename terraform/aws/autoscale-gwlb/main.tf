@@ -7,7 +7,8 @@ provider "aws" {
 module "amis" {
   source = "../modules/amis"
   version_license = var.gateway_version
-  amis_url = "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml"
+  amis_url = local.is_gwlb_ami == true ? "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml" : "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml"
+
 }
 
 resource "aws_security_group" "permissive_sg" {
@@ -46,15 +47,16 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
     encrypted = var.enable_volume_encryption
   }
 
-  user_data = templatefile("${path.module}/asg_userdata.sh", {
+  user_data = templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     EnableCloudWatch = var.enable_cloudwatch,
     EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
+    SICKey = local.gateway_SICkey_base64,
     AllowUploadDownload = var.allow_upload_download,
-    BootstrapScript = var.gateway_bootstrap_script
+    BootstrapScript = local.gateway_bootstrap_script64,
+    OsVersion = local.version_split
   })
 }
 resource "aws_autoscaling_group" "asg" {
@@ -111,24 +113,11 @@ resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_document.json
   path = "/"
 }
-data "aws_iam_policy_document" "policy_document" {
-  version = "2012-10-17"
-  statement {
-    actions = ["cloudwatch:PutMetricData"]
-    effect = "Allow"
-    resources = ["*"]
-  }
-}
-resource "aws_iam_policy" "policy" {
-  count = local.create_iam_role
-  name_prefix = format("%s-iam_policy", local.asg_name)
-
-  policy = data.aws_iam_policy_document.policy_document.json
-}
-resource "aws_iam_role_policy_attachment" "attachment" {
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
   count = local.create_iam_role
   role = aws_iam_role.role[count.index].name
-  policy_arn = aws_iam_policy.policy[count.index].arn
+  tag_name = local.asg_name
 }
 resource "aws_iam_instance_profile" "instance_profile" {
   count = local.create_iam_role

@@ -36,6 +36,7 @@ Metadata:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
+          - CloudWatch
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -82,6 +83,8 @@ Metadata:
         default: Gateway Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       GatewayBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -240,6 +243,9 @@ Parameters:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -278,6 +284,13 @@ Parameters:
     Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
     AllowedValues:
       - true
       - false
@@ -344,6 +357,7 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary
