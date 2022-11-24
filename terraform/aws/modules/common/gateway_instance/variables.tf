@@ -43,7 +43,7 @@ variable "volume_encryption" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version & license"
-  default = "R80.40-PAYG-NGTP"
+  default = "R81.10-BYOL"
 }
 variable "gateway_instance_type" {
   type = string
