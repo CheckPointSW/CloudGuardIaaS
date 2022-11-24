@@ -180,10 +180,10 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| YYYYMMDD | First release of Check Point Security Cluster Terraform module for AWS |
-
+| Template Version | Description                                                            |
+|------------------|------------------------------------------------------------------------|
+| 20221123         | First release of Check Point Security Cluster Terraform module for AWS |
+| 20221123         | R81.20 version support                                                 |
 
 
 

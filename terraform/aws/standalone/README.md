@@ -159,7 +159,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20210309         | First release of Check Point Security Management Server & Security Gateway (Standalone) Terraform module for AWS |
 | 20210329         | Stability fixes                                                                                                  |
 | 20220606         | New instance type support                                                                                        |
-
+| 20221123         | R81.20 version support                                                                                           |
 
 
 ## License

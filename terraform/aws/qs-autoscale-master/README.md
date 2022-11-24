@@ -232,7 +232,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 |------------------|---------------------------------------------------------------------------------------|
 | 20210309         | First release of Check Point Quick Start Auto Scaling Master Terraform module for AWS |
 | 20220606         | New instance type support                                                             |
-
+| 20221123         | R81.20 version support                                                                |
 
 
 ## License

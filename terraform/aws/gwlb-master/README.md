@@ -212,7 +212,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 |------------------|---------------------------------------------------------------------------------------------|
 | 20220414         | First release of Check Point CloudGuard Network Gateway Load Balancer master module for AWS |
 | 20220606         | New instance type support                                                                   |
-
+| 20221123         | R81.20 version support                                                                      |
 
 
 ## License
