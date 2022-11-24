@@ -21,7 +21,10 @@
       "allowedValues": [
         "R81.10 - Bring Your Own License",
         "R81.10 - Pay As You Go (NGTP)",
-        "R81.10 - Pay As You Go (NGTX)"
+        "R81.10 - Pay As You Go (NGTX)",
+        "R81.20 - Bring Your Own License",
+        "R81.20 - Pay As You Go (NGTP)",
+        "R81.20 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
@@ -358,21 +361,26 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20220130",
+    "templateVersion": "20221123",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
       "R81.10 - Pay As You Go (NGTP)": "NGTP",
-      "R81.10 - Pay As You Go (NGTX)": "NGTX"
+      "R81.10 - Pay As You Go (NGTX)": "NGTX",
+      "R81.20 - Bring Your Own License": "BYOL",
+      "R81.20 - Pay As You Go (NGTP)": "NGTP",
+      "R81.20 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R81.10 - Bring Your Own License": "R8110",
       "R81.10 - Pay As You Go (NGTP)": "R8110",
-      "R81.10 - Pay As You Go (NGTX)": "R8110"
+      "R81.10 - Pay As You Go (NGTX)": "R8110",
+      "R81.20 - Bring Your Own License": "R8120",
+      "R81.20 - Pay As You Go (NGTP)": "R8120",
+      "R81.20 - Pay As You Go (NGTX)": "R8120"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
-    "adminUsername": "notused",
     "isBlink": true,
     "subnet1Name": "[parameters('subnet1Name')]",
     "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
@@ -750,7 +758,7 @@
           },
           "osProfile": {
             "adminPassword": "[parameters('adminPassword')]",
-            "adminUsername": "[variables('adminUsername')]",
+            "adminUsername": "[concat('not','used')]",
             "computerNamePrefix": "[toLower(parameters('vmName'))]",
             "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
             "linuxConfiguration": "[variables('linuxConfiguration')]"
