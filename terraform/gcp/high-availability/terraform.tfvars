@@ -5,7 +5,7 @@ project                               = "PLEASE ENTER PROJECT NAME"             
 # --- Check Point Deployment ---
 prefix                                = "PLEASE ENTER PREFIX"                         # "chkp-tf-ha"
 license                               = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8040-gw-byol-cluster-123-456-v12345678"
+image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8110-gw-byol-cluster-335-985-v20220126"
 
 # --- Instances Configuration ---
 region                                = "PLEASE ENTER REGION"                         # "us-central1"
