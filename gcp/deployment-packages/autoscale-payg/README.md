@@ -35,7 +35,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 ## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
 | ------------- | ------------- | ------------- | -------------  |
-| **autoscalingVersion** | Autoscaling Version | string | R80.40 Autoscaling;<br/>R81.00 Autoscaling; <br/>R81.10 Autoscaling;|
+| **autoscalingVersion** | Autoscaling Version | string | R80.40 Autoscaling;<br/>R81.00 Autoscaling;<br/>R81.10 Autoscaling;<br/>R81.20 Autoscaling;|
 |  |  |  |  |  |
 | **managementName** | Security Management Server name | string | The name of the Security Management Server as appears in autoprovisioning configuration |
 |  |  |  |  |  |

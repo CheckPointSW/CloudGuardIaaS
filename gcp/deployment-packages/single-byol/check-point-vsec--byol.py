@@ -17,7 +17,9 @@ VERSIONS = {
     'R81': 'r81',
     'R81-GW': 'r81-gw',
     'R81.10': 'r8110',
-    'R81.10-GW': 'r8110-gw'
+    'R81.10-GW': 'r8110-gw',
+    'R81.20': 'r8120',
+    'R81.20-GW': 'r8120-gw'
 }
 
 ADDITIONAL_NETWORK = 'additionalNetwork{}'

@@ -155,6 +155,10 @@ properties:
       - R81.10 Management only
       - R81.10 Manual Configuration
       - R81.10 Gateway and Management (Standalone)
+      - R81.20 Gateway only
+      - R81.20 Management only
+      - R81.20 Manual Configuration
+      - R81.20 Gateway and Management (Standalone)
   allowUploadDownload:
     type: boolean
     default: True

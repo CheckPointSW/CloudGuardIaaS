@@ -43,7 +43,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 ## config.yaml variables
 | Name          | Description   | Type          | Allowed values |
 | ------------- | ------------- | ------------- | -------------  |
-| **ha_version** | High Availability Version | string | R80.40 Cluster;<br/>R81.00 Cluster;<br/>R81.10 Cluster; |
+| **ha_version** | High Availability Version | string | R80.40 Cluster;<br/>R81.00 Cluster;<br/>R81.10 Cluster;<br/>R81.20 Cluster; |
 |  |  |  |  |  |
 | **zoneA** | Member A Zone. The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |
 |  |  |  |  |  |

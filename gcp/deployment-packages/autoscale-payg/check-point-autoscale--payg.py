@@ -13,7 +13,8 @@ LICENCE_TYPE = 'mig'
 VERSIONS = {
     'R80.40-GW': 'r8040-gw',
     'R81-GW': 'r81-gw',
-    'R81.10-GW': 'r8110-gw'
+    'R81.10-GW': 'r8110-gw',
+    'R81.20-GW': 'r8110-gw'
 }
 
 TEMPLATE_NAME = 'autoscale'
