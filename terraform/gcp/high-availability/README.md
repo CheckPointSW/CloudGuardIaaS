@@ -117,7 +117,7 @@ project = "project-name"
 # --- Check Point Deployment ---
 prefix = "chkp-tf-ha"
 license = "BYOL"
-image_name = "check-point-r8040-gw-byol-cluster-123-456-v12345678"
+image_name = "check-point-r8110-gw-byol-cluster-335-985-v20220126"
 
 # --- Instances Configuration ---
 region = "us-central1"
@@ -221,7 +221,7 @@ internal_network1_subnetwork_name = ""
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-ha" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
-| image_name | The High Availability (cluster) image name (e.g. check-point-r8040-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
+| image_name | The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
 |  |  |  |  |  |
 | region  | GCP region  | string  | N/A | "us-central1" | no |
 | zoneA  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
