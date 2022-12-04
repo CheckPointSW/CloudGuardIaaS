@@ -44,7 +44,7 @@
       "condition": "[parameters('deployNsg')]",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
-      "name": "[variables('NewNsgName')]",
+      "name": "[parameters('NewNsgName')]",
       "properties": {
         "securityRules": [
           {
