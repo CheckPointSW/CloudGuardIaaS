@@ -26,9 +26,9 @@
       "type": "bool",
       "defaultValue": false
     },
-    "tagsByResource": {
-      "type": "object",
-      "defaultValue": {}
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -44,7 +44,7 @@
       "condition": "[parameters('deployNsg')]",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
-      "name": "[variables('nsgName')]",
+      "name": "[parameters('NewNsgName')]",
       "properties": {
         "securityRules": [
           {
@@ -62,8 +62,7 @@
             }
           }
         ]
-      },
-      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+      }
     }
   ],
   "outputs": {
