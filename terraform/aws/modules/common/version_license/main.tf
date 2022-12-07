@@ -21,8 +21,7 @@ locals {
     "R81.10-BYOL",
     "R81.10-PAYG",
     "R81.20-BYOL",
-	"R81.20-PAYG-NGTP",
-    "R81.20-PAYG-NGTX"
+    "R81.20-PAYG"
   ]
   mds_versions = [
     "R80.40-BYOL",
