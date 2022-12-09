@@ -30,6 +30,10 @@
     "NewNsgName": {
       "type": "string",
       "defaultValue": "[concat(parameters('vmName'), '-nsg')]"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
