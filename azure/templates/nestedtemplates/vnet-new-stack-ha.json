@@ -80,43 +80,8 @@
       "type": "string"
     }
   },
-  "variables": {
-    "copy": [
-      {
-        "name": "toInternalRoutes",
-        "count": "[length(parameters('virtualNetworkAddressPrefixes'))]",
-        "input": {
-          "name": "[concat('To-Internal-',copyIndex('toInternalRoutes'))]",
-          "properties": {
-            "addressPrefix": "[parameters('virtualNetworkAddressPrefixes')[copyIndex('toInternalRoutes')]]",
-            "nextHopType": "None",
-            "nextHopType": "VirtualAppliance",
-            "nextHopIpAddress": "[parameters('subnet1StartAddress')]"
-          }
-        }
-      }
-    ],
-    "localSubnetRoute": [
-      {
-        "name": "Local-Subnet",
-        "properties": {
-          "addressPrefix": "[parameters('Subnet1Prefix')]",
-          "nextHopType": "VnetLocal"
-        }
-      }
-    ],
-    "routesArray":"[concat(variables('localSubnetRoute'), variables('toInternalRoutes'))]"
-  },
+  "variables": {},
   "resources": [
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "[parameters('apiVersion')]",
-      "location": "[parameters('location')]",
-      "name": "[parameters('Subnet1Name')]",
-      "properties": {
-        "routes": "[variables('routesArray')]"
-      }
-    },
     {
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "[parameters('apiVersion')]",
@@ -141,7 +106,6 @@
       "location": "[parameters('location')]",
       "name": "[parameters('virtualNetworkName')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
         "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]"
       ],
       "properties": {
@@ -152,10 +116,7 @@
           {
             "name": "[parameters('subnet1Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]",
-              "routeTable": {
-                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]"
-              }
+              "addressPrefix": "[parameters('subnet1Prefix')]"
             }
           },
           {
