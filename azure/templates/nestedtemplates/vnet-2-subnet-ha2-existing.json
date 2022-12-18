@@ -19,13 +19,17 @@
       },
       "defaultValue": ""
     },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
     "deployNsg": {
       "type": "bool",
       "defaultValue": false
     },
     "NewNsgName": {
       "type": "string",
-      "defaultValue": "NewNsg"
+      "defaultValue": "default-nsg"
     }
   },
   "variables": {
@@ -55,7 +59,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {
