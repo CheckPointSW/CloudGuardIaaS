@@ -25,7 +25,11 @@
     },
     "NewNsgName": {
       "type": "string",
-      "defaultValue": ""
+      "defaultValue": "default-nsg"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -55,7 +59,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {
