@@ -8,7 +8,7 @@ These types of Terraform resources are supported:
 * [Network interface](https://www.terraform.io/docs/providers/aws/r/network_interface.html)
 * [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
 * [EIP](https://www.terraform.io/docs/providers/aws/r/eip.html)
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
+* [Launch template](https://www.terraform.io/docs/providers/aws/r/launch_template.html)
 * [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
 * [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
 
@@ -193,7 +193,8 @@ In order to check the template version, please refer to [sk116585](https://suppo
 |------------------|------------------------------------------------------------------------------------------|
 | 20210329         | First release of Check Point Transit Gateway Auto Scaling Group Terraform module for AWS |
 | 20220606         | New instance type support                                                                |
-| 20221123         | R81.20 version support                                                                   |
+| 20221123         | R81.20 version support    
+| 20221215         | Support ASG Launch Template instead of Launch Configuration 
 
 
 ## License
