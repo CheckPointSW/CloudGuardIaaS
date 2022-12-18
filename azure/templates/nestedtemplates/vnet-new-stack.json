@@ -88,8 +88,15 @@
       "location": "[parameters('location')]",
       "name": "[parameters('subnet1Name')]",
       "properties": {
-        "routes": [
-          {
+        "routes": [        
+		 {
+            "name": "Local-Subnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          },
+		  {
             "name": "To-Internal",
             "properties": {
               "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
