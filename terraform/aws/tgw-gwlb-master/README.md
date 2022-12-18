@@ -7,7 +7,7 @@ These types of Terraform resources are supported:
 * [Security Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
 * [Load Balancer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb)
 * [Load Balancer Target Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb_target_group)
-* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Launch template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template)
 * [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
 * [IAM Role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) - conditional creation
 
@@ -249,7 +249,8 @@ In order to check the template version, please refer to [sk116585](https://suppo
 |------------------|----------------------------------------------------------------------------------------------------------------------------|
 | 20220414         | First release of Check Point CloudGuar d Network Gateway Load Balancer for Transit Gateway Master Terraform module for AWS |
 | 20220606         | New instance type support                                                                                                  |
-| 20221123         | R81.20 version support                                                                                                     |
+| 20221123         | R81.20 version support                           
+| 20221215         | Support ASG Launch Template instead of Launch Configuration 
 
 
 ## License
