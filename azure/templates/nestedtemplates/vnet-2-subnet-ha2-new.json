@@ -52,7 +52,14 @@
     },
     "NewNsgName": {
       "type": "string",
-      "defaultValue": "NewNsg"
+      "defaultValue": "default-nsg",
+      "metadata": {
+        "description": "Name of the network security group"
+      }
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -82,32 +89,6 @@
   },
   "resources": [
     {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2020-06-01",
-      "location": "[parameters('location')]",
-      "name": "[parameters('Subnet1Name')]",
-      "properties": {
-        "routes": "[variables('routesArray')]"
-      }
-    },
-    {
-      "type": "Microsoft.Network/routeTables",
-      "apiVersion": "2020-06-01",
-      "location": "[parameters('location')]",
-      "name": "[parameters('Subnet2Name')]",
-      "properties": {
-        "routes": [
-          {
-            "name": "To-Internet",
-            "properties": {
-              "addressPrefix": "0.0.0.0/0",
-              "nextHopType": "None"
-            }
-          }
-        ]
-      }
-    },
-    {
       "type": "Microsoft.Network/networkSecurityGroups",
       "condition": "[parameters('deployNSG')]",
       "apiVersion": "2020-06-01",
@@ -130,7 +111,36 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('Subnet1Name')]",
+      "properties": {
+        "routes": "[variables('routesArray')]"
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('Subnet2Name')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "To-Internet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "None"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -165,7 +175,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     }
   ],
   "outputs": {
