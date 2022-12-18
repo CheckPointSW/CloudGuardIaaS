@@ -88,14 +88,7 @@
       "location": "[parameters('location')]",
       "name": "[parameters('subnet1Name')]",
       "properties": {
-        "routes": [        
-		 {
-            "name": "Local-Subnet",
-            "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]",
-              "nextHopType": "VnetLocal"
-            }
-          },
+        "routes": [
 		  {
             "name": "To-Internal",
             "properties": {
@@ -144,13 +137,19 @@
           {
             "name": "[parameters('subnet1Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]"
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]"
+              }
             }
           },
           {
             "name": "[parameters('subnet2Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet2Prefix')]"
+              "addressPrefix": "[parameters('subnet2Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]"
+              }
             }
           }
         ]
