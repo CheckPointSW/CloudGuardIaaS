@@ -168,7 +168,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220414         | First release of Check Point Auto Scaling GWLB Terraform module for AWS |
 | 20220606         | New instance type support                                               |
 | 20221123         | R81.20 version support    
-| 20221211         | Support ASG Launch Template instead of Launch Configuration 
+| 20221215         | Support ASG Launch Template instead of Launch Configuration 
 
 
 
