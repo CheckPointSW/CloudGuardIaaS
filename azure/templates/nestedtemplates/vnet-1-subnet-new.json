@@ -109,7 +109,8 @@
       "name": "[parameters('subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -119,7 +120,8 @@
       "dependsOn": [
         "[variables('routeTableID')]"
       ],
-      "properties": "[variables('vnetProperties')]"
+      "properties": "[variables('vnetProperties')]",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -144,7 +146,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {
