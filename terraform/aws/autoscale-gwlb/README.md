@@ -3,7 +3,7 @@
 Terraform module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC.
 
 These types of Terraform resources are supported:
-* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Launch Template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_Template)
 * [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
 * [Security group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
 * [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
@@ -156,7 +156,7 @@ secret_key = "my-secret-key"
 | autoscale_autoscaling_group_max_size  | The deployed AutoScaling Group's maximum number  of instances  |
 | autoscale_autoscaling_group_target_group_arns  | The deployed AutoScaling Group's configured target groups  |
 | autoscale_autoscaling_group_subnets  | The subnets on which the deployed AutoScaling Group is configured |
-| autoscale_launch_configuration_id  | The id of the Launch Configuration  |
+| autoscale_launch_template_id  | The id of the Launch Template  |
 | autoscale_autoscale_security_group_id  | The deployed AutoScaling Group's security group id  |
 | autoscale_iam_role_name  | The deployed AutoScaling Group's IAM role name (if created)  |
 
