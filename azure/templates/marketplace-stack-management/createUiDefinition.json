@@ -259,7 +259,7 @@
               "sku": "mgmt-25"
             },
             "count": 1
-          },         
+          },
           {
             "name": "managementGUIClientNetwork",
             "type": "Microsoft.Common.TextBox",
