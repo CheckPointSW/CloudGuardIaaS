@@ -52,5 +52,4 @@ locals {
     "gp2"]
   // will fail if [var.VolumeType] is invalid:
   validate_volume_type = index(local.volume_type_allowed_values, var.volume_type)
-
 }

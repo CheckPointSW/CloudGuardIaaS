@@ -9,7 +9,7 @@ These types of Terraform resources are supported:
 * [Security Group](https://www.terraform.io/docs/providers/aws/r/security_group.html)
 * [Load Balancer](https://www.terraform.io/docs/providers/aws/r/lb.html)
 * [Load Balancer Target Group](https://www.terraform.io/docs/providers/aws/r/lb_target_group.html)
-* [Launch configuration](https://www.terraform.io/docs/providers/aws/r/launch_configuration.html)
+* [Launch template](https://www.terraform.io/docs/providers/aws/r/launch_template.html)
 * [Auto Scaling Group](https://www.terraform.io/docs/providers/aws/r/autoscaling_group.html)
 * [AWS Instance](https://www.terraform.io/docs/providers/aws/r/instance.html)
 * [IAM Role](https://www.terraform.io/docs/providers/aws/r/iam_role.html) - conditional creation
@@ -233,7 +233,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20210309         | First release of Check Point Quick Start Auto Scaling Master Terraform module for AWS |
 | 20220606         | New instance type support                                                             |
 | 20221123         | R81.20 version support                                                                |
-
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                           |
 
 ## License
 

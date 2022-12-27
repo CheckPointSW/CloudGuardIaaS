@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20211212)
+Description: Create an Auto Scaling group of Check Point gateways (20211226)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -411,10 +411,12 @@ Resources:
           CidrIp: 0.0.0.0/0
   GatewayGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: GatewayLaunchConfig
+    DependsOn: GatewayLaunchTemplate
     Properties:
       VPCZoneIdentifier: !Ref GatewaysSubnets
-      LaunchConfigurationName: !Ref GatewayLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
       MinSize: !Ref GatewaysMinSize
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
@@ -439,37 +441,44 @@ Resources:
               - !Join ['=', [template, !Ref ConfigurationTemplate]]
               - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
           PropagateAtLaunch: true
-  GatewayLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      AssociatePublicIpAddress: true
-      KeyName: !Ref KeyName
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      SecurityGroups:
-        - !Ref PermissiveSecurityGroup
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !Ref EnableVolumeEncryption
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      IamInstanceProfile: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: true
+            Groups:
+              - !Ref PermissiveSecurityGroup
+        Monitoring:
+          Enabled: true
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !Ref EnableVolumeEncryption
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:

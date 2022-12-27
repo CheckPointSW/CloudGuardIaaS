@@ -3,7 +3,7 @@
 Terraform module which deploys an Auto Scaling Group of Check Point Security Gateways into an existing VPC.
 
 These types of Terraform resources are supported:
-* [Launch configuration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration)
+* [Launch template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template)
 * [Auto Scaling Group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group)
 * [Security group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group)
 * [CloudWatch Metric Alarm](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_metric_alarm)
@@ -146,19 +146,19 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| autoscale_autoscaling_group_name  | The name of the deployed AutoScaling Group  |
-| autoscale_autoscaling_group_arn  | The ARN for the deployed AutoScaling Group  |
-| autoscale_autoscaling_group_availability_zones  | The AZs on which the Autoscaling Group is configured  |
-| autoscale_autoscaling_group_desired_capacity  | The deployed AutoScaling Group's desired capacity of instances |
-| autoscale_autoscaling_group_min_size  | The deployed AutoScaling Group's minimum number of instances  |
-| autoscale_autoscaling_group_max_size  | The deployed AutoScaling Group's maximum number  of instances  |
-| autoscale_autoscaling_group_target_group_arns  | The deployed AutoScaling Group's configured target groups  |
-| autoscale_autoscaling_group_subnets  | The subnets on which the deployed AutoScaling Group is configured |
-| autoscale_launch_configuration_id  | The id of the Launch Configuration  |
-| autoscale_autoscale_security_group_id  | The deployed AutoScaling Group's security group id  |
-| autoscale_iam_role_name  | The deployed AutoScaling Group's IAM role name (if created)  |
+| Name                                           | Description                                                       |
+|------------------------------------------------|-------------------------------------------------------------------|
+| autoscale_autoscaling_group_name               | The name of the deployed AutoScaling Group                        |
+| autoscale_autoscaling_group_arn                | The ARN for the deployed AutoScaling Group                        |
+| autoscale_autoscaling_group_availability_zones | The AZs on which the Autoscaling Group is configured              |
+| autoscale_autoscaling_group_desired_capacity   | The deployed AutoScaling Group's desired capacity of instances    |
+| autoscale_autoscaling_group_min_size           | The deployed AutoScaling Group's minimum number of instances      |
+| autoscale_autoscaling_group_max_size           | The deployed AutoScaling Group's maximum number  of instances     |
+| autoscale_autoscaling_group_target_group_arns  | The deployed AutoScaling Group's configured target groups         |
+| autoscale_autoscaling_group_subnets            | The subnets on which the deployed AutoScaling Group is configured |
+| autoscale_launch_template_id                   | The id of the Launch Template                                     |
+| autoscale_autoscale_security_group_id          | The deployed AutoScaling Group's security group id                |
+| autoscale_iam_role_name                        | The deployed AutoScaling Group's IAM role name (if created)       |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -168,9 +168,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220414         | First release of Check Point Auto Scaling GWLB Terraform module for AWS |
 | 20220606         | New instance type support                                               |
 | 20221123         | R81.20 version support                                                  |
-
-
-
+| 20221226         | Support ASG Launch Template instead of Launch Configuration             |
 
 ## License
 

@@ -32,22 +32,36 @@ resource "aws_security_group" "permissive_sg" {
   }
 }
 
-resource "aws_launch_configuration" "asg_launch_configuration" {
+resource "aws_launch_template" "asg_launch_template" {
   name_prefix = local.asg_name
   image_id = module.amis.ami_id
   instance_type = var.gateway_instance_type
   key_name = var.key_name
-  security_groups = [aws_security_group.permissive_sg.id]
-  associate_public_ip_address = var.allocate_public_IP
-  iam_instance_profile = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
-
-  root_block_device {
-    volume_type = var.volume_type
-    volume_size = var.volume_size
-    encrypted = var.enable_volume_encryption
+  network_interfaces {
+    associate_public_ip_address = var.allocate_public_IP
+    security_groups = [aws_security_group.permissive_sg.id]
   }
 
-  user_data = templatefile("${path.module}/asg_userdata.yaml", {
+  iam_instance_profile {
+    name = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_type = var.volume_type
+      volume_size = var.volume_size
+      encrypted   = var.enable_volume_encryption
+    }
+  }
+
+  description = "Initial template version"
+
+  user_data = base64encode(templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
     PasswordHash = local.gateway_password_hash_base64,
     EnableCloudWatch = var.enable_cloudwatch,
@@ -57,11 +71,14 @@ resource "aws_launch_configuration" "asg_launch_configuration" {
     AllowUploadDownload = var.allow_upload_download,
     BootstrapScript = local.gateway_bootstrap_script64,
     OsVersion = local.version_split
-  })
+  }))
 }
 resource "aws_autoscaling_group" "asg" {
   name_prefix = local.asg_name
-  launch_configuration = aws_launch_configuration.asg_launch_configuration.id
+  launch_template {
+    id = aws_launch_template.asg_launch_template.id
+    version = aws_launch_template.asg_launch_template.latest_version
+  }
   min_size = var.minimum_group_size
   max_size = var.maximum_group_size
   target_group_arns = var.target_groups
