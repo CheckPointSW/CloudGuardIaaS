@@ -230,15 +230,15 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description                                                 |
-| ------------- |-------------------------------------------------------------|
-| managment_public_ip  | The deployed Security Management AWS instance public IP                               |
-| load_balancer_url  | The URL of the external Load Balancer                                                 |
-| template_name  | Name of a gateway configuration template in the automatic provisioning configuration. |
-| controller_name  | The controller name in CME.                                                           |
-| gwlb_name  | The name of the deployed Gateway Load Balancer                                        |
-| gwlb_service_name  | The service name for the deployed Gateway Load Balancer                               |
-| gwlb_arn  | The arn for the deployed Gateway Load Balancer                                        |
+| Name                | Description                                                                           |
+|---------------------|---------------------------------------------------------------------------------------|
+| managment_public_ip | The deployed Security Management AWS instance public IP                               |
+| load_balancer_url   | The URL of the external Load Balancer                                                 |
+| template_name       | Name of a gateway configuration template in the automatic provisioning configuration. |
+| controller_name     | The controller name in CME.                                                           |
+| gwlb_name           | The name of the deployed Gateway Load Balancer                                        |
+| gwlb_service_name   | The service name for the deployed Gateway Load Balancer                               |
+| gwlb_arn            | The arn for the deployed Gateway Load Balancer                                        |
 
 
 
@@ -249,9 +249,8 @@ In order to check the template version, please refer to [sk116585](https://suppo
 |------------------|----------------------------------------------------------------------------------------------------------------------------|
 | 20220414         | First release of Check Point CloudGuar d Network Gateway Load Balancer for Transit Gateway Master Terraform module for AWS |
 | 20220606         | New instance type support                                                                                                  |
-| 20221123         | R81.20 version support                           
-| 20221215         | Support ASG Launch Template instead of Launch Configuration 
-
+| 20221123         | R81.20 version support                                                                                                     |
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                                                                |
 
 ## License
 

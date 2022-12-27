@@ -29,9 +29,8 @@ output "autoscale_autoscaling_group_target_group_arns" {
 output "autoscale_autoscaling_group_subnets" {
   value = aws_autoscaling_group.asg.vpc_zone_identifier
 }
-
-output "autoscale_launch_configuration_id" {
-  value = aws_launch_configuration.asg_launch_configuration.id
+output "autoscale_launch_template_id" {
+  value = aws_launch_template.asg_launch_template.id
 }
 
 output "autoscale_security_group_id" {

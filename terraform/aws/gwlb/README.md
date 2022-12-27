@@ -205,8 +205,8 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220414         | First release of Check Point CloudGuard Network Gateway Load Balancer module for AWS |
 | 20220523         | Add support for cross zone load balancing                                            |
 | 20220606         | New instance type support                                                            |
-| 20221123         | R81.20 version support              
-| 20221215         | Support ASG Launch Template instead of Launch Configuration 
+| 20221123         | R81.20 version support                                                               |
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                          |
 
 ## License
 
