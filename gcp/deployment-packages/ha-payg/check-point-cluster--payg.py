@@ -23,7 +23,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20221124'
+TEMPLATE_VERSION = '20221222'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
