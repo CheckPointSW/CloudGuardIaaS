@@ -12,10 +12,11 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.30 - Bring Your Own License",
         "R80.40 - Bring Your Own License",
         "R81 - Bring Your Own License",
-        "R81.10 - Bring Your Own License"
+        "R81.10 - Bring Your Own License",
+        "R81.20 - Bring Your Own License",
+        "R82 - Bring Your Own License"
       ],
       "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
@@ -216,27 +217,48 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     }
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20220130",
+    "templateVersion": "20221227",
     "location": "[parameters('location')]",
     "offers": {
-      "R80.30 - Bring Your Own License": "BYOL",
       "R80.40 - Bring Your Own License": "BYOL",
       "R81 - Bring Your Own License": "BYOL",
-      "R81.10 - Bring Your Own License": "BYOL"
+      "R81.10 - Bring Your Own License": "BYOL",
+      "R81.20 - Bring Your Own License": "BYOL",
+      "R82 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.30 - Bring Your Own License": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R81 - Bring Your Own License": "R81",
-      "R81.10 - Bring Your Own License": "R8110"
+      "R81.10 - Bring Your Own License": "R8110",
+      "R81.20 - Bring Your Own License": "R8120",
+      "R82 - Bring Your Own License": "R82"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
-    "adminUsername": "notused",
     "isBlink": "[bool('false')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
@@ -246,6 +268,7 @@
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
+    "customData64": "[base64(variables('customData'))]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -285,14 +308,15 @@
     "identity": "[if(parameters('msi'), json('{\"type\": \"SystemAssigned\"}'), json('null'))]",
     "publicIPAddressName": "[parameters('vmName')]",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
-    "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -321,7 +345,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -349,6 +374,15 @@
           },
           "Subnet1Prefix": {
             "value": "[parameters('Subnet1Prefix')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -376,6 +410,15 @@
           },
           "vmName": {
             "value": "[parameters('vmName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -391,145 +434,21 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
-      }
-    },
-    {
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2020-06-01",
-      "location": "[variables('location')]",
-      "name": "[variables('nsgName')]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "SSH",
-            "properties": {
-              "description": "Allow inbound SSH connection",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "22",
-              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "100",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "GAiA-portal",
-            "properties": {
-              "description": "Allow inbound HTTPS access to the GAiA portal",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "443",
-              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "110",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "SmartConsole-1",
-            "properties": {
-              "description": "Allow inbound access using the SmartConsole GUI client",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "18190",
-              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "120",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "SmartConsole-2",
-            "properties": {
-              "description": "Allow inbound access using the SmartConsole GUI client",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "19009",
-              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "130",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "Logs",
-            "properties": {
-              "description": "Allow inbound logging connections from managed gateways",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "257",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "140",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "ICA-pull",
-            "properties": {
-              "description": "Allow security gateways to pull a SIC certificate",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "18210",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "150",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "CRL-fetch",
-            "properties": {
-              "description": "Allow security gateways to fetch CRLs",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "18264",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "160",
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "Policy-fetch",
-            "properties": {
-              "description": "Allow security gateways to fetch policy",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "18191",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": "170",
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
-        "[variables('nsgId')]",
         "[variables('publicIPAddressId')]"
       ],
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup": {
-          "id": "[variables('nsgId')]"
-        },
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -545,7 +464,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -563,7 +483,8 @@
           }
         },
         "hyperVGeneration": "V1"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -578,6 +499,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[variables('identity')]",
       "properties": {
+        "UserData": "[variables('customData64')]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
@@ -599,9 +521,9 @@
         },
         "osProfile": {
           "adminPassword": "[parameters('adminPassword')]",
-          "adminUsername": "[variables('adminUsername')]",
+          "adminUsername": "[concat('not','used')]",
           "computerName": "[toLower(parameters('vmName'))]",
-          "customData": "[base64(variables('customData'))]",
+          "customData": "[variables('customData64')]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -616,7 +538,8 @@
             }
           }
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')) ]"
     }
   ],
   "outputs": {
