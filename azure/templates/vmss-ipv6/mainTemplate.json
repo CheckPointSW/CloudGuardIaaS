@@ -19,9 +19,6 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.30 - Bring Your Own License",
-        "R80.30 - Pay As You Go (NGTP)",
-        "R80.30 - Pay As You Go (NGTX)",
         "R80.40 - Bring Your Own License",
         "R80.40 - Pay As You Go (NGTP)",
         "R80.40 - Pay As You Go (NGTX)",
@@ -30,7 +27,10 @@
         "R81 - Pay As You Go (NGTX)",
         "R81.10 - Bring Your Own License",
         "R81.10 - Pay As You Go (NGTP)",
-        "R81.10 - Pay As You Go (NGTX)"
+        "R81.10 - Pay As You Go (NGTX)",
+        "R81.20 - Bring Your Own License",
+        "R81.20 - Pay As You Go (NGTP)",
+        "R81.20 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
@@ -261,7 +261,7 @@
         "description": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC's private IP address."
       }
     },
-    "mgmtIPaddress": {
+    "mgmtIpAddress": {
       "type": "string",
       "defaultValue": "",
       "metadata": {
@@ -352,6 +352,26 @@
     "rbacGuid": {
       "type": "string",
       "defaultValue": "[newGuid()]"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "default-nsg"
     }
   },
   "variables": {
@@ -366,16 +386,13 @@
     "subnet2Name": "[parameters('Subnet2Name')]",
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20220130",
+    "templateVersion": "20221227",
     "location": "[parameters('location')]",
     "subnet-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "subnet2-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet2Name'))]",
     "VMSSFrontend": "VMSS-Frontend",
     "VMSSBackend": "VMSS-Backend",
     "offers": {
-      "R80.30 - Bring Your Own License": "BYOL",
-      "R80.30 - Pay As You Go (NGTP)": "NGTP-V2",
-      "R80.30 - Pay As You Go (NGTX)": "NGTX-V2",
       "R80.40 - Bring Your Own License": "BYOL",
       "R80.40 - Pay As You Go (NGTP)": "NGTP",
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
@@ -384,13 +401,13 @@
       "R81 - Pay As You Go (NGTX)": "NGTX",
       "R81.10 - Bring Your Own License": "BYOL",
       "R81.10 - Pay As You Go (NGTP)": "NGTP",
-      "R81.10 - Pay As You Go (NGTX)": "NGTX"
+      "R81.10 - Pay As You Go (NGTX)": "NGTX",
+      "R81.20 - Bring Your Own License": "BYOL",
+      "R81.20 - Pay As You Go (NGTP)": "NGTP",
+      "R81.20 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.30 - Bring Your Own License": "R8030",
-      "R80.30 - Pay As You Go (NGTP)": "R8030",
-      "R80.30 - Pay As You Go (NGTX)": "R8030",
       "R80.40 - Bring Your Own License": "R8040",
       "R80.40 - Pay As You Go (NGTP)": "R8040",
       "R80.40 - Pay As You Go (NGTX)": "R8040",
@@ -399,10 +416,12 @@
       "R81 - Pay As You Go (NGTX)": "R81",
       "R81.10 - Bring Your Own License": "R8110",
       "R81.10 - Pay As You Go (NGTP)": "R8110",
-      "R81.10 - Pay As You Go (NGTX)": "R8110"
+      "R81.10 - Pay As You Go (NGTX)": "R8110",
+      "R81.20 - Bring Your Own License": "R8120",
+      "R81.20 - Pay As You Go (NGTP)": "R8120",
+      "R81.20 - Pay As You Go (NGTX)": "R8120"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
-    "adminUsername": "notused",
     "isBlink": true,
     "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
     "storageAccountType": "Standard_LRS",
@@ -502,34 +521,38 @@
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
-      "australiaeast",
       "brazilsouth",
       "canadacentral",
       "centralus",
-      "eastasia",
       "eastus",
       "eastus2",
+      "southcentralus",
+      "usgovvirginia",
+      "westus2",
+      "westus3",
       "francecentral",
       "germanywestcentral",
-      "japaneast",
-      "koreacentral",
       "northeurope",
       "norwayeast",
-      "southafricanorth",
-      "southcentralus",
-      "southeastasia",
-      "swedencentral",
       "uksouth",
-      "usgovvirginia",
       "westeurope",
-      "westus2",
-      "westus3"
+      "swedencentral",
+      "switzerlandnorth",
+      "qatarcentral",
+      "uaenorth",
+      "southafricanorth",
+      "australiaeast",
+      "centralindia",
+      "japaneast",
+      "koreacentral",
+      "southeastasia",
+      "eastasia"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
     "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
     "mgmtIpAddressType": "[split(variables('mgmtInterface'), '-')[1]]",
     "mgmtInterfaceName": "[split(variables('mgmtInterface'), '-')[0]]",
-    "mgmtIPaddress": "[if(equals(variables('mgmtInterfaceName'), 'eth0'), parameters('mgmtIPaddress'), '')]",
+    "mgmtIPaddress": "[if(equals(variables('mgmtInterfaceName'), 'eth0'), parameters('mgmtIpAddress'), '')]",
     "commomTags": {
       "x-chkp-management": "[parameters('managementServer')]",
       "x-chkp-template": "[parameters('configurationTemplate')]",
@@ -548,7 +571,10 @@
     "numberOfRecordSetEntries": "20",
     "customMetrics": "[parameters('customMetrics')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
-    "identity": "[json('{\"type\": \"SystemAssigned\"}')]"
+    "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -574,7 +600,8 @@
       },
       "properties": {
         "publicIPAllocationMethod": "Static"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "apiVersion": "2020-05-01",
@@ -587,7 +614,8 @@
       "properties": {
         "publicIPAllocationMethod": "Static",
         "publicIPAddressVersion": "IPv6"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "apiVersion": "2020-05-01",
@@ -676,7 +704,8 @@
             "name": "lb-probe"
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     },
     {
       "apiVersion": "2021-01-01",
@@ -736,31 +765,8 @@
             "name": "lb-probe"
           }
         ]
-      }
-    },
-    {
-      "apiVersion": "2020-05-01",
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "vmss-nsg",
-      "location": "[parameters('location')]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "allow-all-inbound",
-            "properties": {
-              "description": "Allow all inbound traffic",
-              "protocol": "TCP",
-              "sourcePortRange": "*",
-              "destinationPortRange": "*",
-              "sourceAddressPrefix": "*",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 1001,
-              "direction": "Inbound"
-            }
-          }
-        ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -779,7 +785,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -805,7 +812,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -856,7 +864,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     },
     {
       "condition": "[equals(variables('customMetrics'), 'yes')]",
@@ -870,7 +879,8 @@
       },
       "dependsOn": [
         "[variables('vmssID')]"
-      ]
+      ],
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
@@ -898,7 +908,13 @@
             "value": "[parameters('vmName')]"
           },
           "deployNsg": {
-            "value": true
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -933,6 +949,9 @@
           },
           "vmssName": {
             "value": "[parameters('vmName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -950,7 +969,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -967,6 +987,32 @@
             "storageAccountType": "Standard_LRS"
           }
         }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "condition": "[and(parameters('deployNewNSG'),equals(parameters('vnetNewOrExisting'), 'new'))]",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('NewNsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowAllInBound",
+            "properties": {
+              "description": "Allow all inbound connections",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "100",
+              "direction": "Inbound"
+            }
+          }
+        ]
       }
     },
     {
@@ -976,14 +1022,13 @@
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
       "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
-      "tags": "[variables('vmssTags')]",
+      "tags": "[union(variables('vmssTags'),if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachineScaleSets'), parameters('tagsByResource')['Microsoft.Compute/virtualMachineScaleSets'], json('{}')))]",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
         "[resourceId('Microsoft.Network/loadBalancers','frontend-lb')]",
         "[resourceId('Microsoft.Network/loadBalancers','backend-lb')]",
         "[variables('storageAccountId')]",
-        "[variables('customImageId')]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups','vmss-nsg')]"
+        "[variables('customImageId')]"
       ],
       "sku": {
         "name": "[parameters('vmSize')]",
@@ -996,6 +1041,7 @@
           "mode": "Manual"
         },
         "virtualMachineProfile": {
+          "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), split(parameters('virtualNetworkAddressPrefix'), '.')[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
           "storageProfile": {
             "osDisk": {
               "caching": "ReadWrite",
@@ -1008,7 +1054,7 @@
           },
           "osProfile": {
             "adminPassword": "[parameters('adminPassword')]",
-            "adminUsername": "[variables('adminUsername')]",
+            "adminUsername": "[concat('not','used')]",
             "computerNamePrefix": "[toLower(parameters('vmName'))]",
             "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), split(parameters('virtualNetworkAddressPrefix'), '.')[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
             "linuxConfiguration": "[variables('linuxConfiguration')]"
@@ -1018,12 +1064,10 @@
               {
                 "name": "eth0",
                 "properties": {
-                  "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups','vmss-nsg')]"
-                  },
                   "primary": true,
                   "enableIPForwarding": false,
                   "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
+                  "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1IPV6",
@@ -1062,9 +1106,6 @@
               {
                 "name": "eth1",
                 "properties": {
-                  "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups','vmss-nsg')]"
-                  },
                   "primary": false,
                   "enableIPForwarding": true,
                   "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
@@ -1172,7 +1213,8 @@
             ]
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Insights/autoscaleSettings'), parameters('tagsByResource')['Microsoft.Insights/autoscaleSettings'], json('{}')) ]"
     }
   ]
 }
