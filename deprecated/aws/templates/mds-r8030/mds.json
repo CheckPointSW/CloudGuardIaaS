@@ -651,7 +651,7 @@
     "AMI": {
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
-        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml",
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/utils/amis-deprecated.yaml",
         "Parameters": {
           "Version": {
             "Fn::If": [
