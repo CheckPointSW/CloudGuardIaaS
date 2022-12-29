@@ -268,7 +268,7 @@ Parameters:
       - false
   GatewayVersion:
     Type: String
-    Default: R80.40-PAYG-NGTP
+    Default: R81.20-BYOL
     AllowedValues:
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
