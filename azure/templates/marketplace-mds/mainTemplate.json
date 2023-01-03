@@ -241,7 +241,7 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20221227",
+    "templateVersion": "20220130",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -314,9 +314,7 @@
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
-    "NewNsgReference": {
-      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
   },
   "resources": [
     {
@@ -379,10 +377,11 @@
             "value": "[parameters('tagsByResource')]"
           },
           "deployNsg": {
-            "value": "[parameters('deployNewNSG')]"
+            "value": false
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }
@@ -415,10 +414,11 @@
             "value": "[parameters('tagsByResource')]"
           },
           "deployNsg": {
-            "value": "[parameters('deployNewNSG')]"
+            "value": false
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }
@@ -438,6 +438,130 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
+      "condition": "[parameters('deployNewNSG')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2020-06-01",
+      "location": "[variables('location')]",
+      "name": "[parameters('NewNsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allow inbound SSH connection",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "100",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "GAiA-portal",
+            "properties": {
+              "description": "Allow inbound HTTPS access to the GAiA portal",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "443",
+              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "110",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SmartConsole-1",
+            "properties": {
+              "description": "Allow inbound access using the SmartConsole GUI client",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "18190",
+              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "120",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SmartConsole-2",
+            "properties": {
+              "description": "Allow inbound access using the SmartConsole GUI client",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "19009",
+              "sourceAddressPrefix": "[variables('managementGUIClientNetwork')]",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "130",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Logs",
+            "properties": {
+              "description": "Allow inbound logging connections from managed gateways",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "257",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "140",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "ICA-pull",
+            "properties": {
+              "description": "Allow security gateways to pull a SIC certificate",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "18210",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "150",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "CRL-fetch",
+            "properties": {
+              "description": "Allow security gateways to fetch CRLs",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "18264",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "160",
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "Policy-fetch",
+            "properties": {
+              "description": "Allow security gateways to fetch policy",
+              "protocol": "TCP",
+              "sourcePortRange": "*",
+              "destinationPortRange": "18191",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "170",
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+    },
+    {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
@@ -448,7 +572,7 @@
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
