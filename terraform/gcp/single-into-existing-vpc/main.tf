@@ -206,6 +206,7 @@ resource "google_compute_instance" "gateway" {
     subnet_router_meta_path = ""
     mgmtNIC = var.management_nic
     managementNetwork = ""
+    numAdditionalNICs = ""
   })
 }
 resource "google_compute_address" "static" {
