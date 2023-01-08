@@ -384,7 +384,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20221227",
+    "templateVersion": "20230105",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
@@ -571,7 +571,7 @@
   "resources": [
     {
       "apiVersion": "2020-06-01",
-      "name": "pid-5432b4df-d783-57a2-b65f-39f4bca4974a",
+      "name": "pid-6f13b00a-7546-4ab2-be9f-c66815cc6c8b-partnercenter",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
