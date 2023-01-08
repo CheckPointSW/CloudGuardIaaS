@@ -251,7 +251,7 @@
   },
   "variables": {
     "templateName": "management",
-    "templateVersion": "20220130",
+    "templateVersion": "20230105",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -342,7 +342,9 @@
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
-    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -404,9 +406,8 @@
           "deployNsg": {
             "value": false
           },
-          "NewNsgName":
-          {
-            "value":"[parameters('NewNsgName')]"
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -441,9 +442,8 @@
           "deployNsg": {
             "value": false
           },
-          "NewNsgName":
-          {
-            "value":"[parameters('NewNsgName')]"
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -600,7 +600,7 @@
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
