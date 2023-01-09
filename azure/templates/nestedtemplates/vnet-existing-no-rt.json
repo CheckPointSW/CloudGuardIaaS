@@ -66,10 +66,6 @@
     },
     "apiVersion": {
       "type": "string"
-    },
-    "tagsByResource": {
-      "type": "object",
-      "defaultValue": {}
     }
   },
   "variables": {
