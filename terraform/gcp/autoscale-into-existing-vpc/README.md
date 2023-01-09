@@ -217,7 +217,7 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20220109 | Updated startup script to use cloud-config. |
+| 20230109 | Updated startup script to use cloud-config. |
 | | | |
 | 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
 | | | |
