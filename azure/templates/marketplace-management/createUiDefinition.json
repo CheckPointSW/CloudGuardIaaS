@@ -114,7 +114,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -142,7 +143,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -170,7 +172,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -198,7 +201,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -226,7 +230,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -254,7 +259,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -282,6 +288,7 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
+              "Standard_DS3_v2",
               "Standard_D3_v2"
             ],
             "constraints": {
@@ -310,6 +317,7 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
+              "Standard_DS3_v2",
               "Standard_D3_v2"
             ],
             "constraints": {
@@ -406,6 +414,46 @@
             }
           },
           {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
             "name": "enableApi",
             "type": "Microsoft.Common.DropDown",
             "label": "Accept Management API calls",
@@ -433,7 +481,7 @@
             "visible": "[equals(steps('chkp').installationType, 'management')]",
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Allow download from/upload to Check Point",
+            "label": "Automatically download updates and share statistical data for product improvement purpose",
             "defaultValue": "Yes",
             "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
             "constraints": {
@@ -539,6 +587,77 @@
                 }
               }
             }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "defaultValue": "{}",
+            "toolTip": "",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": "new"
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": "exist"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, 'exist')]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "None",
+            "placeholder": "",
+            "multiLine": false,
+            "constraints": {
+              "required": "[equals(steps('network').NSG, 'new')]",
+              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[equals(steps('network').NSG, 'new')]"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Network/networkSecurityGroups",
+              "Microsoft.Network/networkInterfaces",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks"
+            ]
           }
         ]
       }
@@ -563,9 +682,15 @@
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
+      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "enableApi": "[steps('chkp').enableApi]",
-      "adminShell": "[steps('chkp').adminShell]"
+      "adminShell": "[steps('chkp').adminShell]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[equals(steps('network').NSG, 'new')]",
+      "UseExistingNSG": "[equals(steps('network').NSG, 'exist')]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }

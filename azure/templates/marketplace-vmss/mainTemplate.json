@@ -474,13 +474,33 @@
     "rbacGuid": {
       "type": "string",
       "defaultValue": "[newGuid()]"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     }
   },
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
-    "templateVersion": "20221123",
+    "templateVersion": "20230109",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -615,28 +635,32 @@
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
-      "australiaeast",
       "brazilsouth",
       "canadacentral",
       "centralus",
-      "eastasia",
       "eastus",
       "eastus2",
+      "southcentralus",
+      "usgovvirginia",
+      "westus2",
+      "westus3",
       "francecentral",
       "germanywestcentral",
-      "japaneast",
-      "koreacentral",
       "northeurope",
       "norwayeast",
-      "southafricanorth",
-      "southcentralus",
-      "southeastasia",
-      "swedencentral",
       "uksouth",
-      "usgovvirginia",
       "westeurope",
-      "westus2",
-      "westus3"
+      "swedencentral",
+      "switzerlandnorth",
+      "qatarcentral",
+      "uaenorth",
+      "southafricanorth",
+      "australiaeast",
+      "centralindia",
+      "japaneast",
+      "koreacentral",
+      "southeastasia",
+      "eastasia"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
     "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
@@ -689,7 +713,10 @@
       }
     },
     "publicIPPrefixLength": "[variables('IPv4Lengths')[parameters('IPv4Length')]]",
-    "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]"
+    "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]",
+    "NewNsgReference": {
+      "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -705,7 +732,8 @@
       "sku": {
         "name": "Standard",
         "tier": "Regional"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicipprefixes'), parameters('tagsByResource')['Microsoft.Network/publicipprefixes'], json('{}')) ]"
     },
     {
       "apiVersion": "2020-06-01",
@@ -732,7 +760,8 @@
       },
       "dependsOn": [
         "[variables('vmssID')]"
-      ]
+      ],
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -772,7 +801,13 @@
             "value": "[parameters('vmName')]"
           },
           "deployNsg": {
-            "value": true
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -803,7 +838,13 @@
             "value": "[parameters('vmName')]"
           },
           "deployNsg": {
-            "value": true
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -838,6 +879,9 @@
           },
           "vmssName": {
             "value": "[parameters('vmName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -895,6 +939,9 @@
           },
           "floatingIp": {
             "value": "[variables('enableFloatingIP')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -912,7 +959,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -930,7 +978,8 @@
           }
         },
         "hyperVGeneration": "V1"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Compute/virtualMachineScaleSets",
@@ -939,7 +988,7 @@
       "location": "[variables('location')]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
       "zones": "[if(and(contains(variables('availabilityZonesLocations'), variables('location')), greater(parameters('availabilityZonesNum'), 0)), variables('availabilityZonesProperty'), json('null'))]",
-      "tags": "[variables('vmssTags')]",
+      "tags": "[union(variables('vmssTags'),if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachineScaleSets'), parameters('tagsByResource')['Microsoft.Compute/virtualMachineScaleSets'], json('{}')))]",
       "dependsOn": [
         "[variables('vnetID')]",
         "[variables('loadBalancerSetupId')]",
@@ -957,6 +1006,7 @@
           "mode": "Manual"
         },
         "virtualMachineProfile": {
+          "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
           "storageProfile": {
             "osDisk": {
               "caching": "ReadWrite",
@@ -982,7 +1032,7 @@
                   "primary": true,
                   "enableIPForwarding": false,
                   "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
-                  "networkSecurityGroup": "[if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.nsgProperties.value, reference('networkExistingSetup').outputs.nsgProperties.value)]",
+                  "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1",
@@ -1098,7 +1148,8 @@
             ]
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Insights/autoscaleSettings'), parameters('tagsByResource')['Microsoft.Insights/autoscaleSettings'], json('{}')) ]"
     }
   ],
   "outputs": {

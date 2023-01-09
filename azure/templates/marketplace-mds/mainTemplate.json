@@ -216,11 +216,31 @@
         "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
       },
       "defaultValue": ""
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     }
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20221123",
+    "templateVersion": "20230109",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -245,6 +265,7 @@
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
+    "customData64": "[base64(variables('customData'))]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -284,14 +305,15 @@
     "identity": "[if(parameters('msi'), json('{\"type\": \"SystemAssigned\"}'), json('null'))]",
     "publicIPAddressName": "[parameters('vmName')]",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
-    "nsgId": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]",
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -320,7 +342,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -348,6 +371,15 @@
           },
           "Subnet1Prefix": {
             "value": "[parameters('Subnet1Prefix')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": false
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -375,6 +407,15 @@
           },
           "vmName": {
             "value": "[parameters('vmName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": false
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -390,13 +431,15 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
+      "condition": "[parameters('deployNewNSG')]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
-      "name": "[variables('nsgName')]",
+      "name": "[parameters('NewNsgName')]",
       "properties": {
         "securityRules": [
           {
@@ -512,23 +555,21 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
-        "[variables('nsgId')]",
         "[variables('publicIPAddressId')]"
       ],
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup": {
-          "id": "[variables('nsgId')]"
-        },
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -544,7 +585,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -562,7 +604,8 @@
           }
         },
         "hyperVGeneration": "V1"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -577,6 +620,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[variables('identity')]",
       "properties": {
+        "UserData": "[variables('customData64')]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
@@ -600,7 +644,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computerName": "[toLower(parameters('vmName'))]",
-          "customData": "[base64(variables('customData'))]",
+          "customData": "[variables('customData64')]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -615,7 +659,8 @@
             }
           }
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')) ]"
     }
   ],
   "outputs": {

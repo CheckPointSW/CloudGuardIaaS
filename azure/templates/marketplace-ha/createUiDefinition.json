@@ -856,8 +856,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -938,8 +938,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -1020,8 +1020,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -1166,7 +1166,7 @@
             "label": "Availability options",
             "defaultValue": "Availability Set",
             "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -1199,7 +1199,7 @@
           {
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Allow download from/upload to Check Point",
+            "label": "Automatically download updates and share statistical data for product improvement purpose",
             "defaultValue": "Yes",
             "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
             "constraints": {
@@ -1211,6 +1211,46 @@
                 {
                   "label": "No",
                   "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
                 }
               ]
             }
@@ -1419,6 +1459,79 @@
                 }
               }
             }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "defaultValue": "{}",
+            "toolTip": "",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": "new"
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": "exist"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, 'exist')]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "None",
+            "placeholder": "",
+            "multiLine": false,
+            "constraints": {
+              "required": "[equals(steps('network').NSG, 'new')]",
+              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[equals(steps('network').NSG, 'new')]"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Compute/availabilitySets",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Network/networkInterfaces",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Network/loadBalancers",
+              "Microsoft.Network/networkSecurityGroups",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks"
+            ]
           }
         ]
       }
@@ -1430,7 +1543,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('clusterObjectNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiNGTP, steps('chkp').R8040vmSizeUiNGTX, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiNGTP, steps('chkp').R81vmSizeUiNGTX), steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX)]",
+      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiNGTP, steps('chkp').R8040vmSizeUiNGTX, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiNGTP, steps('chkp').R81vmSizeUiNGTX, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX)]",
       "sicKey": "[steps('chkp').sicKeyUi]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefixes": "[steps('network').virtualNetwork.addressPrefixes]",
@@ -1445,6 +1558,7 @@
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
+      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "managedSystemAssigned": "[steps('chkp').managedSystemAssigned]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "availabilityOptions": "[steps('chkp').availabilityOptions]",
@@ -1453,7 +1567,12 @@
       "publicIPPrefix": "[steps('chkp').publicIPPrefix]",
       "createNewIPPrefix": "[steps('chkp').createNewIPPrefix]",
       "ipPrefixExistingResourceId": "[steps('chkp').ipPrefixExistingResourceId]",
-      "adminShell": "[steps('chkp').adminShell]"
+      "adminShell": "[steps('chkp').adminShell]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[equals(steps('network').NSG, 'new')]",
+      "UseExistingNSG": "[equals(steps('network').NSG, 'exist')]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }

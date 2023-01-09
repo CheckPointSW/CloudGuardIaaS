@@ -260,11 +260,31 @@
     "rbacGuid": {
       "type": "string",
       "defaultValue": "[newGuid()]"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     }
   },
   "variables": {
     "templateName": "single",
-    "templateVersion": "20221123",
+    "templateVersion": "20230109",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -305,7 +325,7 @@
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
-    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R81.10'), equals(variables('osVersion'),'R81.20'))), 'mgmt-byol', 'sg-byol')]",
+    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'))), 'mgmt-byol', 'sg-byol')]",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
@@ -397,7 +417,10 @@
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -426,7 +449,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -466,6 +490,15 @@
           },
           "Subnet2StartAddress": {
             "value": "[parameters('Subnet2StartAddress')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -482,11 +515,23 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
           },
           "virtualNetworkExistingRGName": {
             "value": "[variables('vnetRGName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -502,7 +547,8 @@
         "dnsSettings": {
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -516,6 +562,7 @@
       "properties": {
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -531,7 +578,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -556,7 +604,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -574,7 +623,8 @@
           }
         },
         "hyperVGeneration": "V1"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -590,6 +640,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
+        "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
@@ -619,7 +670,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computerName": "[toLower(parameters('vmName'))]",
-          "customData": "[base64(variables('customData'))]",
+          "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -634,7 +685,8 @@
             }
           }
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')) ]"
     },
     {
       "condition": "[equals(variables('customMetrics'), 'yes')]",
@@ -648,7 +700,8 @@
       },
       "dependsOn": [
         "[variables('vmID')]"
-      ]
+      ],
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     }
   ],
   "outputs": {

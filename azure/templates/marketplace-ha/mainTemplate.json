@@ -302,11 +302,31 @@
       "metadata": {
         "Description": "Indicates whether CloudGuard Metrics will be used for Cluster members monitoring"
       }
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNewNSG": {
+      "type": "bool",
+      "defaultValue": true
+    },
+    "UseExistingNSG": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     }
   },
   "variables": {
     "templateName": "ha",
-    "templateVersion": "20221123",
+    "templateVersion": "20230109",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -451,7 +471,6 @@
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]",
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),2)))]"
     ],
-    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
     "elbPublicIPId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('elbPublicIPName'))]",
     "haPublicIPId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('haPublicIPName'))]",
     "gwPublicIPIds": [
@@ -467,28 +486,32 @@
     "installationType": "cluster",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
     "availabilityZonesLocations": [
-      "australiaeast",
       "brazilsouth",
       "canadacentral",
       "centralus",
-      "eastasia",
       "eastus",
       "eastus2",
+      "southcentralus",
+      "usgovvirginia",
+      "westus2",
+      "westus3",
       "francecentral",
       "germanywestcentral",
-      "japaneast",
-      "koreacentral",
       "northeurope",
       "norwayeast",
-      "southafricanorth",
-      "southcentralus",
-      "southeastasia",
-      "swedencentral",
       "uksouth",
-      "usgovvirginia",
       "westeurope",
-      "westus2",
-      "westus3"
+      "swedencentral",
+      "switzerlandnorth",
+      "qatarcentral",
+      "uaenorth",
+      "southafricanorth",
+      "australiaeast",
+      "centralindia",
+      "japaneast",
+      "koreacentral",
+      "southeastasia",
+      "eastasia"
     ],
     "availabilitySetProperty": {
       "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
@@ -506,7 +529,10 @@
     },
     "prefixDependsOn": "[if(equals(parameters('publicIPPrefix'), 'yes'), if(equals(parameters('createNewIPPrefix'), 'yes'), variables('publicIPNewPrefixId'), variables('ipNewPrefixId')), variables('ipNewPrefixId'))]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]"
+    "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -522,7 +548,8 @@
       "sku": {
         "name": "Standard",
         "tier": "Regional"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPPrefixes'), parameters('tagsByResource')['Microsoft.Network/publicIPPrefixes'], json('{}')) ]"
     },
     {
       "apiVersion": "2020-06-01",
@@ -550,7 +577,8 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage"
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
@@ -566,9 +594,6 @@
         "parameters": {
           "location": {
             "value": "[variables('location')]"
-          },
-          "nsgName": {
-            "value": "[variables('nsgName')]"
           },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
@@ -587,6 +612,15 @@
           },
           "subnet2Prefix": {
             "value": "[parameters('subnet2Prefix')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -603,11 +637,23 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
           "virtualNetworkName": {
             "value": "[parameters('virtualNetworkName')]"
           },
           "virtualNetworkExistingRGName": {
             "value": "[variables('vnetRGName')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
           }
         }
       }
@@ -623,7 +669,8 @@
       },
       "sku": {
         "name": "Aligned"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/availabilitySets'), parameters('tagsByResource')['Microsoft.Compute/availabilitySets'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
@@ -643,7 +690,8 @@
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
         },
         "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
@@ -667,7 +715,8 @@
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
         },
         "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
@@ -687,7 +736,8 @@
           "domainNameLabel": "[concat(toLower(parameters('vmName')), '-vip-', uniquestring(resourceGroup().id, deployment().name))]"
         },
         "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -704,6 +754,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",
@@ -739,7 +790,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -755,6 +807,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",
@@ -776,7 +829,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
@@ -813,7 +867,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
@@ -831,7 +886,8 @@
           }
         },
         "hyperVGeneration": "V1"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
@@ -853,6 +909,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
+        "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -883,7 +940,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computername": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
-          "customData": "[base64(variables('customData'))]",
+          "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -898,7 +955,8 @@
             }
           }
         }
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/loadBalancers",
@@ -941,7 +999,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     },
     {
       "condition": "[equals(parameters('managedSystemAssigned'), 'yes')]",
@@ -959,7 +1018,8 @@
         "roleDefinitionId": "[variables('roleDefinitionId')]",
         "scope": "[resourceGroup().id]",
         "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2021-07-01', 'Full').identity.principalId]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/loadBalancers",
@@ -1022,7 +1082,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     }
   ],
   "outputs": {

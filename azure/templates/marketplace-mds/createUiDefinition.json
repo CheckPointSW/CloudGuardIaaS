@@ -197,8 +197,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size. Minimum of 16 cores and 64 GB RAM is required.",
             "recommendedSizes": [
-              "Standard_DS5_v2",
-              "Standard_DS15_v2"
+              "Standard_DS15_v2",
+              "Standard_DS5_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -276,7 +276,7 @@
             "toolTip": "GUI clients network CIDR",
             "constraints": {
               "required": true,
-              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(0|32))?$",
               "validationMessage": "Enter a valid IPv4 network CIDR"
             }
           },
@@ -317,7 +317,7 @@
           {
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Allow download from/upload to Check Point",
+            "label": "Automatically download updates and share statistical data for product improvement purpose",
             "defaultValue": "Yes",
             "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
             "constraints": {
@@ -349,7 +349,27 @@
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
             "toolTip": "Type of CloudGuard disk.",
-            "visible": "[contains(steps('chkp').R8040vmSizeUiBYOL, 'DS')]",
+            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
             "defaultValue": "Standard",
             "constraints": {
               "allowedValues": [
@@ -443,6 +463,77 @@
                 }
               }
             }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "defaultValue": "{}",
+            "toolTip": "",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": "new"
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": "exist"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, 'exist')]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "None",
+            "placeholder": "",
+            "multiLine": false,
+            "constraints": {
+              "required": "[equals(steps('network').NSG, 'new')]",
+              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[equals(steps('network').NSG, 'new')]"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Network/networkSecurityGroups",
+              "Microsoft.Network/networkInterfaces",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks"
+            ]
           }
         ]
       }
@@ -462,15 +553,20 @@
       "Subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
-      "managementGUIClientNetwork": "[steps('chkp').managementGUIClientNetwork]",
+      "managementGUIClientNetwork": "[if(contains(steps('chkp').managementGUIClientNetwork, '/'), steps('chkp').managementGUIClientNetwork, concat(steps('chkp').managementGUIClientNetwork, '/32'))]",
       "sicKey": "[coalesce(steps('chkp').sicKeyUi, 'notused')]",
       "installationType": "[steps('chkp').installationType]",
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
-      "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
+      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "adminShell": "[steps('chkp').adminShell]"
+      "adminShell": "[steps('chkp').adminShell]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[equals(steps('network').NSG, 'new')]",
+      "UseExistingNSG": "[equals(steps('network').NSG, 'exist')]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }

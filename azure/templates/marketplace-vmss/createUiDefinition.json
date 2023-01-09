@@ -521,7 +521,7 @@
             "label": "Number of Availability Zones to use",
             "defaultValue": "None",
             "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -1442,8 +1442,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -1524,8 +1524,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -1606,8 +1606,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
             ],
             "constraints": {
               "allowedSizes": [
@@ -1761,6 +1761,46 @@
             }
           },
           {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
             "name": "useCustomImageUri",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Use development image uri",
@@ -1851,6 +1891,77 @@
                 }
               }
             }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "defaultValue": "{}",
+            "toolTip": "",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": "new"
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": "exist"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, 'exist')]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "None",
+            "placeholder": "",
+            "multiLine": false,
+            "constraints": {
+              "required": "[equals(steps('network').NSG, 'new')]",
+              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[equals(steps('network').NSG, 'new')]"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Compute/virtualMachineScaleSets",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks",
+              "Microsoft.Network/networkSecurityGroups",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Network/loadBalancers"
+            ]
           }
         ]
       }
@@ -1889,6 +2000,7 @@
       "sicKey": "[steps('chkp').sicKeyUi]",
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
+      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefixes": "[steps('network').virtualNetwork.addressPrefixes]",
@@ -1904,7 +2016,12 @@
       "publicIPPrefix": "[steps('autoprovision').publicIPPrefix]",
       "createNewIPPrefix": "[steps('autoprovision').createNewIPPrefix]",
       "ipPrefixExistingResourceId": "[steps('autoprovision').ipPrefixExistingResourceId]",
-      "adminShell": "[steps('chkp').adminShell]"
+      "adminShell": "[steps('chkp').adminShell]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[equals(steps('network').NSG, 'new')]",
+      "UseExistingNSG": "[equals(steps('network').NSG, 'exist')]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }
