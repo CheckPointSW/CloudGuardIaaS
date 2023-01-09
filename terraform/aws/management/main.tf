@@ -150,21 +150,24 @@ resource "aws_instance" "management-instance" {
   disable_api_termination = var.disable_instance_termination
 
   ami = module.amis.ami_id
-  user_data = templatefile("${path.module}/management_user_data.sh", {
+  user_data = templatefile("${path.module}/management_userdata.yaml", {
     // script's arguments
     Hostname = var.management_hostname,
-    PasswordHash = var.management_password_hash,
+    PasswordHash = local.management_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp
     NTPSecondary = var.secondary_ntp
     Shell = var.admin_shell,
     AdminSubnet = var.admin_cidr
     IsPrimary = var.is_primary_management
-    SICKey = var.SICKey,
+    SICKey = local.management_SICkey_base64,
+    OsVersion = local.version_split
     EnableInstanceConnect = var.enable_instance_connect
     AllocateElasticIP = var.allocate_and_associate_eip
     GatewayManagement = var.gateway_management
-    BootstrapScript = var.management_bootstrap_script
+    BootstrapScript = local.management_bootstrap_script64
+    PubMgmt = local.pub_mgmt
+
   })
 }
 

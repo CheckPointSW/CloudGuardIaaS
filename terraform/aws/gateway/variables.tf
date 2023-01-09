@@ -95,7 +95,7 @@ variable "instance_tags" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81-BYOL"
+  default = "R81.10-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"
@@ -133,6 +133,11 @@ variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
+}
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
 }
 variable "gateway_bootstrap_script" {
   type = string

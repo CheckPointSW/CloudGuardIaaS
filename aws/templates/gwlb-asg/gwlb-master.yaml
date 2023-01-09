@@ -365,6 +365,9 @@ Parameters:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP
       - R80.40-PAYG-NGTX
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -475,7 +478,7 @@ Parameters:
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R81-BYOL
+    Default: R81.10-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG
@@ -483,6 +486,8 @@ Parameters:
       - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
+      - R81.20-BYOL
+      - R81.20-PAYG
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String

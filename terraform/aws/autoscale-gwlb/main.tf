@@ -7,7 +7,8 @@ provider "aws" {
 module "amis" {
   source = "../modules/amis"
   version_license = var.gateway_version
-  amis_url = "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml"
+  amis_url = local.is_gwlb_ami == true ? "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml" : "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml"
+
 }
 
 resource "aws_security_group" "permissive_sg" {
@@ -31,35 +32,53 @@ resource "aws_security_group" "permissive_sg" {
   }
 }
 
-resource "aws_launch_configuration" "asg_launch_configuration" {
+resource "aws_launch_template" "asg_launch_template" {
   name_prefix = local.asg_name
   image_id = module.amis.ami_id
   instance_type = var.gateway_instance_type
   key_name = var.key_name
-  security_groups = [aws_security_group.permissive_sg.id]
-  associate_public_ip_address = var.allocate_public_IP
-  iam_instance_profile = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
-
-  root_block_device {
-    volume_type = var.volume_type
-    volume_size = var.volume_size
-    encrypted = var.enable_volume_encryption
+  network_interfaces {
+    associate_public_ip_address = var.allocate_public_IP
+    security_groups = [aws_security_group.permissive_sg.id]
   }
 
-  user_data = templatefile("${path.module}/asg_userdata.sh", {
+  iam_instance_profile {
+    name = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
+  }
+
+  monitoring {
+    enabled = true
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_type = var.volume_type
+      volume_size = var.volume_size
+      encrypted   = var.enable_volume_encryption
+    }
+  }
+
+  description = "Initial template version"
+
+  user_data = base64encode(templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     EnableCloudWatch = var.enable_cloudwatch,
     EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
+    SICKey = local.gateway_SICkey_base64,
     AllowUploadDownload = var.allow_upload_download,
-    BootstrapScript = var.gateway_bootstrap_script
-  })
+    BootstrapScript = local.gateway_bootstrap_script64,
+    OsVersion = local.version_split
+  }))
 }
 resource "aws_autoscaling_group" "asg" {
   name_prefix = local.asg_name
-  launch_configuration = aws_launch_configuration.asg_launch_configuration.id
+  launch_template {
+    id = aws_launch_template.asg_launch_template.id
+    version = aws_launch_template.asg_launch_template.latest_version
+  }
   min_size = var.minimum_group_size
   max_size = var.maximum_group_size
   target_group_arns = var.target_groups
@@ -111,24 +130,11 @@ resource "aws_iam_role" "role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy_document.json
   path = "/"
 }
-data "aws_iam_policy_document" "policy_document" {
-  version = "2012-10-17"
-  statement {
-    actions = ["cloudwatch:PutMetricData"]
-    effect = "Allow"
-    resources = ["*"]
-  }
-}
-resource "aws_iam_policy" "policy" {
-  count = local.create_iam_role
-  name_prefix = format("%s-iam_policy", local.asg_name)
-
-  policy = data.aws_iam_policy_document.policy_document.json
-}
-resource "aws_iam_role_policy_attachment" "attachment" {
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
   count = local.create_iam_role
   role = aws_iam_role.role[count.index].name
-  policy_arn = aws_iam_policy.policy[count.index].arn
+  tag_name = local.asg_name
 }
 resource "aws_iam_instance_profile" "instance_profile" {
   count = local.create_iam_role

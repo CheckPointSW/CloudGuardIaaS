@@ -108,11 +108,11 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **disk_size** | Storage data disk size size(GB) | string | A number in the range 100 - 3995 (GB) |
  |  |  |  |  |  |
- | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.30 and above; <br/>"sg-ngtp-v2" - NGTP PAYG license for R80.30 only; <br/>"sg-ngtx-v2" - NGTX PAYG license for R80.30 only; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
+ | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license for R80.40 and above; <br/>"sg-ngtp" - NGTP PAYG license for R80.40 and above; <br/>"sg-ngtx" - NGTX PAYG license for R80.40 and above; |
  |  |  |  |  |  |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8030"; <br/>"check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r81.10"; |
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r81.10"; <br/>"check-point-cg-r81.20"; |
  |  |  |  |  |  |
- | **os_version** | GAIA OS version | string | "R80.30"; <br/>"R80.40"; <br/>"R81"; <br/>"R81.10"; |
+ | **os_version** | GAIA OS version | string | "R80.40"; <br/>"R81"; <br/>"R81.10"; <br/>"R81.20"; |
  |  |  |  |  |  |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it |
  |  |  |  |  |  |
@@ -197,6 +197,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |
+| | | |
 | 20220111 | - Added support to select different shells. |
 | | | |
 | 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |

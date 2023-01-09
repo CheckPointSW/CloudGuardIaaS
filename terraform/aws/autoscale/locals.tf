@@ -18,6 +18,10 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   regex_valid_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.gateway_SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SICKey] must be at least 8 alphanumeric characters"
@@ -35,6 +39,12 @@ locals {
   regex_cidr_result = regex(local.regex_valid_cidr_range, var.proxy_elb_clients) == var.proxy_elb_clients ? 0 : "Variable [proxy_elb_clients] must be a valid CIDR range"
 
   tags_asg_format = null_resource.tags_as_list_of_maps.*.triggers
+
+  //Splits the version and licence and returns the os version
+  version_split = element(split("-", var.gateway_version), 0)
+  gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
+  gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
+  gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
 }
 resource "null_resource" "tags_as_list_of_maps" {
   count = length(keys(var.instances_tags))

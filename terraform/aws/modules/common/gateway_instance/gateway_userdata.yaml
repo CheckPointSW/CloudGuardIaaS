@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"gateway\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20221123\" templateName=\"gateway\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" bootstrapScript64=\"${GatewayBootstrapScript}\"

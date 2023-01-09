@@ -8,6 +8,10 @@ locals {
   // Will fail if var.management_permissions is invalid
   validate_permissions = index(local.permissions_allowed_values, var.management_permissions)
 
+  regex_valid_key_name = "[\\S\\s]+[\\S]+"
+  // will fail if var.key_name is invalid
+  regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+
   regex_valid_gateway_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.gateway_SIC_Key is invalid
   regex_gateway_sic_result = regex(local.regex_valid_gateway_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SIC_Key] must be at least 8 alphanumeric characters"

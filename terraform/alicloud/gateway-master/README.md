@@ -130,7 +130,7 @@ allocate_and_associate_eip = true
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| __VERSION__ | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud. |
+| 20211011 | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud. |
 | | | |
 
 ## License

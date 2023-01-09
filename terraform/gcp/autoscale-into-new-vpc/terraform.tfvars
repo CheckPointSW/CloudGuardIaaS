@@ -5,7 +5,7 @@ project                           = "PLEASE ENTER PROJECT NAME"                 
 # --- Check Point---
 prefix                            = "PLEASE ENTER PREFIX"                         # "chkp-tf-mig"
 license                           = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                        = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8040-gw-byol-mig-123-456-v12345678"
+image_name                        = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8110-gw-byol-mig-335-985-v20220126"
 management_nic                    = "PLEASE ENTER MANAGEMENT INTERFACE"           # "Ephemeral Public IP (eth0)"
 management_name                   = "PLEASE ENTER MANAGEMENT NAME"                # "tf-checkpoint-management"
 configuration_template_name       = "PLEASE ENTER CONFIGURATION TEMPLATE NAME"    # "tf-asg-autoprov-tmplt"

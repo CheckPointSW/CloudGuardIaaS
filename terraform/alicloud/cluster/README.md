@@ -136,7 +136,7 @@ ram_role_name = ""
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| __VERSION__ | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud. |
+| 20211011 | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
 
 ## License

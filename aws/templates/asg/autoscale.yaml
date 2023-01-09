@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20211212)
+Description: Create an Auto Scaling group of Check Point gateways (20211226)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -245,6 +245,9 @@ Parameters:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -340,15 +343,14 @@ Resources:
             Action:
               - sts:AssumeRole
       Path: /
-      Policies:
-        - PolicyName: ChkpGatewayPoliocy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - cloudwatch:PutMetricData
-                Resource: '*'
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: ChkpGatewayPolicy
+        PolicyRole: !Ref ChkpGatewayRole
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Condition: EnableCloudWatch
@@ -409,10 +411,12 @@ Resources:
           CidrIp: 0.0.0.0/0
   GatewayGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: GatewayLaunchConfig
+    DependsOn: GatewayLaunchTemplate
     Properties:
       VPCZoneIdentifier: !Ref GatewaysSubnets
-      LaunchConfigurationName: !Ref GatewayLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
       MinSize: !Ref GatewaysMinSize
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
@@ -437,81 +441,44 @@ Resources:
               - !Join ['=', [template, !Ref ConfigurationTemplate]]
               - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
           PropagateAtLaunch: true
-  GatewayLaunchConfig:
-    Type: AWS::AutoScaling::LaunchConfiguration
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
     Properties:
-      AssociatePublicIpAddress: true
-      KeyName: !Ref KeyName
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      SecurityGroups:
-        - !Ref PermissiveSecurityGroup
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !Ref EnableVolumeEncryption
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      IamInstanceProfile: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: true
+            Groups:
+              - !Ref PermissiveSecurityGroup
+        Monitoring:
+          Enabled: true
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !Ref EnableVolumeEncryption
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#!/bin/bash'
-            - 'set -e'
-            - 'logfile=/var/log/aws-user-data.log'
-            - '> ${logfile}'
-            - 'exec 1>>${logfile} 2>>${logfile}'
-            - 'echo -e "\nStarting user-data\n"'
-            - 'echo "Setting up parameters"'
-            - !Sub 'pwd_hash=''${GatewayPasswordHash}'' ; shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
-            - !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ' | base64 -d)"']]
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ' | base64 -d)"']]
-            - 'echo "Updating cloud-version file"'
-            - 'template="autoscale"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'echo "Updating cloud-version file"'
-            - 'if test -f ${cv_path}; then'
-            - '    echo template_name: ${template} >> ${cv_path}'
-            - '    echo template_version: 20211212 >> ${cv_path}'
-            - 'fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then'
-            - '    cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' | jq ''.template_version = "20211212"'' > ${cv_json_path_tmp}'
-            - '    mv ${cv_json_path_tmp} ${cv_json_path}'
-            - 'fi'
-            - 'if [[ -z ${pwd_hash} ]]; then'
-            - '    echo "Generating random password hash"'
-            - '    pwd_hash="$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)"'
-            - 'fi'
-            - 'echo "Setting admin shell to ${shell}"'
-            - 'clish -c "set user admin shell ${shell}" -s'
-            - 'echo "Starting First Time Wizard"'
-            - 'blink_config -s "gateway_cluster_member=false&ftw_sic_key=${sic}&upload_info=${allow_info}&download_info=${allow_info}&admin_hash=${pwd_hash}"'
-            - 'echo "Setting admin password"'
-            - 'clish -c "set user admin password-hash ${pwd_hash}" -s'
-            - 'echo "Setting LocalGateway dynamic object"'
-            - 'addr="$(ip addr show dev eth0 | awk ''/inet/{print $2; exit}'' | cut -d / -f 1)"'
-            - 'dynamic_objects -n LocalGateway -r ${addr} ${addr} -a || true'
-            - 'if ${cw}; then'
-            - '    echo "Enabling CloudWatch"'
-            - '    echo {\"version\": \"1\"} > /etc/fw/conf/cloudwatch.json'
-            - '    cloudwatch start'
-            - 'fi'
-            - 'if ${eic}; then'
-            - '    echo "Enabling ec2 instance connect"'
-            - '    if [[ -d "/etc/ec2-instance-connect" ]]; then'
-            - '        ec2-instance-connect-config on'
-            - '    else'
-            - '        echo "Could not enable eic, /etc/ec2-instance-connect was not found"'
-            - '    fi'
-            - 'fi'
-            - 'if [[ -n ${bootstrap} ]]; then'
-            - '    echo "Invoking bootstrap script"'
-            - '    eval ${bootstrap}'
-            - 'fi'
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:

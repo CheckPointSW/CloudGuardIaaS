@@ -115,7 +115,7 @@ bootstrap_script = "echo 12345678"
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| __VERSION__ | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
+| 20211011 | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
 
 ## License

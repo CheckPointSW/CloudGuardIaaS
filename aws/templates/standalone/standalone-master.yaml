@@ -35,6 +35,7 @@ Metadata:
           - ResourcesTagName
           - StandaloneHostname
           - AllowUploadDownload
+          - CloudWatch
           - StandaloneBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -79,6 +80,8 @@ Metadata:
         default: Standalone Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       StandaloneBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
@@ -159,6 +162,7 @@ Parameters:
       - R80.40-PAYG-NGTP
       - R81-PAYG-NGTP
       - R81.10-PAYG-NGTP
+      - R81.20-PAYG-NGTP
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -258,6 +262,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StandaloneBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -338,6 +349,7 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         StandaloneHostname: !Ref StandaloneHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         StandaloneBootstrapScript: !Ref StandaloneBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary
