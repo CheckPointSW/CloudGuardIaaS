@@ -9,9 +9,9 @@
         "type": "Microsoft.Common.InfoBox",
         "visible": true,
         "options": {
-        "icon": "Warning",
-        "text": "This solution is currently supported as a public preview, the purpose of this is to obtain feedback prior to the full commercial release of such product, solution or service. The following terms will apply in addition to the general terms and conditions. Any solution released under Public Preview:\n\n1. Is excluded from the Service Level Agreement.\n\n2. May not be covered by customer support.\n\n3. May be changed or discontinued by Check Point Software Technologies at any time without notice."
-      }
+          "icon": "Warning",
+          "text": "This solution is currently supported as a public preview, the purpose of this is to obtain feedback prior to the full commercial release of such product, solution or service. The following terms will apply in addition to the general terms and conditions. Any solution released under Public Preview:\n\n1. Is excluded from the Service Level Agreement.\n\n2. May not be covered by customer support.\n\n3. May be changed or discontinued by Check Point Software Technologies at any time without notice."
+        }
       },
       {
         "name": "basics settings text block",
@@ -369,10 +369,6 @@
                 {
                   "label": "R81.20",
                   "value": "R81.20"
-                },
-                {
-                  "label": "R82",
-                  "value": "R82"
                 }
               ]
             }
@@ -894,252 +890,6 @@
             "count": "[steps('autoprovision').vmCount]"
           },
           {
-            "name": "R82vmSizeUiBYOL",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_DS3_v2",
-              "Standard_D3_v2"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_DS2_v2",
-                "Standard_DS3_v2",
-                "Standard_DS4_v2",
-                "Standard_DS5_v2",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_D4s_v3",
-                "Standard_D8s_v3",
-                "Standard_D16s_v3",
-                "Standard_D32s_v3",
-                "Standard_D64s_v3",
-                "Standard_E4s_v3",
-                "Standard_E8s_v3",
-                "Standard_E16s_v3",
-                "Standard_E20s_v3",
-                "Standard_E32s_v3",
-                "Standard_E64s_v3",
-                "Standard_E64is_v3",
-                "Standard_F4s_v2",
-                "Standard_F8s_v2",
-                "Standard_F16s_v2",
-                "Standard_F32s_v2",
-                "Standard_F64s_v2",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_D2_v2",
-                "Standard_D3_v2",
-                "Standard_D4_v2",
-                "Standard_D5_v2",
-                "Standard_D11_v2",
-                "Standard_D12_v2",
-                "Standard_D13_v2",
-                "Standard_D14_v2",
-                "Standard_D15_v2",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16",
-                "Standard_D4_v3",
-                "Standard_D8_v3",
-                "Standard_D16_v3",
-                "Standard_D32_v3",
-                "Standard_D64_v3",
-                "Standard_E4_v3",
-                "Standard_E8_v3",
-                "Standard_E16_v3",
-                "Standard_E20_v3",
-                "Standard_E32_v3",
-                "Standard_E64_v3",
-                "Standard_E64i_v3",
-                "Standard_DS11_v2",
-                "Standard_DS12_v2",
-                "Standard_DS13_v2",
-                "Standard_DS14_v2",
-                "Standard_DS15_v2"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-byol"
-            },
-            "count": "[steps('autoprovision').vmCount]"
-          },
-          {
-            "name": "R82vmSizeUiNGTP",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_DS3_v2",
-              "Standard_D3_v2"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_DS2_v2",
-                "Standard_DS3_v2",
-                "Standard_DS4_v2",
-                "Standard_DS5_v2",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_D4s_v3",
-                "Standard_D8s_v3",
-                "Standard_D16s_v3",
-                "Standard_D32s_v3",
-                "Standard_D64s_v3",
-                "Standard_E4s_v3",
-                "Standard_E8s_v3",
-                "Standard_E16s_v3",
-                "Standard_E20s_v3",
-                "Standard_E32s_v3",
-                "Standard_E64s_v3",
-                "Standard_E64is_v3",
-                "Standard_F4s_v2",
-                "Standard_F8s_v2",
-                "Standard_F16s_v2",
-                "Standard_F32s_v2",
-                "Standard_F64s_v2",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_D2_v2",
-                "Standard_D3_v2",
-                "Standard_D4_v2",
-                "Standard_D5_v2",
-                "Standard_D11_v2",
-                "Standard_D12_v2",
-                "Standard_D13_v2",
-                "Standard_D14_v2",
-                "Standard_D15_v2",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16",
-                "Standard_D4_v3",
-                "Standard_D8_v3",
-                "Standard_D16_v3",
-                "Standard_D32_v3",
-                "Standard_D64_v3",
-                "Standard_E4_v3",
-                "Standard_E8_v3",
-                "Standard_E16_v3",
-                "Standard_E20_v3",
-                "Standard_E32_v3",
-                "Standard_E64_v3",
-                "Standard_E64i_v3",
-                "Standard_DS11_v2",
-                "Standard_DS12_v2",
-                "Standard_DS13_v2",
-                "Standard_DS14_v2",
-                "Standard_DS15_v2"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtp"
-            },
-            "count": "[steps('autoprovision').vmCount]"
-          },
-          {
-            "name": "R82vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_DS3_v2",
-              "Standard_D3_v2"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_DS2_v2",
-                "Standard_DS3_v2",
-                "Standard_DS4_v2",
-                "Standard_DS5_v2",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_D4s_v3",
-                "Standard_D8s_v3",
-                "Standard_D16s_v3",
-                "Standard_D32s_v3",
-                "Standard_D64s_v3",
-                "Standard_E4s_v3",
-                "Standard_E8s_v3",
-                "Standard_E16s_v3",
-                "Standard_E20s_v3",
-                "Standard_E32s_v3",
-                "Standard_E64s_v3",
-                "Standard_E64is_v3",
-                "Standard_F4s_v2",
-                "Standard_F8s_v2",
-                "Standard_F16s_v2",
-                "Standard_F32s_v2",
-                "Standard_F64s_v2",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_D2_v2",
-                "Standard_D3_v2",
-                "Standard_D4_v2",
-                "Standard_D5_v2",
-                "Standard_D11_v2",
-                "Standard_D12_v2",
-                "Standard_D13_v2",
-                "Standard_D14_v2",
-                "Standard_D15_v2",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16",
-                "Standard_D4_v3",
-                "Standard_D8_v3",
-                "Standard_D16_v3",
-                "Standard_D32_v3",
-                "Standard_D64_v3",
-                "Standard_E4_v3",
-                "Standard_E8_v3",
-                "Standard_E16_v3",
-                "Standard_E20_v3",
-                "Standard_E32_v3",
-                "Standard_E64_v3",
-                "Standard_E64i_v3",
-                "Standard_DS11_v2",
-                "Standard_DS12_v2",
-                "Standard_DS13_v2",
-                "Standard_DS14_v2",
-                "Standard_DS15_v2"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtx"
-            },
-            "count": "[steps('autoprovision').vmCount]"
-          },
-          {
             "name": "adminShell",
             "type": "Microsoft.Common.DropDown",
             "label": "Default shell for the admin user",
@@ -1368,7 +1118,7 @@
             "resourceType": "Microsoft.Network/NetworkSecurityGroups",
             "options": {
               "filter": {
-                "subscription" :  "onBasics",
+                "subscription": "onBasics",
                 "location": "onBasics"
               }
             },
@@ -1410,7 +1160,7 @@
             ]
           }
         ]
-        }
+      }
     ],
     "outputs": {
       "location": "[location()]",
@@ -1434,7 +1184,7 @@
       "availabilityZonesNum": "[coalesce(steps('autoprovision').availabilityZonesNum, int('0'))]",
       "customMetrics": "[steps('autoprovision').customMetrics]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
-      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX, steps('chkp').R82vmSizeUiBYOL, steps('chkp').R82vmSizeUiNGTP, steps('chkp').R82vmSizeUiNGTX)]",
+      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX)]",
       "sicKey": "[steps('chkp').sicKeyUi]",
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
@@ -1449,8 +1199,8 @@
       "subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
       "adminShell": "[steps('chkp').adminShell]",
       "tagsByResource": "[steps('tags').tagsByResource]",
-      "deployNewNSG" : "[equals(steps('network').NSG, 'new')]",
-      "UseExistingNSG" : "[equals(steps('network').NSG, 'exist')]",
+      "deployNewNSG": "[equals(steps('network').NSG, 'new')]",
+      "UseExistingNSG": "[equals(steps('network').NSG, 'exist')]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]"
     }

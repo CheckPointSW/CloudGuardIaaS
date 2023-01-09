@@ -30,10 +30,7 @@
         "R81.10 - Pay As You Go (NGTX)",
         "R81.20 - Bring Your Own License",
         "R81.20 - Pay As You Go (NGTP)",
-        "R81.20 - Pay As You Go (NGTX)",
-        "R82 - Bring Your Own License",
-        "R82 - Pay As You Go (NGTP)",
-        "R82 - Pay As You Go (NGTX)"
+        "R81.20 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R81.10 - Bring Your Own License",
       "metadata": {
@@ -287,7 +284,7 @@
   },
   "variables": {
     "templateName": "single",
-    "templateVersion": "20230105",
+    "templateVersion": "20230109",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -301,10 +298,7 @@
       "R81.10 - Pay As You Go (NGTX)": "NGTX",
       "R81.20 - Bring Your Own License": "BYOL",
       "R81.20 - Pay As You Go (NGTP)": "NGTP",
-      "R81.20 - Pay As You Go (NGTX)": "NGTX",
-      "R82 - Bring Your Own License": "BYOL",
-      "R82 - Pay As You Go (NGTP)": "NGTP",
-      "R82 - Pay As You Go (NGTX)": "NGTX"
+      "R81.20 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -319,10 +313,7 @@
       "R81.10 - Pay As You Go (NGTX)": "R8110",
       "R81.20 - Bring Your Own License": "R8120",
       "R81.20 - Pay As You Go (NGTP)": "R8120",
-      "R81.20 - Pay As You Go (NGTX)": "R8120",
-      "R82 - Bring Your Own License": "R82",
-      "R82 - Pay As You Go (NGTP)": "R82",
-      "R82 - Pay As You Go (NGTX)": "R82"
+      "R81.20 - Pay As You Go (NGTX)": "R8120"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "installationType": "[parameters('installationType')]",
@@ -334,7 +325,7 @@
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
-    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'), equals(variables('osVersion'),'R82'))), 'mgmt-byol', 'sg-byol')]",
+    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'))), 'mgmt-byol', 'sg-byol')]",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
