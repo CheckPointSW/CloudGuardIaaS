@@ -293,6 +293,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20220109 | Updated startup script to use cloud-config. |
+| | | |
 | 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |
 | | | |
 |  | Addition of "template_type" parameter to "cloud-version" files. |

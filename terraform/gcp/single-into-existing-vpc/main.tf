@@ -192,7 +192,7 @@ resource "google_compute_instance" "gateway" {
     sicKey = ""
     allowUploadDownload = var.allowUploadDownload
     templateName = "single_tf"
-    templateVersion = "20211128"
+    templateVersion = "20220109"
     templateType = "terraform"
     hasInternet = "true"
     enableMonitoring = var.enableMonitoring
