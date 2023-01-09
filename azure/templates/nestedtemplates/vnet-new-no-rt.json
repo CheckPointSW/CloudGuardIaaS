@@ -66,10 +66,6 @@
     },
     "apiVersion": {
       "type": "string"
-    },
-    "tagsByResource": {
-      "type": "object",
-      "defaultValue": {}
     }
   },
   "variables": {},
@@ -99,8 +95,7 @@
             }
           }
         ]
-      },
-      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
+      }
     }
   ],
   "outputs": {
