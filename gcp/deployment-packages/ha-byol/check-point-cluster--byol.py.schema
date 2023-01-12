@@ -43,6 +43,12 @@ properties:
     type: string
     pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$
     default: ''
+  smart1CloudTokenA:
+    type: string
+    default: ''
+  smart1CloudTokenB:
+    type: string
+    default: '' 
   diskType:
     type: string
     default: pd-ssd

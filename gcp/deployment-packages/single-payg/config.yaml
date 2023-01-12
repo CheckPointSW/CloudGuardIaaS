@@ -27,6 +27,8 @@ resources:
     installationType: "PLEASE ENTER AN INSTALLATION TYPE"
     diskType: "PLEASE ENTER A DISK TYPE"
     bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
+    #Connecting to Smart-1 Cloud is only available for Gateway only installation
+    smart1CloudToken: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD OR LEAVE EMPTY DOUBLE QUOTES"
     generatePassword: "PLEASE ENTER true or false"
     allowUploadDownload: "PLEASE ENTER true or false"
     enableMonitoring: "PLEASE ENTER true or false"

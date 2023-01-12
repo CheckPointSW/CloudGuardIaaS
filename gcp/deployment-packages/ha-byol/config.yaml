@@ -14,6 +14,9 @@ resources:
       zoneB: "PLEASE ENTER ZONE B. MUST BE EQUAL TO ZONE A"
       machineType: "PLEASE ENTER A MACHINE TYPE"
       diskType: "PLEASE ENTER A DISK TYPE"
+      #To connect to Smart-1 Cloud you must provide two valid tokens (one per member)
+      smart1CloudTokenA: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD FOR MEMBER A OR LEAVE EMPTY DOUBLE QUOTES"
+      smart1CloudTokenB: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD FOR MEMBER B OR LEAVE EMPTY DOUBLE QUOTES"
       bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
       instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
       enableMonitoring: "PLEASE ENTER true or false"

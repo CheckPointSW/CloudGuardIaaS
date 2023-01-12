@@ -67,6 +67,8 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **installationType** | Installation type and version | string | R80.40 Gateway only<br/>R80.40 Management only<br/>R80.40 Manual Configuration<br/>R80.40 Gateway and Management (Standalone)<br/>R81.00 Gateway only<br/>R81.00 Management only<br/>R81.00 Manual Configuration<br/>R81.00 Gateway and Management (Standalone)<br/>R81.10 Gateway only<br/>R81.10 Management only<br/>R81.10 Manual Configuration<br/>R81.10 Gateway and Management (Standalone)<br/>R81.20 Gateway only<br/>R81.20 Management only<br/>R81.20 Manual Configuration<br/>R81.20 Gateway and Management (Standalone) |
 |  |  |  |  |  |
+| **smart1CloudToken** | Smart-1 Cloud token | string ||
+|  |  |  |  |  |
 | **diskType** | Disk type | string | pd-ssd;<br/>pd-standard;<br/>Storage space is much less expensive for a standard persistent disk. An SSD persistent disk is better for random IOPS or streaming throughput with low latency. [Learn more](https://cloud.google.com/compute/docs/disks/?hl=en_US&_ga=2.66020774.-962483654.1585043745#overview_of_disk_types)|
 |  |  |  |  |  |
 | **bootDiskSizeGb** | Disk size in GB | number | Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. [Learn more](https://cloud.google.com/compute/docs/disks/?hl=en_US&_ga=2.232680471.-962483654.1585043745#pdperformance)|
@@ -107,6 +109,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     network_espSourceRanges: ""
     externalIP: "Static"
     installationType: "R81.10 Gateway only"
+    smart1CloudToken: ""
     diskType: "pd-ssd"
     bootDiskSizeGb: 100
     generatePassword: false

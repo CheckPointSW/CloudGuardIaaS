@@ -119,6 +119,10 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **instanceSSHKey** | Public SSH key for the user 'admin' | string | A valid public ssh key |
 |  |  |  |  |  |
+| **smart1CloudTokenA** | Smart-1 Cloud token for member A| string ||
+|  |  |  |  |  |
+| **smart1CloudTokenB** | Smart-1 Cloud token for member B| string ||
+|  |  |  |  |  |
 | **sicKey** | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server | string | At least 8 alpha numeric characters.<br/>If SIC is not provided and needed, a key will be automatically generated |
 |  |  |  |  |  |
 | **numAdditionalNICs** | Number of additional network interfaces | number | A number in the range 0 - 6.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |
@@ -137,6 +141,8 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     diskType: "pd-ssd"
     bootDiskSizeGb: 100
     instanceSSHKey: "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
+    smart1CloudTokenA: ""
+    smart1CloudTokenB: ""
     enableMonitoring: false
     managementNetwork: "209.87.209.100/32"
     sicKey: "aaaaaaaa"
