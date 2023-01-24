@@ -249,6 +249,18 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | ESP_firewall_rules_name  | If enable - the ESP firewall rules name, otherwise, an empty list.  |
 
 
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20230109 | Updated startup script to use cloud-config. |
+| | | |
+| 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |
+| | | |
+|  | Addition of "template_type" parameter to "cloud-version" files. |
+| | | |
+
 ## Authors
 
 
