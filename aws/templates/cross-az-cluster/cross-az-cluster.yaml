@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Cluster into an existing VPC (20221229)
+Description: Deploys a Check Point Cluster into an existing VPC (20230126)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -32,6 +32,8 @@ Metadata:
           - Shell
           - GatewayPasswordHash
           - GatewaySICKey
+          - MemberAToken
+          - MemberBToken
       - Label:
           default: Advanced Settings
         Parameters:
@@ -83,6 +85,10 @@ Metadata:
         default: Password hash
       GatewaySICKey:
         default: SIC key
+      MemberAToken:
+        default: Smart-1 Cloud Token for member A
+      MemberBToken:
+        default: Smart-1 Cloud Token for member B
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
@@ -271,6 +277,14 @@ Parameters:
     Type: String
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
     ConstraintDescription: At least 8 alpha numeric characters.
+    NoEcho: true
+  MemberAToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    Type: String
+    NoEcho: true
+  MemberBToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    Type: String
     NoEcho: true
   ResourcesTagName:
     Description: Name tag prefix of the resources. (optional)
@@ -524,7 +538,7 @@ Resources:
             - 'runcmd:'
             - '  - |'
             - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
             - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
             - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
             - !Join ['', ['    other_member_ip="', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress, '"']]
@@ -535,7 +549,7 @@ Resources:
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221229\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230126\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
     DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface]
@@ -569,7 +583,7 @@ Resources:
             - 'runcmd:'
             - '  - |'
             - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
             - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
             - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
             - !Join ['', ['    other_member_ip="', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress, '"']]
@@ -580,7 +594,7 @@ Resources:
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221229\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230126\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
 Outputs:
   ClusterPublicAddress:
     Description: The public address of the cluster.
@@ -631,3 +645,14 @@ Outputs:
   MemberBPrivateInternalAddress:
     Description: The private Internal address of member B.
     Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
+Rules:
+  MemberATokenNotProvided:
+    RuleCondition: !Equals [!Ref MemberAToken, '']
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+        Assert: !Equals [!Ref MemberBToken, '']
+  MemberBTokenNotProvided:
+    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+        Assert: !Equals [ !Ref MemberAToken, '' ]

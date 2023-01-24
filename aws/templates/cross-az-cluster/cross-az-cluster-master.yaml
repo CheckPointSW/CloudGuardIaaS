@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point Cluster in a new VPC (20221123)
+Description: Deploy a Check Point Cluster in a new VPC (20230126)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -31,6 +31,8 @@ Metadata:
           - Shell
           - GatewayPasswordHash
           - GatewaySICKey
+          - MemberAToken
+          - MemberBToken
       - Label:
           default: Advanced Settings
         Parameters:
@@ -80,6 +82,10 @@ Metadata:
         default: Password hash
       GatewaySICKey:
         default: SIC key
+      MemberAToken:
+        default: Smart-1 Cloud Token for member A
+      MemberBToken:
+        default: Smart-1 Cloud Token for member B
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
@@ -269,6 +275,14 @@ Parameters:
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
     ConstraintDescription: At least 8 alpha numeric characters.
     NoEcho: true
+  MemberAToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    Type: String
+    NoEcho: true
+  MemberBToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    Type: String
+    NoEcho: true
   ResourcesTagName:
     Description: Name tag prefix of the resources. (optional)
     Type: String
@@ -336,7 +350,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      TemplateURL: __URL__/cluster/geo-cluster.yaml
+      TemplateURL: __URL__/cluster/cross-az-cluster.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnetA: !GetAtt VPCStack.Outputs.PublicSubnet1ID
@@ -357,6 +371,8 @@ Resources:
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
         GatewaySICKey: !Ref GatewaySICKey
+        MemberAToken: !Ref MemberAToken
+        MemberBToken: !Ref MemberBToken
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
@@ -392,3 +408,14 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !GetAtt ClusterStack.Outputs.MemberBURL
+Rules:
+  MemberATokenNotProvided:
+    RuleCondition: !Equals [!Ref MemberAToken, '']
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+        Assert: !Equals [!Ref MemberBToken, '']
+  MemberBTokenNotProvided:
+    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+        Assert: !Equals [ !Ref MemberAToken, '' ]

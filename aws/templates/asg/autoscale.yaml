@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20211226)
+Description: Create an Auto Scaling group of Check Point gateways (20221226)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
