@@ -119,9 +119,9 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **instanceSSHKey** | Public SSH key for the user 'admin' | string | A valid public ssh key |
 |  |  |  |  |  |
-| **smart1CloudTokenA** | Smart-1 Cloud token for member A| string ||
+| **smart1CloudTokenA** | Smart-1 Cloud token for member A| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 |  |  |  |  |  |
-| **smart1CloudTokenB** | Smart-1 Cloud token for member B| string ||
+| **smart1CloudTokenB** | Smart-1 Cloud token for member B| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 |  |  |  |  |  |
 | **sicKey** | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server | string | At least 8 alpha numeric characters.<br/>If SIC is not provided and needed, a key will be automatically generated |
 |  |  |  |  |  |
