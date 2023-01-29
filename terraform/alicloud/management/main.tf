@@ -157,9 +157,10 @@ resource "alicloud_instance" "management_instance" {
     AdminCidr = var.admin_cidr
     IsPrimary = var.is_primary_management
     SICKey = var.SICKey,
-    AllocateElasticIP = var.allocate_and_associate_eip
-    GatewayManagement = var.gateway_management
-    BootstrapScript = var.bootstrap_script
+    AllocateElasticIP = var.allocate_and_associate_eip,
+    GatewayManagement = var.gateway_management,
+    BootstrapScript = var.bootstrap_script,
+    mgmt_new_config = local.mgmt_new_config
   })
 }
 
