@@ -35,9 +35,9 @@ module "common_gateway_instance" {
 }
 
 resource "alicloud_network_interface" "internal_eni" {
-  name = format("%s-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name  = format("%s-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.private_vswitch_id
-  security_groups = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth1"
 }

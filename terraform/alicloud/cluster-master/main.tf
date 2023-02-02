@@ -12,7 +12,7 @@ module "launch_vpc" {
 
 resource "alicloud_route_table" "private_vswitch_rt" {
   depends_on = [module.launch_vpc]
-  name =  "Internal_Route_Table"
+  route_table_name  =  "Internal_Route_Table"
   vpc_id = module.launch_vpc.vpc_id
 }
 resource "alicloud_route_table_attachment" "private_rt_to_private_vswitchs" {
