@@ -1,0 +1,14 @@
+name: Spectral Code Analysis
+on: [push, fork, pull_request]
+jobs:
+  code-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download-spectral
+        run: curl -L 'https://app.spectralops.io/latest/x/sh?key=${{ secrets.SPECTRAL_KEY }}'| sh
+      
+      - name: print_spectral_ver
+        run: $HOME/.spectral/spectral -V
+        
+      - name: spectral-scan
+        run: SPECTRAL_DSN=${{ secrets.SPECTRAL_DSN }} $HOME/.spectral/spectral github -k repo -t ${{ secrets.TOKEN }} ${{ secrets.REPO_NAME }} --include-tags base,audit,iac
