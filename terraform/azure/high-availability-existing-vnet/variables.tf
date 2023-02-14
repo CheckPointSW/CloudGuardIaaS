@@ -46,6 +46,16 @@ variable "admin_password" {
   type = string
 }
 
+variable "smart_1_cloud_token_a" {
+  description = "Smart-1 Cloud Token, for configuring member A"
+  type = string
+}
+
+variable "smart_1_cloud_token_b" {
+  description = "Smart-1 Cloud Token, for configuring member B"
+  type = string
+}
+
 variable "sic_key" {
   description = "Secure Internal Communication(SIC) key"
   type = string

@@ -102,6 +102,10 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
  |  |  |  |  |  |
+ | **smart_1_cloud_token_a** | Smart-1 Cloud token to connect automatically ***Member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)  | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal |  |
+ |  |  |  |  |  |
+ | **smart_1_cloud_token_b** | Smart-1 Cloud token to connect automatically ***Member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal |  |
+ |  |  |  |  |  |
  | **sic_key** | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server | string | Only alphanumeric characters are allowed, and the value must be 12-30 characters long |
  |  |  |  |  |  |
  | **vm_size** | Specifies the size of Virtual Machine | string | "Standard_DS2_v2", "Standard_DS3_v2", "Standard_DS4_v2", "Standard_DS5_v2", "Standard_F2s", "Standard_F4s", "Standard_F8s", "Standard_F16s", "Standard_D4s_v3", "Standard_D8s_v3", "Standard_D16s_v3", "Standard_D32s_v3", "Standard_D64s_v3", "Standard_E4s_v3", "Standard_E8s_v3", "Standard_E16s_v3", "Standard_E20s_v3", "Standard_E32s_v3", "Standard_E64s_v3", "Standard_E64is_v3", "Standard_F4s_v2", "Standard_F8s_v2", "Standard_F16s_v2", "Standard_F32s_v2", "Standard_F64s_v2", "Standard_M8ms", "Standard_M16ms", "Standard_M32ms", "Standard_M64ms", "Standard_M64s", "Standard_D2_v2", "Standard_D3_v2", "Standard_D4_v2", "Standard_D5_v2", "Standard_D11_v2", "Standard_D12_v2", "Standard_D13_v2", "Standard_D14_v2", "Standard_D15_v2", "Standard_F2", "Standard_F4", "Standard_F8", "Standard_F16", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3", "Standard_D32_v3", "Standard_D64_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3", "Standard_E20_v3", "Standard_E32_v3", "Standard_E64_v3", "Standard_E64i_v3", "Standard_DS11_v2", "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2" |
@@ -175,6 +179,8 @@ availability_type = "Availability Zone"
     frontend_IP_addresses           = [5, 6, 7]
     backend_IP_addresses            = [5, 6, 7]
     admin_password                  = "xxxxxxxxxxxx"
+    smart_1_cloud_token_a           = "xxxxxxxxxxxx"
+    smart_1_cloud_token_b           = "xxxxxxxxxxxx"
     sic_key                         = "xxxxxxxxxxxx"
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
@@ -197,6 +203,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230212 | - Added Smart-1 Cloud support  |
+| | | |
 | 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |
 | | | |
 | 20220111 | - Added support to select different shells. |
