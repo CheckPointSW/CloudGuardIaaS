@@ -85,7 +85,7 @@ secret_key = "my-secret-key"
   // --- EC2 Instances Configuration ---
   mds_name = "CP-MDS-tf"
   mds_instance_type = "m5.12xlarge"
-  key_name = "privatekey"
+  key_name = "publickey"
   volume_size = 100
   volume_encryption = "alias/aws/ebs"
   enable_instance_connect = false
@@ -103,7 +103,7 @@ secret_key = "my-secret-key"
   // --- Check Point Settings ---
   mds_version = "R81.10-BYOL"
   mds_admin_shell = "/bin/bash"
-  mds_password_hash = "12345678"
+  mds_password_hash = ""
   
   // --- Multi-Domain Server Settings ---
   mds_hostname = "mds-tf"

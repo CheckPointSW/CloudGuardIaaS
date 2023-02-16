@@ -17,7 +17,7 @@ private_subnets_map = {
 subnets_bit_length = 8
 
 // --- General Settings ---
-key_name = "privatekey"
+key_name = "publickey"
 enable_volume_encryption = true
 enable_instance_connect = false
 disable_instance_termination = false
@@ -33,7 +33,7 @@ gateway_instance_type = "c5.xlarge"
 gateways_min_group_size = 2
 gateways_max_group_size = 8
 gateway_version = "R81.10-BYOL"
-gateway_password_hash = "12345678"
+gateway_password_hash = ""
 gateway_SICKey = "12345678"
 enable_cloudwatch = true
 
@@ -41,7 +41,7 @@ enable_cloudwatch = true
 management_deploy = true
 management_instance_type = "m5.xlarge"
 management_version = "R81.10-BYOL"
-management_password_hash = "12345678"
+management_password_hash = ""
 gateways_policy = "Standard"
 gateways_blades = true
 admin_cidr = "0.0.0.0/0"

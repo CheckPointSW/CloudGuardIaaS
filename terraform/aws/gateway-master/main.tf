@@ -51,6 +51,7 @@ module "launch_gateway_into_vpc" {
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
   gateway_password_hash = var.gateway_password_hash
+  gateway_TokenKey = var.gateway_TokenKey
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch

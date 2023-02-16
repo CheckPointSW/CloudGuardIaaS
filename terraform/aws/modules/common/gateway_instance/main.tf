@@ -36,6 +36,7 @@ resource "aws_instance" "gateway_instance" {
     PasswordHash = local.gateway_password_hash_base64,
     Shell = var.admin_shell,
     SICKey = local.gateway_SICkey_base64,
+    TokenKey = local.gateway_TokenKey,
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     Hostname = var.gateway_hostname,
     AllowUploadDownload = var.allow_upload_download,

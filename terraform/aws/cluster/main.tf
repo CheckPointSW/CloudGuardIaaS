@@ -144,6 +144,7 @@ resource "aws_instance" "member-a-instance" {
     EnableInstanceConnect = var.enable_instance_connect,
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
+    TokenA = var.memberAToken,
     MemberAPublicAddress =  aws_eip.member_a_eip[0].public_ip,
     AllocateAddress = var.allocate_and_associate_eip,
     OsVersion = local.version_split
@@ -198,6 +199,7 @@ resource "aws_instance" "member-b-instance" {
     EnableInstanceConnect = var.enable_instance_connect,
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
+    TokenB = var.memberBToken,
     MemberBPublicAddress =  aws_eip.member_b_eip[0].public_ip,
     AllocateAddress = var.allocate_and_associate_eip,
     OsVersion = local.version_split
