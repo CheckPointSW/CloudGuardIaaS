@@ -122,7 +122,7 @@ sicKey = ""
 managementGUIClientNetwork = "0.0.0.0/0"
 
 #--- Quick connect to Smart-1 Cloud ---
-smart1CloudToken = "xxxxxxxxxxxxxxxxxxxxxxxx"
+smart_1_cloud_token = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Networking ---
 zone = "us-central1-a
@@ -234,7 +234,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | managementGUIClientNetwork | Allowed GUI clients | string | A valid IPv4 network CIDR (e.g. 0.0.0.0/0) |0.0.0.0/0|no|
 |  |  |  |  |  |
-| smart1CloudToken | Smart-1 Cloud token to connect this gateway to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+| smart_1_cloud_token | Smart-1 Cloud token to connect this gateway to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 |  |  |  |  |  |
 | numAdditionalNICs | Number of additional network interfaces | number | A number in the range 0 - 8.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |0|no|
 |  |  |  |  |  |

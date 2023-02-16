@@ -5,7 +5,7 @@ project                               = "PLEASE ENTER PROJECT NAME"             
 # --- Check Point Deployment ---
 prefix                                = "PLEASE ENTER PREFIX"                         # "chkp-tf-ha"
 license                               = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8110-gw-byol-cluster-335-985-v20220126"
+image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8040-gw-byol-cluster-123-456-v12345678"
 
 # --- Instances Configuration ---
 region                                = "PLEASE ENTER REGION"                         # "us-central1"
@@ -24,10 +24,9 @@ generate_password                     = "PLEASE ENTER true or false"            
 allow_upload_download                 = "PLEASE ENTER true OR false"                  # true
 admin_shell                           = "PLEASE ENTER ADMIN SHELL"                    # "/etc/cli.sh"
 
-
 # --- Quick connect to Smart-1 Cloud ---
-smart1CloudTokenA                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"       # ""
-smart1CloudTokenB                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"       # ""
+smart_1_cloud_token_a                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
+smart_1_cloud_token_b                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
 
 # --- Networking ---
 cluster_network_cidr                  = "PLEASE ENTER CLUSTER NETWORK CIDR"           # "10.0.1.0/24"

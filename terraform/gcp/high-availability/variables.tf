@@ -100,19 +100,19 @@ variable "admin_shell" {
   default = "/etc/cli.sh"
 }
 # --- Quick connect to Smart-1 Cloud ---
-variable "smart1CloudTokenA" {
+variable "smart_1_cloud_token_a" {
   type = string
   description ="(Optional) Smart-1 cloud token for member A to connect this Gateway to Check Point's Security Management as a Service"
   default = ""
 }
-variable "smart1CloudTokenB" {
+variable "smart_1_cloud_token_b" {
   type = string
   description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
   default = ""
 }
 
 resource "null_resource" "validate_both_tokens" {
-  count = var.smart1CloudTokenA != "" && var.smart1CloudTokenB != "" ? 0 : "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
+  count = var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_b != "" ? 0 : "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
 }
 
 # --- Networking ---

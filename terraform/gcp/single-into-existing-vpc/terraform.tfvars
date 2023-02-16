@@ -16,7 +16,7 @@ sicKey                                      = "PLEASE ENTER SIC KEY"            
 managementGUIClientNetwork                  = "PLEASE ENTER MANAGEMENT GUI CLIENT NETWORK"                              # "0.0.0.0/0"
 
 # --- Quick connect to Smart-1 Cloud ---
-smart1CloudToken                            = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"                                        # ""
+smart_1_cloud_token                            = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"                                        # ""
 
 # --- Networking---
 zone                                        = "PLEASE ENTER ZONE"                                                       # "us-central1-a"

@@ -137,8 +137,8 @@ allow_upload_download = false
 admin_shell = "/bin/bash"
 
 #--- Quick connect to Smart-1 Cloud ---
-smart1CloudTokenB = "xxxxxxxxxxxxxxxxxxxxxxxx"
-smart1CloudTokenB = "xxxxxxxxxxxxxxxxxxxxxxxx"
+smart_1_cloud_token_a = "xxxxxxxxxxxxxxxxxxxxxxxx"
+smart_1_cloud_token_b = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Networking ---
 cluster_network_cidr = "10.0.1.0/24"
@@ -240,8 +240,8 @@ internal_network1_subnetwork_name = ""
 | generate_password  | Automatically generate an administrator password.  | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
 | admin_shell | Change the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
-| smart1CloudTokenA | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
-| smart1CloudTokenB | Smart-1 Cloud token to connect ***member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+| smart_1_cloud_token_a | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+| smart_1_cloud_token_b | Smart-1 Cloud token to connect ***member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 | cluster_network_cidr  | Cluster external subnet CIDR. If the variable's value is not empty double quotes, a new network will be created. The Cluster public IP will be translated to a private address assigned to the active member in this external network.  | string  | N/A | "10.0.0.0/24" | no |
 | cluster_network_name  | Cluster external network ID in the chosen zone. The network determines what network traffic the instance can access.If you have specified a CIDR block at var.cluster_network_cidr, this network name will not be used.  | string  | N/A | "" | no |
 | cluster_network_subnetwork_name  | Cluster subnet ID in the chosen network. Assigns the instance an IPv4 address from the subnetwork’s range. If you have specified a CIDR block at var.cluster_network_cidr, this subnetwork will not be used. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network.  | string  | N/A | "" | no |

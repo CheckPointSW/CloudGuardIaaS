@@ -102,7 +102,7 @@ resource "google_compute_instance_template" "instance_template" {
     secondary_cluster_address_name = ""
     managementNetwork = ""
     numAdditionalNICs = ""
-    smart1CloudToken = ""
+    smart_1_cloud_token = ""
     name = ""
     zoneConfig = ""
     region = ""

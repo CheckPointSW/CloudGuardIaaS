@@ -207,7 +207,7 @@ resource "google_compute_instance" "gateway" {
     mgmtNIC = var.management_nic
     managementNetwork = ""
     numAdditionalNICs = ""
-    smart1CloudToken = var.smart1CloudToken
+    smart_1_cloud_token = var.smart_1_cloud_token
     name = ""
     zoneConfig = ""
     region = ""

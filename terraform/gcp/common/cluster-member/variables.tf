@@ -148,12 +148,12 @@ variable "admin_shell" {
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
 }
-variable "smart1CloudTokenA" {
+variable "smart_1_cloud_token_a" {
   type = string
   description ="(Optional) Smart-1 cloud token for member A to connect this Gateway to Check Point's Security Management as a Service"
   default = ""
 }
-variable "smart1CloudTokenB" {
+variable "smart_1_cloud_token_b" {
   type = string
   description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
   default = ""
