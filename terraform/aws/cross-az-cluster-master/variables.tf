@@ -136,7 +136,7 @@ variable "memberBToken" {
 }
 resource "null_resource" "invalid_tokens" {
   // Will fail if var.memberAToken is empty and var.memberBToken isn't and vice versa
-  count = var.memberAToken != "" && var.memberBToken != "" ? 0 : "Smart-1 Cloud Tokens for member A and member B can not be empty."
+  count = (var.memberAToken != "" && var.memberBToken != "") || (var.memberAToken == "" && var.memberBToken == "")  ? 0 : "Smart-1 Cloud Tokens for member A and member B can not be empty."
 }
 
 // --- Advanced Settings ---
