@@ -25,7 +25,7 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8040-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
 }
 
 # --- Instances Configuration ---
@@ -98,6 +98,21 @@ variable "admin_shell" {
   type = string
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
+}
+# --- Quick connect to Smart-1 Cloud ---
+variable "smart1CloudTokenA" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member A to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
+variable "smart1CloudTokenB" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
+
+resource "null_resource" "validate_both_tokens" {
+  count = var.smart1CloudTokenA != "" && var.smart1CloudTokenB != "" ? 0 : "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
 }
 
 # --- Networking ---

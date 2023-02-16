@@ -157,6 +157,11 @@ variable "managementGUIClientNetwork" {
   description ="Allowed GUI clients	"
   default = "0.0.0.0/0"
 }
+variable "smart1CloudToken" {
+  type = string
+  description ="(Optional) Smart-1 cloud token to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
 variable "numAdditionalNICs" {
   type = number
   description ="Number of additional network interfaces"

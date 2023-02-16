@@ -207,6 +207,10 @@ resource "google_compute_instance" "gateway" {
     mgmtNIC = var.management_nic
     managementNetwork = ""
     numAdditionalNICs = ""
+    smart1CloudToken = var.smart1CloudToken
+    name = ""
+    zoneConfig = ""
+    region = ""
   })
 }
 resource "google_compute_address" "static" {

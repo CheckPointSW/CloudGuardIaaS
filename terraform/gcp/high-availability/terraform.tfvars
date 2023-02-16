@@ -24,6 +24,11 @@ generate_password                     = "PLEASE ENTER true or false"            
 allow_upload_download                 = "PLEASE ENTER true OR false"                  # true
 admin_shell                           = "PLEASE ENTER ADMIN SHELL"                    # "/etc/cli.sh"
 
+
+# --- Quick connect to Smart-1 Cloud ---
+smart1CloudTokenA                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"       # ""
+smart1CloudTokenB                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"       # ""
+
 # --- Networking ---
 cluster_network_cidr                  = "PLEASE ENTER CLUSTER NETWORK CIDR"           # "10.0.1.0/24"
 cluster_network_name                  = "PLEASE ENTER CLUSTER NETWORK ID"             # "cluster-network"
