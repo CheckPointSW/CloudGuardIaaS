@@ -298,3 +298,10 @@ variable "existing_public_ip_prefix_id" {
   type = string
   default = ""
 }
+
+locals{
+  is_both_tokens_used = length(var.smart_1_cloud_token_a) > 0 == length(var.smart_1_cloud_token_b) > 0
+  validation_message = "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
+  _ = regex("^$", (local.is_both_tokens_used ? "" : local.validation_message)
+  )
+}
