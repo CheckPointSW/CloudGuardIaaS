@@ -300,8 +300,14 @@ variable "existing_public_ip_prefix_id" {
 }
 
 locals{
+  # Validate both s1c tokens are used or both empty
   is_both_tokens_used = length(var.smart_1_cloud_token_a) > 0 == length(var.smart_1_cloud_token_b) > 0
-  validation_message = "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
-  _ = regex("^$", (local.is_both_tokens_used ? "" : local.validation_message)
-  )
+  validation_message_both = "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
+  _ = regex("^$", (local.is_both_tokens_used ? "" : local.validation_message_both))
+
+  is_tokens_used = length(var.smart_1_cloud_token_a) > 0
+  # Validate both s1c tokens are unqiue
+  is_both_tokens_the_same = var.smart_1_cloud_token_a == var.smart_1_cloud_token_b
+  validation_message_unique = "Same Smart-1 Cloud token used for both memeber, you must provide unique token for each member"
+  __ = local.is_tokens_used ? regex("^$", (local.is_both_tokens_the_same ? local.validation_message_unique : "")) : ""
 }
