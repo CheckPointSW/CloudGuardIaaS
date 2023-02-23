@@ -3,7 +3,7 @@
 // --- VPC Network Configuration ---
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
-  "us-east-1b" = 1
+  "us-east-1a" = 1
 }
 vswitchs_bit_length = 8
 
@@ -21,7 +21,7 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-version_license = "R81-BYOL"
+version_license = "R81.10-BYOL"
 admin_shell = "/bin/bash"
 password_hash = "12345678"
 hostname = "mgmt-tf"

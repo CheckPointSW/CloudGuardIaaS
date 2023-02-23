@@ -62,7 +62,11 @@ else
 fi
 
 echo "Starting First Time Wizard"
-config_system -s "install_security_gw=false&install_security_managment=true&$mgmt_clients&install_mgmt_primary=$primary&install_mgmt_secondary=$secondary&mgmt_admin_radio=gaia_admin&ftw_sic_key='$sic'&download_info=${AllowUploadDownload}&upload_info=${AllowUploadDownload}"
+if [ "${mgmt_new_config}" = "1" ]; then
+    config_system -s "is_maintenance_pw_not_mandatory=true&install_security_gw=false&install_security_managment=true&$mgmt_clients&install_mgmt_primary=$primary&install_mgmt_secondary=$secondary&mgmt_admin_radio=gaia_admin&ftw_sic_key='$sic'&download_info=${AllowUploadDownload}&upload_info=${AllowUploadDownload}"
+else
+    config_system -s "install_security_gw=false&install_security_managment=true&$mgmt_clients&install_mgmt_primary=$primary&install_mgmt_secondary=$secondary&mgmt_admin_radio=gaia_admin&ftw_sic_key='$sic'&download_info=${AllowUploadDownload}&upload_info=${AllowUploadDownload}"
+fi
 
 rc=$?
 if test $rc -eq 0 && $primary; then

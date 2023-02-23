@@ -13,6 +13,7 @@ These types of Terraform resources are supported:
 ## Note
 - Make sure your region and zone are supporting the gateway instance types in **modules/common/instance_type/main.tf**
   [Alicloud Instance_By_Region](https://ecs-buy.aliyun.com/instanceTypes/?spm=a2c63.p38356.879954.139.1eeb2d44eZQw2m#/instanceTypeByRegion)
+- terraform destroy will throw an error that the plugin crashed.
   
 ## Configuration
 

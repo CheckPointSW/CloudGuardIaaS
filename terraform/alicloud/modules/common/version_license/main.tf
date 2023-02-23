@@ -6,7 +6,9 @@ locals {
   ]
   mgmt_versions = [
     //"R81-PAYG",
-    "R81-BYOL"
+    "R81-BYOL",
+    "R81.10-BYOL",
+    "R81.20-BYOL"
   ]
 }
 
