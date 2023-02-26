@@ -167,6 +167,12 @@ Parameters:
       - c6i.4xlarge
       - c6i.12xlarge
       - c6i.24xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.12xlarge
+      - c6in.24xlarge
       - r5.large
       - r5.xlarge
       - r5.2xlarge
