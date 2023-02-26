@@ -134,10 +134,6 @@ variable "memberBToken" {
   type = string
   description = "Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud."
 }
-resource "null_resource" "invalid_tokens" {
-  // Will fail if var.memberAToken is empty and var.memberBToken isn't and vice versa
-  count = (var.memberAToken != "" && var.memberBToken != "") || (var.memberAToken == "" && var.memberBToken == "")  ? 0 : "Smart-1 Cloud Tokens for member A and member B can not be empty."
-}
 
 // --- Advanced Settings ---
 variable "resources_tag_name" {
