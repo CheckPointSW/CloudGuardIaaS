@@ -27,7 +27,7 @@ locals {
 
   is_tokens_used = length(var.memberAToken) > 0
   is_both_tokens_the_same = var.memberAToken == var.memberBToken
-  validation_message_unique = "Same Smart-1 Cloud token used for both member, you must provide unique token for each member"
+  validation_message_unique = "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
   //Will fail if both s1c tokens are the same
   regex_s1c_unique = local.is_tokens_used ? regex("^$", (local.is_both_tokens_the_same ? local.validation_message_unique : "")) : ""
 
