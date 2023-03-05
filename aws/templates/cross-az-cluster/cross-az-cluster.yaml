@@ -157,48 +157,56 @@ Parameters:
       - m6i.xlarge
       - m6i.2xlarge
       - m6i.4xlarge
+      - m6i.8xlarge
       - m6i.12xlarge
       - m6i.24xlarge
       - c6i.large
       - c6i.xlarge
       - c6i.2xlarge
       - c6i.4xlarge
+      - c6i.8xlarge
       - c6i.12xlarge
       - c6i.24xlarge
       - c6in.large
       - c6in.xlarge
       - c6in.2xlarge
       - c6in.4xlarge
+      - c6in.8xlarge
       - c6in.12xlarge
       - c6in.24xlarge
       - r5.large
       - r5.xlarge
       - r5.2xlarge
       - r5.4xlarge
+      - r5.8xlarge
       - r5.12xlarge
       - r5.24xlarge
       - r5a.large
       - r5a.xlarge
       - r5a.2xlarge
       - r5a.4xlarge
+      - r5a.8xlarge
       - r5a.12xlarge
       - r5a.24xlarge
       - r5b.large
       - r5b.xlarge
       - r5b.2xlarge
       - r5b.4xlarge
+      - r5b.8xlarge
       - r5b.12xlarge
       - r5b.24xlarge
       - r5n.large
       - r5n.xlarge
       - r5n.2xlarge
       - r5n.4xlarge
+      - r5n.8xlarge
       - r5n.12xlarge
       - r5n.24xlarge
       - m6a.large
       - m6a.xlarge
       - m6a.2xlarge
       - m6a.4xlarge
+      - m6a.8xlarge
       - m6a.12xlarge
       - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
