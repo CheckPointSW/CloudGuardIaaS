@@ -1,0 +1,10 @@
+name: Secure Code Analysis
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  code-analysis:
+    uses: CheckPointSW/secure-code-workflow/.github/workflows/code-analysis.yml@main
+    secrets: inherit
