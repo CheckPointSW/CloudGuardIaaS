@@ -1326,7 +1326,7 @@
             "name": "allowSmart1CloudConnection",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Quick connect to Smart-1 Cloud",
-            "defaultValue": "No",
+            "defaultValue": "Yes",
             "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
              "constraints": {
               "allowedValues": [
