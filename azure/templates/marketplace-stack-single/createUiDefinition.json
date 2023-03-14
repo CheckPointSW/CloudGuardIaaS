@@ -54,7 +54,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
             "defaultValue": "R81.10",
-            "toolTip": "The version of Check Point CloudGuard.",
+            "toolTip": "The version of Check Point CloudGuard Gateway.",
             "constraints": {
               "allowedValues": [
                 {

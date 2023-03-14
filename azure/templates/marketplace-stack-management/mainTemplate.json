@@ -210,7 +210,7 @@
   "variables": {
     "installationType": "management-stack",
     "templateName": "stack-management",
-    "templateVersion": "20190626",
+    "templateVersion": "20230219",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
