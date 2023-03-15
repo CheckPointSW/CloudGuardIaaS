@@ -1,0 +1,12 @@
+{
+    "mgmt_ip": "",
+    "tenant_id": "",
+    "client_id": "",
+    "subscription_id": "",
+	"managed_app_resource_group_name": "",
+    "nva_name": "",
+    "user_name": "",
+    "password": "",
+	"policy_name": ""
+}
+
