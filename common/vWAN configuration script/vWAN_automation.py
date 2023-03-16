@@ -83,9 +83,10 @@ def mgmt_login():
 
     try:
         res = requests.post(url, json=body, headers=headers, verify=False)
+        print('Succeed login to the management')
         return res.json()['sid']
     except Exception:
-        sys.exit('Failed to login to managament {}'.format(MGMT_IP))
+        sys.exit('Failed to login to the managament {}'.format(MGMT_IP))
 
 
 def get_access_token():
@@ -196,7 +197,7 @@ def mgmt_publish():
 
 
 def mgmt_add_gateways_to_policy(policy_targets):
-    print('Starting to add gateways to policy installation targets')
+    print('Starting to add gateways to {} policy installation targets'.format(POLICY))
     url = f'{MGMT_URL}/set-package'
     headers = get_headers_for_mgmt_api()
     body = {
@@ -251,6 +252,10 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 init_variables_from_config()
 SID = mgmt_login()
 _gateways = get_nva_gateways()
+gw_names = filter(lambda gw: gw[PUBLIC_IP_FIELD] != '', _gateways)
+print('These gateways were found:')
+for gw in gw_names:
+    print('{} - {}'.format(gw[INSTANCE_NAME], gw[PUBLIC_IP_FIELD]))
 _policy_targets = []
 for gw_info in gateways_info_generator(_gateways):
     print('Starting to configure {} - {}'.format(gw_info[NAME], gw_info[PUBLIC_IP_FIELD]))
