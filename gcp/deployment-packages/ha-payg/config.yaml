@@ -11,7 +11,7 @@ resources:
   properties:
       ha_version: "PLEASE ENTER HA VERSION"
       zoneA: "PLEASE ENTER ZONE A"
-      zoneB: "PLEASE ENTER ZONE B. MUST BE EQUAL TO ZONE A"
+      zoneB: "PLEASE ENTER ZONE B. MUST BE IN THE SAME REGION AS MEMBER A ZONE"
       machineType: "PLEASE ENTER A MACHINE TYPE"
       diskType: "PLEASE ENTER A DISK TYPE"
       #To connect to Smart-1 Cloud you must provide two valid tokens (one per member)
