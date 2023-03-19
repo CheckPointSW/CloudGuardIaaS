@@ -20,7 +20,7 @@ resources:
       bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
       instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
       enableMonitoring: "PLEASE ENTER true or false"
-      managementNetwork: "PLEASE ENTER MANAGEMENT IP"
+      managementNetwork: "PLEASE ENTER MANAGEMENT IP, if using Smart-1 Cloud insert 'S1C'"
       sicKey: "PLEASE ENTER A SIC KEY"
       generatePassword: "PLEASE ENTER true or false"
       allowUploadDownload: "PLEASE ENTER true or false"
