@@ -21,19 +21,48 @@ When connected via ssh, run:
     mgmt_cli -r true set api-settings accepted-api-calls-from "All IP addresses" ; api reconf
     ```
 
-
 4. Fill the vWAN_automation_config.json file with the required data.
 
+5. For Linux users:
 
-### Usage:
+    Ensure Python installed. Run:
+    ```
+    python --version
+    ```
+    or:
+    ```
+    python3 --version
+    ```
 
+    If Python is installed on your system, the version number will be displayed in the Command Prompt window. If Python is not installed, you will receive an error message. 
+
+5. Install requests package:
+    ```
+    pip install requests
+    ```
+
+
+## Usage:
 - Nevigate to vWAN configuration script folder.
+
+#### **Linux:**
 
 - Run:
     ```
     python vWan_automation.py
     ```
-
+    or:
+    ```
+    python3 vWan_automation.py
+    ```
+- Enter the Client Secret & SIC for the script when prompted.
+- Wait for the script to finish. 
+#### **Windows:**
+- Right click on main.ps1 and click on “Run with PowerShell”.
+    - There might be a prompt, press “y” to continue.
+- Wait for any dependency to be installed (Python or “requests” package).
+- Enter the Client Secret & SIC for the script when prompted.
+- Wait for the script to finish.
 
 
 
