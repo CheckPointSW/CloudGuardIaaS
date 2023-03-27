@@ -1,5 +1,5 @@
 # vWAN Automatic configuration script
-This script was created for easy NVA gateways configuration in Smart Console by automating the process of adding the gateways objects to Smart Console, establishing SIC, disabling anti-spoofing for internal and external interfaces, and installing policy.
+This script was created for easy NVA gateways configuration in Smart Console by automating the process of adding the gateways objects to Smart Console, establishing SIC, and installing policy.
 
 ## Preconditions:
 
@@ -25,11 +25,7 @@ When connected via ssh, run:
 
 5. For Linux users:
 
-    Ensure Python installed. Run:
-    ```
-    python --version
-    ```
-    or:
+    Ensure Python3 installed. Run:
     ```
     python3 --version
     ```
@@ -48,9 +44,6 @@ When connected via ssh, run:
 #### **Linux:**
 
 - Run:
-    ```
-    python vWan_automation.py
-    ```
     or:
     ```
     python3 vWan_automation.py
