@@ -1956,6 +1956,7 @@
             "type": "Microsoft.Common.TagsByResource",
             "toolTip": "Create Azure tags for the new resources",
             "resources": [
+              "Function App",
               "Microsoft.Storage/storageAccounts",
               "Microsoft.Compute/virtualMachineScaleSets",
               "Microsoft.Network/routeTables",
