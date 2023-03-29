@@ -115,6 +115,10 @@ bootstrap_script = "echo 12345678"
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230129 | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud. |
+| | | |
+| 20221220 | First release of R81.10 CloudGuard Management Terraform deployment in Alibaba Cloud. |
+| | | |
 | 20211011 | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
 
