@@ -54,7 +54,7 @@ Configure envrionment variables in Windows:
 | volume_size | Root volume size (GB) - minimum 100 | number | n/a | 100 | no |
 | ram_role_name | A predefined RAM role name to attach to the cluster's security gateway instances | string | n/a | "" | no |
 | instance_tags | (Optional) A map of tags as key=value pairs. All tags will be added to the Gateway ECS Instances | map(string) | n/a | {}} | no |
-| gateway_version | Gateway version and license | string | - R81-BYOL <br/> - R81.10-BYOL | R81-BYOL | no |
+| gateway_version | Gateway version and license | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL | R81-BYOL | no |
 | admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
 | gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
 | gateway_password_hash | (optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |

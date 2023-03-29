@@ -49,7 +49,7 @@ Configure envrionment variables in Windows:
 | ram_role_name  | RAM role name to attach to the instance profile, leave it empty for automatic creation   | string  | n/a  | n/a  | no  |
 | instance_tags  | (Optional) A map of tags as key=value pairs. All tags will be added to the Management ECS Instance  | map(string)  | n/a  | {}  | no  |
 |   |   |   |   |   |   |
-| gateway_version | Gateway version and license | string | - R81-BYOL <br/> - R81.10-BYOL | R81-BYOL |
+| gateway_version | Gateway version and license | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL | R81-BYOL |
 | admin_shell  | Set the admin shell to enable advanced command line configuration  | string  | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
 | hostname  | (Optional) Management prompt hostname  | string  | n/a  | n/a  | no  |
