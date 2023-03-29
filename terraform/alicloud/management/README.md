@@ -50,7 +50,7 @@ Configure envrionment variables in Windows:
 | ram_role_name  | RAM role name to attach to the instance profile, leave it empty for automatic creation   | string  | n/a  | n/a  | no  |
 | instance_tags  | (Optional) A map of tags as key=value pairs. All tags will be added to the Management ECS Instance  | map(string)  | n/a  | {}  | no  |
 |   |   |   |   |   |   |
-| version_license  | Version and license of the Check Point Security Management  | string | - R81-BYOL | R81-BYOL |
+| version_license  | Version and license of the Check Point Security Management  | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL | R81-BYOL |
 | admin_shell  | Set the admin shell to enable advanced command line configuration  | string  | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
 | password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
 | hostname  | (Optional) Management prompt hostname  | string  | n/a  | n/a  | no  |
@@ -115,6 +115,10 @@ bootstrap_script = "echo 12345678"
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230129 | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud. |
+| | | |
+| 20221220 | First release of R81.10 CloudGuard Management Terraform deployment in Alibaba Cloud. |
+| | | |
 | 20211011 | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
 

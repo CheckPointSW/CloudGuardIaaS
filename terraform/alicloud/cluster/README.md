@@ -48,13 +48,13 @@ Configure envrionment variables in Windows:
 | private_vswitch_id | The private vswitch of the security gateways | string | Subnet in the same availability zone with cluster_vswitch_id and mgmt_vswitch_id | n/a | yes |
 | private_route_table | (optional) Sets '0.0.0.0/0' route to the Active Cluster member instance in the specified route table (e.g. vtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the Route Table. | string | n/a | "" | no |
 | gateway_name | (optional) The name tag of the Cluster's Security Gateway instances | string | n/a | "Check-Point-Cluster-tf" | no |
-| gateway_instance_type | The instance type of the Security Gateways | string | - ecs.g5ne.large <br/> - ecs.g5ne.xlarge <br/> - ecs.g5ne.2xlarge <br/> - ecs.g5ne.4xlarge <br/> - ecs.g5ne.8xlarge  | "ecs.g5ne.xlarge" | no |
+| gateway_instance_type | The instance type of the Security Gateways | string | - ecs.g5ne.large <br/> - ecs.g5ne.xlarge <br/> - ecs.g5ne.2xlarge <br/> - ecs.g5ne.4xlarge <br/> - ecs.g5ne.8xlarge <br/> - ecs.g7ne.large <br/> - ecs.g7ne.xlarge <br/> - ecs.g7ne.2xlarge <br/> - ecs.g7ne.4xlarge <br/> - ecs.g7ne.8xlarge  | "ecs.g5ne.xlarge" | no |
 | key_name | The ECS Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
 | allocate_and_associate_eip | If set to TRUE, an elastic IP will be allocated and associated with each cluster member, in addition to the cluster Elastic IP | bool | true/false | true | no |
 | volume_size | Root volume size (GB) - minimum 100 | number | n/a | 100 | no |
 | ram_role_name | A predefined RAM role name to attach to the cluster's security gateway instances | string | n/a | "" | no |
 | instance_tags | (Optional) A map of tags as key=value pairs. All tags will be added to the Gateway ECS Instances | map(string) | n/a | {}} | no |
-| gateway_version | Gateway version and license | string | - R81-BYOL | R81-BYOL | no |
+| gateway_version | Gateway version and license | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL | R81-BYOL | no |
 | admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
 | gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
 | gateway_password_hash | (optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
@@ -136,6 +136,8 @@ ram_role_name = ""
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230329 | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
+| | | |
 | 20211011 | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
 
