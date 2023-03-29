@@ -130,7 +130,7 @@ allocate_and_associate_eip = true
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20230329 | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud. |
+| 20230329 | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | | | |
 | 20211011 | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud. |
 | | | |

@@ -136,7 +136,7 @@ ram_role_name = ""
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20230329 | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud. |
+| 20230329 | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | | | |
 | 20211011 | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud. |
 | | | |
