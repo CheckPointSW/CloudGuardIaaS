@@ -20,6 +20,16 @@ if test -f $cv_json_path; then
    mv $cv_json_path_tmp $cv_json_path
 fi
 
+eth0_details=$(/sbin/ifconfig eth0 | grep "inet addr:" | awk "1")
+ip=($(echo $eth0_details | cut -d" " -f2 | cut -d":" -f2))
+oct1=$(echo $ip | tr "." " " | awk '{ print $1 }')
+oct2=$(echo $ip | tr "." " " | awk '{ print $2 }')
+oct3=$(echo $ip | tr "." " " | awk '{ print $3 }')
+oct4=$(echo $ip | tr "." " " | awk '{ print $4 }')
+hex_cluster_ip=$(printf '%02X' $oct1 $oct2 $oct3 $oct4)
+HEX_IP_ADDR_LOWER="$(echo $hex_cluster_ip | tr '[A-Z]' '[a-z]')"
+echo "aws_cross_az_private_member_ip=0x$HEX_IP_ADDR_LOWER" >> $FWDIR/boot/modules/fwkern.conf
+
 echo "Set admin password"
 pwd_hash='${PasswordHash}'
 if [[ -n $pwd_hash ]]; then
@@ -68,6 +78,10 @@ fi
 
 
 echo "Starting First Time Wizard"
+if [ "${cluster_new_config}" = "1" ]; then
+  file_name="/etc/.blink_cloud_mode"
+  > file_name
+fi
 blink_config -s "gateway_cluster_member=true&ftw_sic_key='${SICKey}'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'"
 
 

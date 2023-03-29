@@ -22,6 +22,7 @@ module "launch_management_into_vpc" {
 
   allocate_and_associate_eip = var.allocate_and_associate_eip
   volume_size = var.volume_size
+  disk_category = var.disk_category
   instance_tags = var.instance_tags
   version_license = var.version_license
   admin_shell = var.admin_shell
