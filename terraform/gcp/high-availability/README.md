@@ -235,7 +235,7 @@ internal_network1_subnetwork_name = ""
 | disk_size | Disk size in GB - Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. | number | number between 100 and 4096 | 100 | no |
 | enable_monitoring | Enable Stackdriver monitoring | bool | true/false | false | no |
 |  |  |  |  |  |
-| management_network  | Security Management Server address - The public address of the Security Management Server, in CIDR notation. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address.  | string  | N/A | N/A | yes |
+| management_network  | Security Management Server address - The public address of the Security Management Server, in CIDR notation. If usuing Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address.  | string  | N/A | N/A | yes |
 | sic_key  | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server. At least 8 alpha numeric characters. If SIC is not provided and needed, a key will be automatically generated  | string  | N/A | N/A | yes |
 | generate_password  | Automatically generate an administrator password.  | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
