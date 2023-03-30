@@ -120,8 +120,7 @@ bootstrap_script = "echo 12345678"
 
 | Template Version | Description                                                                                              |
 |------------------|----------------------------------------------------------------------------------------------------------|
-| 20230330         | - Added support of ECS disk category.                                                                    |
-|                  | - Stability fixes.                                                                                       |    
+| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                           |
 | 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                     |
 | 20211011         | First release of Check Point CloudGuard Management Terraform deployment into a new VPC in Alibaba cloud. |
 
