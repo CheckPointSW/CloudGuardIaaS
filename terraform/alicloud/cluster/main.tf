@@ -23,6 +23,7 @@ resource "alicloud_instance" "member-a-instance" {
   security_groups = [
     module.common_permissive_sg.permissive_sg_id]
   system_disk_size = var.volume_size
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = format("%s-Member-A", var.gateway_name)
@@ -38,7 +39,8 @@ resource "alicloud_instance" "member-a-instance" {
     Shell = var.admin_shell,
     GatewayBootstrapScript = var.gateway_bootstrap_script,
     SICKey = var.gateway_SICKey,
-    ManagementIpAddress = var.management_ip_address
+    ManagementIpAddress = var.management_ip_address,
+    cluster_new_config = local.cluster_new_config
   })
 }
 resource "alicloud_instance" "member-b-instance" {
@@ -50,6 +52,7 @@ resource "alicloud_instance" "member-b-instance" {
   security_groups = [
     module.common_permissive_sg.permissive_sg_id]
   system_disk_size = var.volume_size
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = format("%s-Member-B", var.gateway_name)
@@ -65,7 +68,8 @@ resource "alicloud_instance" "member-b-instance" {
     Shell = var.admin_shell,
     GatewayBootstrapScript = var.gateway_bootstrap_script,
     SICKey = var.gateway_SICKey,
-    ManagementIpAddress = var.management_ip_address
+    ManagementIpAddress = var.management_ip_address,
+    cluster_new_config = local.cluster_new_config
   })
 }
 

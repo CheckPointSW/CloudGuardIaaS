@@ -140,7 +140,7 @@ resource "alicloud_instance" "management_instance" {
   vswitch_id = var.vswitch_id
   security_groups = [alicloud_security_group.management_sg.id]
   system_disk_size = var.volume_size
-  system_disk_category = "cloud_essd"
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = var.instance_name
