@@ -28,8 +28,11 @@ Metadata:
           - GatewayVersion
           - Shell
           - GatewaySICKey
-          - GatewayToken
           - GatewayPasswordHash
+      - Label:
+          default: Quick connect to Smart-1 Cloud (Recommended)
+        Parameters:
+          - GatewayToken
       - Label:
           default: Advanced Settings
         Parameters:
