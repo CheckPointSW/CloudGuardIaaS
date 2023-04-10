@@ -160,7 +160,7 @@ variable "smart_1_cloud_token_b" {
 }
 variable "management_network" {
   type = string
-  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If usuing Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
+  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
 }
 variable "generated_admin_password" {
   type = string

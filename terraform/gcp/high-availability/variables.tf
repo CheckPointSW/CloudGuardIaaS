@@ -74,7 +74,7 @@ variable "enable_monitoring" {
 # --- Check Point ---
 variable "management_network" {
   type = string
-  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If usuing Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
+  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
   validation {
     condition = var.management_network != "0.0.0.0/0"
     error_message = "Var.management_network value cannot be the zero-address."
