@@ -16,7 +16,11 @@ resource "null_resource" "volume_size_too_small" {
   // Volume Size validation - resource will not be created if the volume size is smaller than 100
   count = var.volume_size >= 100 ? 0 : "volume_size must be at least 100"
 }
-
+variable "disk_category" {
+  type = string
+  description = "(Optional) Category of the ECS disk"
+  default = "cloud_efficiency"
+}
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"

@@ -23,6 +23,7 @@ resource "alicloud_instance" "member-a-instance" {
   security_groups = [
     module.common_permissive_sg.permissive_sg_id]
   system_disk_size = var.volume_size
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = format("%s-Member-A", var.gateway_name)
@@ -38,7 +39,8 @@ resource "alicloud_instance" "member-a-instance" {
     Shell = var.admin_shell,
     GatewayBootstrapScript = var.gateway_bootstrap_script,
     SICKey = var.gateway_SICKey,
-    ManagementIpAddress = var.management_ip_address
+    ManagementIpAddress = var.management_ip_address,
+    cluster_new_config = local.cluster_new_config
   })
 }
 resource "alicloud_instance" "member-b-instance" {
@@ -50,6 +52,7 @@ resource "alicloud_instance" "member-b-instance" {
   security_groups = [
     module.common_permissive_sg.permissive_sg_id]
   system_disk_size = var.volume_size
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = format("%s-Member-B", var.gateway_name)
@@ -65,15 +68,16 @@ resource "alicloud_instance" "member-b-instance" {
     Shell = var.admin_shell,
     GatewayBootstrapScript = var.gateway_bootstrap_script,
     SICKey = var.gateway_SICKey,
-    ManagementIpAddress = var.management_ip_address
+    ManagementIpAddress = var.management_ip_address,
+    cluster_new_config = local.cluster_new_config
   })
 }
 
 // Management ENIs
 resource "alicloud_network_interface" "member_a_mgmt_eni" {
-  name = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name  = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_groups = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }
@@ -82,9 +86,9 @@ resource "alicloud_network_interface_attachment" "member_a_mgmt_eni_attachment" 
   network_interface_id = alicloud_network_interface.member_a_mgmt_eni.id
 }
 resource "alicloud_network_interface" "member_b_mgmt_eni" {
-  name = format("%s-Member-B-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name  = format("%s-Member-B-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_groups = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }
@@ -96,9 +100,9 @@ resource "alicloud_network_interface_attachment" "member_b_mgmt_eni_attachment" 
 // Internal ENIs
 resource "alicloud_network_interface" "member_a_internal_eni" {
   depends_on = [alicloud_network_interface_attachment.member_a_mgmt_eni_attachment]
-  name = format("%s-Member-A-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name  = format("%s-Member-A-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.private_vswitch_id
-  security_groups = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }
@@ -108,9 +112,9 @@ resource "alicloud_network_interface_attachment" "member_a_internal_eni_attachme
 }
 resource "alicloud_network_interface" "member_b_internal_eni" {
   depends_on = [alicloud_network_interface_attachment.member_b_mgmt_eni_attachment]
-  name = format("%s-Member-B-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name  = format("%s-Member-B-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.private_vswitch_id
-  security_groups = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }

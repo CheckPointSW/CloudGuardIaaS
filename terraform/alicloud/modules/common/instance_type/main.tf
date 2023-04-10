@@ -4,7 +4,12 @@ locals {
     "ecs.g5ne.xlarge",
     "ecs.g5ne.2xlarge",
     "ecs.g5ne.4xlarge",
-    "ecs.g5ne.8xlarge"
+    "ecs.g5ne.8xlarge",
+    "ecs.g7ne.large",
+    "ecs.g7ne.xlarge",
+    "ecs.g7ne.2xlarge",
+    "ecs.g7ne.4xlarge",
+    "ecs.g7ne.8xlarge"
   ]
   mgmt_types = [
     "ecs.g6e.large",

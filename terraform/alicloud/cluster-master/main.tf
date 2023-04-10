@@ -12,7 +12,7 @@ module "launch_vpc" {
 
 resource "alicloud_route_table" "private_vswitch_rt" {
   depends_on = [module.launch_vpc]
-  name =  "Internal_Route_Table"
+  route_table_name  =  "Internal_Route_Table"
   vpc_id = module.launch_vpc.vpc_id
 }
 resource "alicloud_route_table_attachment" "private_rt_to_private_vswitchs" {
@@ -34,6 +34,7 @@ module "launch_cluster_into_vpc" {
   key_name = var.key_name
   allocate_and_associate_eip = var.allocate_and_associate_eip
   volume_size = var.volume_size
+  disk_category = var.disk_category
   ram_role_name = var.ram_role_name
   instance_tags = var.instance_tags
   gateway_version = var.gateway_version

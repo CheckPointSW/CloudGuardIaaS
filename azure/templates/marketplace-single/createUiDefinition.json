@@ -1385,17 +1385,17 @@
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
-            "defaultValue": "{}",
-            "toolTip": "",
+            "defaultValue": true,
+            "toolTip": "Choose between using an existing NSG or using a new NSG",
             "constraints": {
               "allowedValues": [
                 {
                   "label": "Create new",
-                  "value": "new"
+                  "value": true
                 },
                 {
                   "label": "Existing NSG",
-                  "value": "exist"
+                  "value": false
                 }
               ],
               "required": true
@@ -1407,31 +1407,32 @@
             "type": "Microsoft.Solutions.ResourceSelector",
             "label": "Network Security Group",
             "defaultValue": "null",
+            "toolTip": "Choose an existing NSG",
             "resourceType": "Microsoft.Network/NetworkSecurityGroups",
             "options": {
               "filter": {
-                "subscription" :  "onBasics",
+                "subscription": "onBasics",
                 "location": "onBasics"
               }
             },
             "constraints": {
               "required": true
             },
-            "visible": "[equals(steps('network').NSG, 'exist')]"
+            "visible": "[equals(steps('network').NSG, false)]"
           },
           {
             "name": "NSGName",
             "type": "Microsoft.Common.TextBox",
             "label": "Name",
             "defaultValue": "None",
-            "placeholder": "",
+            "toolTip": "Insert Name for the new NSG",
             "multiLine": false,
             "constraints": {
-              "required": "[equals(steps('network').NSG, 'new')]",
+              "required": "[steps('network').NSG]",
               "regex": "^[a-z0-9A-Z]{1,30}$",
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
-            "visible": "[equals(steps('network').NSG, 'new')]"
+            "visible": "[steps('network').NSG]"
           }
         ]
       },
@@ -1442,6 +1443,7 @@
           {
             "name": "tagsByResource",
             "type": "Microsoft.Common.TagsByResource",
+            "toolTip": "Create Azure tags for the new resources",
             "resources": [
               "Microsoft.Storage/storageAccounts",
               "Microsoft.Network/publicIPAddresses",
@@ -1452,7 +1454,7 @@
             ]
           }
         ]
-        }
+      }
     ],
     "outputs": {
       "location": "[location()]",
@@ -1483,8 +1485,7 @@
       "customMetrics": "[steps('chkp').customMetrics]",
       "adminShell": "[steps('chkp').adminShell]",
       "tagsByResource": "[steps('tags').tagsByResource]",
-      "deployNewNSG" : "[equals(steps('network').NSG, 'new')]",
-      "UseExistingNSG" : "[equals(steps('network').NSG, 'exist')]",
+      "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]"
     }

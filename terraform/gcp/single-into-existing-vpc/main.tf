@@ -192,7 +192,7 @@ resource "google_compute_instance" "gateway" {
     sicKey = ""
     allowUploadDownload = var.allowUploadDownload
     templateName = "single_tf"
-    templateVersion = "20211128"
+    templateVersion = "20230109"
     templateType = "terraform"
     hasInternet = "true"
     enableMonitoring = var.enableMonitoring
@@ -206,6 +206,7 @@ resource "google_compute_instance" "gateway" {
     subnet_router_meta_path = ""
     mgmtNIC = var.management_nic
     managementNetwork = ""
+    numAdditionalNICs = ""
   })
 }
 resource "google_compute_address" "static" {

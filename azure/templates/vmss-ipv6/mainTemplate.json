@@ -361,10 +361,6 @@
       "type": "bool",
       "defaultValue": true
     },
-    "UseExistingNSG": {
-      "type": "bool",
-      "defaultValue": false
-    },
     "ExistingNSG": {
       "type": "object",
       "defaultValue": {}
@@ -386,7 +382,7 @@
     "subnet2Name": "[parameters('Subnet2Name')]",
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20230109",
+    "templateVersion": "20230124",
     "location": "[parameters('location')]",
     "subnet-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "subnet2-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet2Name'))]",

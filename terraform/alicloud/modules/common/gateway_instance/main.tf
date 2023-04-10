@@ -6,6 +6,7 @@ resource "alicloud_instance" "gateway_instance" {
   vswitch_id = var.vswitch_id
   security_groups = var.security_groups
   system_disk_size = var.volume_size
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = var.gateway_name
@@ -21,5 +22,6 @@ resource "alicloud_instance" "gateway_instance" {
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
+    gw_new_config = local.gw_new_config
   })
 }

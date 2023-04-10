@@ -3,7 +3,7 @@
 // --- VPC Network Configuration ---
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
-  "us-east-1b" = 1
+  "us-east-1a" = 1
 }
 vswitchs_bit_length = 8
 
@@ -14,6 +14,7 @@ instance_type = "ecs.g6e.xlarge"
 key_name = "key"
 allocate_and_associate_eip = true
 volume_size = 100
+disk_category = "cloud_essd"
 ram_role_name = "role_name"
 instance_tags = {
   key1 = "value1"
@@ -21,7 +22,7 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-version_license = "R81-BYOL"
+version_license = "R81.10-BYOL"
 admin_shell = "/bin/bash"
 password_hash = "12345678"
 hostname = "mgmt-tf"

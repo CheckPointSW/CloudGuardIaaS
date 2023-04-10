@@ -483,10 +483,6 @@
       "type": "bool",
       "defaultValue": true
     },
-    "UseExistingNSG": {
-      "type": "bool",
-      "defaultValue": false
-    },
     "ExistingNSG": {
       "type": "object",
       "defaultValue": {}
@@ -500,7 +496,7 @@
     "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
-    "templateVersion": "20230109",
+    "templateVersion": "20230124",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
