@@ -30,7 +30,7 @@ gwlbe_subnet_3_cidr = "10.0.34.0/24"
 gwlbe_subnet_4_cidr = "10.0.44.0/24"
 
 // --- General Settings ---
-key_name = "key"
+key_name = "publickey"
 enable_volume_encryption = true
 volume_size = 100
 enable_instance_connect = false
