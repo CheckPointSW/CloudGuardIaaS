@@ -186,11 +186,11 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                                       |
-|------------------|-----------------------------------------------------------------------------------|
-| 20221123         | First release of Check Point Security Cluster Terraform module for AWS            |
-| 20221123         | R81.20 version support                                                            |
-| 20230411         | Improved deployment experience for gateways and clusters managed by Smart-1 Cloud |
+| Template Version | Description                                                                                                     |
+|------------------|-----------------------------------------------------------------------------------------------------------------|
+| 20221123         | First release of Check Point Security Cluster Terraform module for AWS                                          |
+| 20221123         | R81.20 version support                                                                                          |
+| 20230411         | - Improved deployment experience for gateways and clusters managed by Smart-1 Cloud<br/>- Multiple VIPs support for Cross Availability Zone Cluster. For more details refer to the [Cross Availability Zone Cluster for AWS R81.20 Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Content/Topics-AWS-CrossAZ-Cluster-AG/Check-Point-CloudGuard-for-AWS.htm) -> "Deploying Cross AZ Cluster with multiple VIPs" section. |
 
 
 ## License
