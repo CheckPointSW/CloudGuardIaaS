@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into a new VPC (20230126)
+Description: Deploys a Check Point Security Gateway into a new VPC (20230411)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
