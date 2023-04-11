@@ -204,7 +204,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20210309         | First release of Check Point Security Cluster Master Terraform module for AWS |
 | 20220606         | New instance type support                                                     |
 | 20221123         | R81.20 version support                                                        |
-| 20230215         | Support Smart-1 Cloud token    |
+| 20230411         | Improved deployment experience for gateways and clusters managed by Smart-1 Cloud    |
 
 ## License
 
