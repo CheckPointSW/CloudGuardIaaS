@@ -1453,7 +1453,7 @@
             ]
           }
         ]
-        }
+      }
     ],
     "outputs": {
       "location": "[location()]",

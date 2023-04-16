@@ -661,7 +661,7 @@
             ]
           }
         ]
-        }
+      }
     ],
     "outputs": {
       "location": "[location()]",

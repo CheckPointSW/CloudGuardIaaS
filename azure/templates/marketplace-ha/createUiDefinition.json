@@ -1535,7 +1535,7 @@
             ]
           }
         ]
-        }
+      }
     ],
     "outputs": {
       "location": "[location()]",
