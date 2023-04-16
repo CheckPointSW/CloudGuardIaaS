@@ -468,7 +468,6 @@
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
-            "defaultValue": true,
             "toolTip": "Choose between using an existing NSG or using a new NSG",
             "constraints": {
               "allowedValues": [
@@ -494,7 +493,7 @@
             "resourceType": "Microsoft.Network/NetworkSecurityGroups",
             "options": {
               "filter": {
-                "subscription": "onBasics",
+                "subscription" :  "onBasics",
                 "location": "onBasics"
               }
             },
@@ -507,12 +506,12 @@
             "name": "NSGName",
             "type": "Microsoft.Common.TextBox",
             "label": "Name",
-            "defaultValue": "None",
+            "defaultValue": "[concat(basics('gatewayNameUi') , '-nsg')]",
             "toolTip": "Insert Name for the new NSG",
             "multiLine": false,
             "constraints": {
               "required": "[steps('network').NSG]",
-              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "regex": "^[a-z0-9A-Z-]{1,30}$",
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
             "visible": "[steps('network').NSG]"
@@ -538,7 +537,7 @@
             ]
           }
         ]
-      }
+        }
     ],
     "outputs": {
       "location": "[location()]",
@@ -565,7 +564,7 @@
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "adminShell": "[steps('chkp').adminShell]",
       "tagsByResource": "[steps('tags').tagsByResource]",
-      "deployNewNSG": "[steps('network').NSG]",
+      "deployNewNSG" : "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]"
     }
