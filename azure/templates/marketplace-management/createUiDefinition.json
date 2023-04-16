@@ -617,7 +617,7 @@
             "resourceType": "Microsoft.Network/NetworkSecurityGroups",
             "options": {
               "filter": {
-                "subscription" :  "onBasics",
+                "subscription": "onBasics",
                 "location": "onBasics"
               }
             },
@@ -688,7 +688,7 @@
       "enableApi": "[steps('chkp').enableApi]",
       "adminShell": "[steps('chkp').adminShell]",
       "tagsByResource": "[steps('tags').tagsByResource]",
-      "deployNewNSG" : "[steps('network').NSG]",
+      "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]"
     }
