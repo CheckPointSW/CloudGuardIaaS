@@ -88,7 +88,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
- | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
+ | **location** | The region where the resources will be deployed at. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
  |  |  |  |  |  |
  | **cluster_name** | The name of the Check Point Cluster Object | string | Only alphanumeric characters are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
