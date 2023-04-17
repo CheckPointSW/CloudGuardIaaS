@@ -88,7 +88,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **resource_group_name** | The name of the resource group that will contain the contents of the deployment | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period |
  |  |  |  |  |  |
- | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
+ | **location** | The region where the resources will be deployed at. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
  |  |  |  |  |  |
  | **cluster_name** | The name of the Check Point Cluster Object | string | Only alphanumeric characters are allowed, and the name must be 1-30 characters long |
  |  |  |  |  |  |
@@ -99,6 +99,10 @@ This solution uses the following modules:
  | **subnet_prefixes** | The address prefixes to be used for created subnets | string | The subnets need to contain within the address space for this virtual network(defined by address_space variable) |
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character |
+ |  |  |  |  |  |
+ | **smart_1_cloud_token_a** | Smart-1 Cloud token to connect automatically ***Member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal |  |
+ |  |  |  |  |  |
+ | **smart_1_cloud_token_b** | Smart-1 Cloud token to connect automatically ***Member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal |  |
  |  |  |  |  |  |
  | **sic_key** | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server | string | Only alphanumeric characters are allowed, and the value must be 12-30 characters long |
  |  |  |  |  |  |
@@ -170,6 +174,8 @@ availability_type = "Availability Zone"
     address_space                   = "10.0.0.0/16"
     subnet_prefixes                 = ["10.0.1.0/24","10.0.2.0/24"]
     admin_password                  = "xxxxxxxxxxxx"
+    smart_1_cloud_token_a           = "xxxxxxxxxxxx"
+    smart_1_cloud_token_b           = "xxxxxxxxxxxx"
     sic_key                         = "xxxxxxxxxxxx"
     vm_size                         = "Standard_D3_v2"
     disk_size                       = "110"
@@ -192,6 +198,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230212 | - Added Smart-1 Cloud support  |
+| | | |
 | 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |
 | | | |
 | 20220111 | - Added support to select different shells. |
