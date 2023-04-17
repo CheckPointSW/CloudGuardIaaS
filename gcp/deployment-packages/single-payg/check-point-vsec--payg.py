@@ -36,11 +36,6 @@ ATTRIBUTES = {
         'description': 'Check Point Security Gateway and Management',
         'canIpForward': True,
     },
-    'Management only': {
-        'tags': [MANAGEMENT],
-        'description': 'Check Point Security Management',
-        'canIpForward': False,
-    },
     'Gateway only': {
         'tags': [GATEWAY],
         'description': 'Check Point Security Gateway',
@@ -147,7 +142,7 @@ def generate_config(context):
     prop['templateVersion'] = TEMPLATE_VERSION
     prop['allowUploadDownload'] = str(prop['allowUploadDownload']).lower()
     if not prop['managementGUIClientNetwork'] and prop['installationType'] in {
-            'Gateway and Management (Standalone)', 'Management only'}:
+            'Gateway and Management (Standalone)'}:
         raise Exception('Allowed GUI clients are required when installing '
                         'a management server')
     for k in ['managementGUIClientNetwork']:
