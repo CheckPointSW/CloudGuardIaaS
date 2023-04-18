@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into a new VPC (20211212)
+Description: Deploys a Check Point Security Gateway into a new VPC (20230411)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,10 @@ Metadata:
           - Shell
           - GatewaySICKey
           - GatewayPasswordHash
+      - Label:
+          default: Quick connect to Smart-1 Cloud (Recommended)
+        Parameters:
+          - GatewayToken
       - Label:
           default: Advanced Settings
         Parameters:
@@ -78,6 +82,8 @@ Metadata:
         default: Admin shell
       GatewaySICKey:
         default: Gateway SIC key
+      GatewayToken:
+        default: Smart-1 Cloud Token
       GatewayPasswordHash:
         default: Gateway Password hash
       ResourcesTagName:
@@ -262,6 +268,10 @@ Parameters:
     Type: String
     AllowedPattern: '[a-zA-Z0-9]{8,}'
     NoEcho: true
+  GatewayToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Gateway to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    Type: String
+    NoEcho: true
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
       to get the PASSWORD's hash). (optional)
@@ -377,6 +387,7 @@ Resources:
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewaySICKey: !Ref GatewaySICKey
+        GatewayToken: !Ref GatewayToken
         GatewayPasswordHash: !Ref GatewayPasswordHash
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
