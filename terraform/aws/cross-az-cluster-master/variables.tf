@@ -125,6 +125,16 @@ variable "gateway_password_hash" {
   default = ""
 }
 
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+variable "memberAToken" {
+  type = string
+  description = "Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud."
+}
+variable "memberBToken" {
+  type = string
+  description = "Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud."
+}
+
 // --- Advanced Settings ---
 variable "resources_tag_name" {
   type = string

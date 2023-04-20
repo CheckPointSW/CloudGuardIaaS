@@ -18,4 +18,4 @@ schedule_scan_interval = 60
 // --- EC2 Instance Configuration ---
 instance_name = "tap-gateway"
 instance_type = "c5.xlarge"
-key_name = "privatekey"
+key_name = "publickey"

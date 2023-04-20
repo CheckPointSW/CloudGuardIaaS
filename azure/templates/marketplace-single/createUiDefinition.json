@@ -1321,7 +1321,51 @@
               "required": true
             },
             "visible": true
-          }
+          },
+          {
+            "name": "allowSmart1CloudConnection",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Quick connect to Smart-1 Cloud",
+            "defaultValue": "Yes",
+            "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
+             "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ]
+            },
+            "visible": "[equals(steps('chkp').installationType, 'gateway')]"
+          },
+          {
+            "name": "smart1CloudTokenTxt",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "Follow these instructions to quickly connect this single gateway to Smart-1 Cloud",
+              "link": {
+                "label": "SK180501 - Connecting CloudGuard Network Security Public Cloud Gateways to Smart-1 Cloud",
+                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501"
+              }
+            },
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+          },
+          {
+            "name": "Smart1CloudToken",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Smart-1 Cloud Token",
+            "toolTip": "Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal",
+            "constraints": {
+              "required": true,
+              "regex": "[\\S\\s]{5,}",
+              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+            },
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+            }
         ]
       },
       {
@@ -1385,7 +1429,6 @@
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
-            "defaultValue": true,
             "toolTip": "Choose between using an existing NSG or using a new NSG",
             "constraints": {
               "allowedValues": [
@@ -1424,12 +1467,12 @@
             "name": "NSGName",
             "type": "Microsoft.Common.TextBox",
             "label": "Name",
-            "defaultValue": "None",
+            "defaultValue": "[concat(basics('gatewayNameUi') , '-nsg')]",
             "toolTip": "Insert Name for the new NSG",
             "multiLine": false,
             "constraints": {
               "required": "[steps('network').NSG]",
-              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "regex": "^[a-z0-9A-Z-]{1,30}$",
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
             "visible": "[steps('network').NSG]"
@@ -1484,6 +1527,7 @@
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "customMetrics": "[steps('chkp').customMetrics]",
       "adminShell": "[steps('chkp').adminShell]",
+      "smart1CloudToken": "[steps('chkp').Smart1CloudToken]",
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",

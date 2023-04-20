@@ -121,6 +121,9 @@ allow_upload_download = true
 sicKey = ""
 managementGUIClientNetwork = "0.0.0.0/0"
 
+#--- Quick connect to Smart-1 Cloud ---
+smart_1_cloud_token = "xxxxxxxxxxxxxxxxxxxxxxxx"
+
 # --- Networking ---
 zone = "us-central1-a
 network = ["default"]
@@ -231,6 +234,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | managementGUIClientNetwork | Allowed GUI clients | string | A valid IPv4 network CIDR (e.g. 0.0.0.0/0) |0.0.0.0/0|no|
 |  |  |  |  |  |
+| smart_1_cloud_token | Smart-1 Cloud token to connect this gateway to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+|  |  |  |  |  |
 | numAdditionalNICs | Number of additional network interfaces | number | A number in the range 0 - 8.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |0|no|
 |  |  |  |  |  |
 | externalIP | External IP address type | string | Static;<br/>Ephemeral;<br/>An external IP address associated with this instance. Selecting "None" will result in the instance having no external internet access. [Learn more](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address?_ga=2.259654658.-962483654.1585043745) |static|no|
@@ -248,12 +253,13 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | SCTP_firewall_rules_name  | If enable - the SCTP firewall rules name, otherwise, an empty list.  |
 | ESP_firewall_rules_name  | If enable - the ESP firewall rules name, otherwise, an empty list.  |
 
-
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230209 | Added Smart-1 Cloud support. |
+| | | |
 | 20230109 | Updated startup script to use cloud-config. |
 | | | |
 | 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |

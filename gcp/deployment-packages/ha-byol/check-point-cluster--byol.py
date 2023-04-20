@@ -23,7 +23,7 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20221222'
+TEMPLATE_VERSION = '20230319'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
@@ -34,11 +34,12 @@ MGMT_NIC = 1
 startup_script = '''
 #cloud-config
 runcmd:
-  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\""'
+  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\"" "smart1CloudToken=\\"{smart1CloudToken}\\"" "name=\\"{name}\\"" "zone=\\"{zoneConfig}\\"" "region=\\"{region}\\""'
 '''
 
 
-def make_gw(context, name, zone, nics, passwd=None, depends_on=None):
+def make_gw(context, name, zone, nics, passwd=None, depends_on=None,
+            smart1cloudToken=None):
     cg_version = context.properties['ha_version'].split(' ')[0]
     if 'gw' in VERSIONS[cg_version]:
         license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
@@ -46,6 +47,10 @@ def make_gw(context, name, zone, nics, passwd=None, depends_on=None):
         license_name = LICENSE
     family = '-'.join(['check-point', VERSIONS[cg_version], license_name])
     formatter = common.DefaultFormatter()
+
+    context.properties['smart1CloudToken'] = smart1cloudToken
+    context.properties['name'] = name
+    context.properties['zoneConfig'] = zone
 
     gw = {
         'type': default.INSTANCE,
@@ -352,11 +357,27 @@ def validate_same_region(zone_a, zone_b):
                            'are not in the same region'.format(zone_a, zone_b))
 
 
+def validate_both_tokens(token_a, token_b):
+    if (not token_a and token_b) or (not token_b and token_a) or \
+                    (token_a and token_a == token_b):
+        raise common.Error('To connect to Smart-1 Cloud, \
+         you must provide two tokens (one per member)')
+
+
+def validate_mgmt_network_if_required(token_a, mgmt_network):
+    if not token_a and mgmt_network == "S1C":
+        raise common.Error(
+            'Public address of the Security Management Server is required')
+
+
 @common.FormatErrorsDec
 def generate_config(context):
     prop = context.properties
 
     validate_same_region(prop['zoneA'], prop['zoneB'])
+    validate_both_tokens(prop['smart1CloudTokenA'], prop['smart1CloudTokenB'])
+    validate_mgmt_network_if_required(
+        prop['smart1CloudTokenA'], prop['managementNetwork'])
 
     prop['deployment'] = context.env['deployment']
     prop['project'] = context.env['project']
@@ -403,9 +424,11 @@ def generate_config(context):
         passwd = ''
 
     member_a = make_gw(context, member_a_name, prop['zoneA'],
-                       member_a_nics, passwd, gw_dependencies)
+                       member_a_nics, passwd, gw_dependencies,
+                       prop['smart1CloudTokenA'])
     member_b = make_gw(context, member_b_name, prop['zoneB'],
-                       member_b_nics, passwd, gw_dependencies)
+                       member_b_nics, passwd, gw_dependencies,
+                       prop['smart1CloudTokenB'])
 
     resources += [member_a, member_b]
 

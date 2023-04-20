@@ -16,7 +16,7 @@ module "launch_vpc" {
 
 module "gwlb" {
   source = "../gwlb"
-    providers = {
+  providers = {
     aws = aws
   }
   vpc_id = module.launch_vpc.vpc_id

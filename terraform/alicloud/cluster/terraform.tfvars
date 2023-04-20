@@ -13,6 +13,7 @@ gateway_instance_type = "ecs.g5ne.xlarge"
 key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
+disk_category = "cloud_efficiency"
 ram_role_name = ""
 instance_tags = {
   key1 = "value1"

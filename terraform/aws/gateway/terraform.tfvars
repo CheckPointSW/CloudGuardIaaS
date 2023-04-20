@@ -9,7 +9,7 @@ private_route_table = "rtb-12345678"
 // --- EC2 Instance Configuration ---
 gateway_name = "Check-Point-Gateway-tf"
 gateway_instance_type = "c5.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
@@ -24,7 +24,10 @@ instance_tags = {
 gateway_version = "R81.10-BYOL"
 admin_shell = "/bin/bash"
 gateway_SICKey = "12345678"
-gateway_password_hash = "12345678"
+gateway_password_hash = ""
+
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+gateway_TokenKey = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"

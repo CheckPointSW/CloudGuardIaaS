@@ -10,6 +10,7 @@ instance_type = "ecs.g6e.xlarge"
 key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
+disk_category = "cloud_essd"
 ram_role_name = ""
 instance_tags = {
   key1 = "value1"

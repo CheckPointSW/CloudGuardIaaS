@@ -37,33 +37,32 @@ Configure envrionment variables in Windows:
         terraform apply
 
 ### terraform.tfvars variables:
-| Name          | Description   | Type          | Allowed values | Default       | Required      |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| vpc_id        | The VPC id in which to deploy | string    | n/a   | n/a   | yes |
-| vswitch_id     | Vswitch id                     | string    | n/a   | n/a   | yes  |
-|   |   |   |   |   |   |
-| instance_name | AliCloud instance name to launch   | string    | n/a   | "CP-Management-tf"  | no  |
-| instance_type | AliCloud instance type  | string  | - ecs.g6e.large <br/> - ecs.g6e.xlarge <br/> - ecs.g6e.2xlarge <br/> - ecs.g6e.4xlarge <br/> - ecs.g6e.8xlarge  | "ecs.g6e.xlarge" | no |
-| key_name | The ECS Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
-| eip  | Allocate and associate an elastic IP with the launched instance  | bool  | true/false  | true  | no  |
-| volume_size  | Root volume size (GB)  | number  | n/a  | 100  | no  |
-| ram_role_name  | RAM role name to attach to the instance profile, leave it empty for automatic creation   | string  | n/a  | n/a  | no  |
-| instance_tags  | (Optional) A map of tags as key=value pairs. All tags will be added to the Management ECS Instance  | map(string)  | n/a  | {}  | no  |
-|   |   |   |   |   |   |
-| version_license  | Version and license of the Check Point Security Management  | string | - R81-BYOL | R81-BYOL |
-| admin_shell  | Set the admin shell to enable advanced command line configuration  | string  | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | /etc/cli.sh | no |
-| password_hash | (Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) | string | n/a | "" | no |
-| hostname  | (Optional) Management prompt hostname  | string  | n/a  | n/a  | no  |
-|   |   |   |   |   |   |
-| is_primary_management  | Determines if this is the primary Management Server or not  | bool  | true/false  | true  | no  |
-| SICKey  | "Mandatory only when deploying a secondary Management Server, the Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters  | string  | n/a  | ""  | no  |
-| allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | n/a | true | no |
-| gateway_management  | Select 'Over the internet' if any of the gateways you wish to manage are not directly accessed via their private IP address  | string  | - Locally managed <br/> - Over the internet  | Locally managed  | no  |
-| admin_cidr  | (CIDR) Allow web, SSH, and graphical clients only from this network to communicate with the Management Server  | string  | valid CIDR  | 0.0.0.0/0  | no  |
-| gateway_addresses  | (CIDR) Allow gateways only from this network to communicate with the Management Server  | string  | valid CIDR  | 0.0.0.0/0  | no  |
-| primary_ntp  | (Optional)  | string  | n/a  | ""  | no  |
-| secondary_ntp  | (Optional)  | string  | n/a  | ""  | no  |
-| bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
+| Name                  | Description                                                                                                                                                                                                                             | Type        | Allowed values                                                                                                 | Default            | Required |
+|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------|--------------------|----------|
+| vpc_id                | The VPC id in which to deploy                                                                                                                                                                                                           | string      | n/a                                                                                                            | n/a                | yes      |
+| vswitch_id            | Vswitch id                                                                                                                                                                                                                              | string      | n/a                                                                                                            | n/a                | yes      |
+|                       |                                                                                                                                                                                                                                         |             |                                                                                                                |                    |          |
+| instance_name         | AliCloud instance name to launch                                                                                                                                                                                                        | string      | n/a                                                                                                            | "CP-Management-tf" | no       |
+| instance_type         | AliCloud instance type                                                                                                                                                                                                                  | string      | - ecs.g6e.large <br/> - ecs.g6e.xlarge <br/> - ecs.g6e.2xlarge <br/> - ecs.g6e.4xlarge <br/> - ecs.g6e.8xlarge | "ecs.g6e.xlarge"   | no       |
+| key_name              | The ECS Key Pair name to allow SSH access to the instances                                                                                                                                                                              | string      | n/a                                                                                                            | n/a                | yes      |
+| eip                   | Allocate and associate an elastic IP with the launched instance                                                                                                                                                                         | bool        | true/false                                                                                                     | true               | no       |
+| volume_size           | Root volume size (GB)                                                                                                                                                                                                                   | number      | n/a                                                                                                            | 100                | no       |
+| disk_category         | The ECS disk category                                                                                                                                                                                                                   | string      | - cloud <br/> - cloud_efficiency <br/> - cloud_ssd, <br/> - cloud_essd                                         | "cloud_efficiency" | no       |
+| ram_role_name         | RAM role name to attach to the instance profile, leave it empty for automatic creation                                                                                                                                                  | string      | n/a                                                                                                            | n/a                | no       |
+| instance_tags         | (Optional) A map of tags as key=value pairs. All tags will be added to the Management ECS Instance                                                                                                                                      | map(string) | n/a                                                                                                            | {}                 | no       |                    |                                                                                                                                                                                                                                         |             |                                                                                                                |                    |          |
+| version_license       | Version and license of the Check Point Security Management                                                                                                                                                                              | string      | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                             | R81-BYOL           |
+| admin_shell           | Set the admin shell to enable advanced command line configuration                                                                                                                                                                       | string      | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh                                             | /etc/cli.sh        | no       |
+| password_hash         | (Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash)                                                                                                                           | string      | n/a                                                                                                            | ""                 | no       |
+| hostname              | (Optional) Management prompt hostname                                                                                                                                                                                                   | string      | n/a                                                                                                            | n/a                | no       |             |                                                                                                                                                                                                                                         |             |                                                                                                                |                    |          |
+| is_primary_management | Determines if this is the primary Management Server or not                                                                                                                                                                              | bool        | true/false                                                                                                     | true               | no       |
+| SICKey                | "Mandatory only when deploying a secondary Management Server, the Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string      | n/a                                                                                                            | ""                 | no       |
+| allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point                                                                                                              | bool        | n/a                                                                                                            | true               | no       |
+| gateway_management    | Select 'Over the internet' if any of the gateways you wish to manage are not directly accessed via their private IP address                                                                                                             | string      | - Locally managed <br/> - Over the internet                                                                    | Locally managed    | no       |
+| admin_cidr            | (CIDR) Allow web, SSH, and graphical clients only from this network to communicate with the Management Server                                                                                                                           | string      | valid CIDR                                                                                                     | 0.0.0.0/0          | no       |
+| gateway_addresses     | (CIDR) Allow gateways only from this network to communicate with the Management Server                                                                                                                                                  | string      | valid CIDR                                                                                                     | 0.0.0.0/0          | no       |
+| primary_ntp           | (Optional)                                                                                                                                                                                                                              | string      | n/a                                                                                                            | ""                 | no       |
+| secondary_ntp         | (Optional)                                                                                                                                                                                                                              | string      | n/a                                                                                                            | ""                 | no       |
+| bootstrap_script      | (Optional) Semicolon (;) separated commands to run on the initial boot                                                                                                                                                                  | string      | n/a                                                                                                            | ""                 | no       |
 
 ## Example for terraform.tfvars
 
@@ -78,6 +77,7 @@ instance_type = "ecs.g6e.xlarge"
 key_name = "privatekey"
 eip = true
 volume_size = 100
+disk_category = "cloud_essd"
 volume_encryption = "alias/alicloud/ebs"
 enable_instance_connect = false
 instance_tags = {
@@ -113,10 +113,11 @@ bootstrap_script = "echo 12345678"
 
 ## Revision History
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20211011 | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
-| | | |
+| Template Version | Description                                                                                                    |
+|------------------|----------------------------------------------------------------------------------------------------------------|
+| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                 |
+| 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                           |
+| 20211011         | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
 
 ## License
 

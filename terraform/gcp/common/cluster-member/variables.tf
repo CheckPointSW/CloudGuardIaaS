@@ -148,9 +148,19 @@ variable "admin_shell" {
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
 }
+variable "smart_1_cloud_token_a" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member A to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
+variable "smart_1_cloud_token_b" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
 variable "management_network" {
   type = string
-  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
+  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
 }
 variable "generated_admin_password" {
   type = string

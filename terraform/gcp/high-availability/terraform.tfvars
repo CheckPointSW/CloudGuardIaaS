@@ -18,11 +18,15 @@ admin_SSH_key                         = "PLEASE ENTER ADMIN SSH KEY"            
 enable_monitoring                     = "PLEASE ENTER true OR false"                  # false
 
 # --- Check Point ---
-management_network                    = "PLEASE ENTER MANAGEMENT IP"                  # "209.87.209.100/32"
+management_network                    = "PLEASE ENTER MANAGEMENT IP OR S1C IF USING SMART-1 CLOUD MANAGEMENT"                  # "209.87.209.100/32"
 sic_key                               = "PLEASE ENTER A SIC KEY"                      # "aaaaaaaa"
 generate_password                     = "PLEASE ENTER true or false"                  # false
 allow_upload_download                 = "PLEASE ENTER true OR false"                  # true
 admin_shell                           = "PLEASE ENTER ADMIN SHELL"                    # "/etc/cli.sh"
+
+# --- Quick connect to Smart-1 Cloud ---
+smart_1_cloud_token_a                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
+smart_1_cloud_token_b                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
 
 # --- Networking ---
 cluster_network_cidr                  = "PLEASE ENTER CLUSTER NETWORK CIDR"           # "10.0.1.0/24"

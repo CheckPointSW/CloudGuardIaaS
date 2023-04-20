@@ -51,7 +51,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **machineType** | Machine types determine the specifications of your machines, such as the amount of memory, virtual cores, and persistent disk limits an instance will have | string | [Learn more about Machine Types](https://cloud.google.com/compute/docs/machine-types?hl=en_US&_ga=2.267871494.-962483654.1585043745) |
 |  |  |  |  |  |
-| **managementNetwork** | Security Management Server address | string | The public address of the Security Management Server, in CIDR notation. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address |
+| **managementNetwork** | Security Management Server address | string | The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address |
 |  |  |  |  |  |
 | **cluster-network-cidr** | Cluster external subnet CIDR.<br/>If the variable's value is not empty double quotes, a new network will be created.<br/> The Cluster public IP will be translated to a private address assigned to the active member in this external network.  | string | Specify an RFC 1918 CIDR block that does not overlap with your other networks to create a new network or select an existing one below  |
 |  |  |  |  |  |
@@ -119,6 +119,10 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **instanceSSHKey** | Public SSH key for the user 'admin' | string | A valid public ssh key |
 |  |  |  |  |  |
+| **smart1CloudTokenA** | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+|  |  |  |  |  |
+| **smart1CloudTokenB** | Smart-1 Cloud token to connect ***member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+|  |  |  |  |  |
 | **sicKey** | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server | string | At least 8 alpha numeric characters.<br/>If SIC is not provided and needed, a key will be automatically generated |
 |  |  |  |  |  |
 | **numAdditionalNICs** | Number of additional network interfaces | number | A number in the range 0 - 6.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |
@@ -137,6 +141,8 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     diskType: "pd-ssd"
     bootDiskSizeGb: 100
     instanceSSHKey: "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
+    smart1CloudTokenA: "xxxxxxxxxxxxxxxxxxxxxxxx"
+    smart1CloudTokenB: "xxxxxxxxxxxxxxxxxxxxxxxx"
     enableMonitoring: false
     managementNetwork: "209.87.209.100/32"
     sicKey: "aaaaaaaa"

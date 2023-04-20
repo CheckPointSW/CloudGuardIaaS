@@ -34,6 +34,7 @@ module "launch_cluster_into_vpc" {
   key_name = var.key_name
   allocate_and_associate_eip = var.allocate_and_associate_eip
   volume_size = var.volume_size
+  disk_category = var.disk_category
   ram_role_name = var.ram_role_name
   instance_tags = var.instance_tags
   gateway_version = var.gateway_version

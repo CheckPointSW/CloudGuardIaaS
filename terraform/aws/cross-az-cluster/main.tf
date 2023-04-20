@@ -143,10 +143,12 @@ resource "aws_instance" "member-a-instance" {
     EnableInstanceConnect = var.enable_instance_connect,
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
+    TokenA = var.memberAToken,
     MemberAPublicAddress =  aws_eip.member_a_eip.public_ip,
     PublicAddressCluster = aws_eip.cluster_eip.public_ip,
     MemberAPrivateAddressSecondary = length(tolist(aws_network_interface.member_a_external_eni.private_ips)) > 1 ? element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0) : "",//extracting member's secondary ip which represent the cluster ip
     MemberBPrivateAddressCluster = aws_network_interface.member_b_internal_eni.private_ip,
+    MemberBPrivateAddressSecondary =  length(tolist(aws_network_interface.member_b_external_eni.private_ips)) > 1 ? element(tolist(setsubtract(tolist(aws_network_interface.member_b_external_eni.private_ips), [aws_network_interface.member_b_external_eni.private_ip])), 0) : "",
     AllocateAddress = true,
     OsVersion = local.version_split
   })
@@ -200,10 +202,12 @@ resource "aws_instance" "member-b-instance" {
     EnableInstanceConnect = var.enable_instance_connect,
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
+    TokenB = var.memberBToken,
     MemberBPublicAddress =  aws_eip.member_b_eip.public_ip,
     PublicAddressCluster=aws_eip.cluster_eip.public_ip,
     MemberBPrivateAddressSecondary =  length(tolist(aws_network_interface.member_b_external_eni.private_ips)) > 1 ? element(tolist(setsubtract(tolist(aws_network_interface.member_b_external_eni.private_ips), [aws_network_interface.member_b_external_eni.private_ip])), 0) : "", //extracting member's secondary ip which represent the member ip
     MemberAPrivateAddressCluster=aws_network_interface.member_a_internal_eni.private_ip,
+    MemberAPrivateAddressSecondary = length(tolist(aws_network_interface.member_a_external_eni.private_ips)) > 1 ? element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0) : "",
     AllocateAddress = true,
     OsVersion = local.version_split
   })
