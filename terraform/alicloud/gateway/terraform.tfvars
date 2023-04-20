@@ -9,10 +9,10 @@ private_route_table = "vtb-"
 // --- ECS Instance Configuration ---
 gateway_name = "Check-Point-Gateway-tf"
 gateway_instance_type = "ecs.g5ne.xlarge"
-key_name = "key"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
-ram_role_name = "role_name"
+ram_role_name = ""
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -22,7 +22,7 @@ instance_tags = {
 gateway_version = "R81-BYOL"
 admin_shell = "/bin/bash"
 gateway_SICKey = "12345678"
-gateway_password_hash = "12345678"
+gateway_password_hash = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"
