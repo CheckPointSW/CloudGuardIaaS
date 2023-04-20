@@ -138,6 +138,7 @@ ram_role_name = ""
 
 | Template Version | Description                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
 | 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |           
 | 20211011         | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud.                         |

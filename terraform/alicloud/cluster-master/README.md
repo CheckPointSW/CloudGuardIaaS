@@ -13,7 +13,6 @@ These types of Terraform resources are supported:
 ## Note
 - Make sure your region and zone are supporting the gateway instance types in **modules/common/instance_type/main.tf**
   [Alicloud Instance_By_Region](https://ecs-buy.aliyun.com/instanceTypes/?spm=a2c63.p38356.879954.139.1eeb2d44eZQw2m#/instanceTypeByRegion)
-- terraform destroy will throw an error that the plugin crashed.
   
 ## Configuration
 
@@ -127,30 +126,31 @@ allocate_and_associate_eip = true
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| internal_rt_id  | The internal route table id id  |
-| vpc_cluster_vswitchs_ids_list  | A list of the cluster vswitchs ids  |
-| vpc_management_vswitchs_ids_list  | A list of the management vswitchs ids  |
-| vpc_private_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| image_id  | The image id of the deployed Security Gateways  |
-| cluster_primary_EIP  | Cluster Primary EIP |
-| cluster_secondary_EIP  | Cluster secondary EIP |
-| member_a_EIP  | Member A instance EIP |
-| member_b_EIP  | Member B instance EIP |
-| member_a_instance_id  | Member A instance id |
-| member_b_instance_id  | Member B instance id |
-| member_a_instance_name  | Member A instance name |
-| member_b_instance_name  | Member B instance name |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group name |
+| Name                             | Description                                    |
+|----------------------------------|------------------------------------------------|
+| vpc_id                           | The id of the deployed vpc                     |
+| internal_rt_id                   | The internal route table id id                 |
+| vpc_cluster_vswitchs_ids_list    | A list of the cluster vswitchs ids             |
+| vpc_management_vswitchs_ids_list | A list of the management vswitchs ids          |
+| vpc_private_vswitchs_ids_list    | A list of the private vswitchs ids             |
+| image_id                         | The image id of the deployed Security Gateways |
+| cluster_primary_EIP              | Cluster Primary EIP                            |
+| cluster_secondary_EIP            | Cluster secondary EIP                          |
+| member_a_EIP                     | Member A instance EIP                          |
+| member_b_EIP                     | Member B instance EIP                          |
+| member_a_instance_id             | Member A instance id                           |
+| member_b_instance_id             | Member B instance id                           |
+| member_a_instance_name           | Member A instance name                         |
+| member_b_instance_name           | Member B instance name                         |
+| permissive_sg_id                 | The permissive security group id               |
+| permissive_sg_name               | The permissive security group name             |
 
 ## Revision History
 
 | Template Version | Description                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      | 
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
+| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
 | 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | 20211011         | First release of Check Point CloudGuard Cluster Terraform deployment into a new VPC in Alibaba cloud.                               |
 

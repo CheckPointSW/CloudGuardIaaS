@@ -114,24 +114,25 @@ allocate_and_associate_eip = true
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| internal_rt_id  | The internal route table id id  |
-| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| vpc_private_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| image_id  | The ami id of the deployed Security Gateway  |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group id name  |
-| gateway_eip_id  | The id of the elastic IP  |
-| gateway_eip_public_ip  | The elastic pubic IP  |
-| gateway_instance_id  | The Security Gateway instance id  |
-| gateway_instance_name  | The deployed Gateway AliCloud instance name  |
+| Name                          | Description                                 |
+|-------------------------------|---------------------------------------------|
+| vpc_id                        | The id of the deployed vpc                  |
+| internal_rt_id                | The internal route table id id              |
+| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids          |
+| vpc_private_vswitchs_ids_list | A list of the private vswitchs ids          |
+| image_id                      | The ami id of the deployed Security Gateway |
+| permissive_sg_id              | The permissive security group id            |
+| permissive_sg_name            | The permissive security group id name       |
+| gateway_eip_id                | The id of the elastic IP                    |
+| gateway_eip_public_ip         | The elastic pubic IP                        |
+| gateway_instance_id           | The Security Gateway instance id            |
+| gateway_instance_name         | The deployed Gateway AliCloud instance name |
 
 ## Revision History
 
 | Template Version | Description                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
 | 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | 20211011         | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud.                               |

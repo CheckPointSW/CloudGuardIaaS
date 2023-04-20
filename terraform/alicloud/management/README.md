@@ -103,18 +103,19 @@ bootstrap_script = "echo 12345678"
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| image_id  | The ami id of the deployed Security Gateway  |
-| management_instance_id  | The deployed Management AliCloud instance id  |
-| management_instance_name  | The deployed Management AliCloud instance name  |
-| management_instance_tags  | The deployed Management AliCloud tags  |
-| management_public_ip  | The deployed Management AliCloud public address  |
+| Name                     | Description                                     |
+|--------------------------|-------------------------------------------------|
+| image_id                 | The ami id of the deployed Security Gateway     |
+| management_instance_id   | The deployed Management AliCloud instance id    |
+| management_instance_name | The deployed Management AliCloud instance name  |
+| management_instance_tags | The deployed Management AliCloud tags           |
+| management_public_ip     | The deployed Management AliCloud public address |
 
 ## Revision History
 
 | Template Version | Description                                                                                                    |
 |------------------|----------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                          |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                 |
 | 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                           |
 | 20211011         | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |
