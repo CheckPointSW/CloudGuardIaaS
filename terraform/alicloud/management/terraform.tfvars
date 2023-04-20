@@ -7,11 +7,11 @@ vswitch_id = "vsw-"
 // --- ECS Instances Configuration ---
 instance_name = "CP-Management-tf"
 instance_type = "ecs.g6e.xlarge"
-key_name = "key"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 disk_category = "cloud_essd"
-ram_role_name = "role_name"
+ram_role_name = ""
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -20,7 +20,7 @@ instance_tags = {
 // --- Check Point Settings ---
 version_license = "R81-BYOL"
 admin_shell = "/bin/bash"
-password_hash = "12345678"
+password_hash = ""
 hostname = "mgmt-tf"
 
 // --- Security Management Server Settings ---
