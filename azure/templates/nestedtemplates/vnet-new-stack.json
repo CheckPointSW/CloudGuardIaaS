@@ -12,47 +12,47 @@
       },
       "defaultValue": "vnet"
     },
-    "virtualNetworkAddressPrefixes": {
-      "type": "array",
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
       "metadata": {
-        "description": "The address prefixes of the virtual network"
+        "description": "The address prefix of the virtual network"
       }
     },
-    "subnet1Name": {
+    "Subnet1Name": {
       "type": "string",
       "metadata": {
         "description": "The name of the 1st subnet"
       },
       "defaultValue": "Frontend"
     },
-    "subnet1Prefix": {
+    "Subnet1Prefix": {
       "type": "string",
       "metadata": {
         "description": "The address prefix of the 1st subnet"
       },
       "defaultValue": "10.0.1.0/24"
     },
-    "subnet1StartAddress": {
+    "Subnet1StartAddress": {
       "type": "string",
       "metadata": {
         "description": "The first avaialable address on the 1st subnet"
       }
     },
-    "subnet2Name": {
+    "Subnet2Name": {
       "type": "string",
       "metadata": {
         "description": "The name of the 2nd subnet"
       },
       "defaultValue": "Backend"
     },
-    "subnet2Prefix": {
+    "Subnet2Prefix": {
       "type": "string",
       "metadata": {
         "description": "The address prefix of the 2nd subnet"
       },
       "defaultValue": "10.0.2.0/24"
     },
-    "subnet2StartAddress": {
+    "Subnet2StartAddress": {
       "type": "string",
       "metadata": {
         "description": "The first avaialable address on the 2nd subnet"
@@ -86,6 +86,24 @@
       "type": "Microsoft.Network/routeTables",
       "apiVersion": "[parameters('apiVersion')]",
       "location": "[parameters('location')]",
+      "name": "[parameters('subnet1Name')]",
+      "properties": {
+        "routes": [
+		  {
+            "name": "To-Internal",
+            "properties": {
+              "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet1StartAddress')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
       "name": "[parameters('subnet2Name')]",
       "properties": {
         "routes": [
@@ -106,17 +124,23 @@
       "location": "[parameters('location')]",
       "name": "[parameters('virtualNetworkName')]",
       "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
         "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]"
       ],
       "properties": {
         "addressSpace": {
-          "addressPrefixes": "[parameters('virtualNetworkAddressPrefixes')]"
+          "addressPrefixes": [
+            "[parameters('virtualNetworkAddressPrefix')]"
+          ]
         },
         "subnets": [
           {
             "name": "[parameters('subnet1Name')]",
             "properties": {
-              "addressPrefix": "[parameters('subnet1Prefix')]"
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]"
+              }
             }
           },
           {

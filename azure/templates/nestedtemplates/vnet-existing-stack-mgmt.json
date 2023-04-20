@@ -12,51 +12,25 @@
       },
       "defaultValue": "vnet"
     },
-    "virtualNetworkAddressPrefixes": {
-      "type": "array",
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
       "metadata": {
-        "description": "The address prefixes of the virtual network"
+        "description": "The address prefix of the virtual network"
       }
     },
-    "subnet1Name": {
+    "Subnet1Name": {
       "type": "string",
       "metadata": {
         "description": "The name of the 1st subnet"
       },
       "defaultValue": "Frontend"
     },
-    "subnet1Prefix": {
+    "Subnet1Prefix": {
       "type": "string",
       "metadata": {
         "description": "The address prefix of the 1st subnet"
       },
       "defaultValue": "10.0.1.0/24"
-    },
-    "subnet1StartAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The first avaialable address on the 1st subnet"
-      }
-    },
-    "subnet2Name": {
-      "type": "string",
-      "metadata": {
-        "description": "The name of the 2nd subnet"
-      },
-      "defaultValue": "Backend"
-    },
-    "subnet2Prefix": {
-      "type": "string",
-      "metadata": {
-        "description": "The address prefix of the 2nd subnet"
-      },
-      "defaultValue": "10.0.2.0/24"
-    },
-    "subnet2StartAddress": {
-      "type": "string",
-      "metadata": {
-        "description": "The first avaialable address on the 2nd subnet"
-      }
     },
     "vnetNewOrExisting": {
       "type": "string",
