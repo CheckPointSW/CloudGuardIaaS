@@ -510,7 +510,7 @@ Resources:
       PrivateIpAddress: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
   MemberAInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, ClusterPublicAddress, MemberBInternalInterface]
+    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, ClusterPublicAddress, MemberBInternalInterface, MemberBExternalInterface]
     Properties:
       Tags:
         - Key: Name
@@ -546,16 +546,17 @@ Resources:
             - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
             - !Join ['', ['    other_member_ip="', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress, '"']]
             - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
+            - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
             - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
             - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
             - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230411\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230411\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface]
+    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface, MemberAExternalInterface]
     Properties:
       Tags:
         - Key: Name
@@ -591,13 +592,14 @@ Resources:
             - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
             - !Join ['', ['    other_member_ip="', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress, '"']]
             - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
+            - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
             - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
             - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
             - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230411\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230411\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
 Outputs:
   ClusterPublicAddress:
     Description: The public address of the cluster.
