@@ -70,20 +70,20 @@ Configure envrionment variables in Windows:
 ## Example for terraform.tfvars
 ```
 // --- VPC Network Configuration ---
-vpc_id = "vpc-12345678"
-cluster_vswitch_id = "vsw-01234"
-mgmt_vswitch_id = "vsw-34567"
-private_vswitch_id = "vsw-56789"
-private_route_table = "vtb-12345678"
+vpc_id = "vpc-"
+cluster_vswitch_id = "vsw-"
+mgmt_vswitch_id = "vsw-"
+private_vswitch_id = "vsw-"
+private_route_table = "vtb-"
 
 // --- ECS Instance Configuration ---
 gateway_name = "Check-Point-Cluster-tf"
 gateway_instance_type = "ecs.g5ne.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 disk_category = "cloud_efficiency"
-ram_role_name = "role_name"
+ram_role_name = ""
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -93,16 +93,16 @@ instance_tags = {
 gateway_version = "R81-BYOL"
 admin_shell = "/bin/bash"
 gateway_SICKey = "12345678"
-gateway_password_hash = "12345678"
+gateway_password_hash = ""
 
 // --- Advanced Settings ---
+management_ip_address = "1.2.3.4"
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
-gateway_bootstrap_script = "echo 12345678"
-primary_ntp = "123.456.789.123"
-secondary_ntp = "abc.def.ghi.jkl"
-
+gateway_bootstrap_script = ""
+primary_ntp = ""
+secondary_ntp = ""
 ```
 
 ## Conditional creation
@@ -138,10 +138,10 @@ ram_role_name = ""
 
 | Template Version | Description                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
-| 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |           
+| 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | 20211011         | First release of Check Point CloudGuard Cluster Terraform deployment into an existing VPC in Alibaba cloud.                         |
-
 
 ## License
 

@@ -1,6 +1,7 @@
 //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
 
 // --- VPC Network Configuration ---
+vpc_name = "cp-vpc"
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
   "us-east-1a" = 1

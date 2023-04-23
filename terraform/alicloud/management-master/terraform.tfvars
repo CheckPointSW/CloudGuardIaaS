@@ -1,6 +1,7 @@
 //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
 
 // --- VPC Network Configuration ---
+vpc_name = "cp-vpc"
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
   "us-east-1a" = 1
@@ -29,7 +30,7 @@ hostname = "mgmt-tf"
 
 // --- Security Management Server Settings ---
 is_primary_management = "true"
-SICKey = "12345678"
+SICKey = ""
 allow_upload_download = "true"
 gateway_management = "Locally managed"
 admin_cidr = "0.0.0.0/0"

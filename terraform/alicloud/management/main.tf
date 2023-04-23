@@ -151,11 +151,11 @@ resource "alicloud_instance" "management_instance" {
     Hostname = var.hostname,
     PasswordHash = var.password_hash,
     AllowUploadDownload = var.allow_upload_download,
-    NTPPrimary = var.primary_ntp
-    NTPSecondary = var.secondary_ntp
+    NTPPrimary = var.primary_ntp,
+    NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
-    AdminCidr = var.admin_cidr
-    IsPrimary = var.is_primary_management
+    AdminCidr = var.admin_cidr,
+    IsPrimary = var.is_primary_management,
     SICKey = var.SICKey,
     AllocateElasticIP = var.allocate_and_associate_eip,
     GatewayManagement = var.gateway_management,
