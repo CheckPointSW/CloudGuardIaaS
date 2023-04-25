@@ -14,18 +14,29 @@ resource "aws_security_group" "servers_security_group" {
   tags = {
     Name = format("%s_ServersSecurityGroup", local.asg_name) }
 }
-resource "aws_launch_configuration" "servers_launch_configuration" {
+
+
+resource "aws_launch_template" "servers_launch_template" {
   name_prefix = local.asg_name
-  associate_public_ip_address = var.allocate_public_address
+  network_interfaces {
+    associate_public_ip_address = var.allocate_public_address
+    security_groups = var.deploy_internal_security_group ? [aws_security_group.servers_security_group[0].id] : [var.source_security_group]
+  }
   key_name = var.key_name
   image_id = var.server_ami
-  security_groups = var.deploy_internal_security_group ? [aws_security_group.servers_security_group[0].id] : [var.source_security_group]
+  description = "Initial template version"
+  monitoring {
+    enabled = true
+  }
   instance_type = var.servers_instance_type
 }
 resource "aws_autoscaling_group" "servers_group" {
   name_prefix = local.asg_name
   vpc_zone_identifier = var.servers_subnets
-  launch_configuration = aws_launch_configuration.servers_launch_configuration.name
+  launch_template {
+    name = aws_launch_template.servers_launch_template.name
+    version = aws_launch_template.servers_launch_template.latest_version
+  }
   min_size = var.servers_min_group_size
   max_size = var.servers_max_group_size
   target_group_arns = local.provided_target_groups_condition ? [var.servers_target_groups] : []

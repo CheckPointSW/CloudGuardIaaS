@@ -82,7 +82,7 @@ secret_key = "my-secret-key"
     }
 
     // --- Check Point Settings ---
-    gateway_version = "R81.10-BYOL"
+    gateway_version = "R81-BYOL"
     admin_shell = "/bin/bash"
     gateway_SICKey = "12345678"
     gateway_password_hash = ""
@@ -155,15 +155,15 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| ami_id  | The ami id of the deployed Security Gateway  |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group id name  |
-| gateway_url  | URL to the portal of the deployed Security Gateway  |
-| gateway_public_ip  | The deployed Security Gateway Server AWS public ip  |
-| gateway_instance_id  | The deployed Security Gateway AWS instance id  |
-| gateway_instance_name  | The deployed Security Gateway AWS instance name  |
+| Name                  | Description                                        |
+|-----------------------|----------------------------------------------------|
+| ami_id                | The ami id of the deployed Security Gateway        |
+| permissive_sg_id      | The permissive security group id                   |
+| permissive_sg_name    | The permissive security group id name              |
+| gateway_url           | URL to the portal of the deployed Security Gateway |
+| gateway_public_ip     | The deployed Security Gateway Server AWS public ip |
+| gateway_instance_id   | The deployed Security Gateway AWS instance id      |
+| gateway_instance_name | The deployed Security Gateway AWS instance name    |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

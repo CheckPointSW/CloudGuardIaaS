@@ -99,7 +99,7 @@ secret_key = "my-secret-key"
   gateway_instance_type = "c5.xlarge"
   gateways_min_group_size = 2
   gateways_max_group_size = 8
-  gateway_version = "R81-BYOL"
+  gateway_version = "R81.10-BYOL"
   gateway_password_hash = ""
   gateway_SICKey = "12345678"
   enable_cloudwatch = true
@@ -177,14 +177,14 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| management_instance_name  | The deployed Security Management AWS instance name |
-| management_public_ip  | The deployed Security Management Server AWS public ip  |
-| management_url  | URL to the portal of the deployed Security Management Server  |
-| autoscaling_group_name  | The name of the deployed AutoScaling Group  |
-| configuration_template  | The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name  |
-| controller_name  | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name  |
+| Name                     | Description                                                                                                                                                                                                                                                 |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| management_instance_name | The deployed Security Management AWS instance name                                                                                                                                                                                                          |
+| management_public_ip     | The deployed Security Management Server AWS public ip                                                                                                                                                                                                       |
+| management_url           | URL to the portal of the deployed Security Management Server                                                                                                                                                                                                |
+| autoscaling_group_name   | The name of the deployed AutoScaling Group                                                                                                                                                                                                                  |
+| configuration_template   | The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name |
+| controller_name          | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name                                                                             |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

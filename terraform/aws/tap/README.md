@@ -215,42 +215,42 @@ delete the relevant sessions).
 
 
 ## Inputs
-| Name          | Description   | Type          | Allowed values | Default       | Required      |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| vpc_id        | The VPC id in which to deploy  | string  | n/a | n/a  | yes |
-| external_subnet_id | The external subnet of the security gateway (internet access)  | string  | n/a | n/a  | yes |
-| internal_subnet_id | The internal subnet of the security gateway. This subnet will be connected to the mirrored sources. | string  | n/a | n/a  | yes |
-| resources_tag_name | (Optional) Resources prefix tag  | string  | n/a | ""  | no |
-| registration_key | The gateway registration key to Check Point NOW cloud | string  | n/a | n/a | yes |
-| vxlan_id | (Optional) VXLAN ID (number) for mirroring sessions  | number  | n/a | 1  | no |
-| blacklist_tags |Key value pairs of tag key and tag value. Instances with any of these tag pairs will not be TAPed | map(string)  | n/a | {}  | no |
-| schedule_scan_interval | (minutes) Lambda will scan the VPC every X minutes for TAP updates | number  | n/a | 60  | no |
-| instance_name | AWS instance name to launch  | string  | n/a | CP-TAP-Gateway-tf  | no |
-| instance_type | AWS instance type - View [Notes and limitations](#Notes-and-limitations) section | string  | n/a | c5.xlarge  | no |
-| key_name | The EC2 Key Pair name to allow SSH access to the instances  | string  | n/a | n/a  | yes |
+| Name                   | Description                                                                                         | Type        | Allowed values | Default           | Required |
+|------------------------|-----------------------------------------------------------------------------------------------------|-------------|----------------|-------------------|----------|
+| vpc_id                 | The VPC id in which to deploy                                                                       | string      | n/a            | n/a               | yes      |
+| external_subnet_id     | The external subnet of the security gateway (internet access)                                       | string      | n/a            | n/a               | yes      |
+| internal_subnet_id     | The internal subnet of the security gateway. This subnet will be connected to the mirrored sources. | string      | n/a            | n/a               | yes      |
+| resources_tag_name     | (Optional) Resources prefix tag                                                                     | string      | n/a            | ""                | no       |
+| registration_key       | The gateway registration key to Check Point NOW cloud                                               | string      | n/a            | n/a               | yes      |
+| vxlan_id               | (Optional) VXLAN ID (number) for mirroring sessions                                                 | number      | n/a            | 1                 | no       |
+| blacklist_tags         | Key value pairs of tag key and tag value. Instances with any of these tag pairs will not be TAPed   | map(string) | n/a            | {}                | no       |
+| schedule_scan_interval | (minutes) Lambda will scan the VPC every X minutes for TAP updates                                  | number      | n/a            | 60                | no       |
+| instance_name          | AWS instance name to launch                                                                         | string      | n/a            | CP-TAP-Gateway-tf | no       |
+| instance_type          | AWS instance type - View [Notes and limitations](#Notes-and-limitations) section                    | string      | n/a            | c5.xlarge         | no       |
+| key_name               | The EC2 Key Pair name to allow SSH access to the instances                                          | string      | n/a            | n/a               | yes      |
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| tap-gateway_instance_id  | The instance id of the deployed Check Point TAP Gateway  |
-| gateway_instance_name  | The instance name of the deployed Check Point TAP Gateway  |
-| gateway_instance_public_ip  | The public ip address of the deployed Check Point TAP Gateway  |
-| traffic_mirror_filter_id  | The traffic mirror filter id created during deployment by the 'tap_target_and_filter' stack  |
-| traffic_mirror_target_id  | The traffic mirror target id pointing to the TAP Gateway's internal ENI - created during deployment by the 'tap_target_and_filter' stack  |
-| tap_lambda_name  | TAP main lambda name (responsible for creating and deleting traffic mirror sessions with the TAP Gateway's target)  |
-| tap_lambda_description  | TAP main lambda description  |
-| termination_lambda_name  | TAP termination lambda name (deletes all traffic mirror sessions with the TAP Gateway's target)  |
-| termination_lambda_description  | TAP termination lambda description  |
+| Name                           | Description                                                                                                                              |
+|--------------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| tap-gateway_instance_id        | The instance id of the deployed Check Point TAP Gateway                                                                                  |
+| gateway_instance_name          | The instance name of the deployed Check Point TAP Gateway                                                                                |
+| gateway_instance_public_ip     | The public ip address of the deployed Check Point TAP Gateway                                                                            |
+| traffic_mirror_filter_id       | The traffic mirror filter id created during deployment by the 'tap_target_and_filter' stack                                              |
+| traffic_mirror_target_id       | The traffic mirror target id pointing to the TAP Gateway's internal ENI - created during deployment by the 'tap_target_and_filter' stack |
+| tap_lambda_name                | TAP main lambda name (responsible for creating and deleting traffic mirror sessions with the TAP Gateway's target)                       |
+| tap_lambda_description         | TAP main lambda description                                                                                                              |
+| termination_lambda_name        | TAP termination lambda name (deletes all traffic mirror sessions with the TAP Gateway's target)                                          |
+| termination_lambda_description | TAP termination lambda description                                                                                                       |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20200413 | First release of Check Point Traffic Access Point (TAP) Terraform module for AWS |
-| 20210309 | AWS Terraform modules refactor |
-| 20210329 | Stability fixes |
+| Template Version | Description                                                                      |
+|------------------|----------------------------------------------------------------------------------|
+| 20200413         | First release of Check Point Traffic Access Point (TAP) Terraform module for AWS |
+| 20210309         | AWS Terraform modules refactor                                                   |
+| 20210329         | Stability fixes                                                                  |
  
 
 
