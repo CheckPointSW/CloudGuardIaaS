@@ -68,26 +68,26 @@ Configure envrionment variables in Windows:
 
 ```
 // --- VPC Network Configuration ---
-vpc_id = "vpc-12345678"
-vswitch_id = "vsw-abc123"
+vpc_id = "vpc-"
+vswitch_id = "vsw-"
 
 // --- ECS Instances Configuration ---
 instance_name = "CP-Management-tf"
 instance_type = "ecs.g6e.xlarge"
-key_name = "privatekey"
-eip = true
+key_name = "publickey"
+allocate_and_associate_eip = true
 volume_size = 100
 disk_category = "cloud_essd"
-volume_encryption = "alias/alicloud/ebs"
-enable_instance_connect = false
+ram_role_name = ""
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
 }
+
 // --- Check Point Settings ---
 version_license = "R81-BYOL"
 admin_shell = "/bin/bash"
-password_hash = "12345678"
+password_hash = ""
 hostname = "mgmt-tf"
 
 // --- Security Management Server Settings ---
@@ -99,22 +99,23 @@ admin_cidr = "0.0.0.0/0"
 gateway_addresses = "0.0.0.0/0"
 primary_ntp = ""
 secondary_ntp = ""
-bootstrap_script = "echo 12345678"
+bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| image_id  | The ami id of the deployed Security Gateway  |
-| management_instance_id  | The deployed Management AliCloud instance id  |
-| management_instance_name  | The deployed Management AliCloud instance name  |
-| management_instance_tags  | The deployed Management AliCloud tags  |
-| management_public_ip  | The deployed Management AliCloud public address  |
+| Name                     | Description                                     |
+|--------------------------|-------------------------------------------------|
+| image_id                 | The ami id of the deployed Security Gateway     |
+| management_instance_id   | The deployed Management AliCloud instance id    |
+| management_instance_name | The deployed Management AliCloud instance name  |
+| management_instance_tags | The deployed Management AliCloud tags           |
+| management_public_ip     | The deployed Management AliCloud public address |
 
 ## Revision History
 
 | Template Version | Description                                                                                                    |
 |------------------|----------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                          |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                 |
 | 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                           |
 | 20211011         | First release of Check Point CloudGaurd Management Terraform deployment into an existing VPC in Alibaba cloud. |

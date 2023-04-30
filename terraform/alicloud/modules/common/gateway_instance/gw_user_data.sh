@@ -48,10 +48,12 @@ if [[ -n "${Hostname}" ]]; then
 fi
 
 echo "Starting First Time Wizard"
+
 if [ "${gw_new_config}" = "1" ]; then
   file_name="/etc/.blink_cloud_mode"
   > file_name
 fi
+
 blink_config -s "gateway_cluster_member=false&ftw_sic_key='${SICKey}'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'"
 echo "Setting LocalGatewayExternal dynamic object"
 addr_ex="$(ip addr show dev eth0 | awk '/inet/{print $2; exit}' | cut -d / -f 1)"

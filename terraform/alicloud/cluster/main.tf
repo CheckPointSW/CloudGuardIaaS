@@ -75,9 +75,9 @@ resource "alicloud_instance" "member-b-instance" {
 
 // Management ENIs
 resource "alicloud_network_interface" "member_a_mgmt_eni" {
-  network_interface_name  = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_group_ids  = [
+  security_group_ids = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }
@@ -86,9 +86,9 @@ resource "alicloud_network_interface_attachment" "member_a_mgmt_eni_attachment" 
   network_interface_id = alicloud_network_interface.member_a_mgmt_eni.id
 }
 resource "alicloud_network_interface" "member_b_mgmt_eni" {
-  network_interface_name  = format("%s-Member-B-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name = format("%s-Member-B-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_group_ids  = [
+  security_group_ids = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }

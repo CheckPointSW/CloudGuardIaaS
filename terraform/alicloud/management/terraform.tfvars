@@ -25,7 +25,7 @@ hostname = "mgmt-tf"
 
 // --- Security Management Server Settings ---
 is_primary_management = "true"
-SICKey = "12345678"
+SICKey = ""
 allow_upload_download = "true"
 gateway_management = "Locally managed"
 admin_cidr = "0.0.0.0/0"

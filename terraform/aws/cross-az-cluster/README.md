@@ -159,16 +159,16 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| ami_id  | The ami id of the deployed Security Cross AZ Cluster members  |
-| cluster_public_ip  | The public address of the cluster  |
-| member_a_public_ip  | The public address of member A |
-| member_b_public_ip  | The public address of member B  |
-| member_a_ssh  | SSH command to member A |
-| member_b_ssh  | SSH command to member B |
-| member_a_url  | URL to the member A portal  |
-| member_b_url  | URL to the member B portal  |
+| Name               | Description                                                  |
+|--------------------|--------------------------------------------------------------|
+| ami_id             | The ami id of the deployed Security Cross AZ Cluster members |
+| cluster_public_ip  | The public address of the cluster                            |
+| member_a_public_ip | The public address of member A                               |
+| member_b_public_ip | The public address of member B                               |
+| member_a_ssh       | SSH command to member A                                      |
+| member_b_ssh       | SSH command to member B                                      |
+| member_a_url       | URL to the member A portal                                   |
+| member_b_url       | URL to the member B portal                                   |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

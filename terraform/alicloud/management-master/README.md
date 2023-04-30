@@ -65,22 +65,22 @@ Configure envrionment variables in Windows:
 ## Example for terraform.tfvars
 ```
 // --- VPC Network Configuration ---
+vpc_name = "cp-vpc"
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
   "us-east-1a" = 1
 }
-private_vswitchs_map = {
-  "us-east-1a" = 2
-}
 vswitchs_bit_length = 8
+
 
 // --- ECS Instances Configuration ---
 instance_name = "CP-Management-tf"
 instance_type = "ecs.g6e.xlarge"
-key_name = "privatekey"
-eip = true
+key_name = "publickey"
+allocate_and_associate_eip = true
 volume_size = 100
 disk_category = "cloud_essd"
+ram_role_name = ""
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -89,7 +89,7 @@ instance_tags = {
 // --- Check Point Settings ---
 version_license = "R81-BYOL"
 admin_shell = "/bin/bash"
-password_hash = "12345678"
+password_hash = ""
 hostname = "mgmt-tf"
 
 // --- Security Management Server Settings ---
@@ -101,29 +101,29 @@ admin_cidr = "0.0.0.0/0"
 gateway_addresses = "0.0.0.0/0"
 primary_ntp = ""
 secondary_ntp = ""
-bootstrap_script = "echo 12345678"
+bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| vpc_private_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| image_id  | The ami id of the deployed Security Gateway  |
-| management_instance_id  | The deployed Management AliCloud instance id  |
-| management_instance_name  | The deployed Management AliCloud instance name  |
-| management_instance_tags  | The deployed Management AliCloud tags  |
-| management_public_ip  | The deployed Management AliCloud public address  |
+| Name                          | Description                                     |
+|-------------------------------|-------------------------------------------------|
+| vpc_id                        | The id of the deployed vpc                      |
+| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids              |
+| vpc_private_vswitchs_ids_list | A list of the private vswitchs ids              |
+| image_id                      | The ami id of the deployed Security Gateway     |
+| management_instance_id        | The deployed Management AliCloud instance id    |
+| management_instance_name      | The deployed Management AliCloud instance name  |
+| management_instance_tags      | The deployed Management AliCloud tags           |
+| management_public_ip          | The deployed Management AliCloud public address |
 
 ## Revision History
 
 | Template Version | Description                                                                                              |
 |------------------|----------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                    |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                           |
 | 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                     |
 | 20211011         | First release of Check Point CloudGuard Management Terraform deployment into a new VPC in Alibaba cloud. |
-
 
 ## License
 

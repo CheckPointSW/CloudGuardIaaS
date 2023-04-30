@@ -143,13 +143,13 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| standalone_instance_id  | The deployed Security Gateway & Management (Standalone) AWS instance id |
-| standalone_instance_name  | The deployed Security Gateway & Management (Standalone) AWS instance name  |
-| standalone_public_ip  | The deployed Security Gateway & Management (Standalone) AWS public address  |
-| standalone_ssh  | SSH command to the Security Gateway & Management (Standalone) |
-| standalone_url  | URL to the portal of the deployed Security Gateway & Management (Standalone)  |
+| Name                     | Description                                                                  |
+|--------------------------|------------------------------------------------------------------------------|
+| standalone_instance_id   | The deployed Security Gateway & Management (Standalone) AWS instance id      |
+| standalone_instance_name | The deployed Security Gateway & Management (Standalone) AWS instance name    |
+| standalone_public_ip     | The deployed Security Gateway & Management (Standalone) AWS public address   |
+| standalone_ssh           | SSH command to the Security Gateway & Management (Standalone)                |
+| standalone_url           | URL to the portal of the deployed Security Gateway & Management (Standalone) |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

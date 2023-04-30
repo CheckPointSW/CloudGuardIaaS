@@ -165,17 +165,17 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| internal_rtb_id  | The internal route table id  |
-| vpc_public_subnets_ids_list  | A list of the public subnets ids  |
-| vpc_private_subnets_ids_list  | A list of the private subnets ids  |
-| standalone_instance_id  | The deployed Security Gateway & Management (Standalone) AWS instance id |
-| standalone_instance_name  | The deployed Security Gateway & Management (Standalone) AWS instance name  |
-| standalone_public_ip  | The deployed Security Gateway & Management (Standalone) AWS public address  |
-| standalone_ssh  | SSH command to the Security Gateway & Management (Standalone) |
-| standalone_url  | URL to the portal of the deployed Security Gateway & Management (Standalone)  |
+| Name                         | Description                                                                  |
+|------------------------------|------------------------------------------------------------------------------|
+| vpc_id                       | The id of the deployed vpc                                                   |
+| internal_rtb_id              | The internal route table id                                                  |
+| vpc_public_subnets_ids_list  | A list of the public subnets ids                                             |
+| vpc_private_subnets_ids_list | A list of the private subnets ids                                            |
+| standalone_instance_id       | The deployed Security Gateway & Management (Standalone) AWS instance id      |
+| standalone_instance_name     | The deployed Security Gateway & Management (Standalone) AWS instance name    |
+| standalone_public_ip         | The deployed Security Gateway & Management (Standalone) AWS public address   |
+| standalone_ssh               | SSH command to the Security Gateway & Management (Standalone)                |
+| standalone_url               | URL to the portal of the deployed Security Gateway & Management (Standalone) |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

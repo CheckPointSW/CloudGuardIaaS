@@ -100,7 +100,7 @@ variable "predefined_role" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81.10-BYOL"
+  default = "R81-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"
