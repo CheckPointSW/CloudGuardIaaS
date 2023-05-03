@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point TGW HA cross AZ Cluster in a new VPC (20230411)
+Description: Deploy a Check Point TGW HA cross AZ Cluster in a new VPC (20230503)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
