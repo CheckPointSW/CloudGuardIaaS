@@ -269,6 +269,7 @@ Parameters:
   GatewayToken:
       Description: Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
       Type: String
+      AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
       NoEcho: true
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"

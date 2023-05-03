@@ -305,10 +305,12 @@ Parameters:
     NoEcho: true
   MemberAToken:
     Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
     Type: String
     NoEcho: true
   MemberBToken:
     Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
     Type: String
     NoEcho: true
   ResourcesTagName:
