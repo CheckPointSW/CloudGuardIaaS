@@ -174,6 +174,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220606         | New instance type support                                                         |
 | 20221123         | R81.20 version support                                                            |
 | 20230411         | Improved deployment experience for gateways and clusters managed by Smart-1 Cloud |
+| 20230503         | Supports Smart-1 Cloud token validation                                           |
 
 ## License
 

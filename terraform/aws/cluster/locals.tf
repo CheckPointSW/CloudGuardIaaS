@@ -20,6 +20,17 @@ locals {
   // Will fail if var.gateway_SIC_Key is invalid
   regex_gateway_sic_result = regex(local.regex_valid_gateway_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SIC_Key] must be at least 8 alphanumeric characters"
 
+  regex_token_valid = "(^https://(.+).checkpoint.com/app/maas/api/v1/tenant(.+)|^$)"
+  //TokenA: will fail if decode token should contain https:// and .checkpoint.com/app/maas/api/v1/tenant or empty string
+  split_tokenA = split(" ", var.memberAToken)
+  tokenA_decode = base64decode(element(local.split_tokenA, length(local.split_tokenA)-1))
+  regex_tokenA = regex(local.regex_token_valid, local.tokenA_decode) == local.tokenA_decode  ? 0 : "Smart-1 Cloud token A is invalid format"
+
+  //TokenB: will fail if decode token should contain https:// and .checkpoint.com/app/maas/api/v1/tenant or empty string
+  split_tokenB = split(" ", var.memberBToken)
+  tokenB_decode = base64decode(element(local.split_tokenB, length(local.split_tokenB)-1))
+  regex_tokenB = regex(local.regex_token_valid, local.tokenB_decode) == local.tokenB_decode  ? 0 : "Smart-1 Cloud token B is invalid format"
+
   is_both_tokens_used = length(var.memberAToken) > 0 == length(var.memberBToken) > 0
   validation_message_both = "Smart-1 Cloud Tokens for member A and member B can not be empty."
   //Will fail if var.memberAToken is empty and var.memberBToken isn't and vice versa
