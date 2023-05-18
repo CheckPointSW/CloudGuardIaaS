@@ -1,42 +1,65 @@
-# Postman Collection for Azure Virtual WAN Management
+# Postman Collection for Azure Virtual Network Management
 
-This Postman collection provides a set of APIs for managing Azure Virtual WAN resources. The collection includes the following categories:
+This Postman collection provides a set of APIs for managing Azure Virtual Network resources. The collection includes the following categories:
 
 ## Virtual WANs
 
-- **GET All virtualWans in resourceGroup**: Retrieve all Virtual WANs in a resource group.
-- **GET All virtualWans in subscription**: Retrieve all Virtual WANs in a subscription.
-- **GET virtualWan**: Retrieve details of a specific Virtual WAN.
+- **GET All Virtual Wans in resourceGroup**: Retrieves a list of all virtual WANs in a specified resource group.
+- **GET All Virtual Wans in subscription**: Retrieves a list of all virtual WANs in a specified subscription.
+- **GET Virtual Wan**: Retrieves details of a specific virtual WAN.
+- **DEL Virtual Wan**: Deletes a specific virtual WAN.
+- **PATCH Update Tags for vWAN**: Updates the tags for a specific virtual WAN.
+- **PUT Virtual Wan**: Creates or updates a virtual WAN.
 
 ## Virtual Hubs
+- **GET Virtual Hub**: Retrieves details of a specific virtual hub.
+- **PUT Virtual Hub - Create Or Update**: Creates or updates a virtual hub.
+- **GET All Virtual Hubs in resourceGroup**: Retrieves a list of all virtual hubs in a specified resource group.
+- **GET All Virtual Hubs in subscription**: Retrieves a list of all virtual hubs in a specified subscription.
+- **PATCH Update Tags for vHub**: Updates the tags for a specific virtual hub.
+### Hub Route Tables
 
-- **GET virtualHub**: Retrieve details of a specific Virtual Hub.
-- **DEL Delete virtualHub**: Delete a specific Virtual Hub.
-- **POST Effective Routes**: Creates or updates a ExpressRoute gateway in a specified resource group.  
-- **GET All virtualHubs in resourceGroup**: Retrieve all Virtual Hubs in a resource group.
-- **GET All virtualHubs in subscription**: Retrieve all Virtual Hubs in a subscription.
-- **PUT Routing Intent**: Update the routing intent for a specific Virtual Hub.
-- **GET Routing Intent**: Retrieve the routing intent for a specific Virtual Hub.
+- **GET Route Table**: Retrieves details of a specific route table associated with a virtual hub.
+- **PUT Route Table - Create Or Update**: Creates or updates a route table associated with a virtual hub.
+- **DEL Route Table**: Deletes a specific route table associated with a virtual hub.
+- **GET All Route Tables**: Retrieves a list of all route tables associated with a virtual hub.
+
+### Hub Virtual Network Connections
+
+- **GET Virtual Network Connections**: Retrieves details of a specific virtual network connection associated with a virtual hub.
+- **PUT Virtual Network Connections - Create Or Update**: Creates or updates a virtual network connection associated with a virtual hub.
+- **DEL Virtual Network Connections**: Deletes a specific virtual network connection associated with a virtual hub.
+- **GET All Virtual Network Connections**: Retrieves a list of all virtual network connections associated with a virtual hub.
+
+- **POST Effective Routes**: Creates or updates a ExpressRoute gateway in a specified resource group.
+
+## Routing Intent
+
+- **PUT Routing Intent**: Creates or updates a routing intent for a specific virtual hub.
+- **GET Routing Intent**: Retrieves the routing intent for a specific virtual hub.
+- **DEL Routing Intent**: Deletes a specific routing intent for a specific virtual hub.
 
 ## VPN Sites
 
-- **GET vpnSite**: Retrieve details of a specific VPN site.
-- **GET All vpnSite in resourceGroup**: Retrieve all VPN sites in a resource group.
-- **GET All vpnSite in subscription**: Retrieve all VPN sites in a subscription.
+- **GET VPN Site**: Retrieves details of a specific VPN site.
+- **GET All VPN Sites in resourceGroup**: Retrieves a list of all VPN sites in a specified resource group.
+- **GET All VPN Sites in subscription**: Retrieves a list of all VPN sites in a specified subscription.
 
-## NVA
+## Network Virtual Appliance (NVA)
 
-- **DEL NetworkVirtualAppliance**: Delete a specific Network Virtual Appliance.
-- **GET NetworkVirtualAppliance**: Retrieve details of a specific Network Virtual Appliance.
-- **GET All NetworkVirtualAppliances**: Retrieve all Network Virtual Appliances in a resource group.
-- **GET All NetworkVirtualAppliances Subscription**: Retrieve all Network Virtual Appliances in a subscription.
-- **GET Get Onboarded Images**: Retrieve a list of onboarded images for a Network Virtual Appliance.
+- **DEL NVA**: Deletes a specific Network Virtual Appliance.
+- **GET NVA**: Retrieves details of a specific Network Virtual Appliance.
+- **GET All NVAs**: Retrieves a list of all Network Virtual Appliances in a resource group.
+
+## Security Rule
+
+- **PUT Inbound Security Rule - Create Or Update**: Creates or updates an inbound security rule.
 
 ## Usage
 
-To use this collection, you will need to set up a Virtual WAN environment and  have the appropriate credentials in your subscription to manage Virtual WAN resources. You will also need to import the collection into Postman and configure the variables in the collection with your Azure credentials.
+To use this collection, you will need to set up a Virtual Network environment and have the appropriate credentials in your subscription to manage Virtual Network resources. You will also need to import the collection into Postman and configure the variables in the collection with your Azure credentials.
 
-Once you have configured the environment variables, you can use the collection to manage your Virtual WAN resources.
+Once you have configured the environment variables, you can use the collection to manage your Virtual Network resources.
 
 ## Contributing
 
