@@ -26,18 +26,24 @@ resource "aws_instance" "gateway_instance" {
 
   instance_type = var.gateway_instance_type
   key_name = var.key_name
+  iam_instance_profile = var.iam_instance_profile_id
+
+  disable_api_termination = var.disable_instance_termination
 
   ami = var.ami_id
-  user_data = templatefile("${path.module}/gw_user_data.sh", {
+  user_data = templatefile("${path.module}/gateway_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
+    SICKey = local.gateway_SICkey_base64,
+    TokenKey = var.gateway_TokenKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
     Hostname = var.gateway_hostname,
     AllowUploadDownload = var.allow_upload_download,
+    EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
-    EnableInstanceConnect = var.enable_instance_connect
+    EnableInstanceConnect = var.enable_instance_connect,
+    OsVersion = local.version_split
   })
 }

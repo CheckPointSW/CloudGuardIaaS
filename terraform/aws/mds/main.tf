@@ -138,11 +138,13 @@ resource "aws_instance" "mds-instance" {
   key_name = var.key_name
   iam_instance_profile = local.use_role == 1 ? aws_iam_instance_profile.mds_instance_profile[0].id : ""
 
+  disable_api_termination = var.disable_instance_termination
+
   ami = module.amis.ami_id
-  user_data = templatefile("${path.module}/mds_user_data.sh", {
+  user_data = templatefile("${path.module}/mds_userdata.yaml", {
     // script's arguments
     Hostname = var.mds_hostname,
-    PasswordHash = var.mds_password_hash
+    PasswordHash = local.mds_password_hash_base64
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp
     NTPSecondary = var.secondary_ntp
@@ -150,9 +152,10 @@ resource "aws_instance" "mds-instance" {
     AdminSubnet = var.admin_cidr
     IsPrimary = local.primary_mds
     IsSecondary = local.secondary_mds
-    SICKey = var.mds_SICKey,
+    SICKey = local.mds_SICkey_base64,
     EnableInstanceConnect = var.enable_instance_connect
-    BootstrapScript = var.mds_bootstrap_script
+    BootstrapScript = local.mds_bootstrap_script64
+    OsVersion = local.version_split
   })
 }
 

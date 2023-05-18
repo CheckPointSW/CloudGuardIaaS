@@ -26,6 +26,7 @@ module "launch_qs_autoscale" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   allow_upload_download = var.allow_upload_download
   provision_tag = var.provision_tag
   load_balancers_type = var.load_balancers_type

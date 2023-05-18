@@ -112,7 +112,7 @@ project = "project-name"
 # --- Check Point---
 prefix = "chkp-tf-mig"
 license = "BYOL"
-image_name = "check-point-r8040-gw-byol-mig-123-456-v12345678"
+image_name = "check-point-r8110-gw-byol-mig-335-985-v20220126"
 management_nic = "Ephemeral Public IP (eth0)"
 management_name = "tf-checkpoint-management"
 configuration_template_name = "tf-asg-autoprov-tmplt"
@@ -167,7 +167,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-mig" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
-| image_name | The autoscaling (MIG) image name (e.g. check-point-r8040-gw-byol-mig-123-456-v12345678). You can choose the desired mig image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py). | string | N/A | N/A | yes |
+| image_name | The autoscaling (MIG) image name (e.g. check-point-r8110-gw-byol-mig-335-985-v20220126). You can choose the desired mig image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py). | string | N/A | N/A | yes |
 | management_nic | Management Interface - Autoscaling Security Gateways in GCP can be managed by an ephemeral public IP or using the private IP of the internal interface (eth1). | string | Ephemeral Public IP (eth0) <br/> - Private IP (eth1) | "Ephemeral Public IP (eth0)" | no |
 | management_name | The name of the Security Management Server as appears in autoprovisioning configuration. (Please enter a valid Security Management name including ascii characters only). | string | N/A | "checkpoint-management" | no |
 | configuration_template_name | Specify the provisioning configuration template name (for autoprovisioning). (Please enter a valid autoprovisioing configuration template name including ascii characters only). | string | N/A | "gcp-asg-autoprov-tmplt" | no |
@@ -195,15 +195,6 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | disk_size | Disk size in GB - Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. | number | number between 100 and 4096 | 100 | no |
 | enable_monitoring | Enable Stackdriver monitoring | bool | true/false | false | no |
 
-## Revision History
-In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
-
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
-| | | |
-|  | Addition of "template_type" parameter to "cloud-version" files. |
-| | | |
 
 ## Outputs
 | Name  | Description |
@@ -220,6 +211,18 @@ In order to check the template version refer to the [sk116585](https://supportce
 | SCTP_firewall_rules_name  | If enable - the SCTP firewall rules name, otherwise, an empty list.  |
 | ESP_firewall_rules_name  | If enable - the ESP firewall rules name, otherwise, an empty list.  |
 
+
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20230109 | Updated startup script to use cloud-config. |
+| | | |
+| 20201208 | First release of Check Point CloudGuard IaaS Auto Scaling Group of Check Point Security Gateways Terraform solution into an existing VPC on GCP. |
+| | | |
+|  | Addition of "template_type" parameter to "cloud-version" files. |
+| | | |
 
 ## Authors
 

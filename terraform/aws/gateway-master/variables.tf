@@ -82,6 +82,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Gateway EC2 Instance"
@@ -115,6 +120,12 @@ variable "gateway_password_hash" {
   default = ""
 }
 
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+variable "gateway_TokenKey" {
+  type = string
+  description = "Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud."
+}
+
 // --- Advanced Settings ---
 variable "resources_tag_name" {
   type = string
@@ -130,6 +141,11 @@ variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
+}
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
 }
 variable "gateway_bootstrap_script" {
   type = string

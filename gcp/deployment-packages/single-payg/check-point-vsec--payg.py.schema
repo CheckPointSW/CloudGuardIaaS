@@ -124,6 +124,9 @@ properties:
       type: GCE_FIREWALL_RANGE
       gceFirewallRange:
         firewallProperty: network_enableEsp
+  smart1CloudToken:
+    type: string
+    default: ''
   diskType:
     type: string
     default: pd-ssd
@@ -143,9 +146,6 @@ properties:
     type: string
     default: R81.10 Gateway only
     enum:
-      - R80.30 Gateway only
-      - R80.30 Management only
-      - R80.30 Manual Configuration
       - R80.40 Gateway only
       - R80.40 Management only
       - R80.40 Manual Configuration
@@ -158,6 +158,10 @@ properties:
       - R81.10 Management only
       - R81.10 Manual Configuration
       - R81.10 Gateway and Management (Standalone)
+      - R81.20 Gateway only
+      - R81.20 Management only
+      - R81.20 Manual Configuration
+      - R81.20 Gateway and Management (Standalone)
   allowUploadDownload:
     type: boolean
     default: True

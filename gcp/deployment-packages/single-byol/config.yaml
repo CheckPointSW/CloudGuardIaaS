@@ -27,6 +27,8 @@ resources:
     network_espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
     externalIP: "PLEASE ENTER AN EXTERNAL IP ADDRESS TYPE"
     installationType: "PLEASE ENTER AN INSTALLATION TYPE"
+    #Connecting to Smart-1 Cloud is only available for Gateway only installation
+    smart1CloudToken: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD OR LEAVE EMPTY DOUBLE QUOTES"
     diskType: "PLEASE ENTER A DISK TYPE"
     bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
     generatePassword: "PLEASE ENTER true or false"

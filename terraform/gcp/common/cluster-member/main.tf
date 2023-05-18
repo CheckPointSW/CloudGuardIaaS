@@ -109,7 +109,7 @@ resource "google_compute_instance" "cluster_member" {
     sicKey = var.sic_key
     allowUploadDownload = var.allow_upload_download
     templateName = "cluster_tf"
-    templateVersion = "20201206"
+    templateVersion = "20230109"
     templateType = "terraform"
     mgmtNIC = ""
     hasInternet = "true"
@@ -121,5 +121,10 @@ resource "google_compute_instance" "cluster_member" {
     primary_cluster_address_name = var.primary_cluster_address_name
     secondary_cluster_address_name = var.secondary_cluster_address_name
     managementNetwork = var.management_network
+    numAdditionalNICs = var.num_internal_networks
+    smart_1_cloud_token = "${var.member_name}" == "${var.prefix}-member-a" ? var.smart_1_cloud_token_a : var.smart_1_cloud_token_b
+    name = var.member_name
+    zoneConfig = var.zone
+    region = var.region
   })
 }

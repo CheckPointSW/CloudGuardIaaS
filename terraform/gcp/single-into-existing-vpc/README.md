@@ -109,7 +109,7 @@ service_account_path = "service-accounts/service-account-file-name.json"
 project = "project-name"
 
 # --- Check Point---
-image_name = "check-point-r8040-gw-byol-123-456-v12345678"
+image_name = "check-point-r8110-gw-byol-single-335-985-v20220126"
 installationType = "Gateway only"
 license = "BYOL"
 prefix = "chkp-single-tf-"
@@ -120,6 +120,9 @@ generatePassword = false
 allow_upload_download = true
 sicKey = ""
 managementGUIClientNetwork = "0.0.0.0/0"
+
+#--- Quick connect to Smart-1 Cloud ---
+smart_1_cloud_token = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Networking ---
 zone = "us-central1-a
@@ -175,7 +178,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | zone | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |us-central1-a|yes|
 |  |  |  |  |  |
-| image_name |The single gateway and management image name| string | N/A | N/A | yes |
+| image_name |The single gateway or management image name (e.g. check-point-r8110-gw-byol-single-335-985-v20220126 for gateway or check-point-r8110-byol-335-883-v20210706 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
 |  |  |  |  |  |
 | installationType | Installation type and version | string |Gateway only;<br/> Management only;<br/> Manual Configuration<br/>Gateway and Management (Standalone) |Gateway only|yes|
 |  |  |  |  |  |
@@ -231,6 +234,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | managementGUIClientNetwork | Allowed GUI clients | string | A valid IPv4 network CIDR (e.g. 0.0.0.0/0) |0.0.0.0/0|no|
 |  |  |  |  |  |
+| smart_1_cloud_token | Smart-1 Cloud token to connect this gateway to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+|  |  |  |  |  |
 | numAdditionalNICs | Number of additional network interfaces | number | A number in the range 0 - 8.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |0|no|
 |  |  |  |  |  |
 | externalIP | External IP address type | string | Static;<br/>Ephemeral;<br/>An external IP address associated with this instance. Selecting "None" will result in the instance having no external internet access. [Learn more](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address?_ga=2.259654658.-962483654.1585043745) |static|no|
@@ -248,6 +253,19 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | SCTP_firewall_rules_name  | If enable - the SCTP firewall rules name, otherwise, an empty list.  |
 | ESP_firewall_rules_name  | If enable - the ESP firewall rules name, otherwise, an empty list.  |
 
+## Revision History
+In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description   |
+| ---------------- | ------------- |
+| 20230209 | Added Smart-1 Cloud support. |
+| | | |
+| 20230109 | Updated startup script to use cloud-config. |
+| | | |
+| 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |
+| | | |
+|  | Addition of "template_type" parameter to "cloud-version" files. |
+| | | |
 
 ## Authors
 

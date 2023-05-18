@@ -3,7 +3,7 @@ service_account_path                        = "PLEASE ENTER SERVICE_ACCOUNT_PATH
 project                                     = "PLEASE ENTER PROJECT"                                                     # "project-name"
 
 # --- Check Point Deployment---
-image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8040-gw-byol-123-456-v12345678"
+image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8110-gw-byol-single-335-985-v20220126"
 installationType                            = "PLEASE ENTER INSTALLATION TYPE"                                          # "Gateway only"
 license                                     = "PLEASE ENTER LICENSE"                                                    # "BYOL"
 prefix                                      = "PLEASE ENTER PREFIX"                                                     # "chkp-single-tf-"
@@ -14,6 +14,9 @@ generatePassword                            = "PLEASE ENTER GENERATE PASSWORD"  
 allowUploadDownload                         = "PLEASE ENTER ALLOW UPLOAD DOWNLOAD"                                      # false
 sicKey                                      = "PLEASE ENTER SIC KEY"                                                    # ""
 managementGUIClientNetwork                  = "PLEASE ENTER MANAGEMENT GUI CLIENT NETWORK"                              # "0.0.0.0/0"
+
+# --- Quick connect to Smart-1 Cloud ---
+smart_1_cloud_token                            = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"                                        # ""
 
 # --- Networking---
 zone                                        = "PLEASE ENTER ZONE"                                                       # "us-central1-a"

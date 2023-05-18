@@ -1,0 +1,1000 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys a Check Point Security Gateway into an existing VPC (20211212)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "VPC Network Configuration"
+          },
+          "Parameters": [
+            "VPC",
+            "ExternalSubnet",
+            "InternalSubnet",
+            "InternalRouteTable",
+            "ResourcesTagName"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EC2 Instance Configuration"
+          },
+          "Parameters": [
+            "Name",
+            "InstanceType",
+            "KeyName",
+            "AllocatePublicAddress",
+            "VolumeSize",
+            "VolumeEncryption",
+            "EnableInstanceConnect"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point Settings"
+          },
+          "Parameters": [
+            "Version",
+            "Shell",
+            "SICKey",
+            "PasswordHash"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Advanced Settings"
+          },
+          "Parameters": [
+            "Hostname",
+            "AllowUploadDownload",
+            "NTPPrimary",
+            "NTPSecondary"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Automatic Provisioning with Security Management Server Settings (optional)"
+          },
+          "Parameters": [
+            "ControlGatewayOverPrivateOrPublicAddress",
+            "ManagementServer",
+            "ConfigurationTemplate"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "VPC": {
+          "default": "VPC"
+        },
+        "ExternalSubnet": {
+          "default": "External subnet"
+        },
+        "ControlGatewayOverPrivateOrPublicAddress": {
+          "default": "Gateway address"
+        },
+        "ManagementServer": {
+          "default": "Management Server"
+        },
+        "ConfigurationTemplate": {
+          "default": "Configuration template"
+        },
+        "InternalSubnet": {
+          "default": "Internal subnet"
+        },
+        "InternalRouteTable": {
+          "default": "Internal route table"
+        },
+        "ResourcesTagName": {
+          "default": "Resources prefix tag"
+        },
+        "Version": {
+          "default": "Version & license"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "AllocatePublicAddress": {
+          "default": "Allocate an Elastic IP"
+        },
+        "EnableInstanceConnect": {
+          "default": "Enable AWS Instance Connect"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "Hostname": {
+          "default": "Hostname"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "VolumeSize": {
+          "default": "Root volume size (GB)"
+        },
+        "VolumeEncryption": {
+          "default": "Volume encryption KMS key identifier"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload & download"
+        },
+        "NTPPrimary": {
+          "default": "Primary NTP server"
+        },
+        "NTPSecondary": {
+          "default": "Secondary NTP server"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC::Id",
+      "MinLength": "1"
+    },
+    "ExternalSubnet": {
+      "Description": "The external subnet of the Security Gateway",
+      "Type": "AWS::EC2::Subnet::Id",
+      "MinLength": "1"
+    },
+    "InternalSubnet": {
+      "Description": "The internal subnet of the Security Gateway",
+      "Type": "AWS::EC2::Subnet::Id",
+      "MinLength": "1"
+    },
+    "InternalRouteTable": {
+      "Description": "Set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567) (optional)",
+      "Type": "String"
+    },
+    "ResourcesTagName": {
+      "Description": "(optional)",
+      "Type": "String"
+    },
+    "Name": {
+      "Type": "String",
+      "Default": "Check-Point-Gateway"
+    },
+    "Version": {
+      "Type": "String",
+      "Default": "R80.30-PAYG-NGTP",
+      "AllowedValues": [
+        "R80.10-BYOL",
+        "R80.10-PAYG-NGTP",
+        "R80.10-PAYG-NGTX",
+        "R80.20-BYOL",
+        "R80.20-PAYG-NGTP",
+        "R80.20-PAYG-NGTX",
+        "R80.30-BYOL",
+        "R80.30-PAYG-NGTP",
+        "R80.30-PAYG-NGTX",
+        "R80.40-BYOL",
+        "R80.40-PAYG-NGTP",
+        "R80.40-PAYG-NGTX"
+      ]
+    },
+    "InstanceType": {
+      "Description": "c4 and t2 instance types are supported only with version R80.10 and c5 are supported only with R80.20 and above",
+      "Type": "String",
+      "Default": "c5.xlarge",
+      "AllowedValues": [
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge",
+        "c4.8xlarge",
+        "c5.large",
+        "c5.xlarge",
+        "c5.2xlarge",
+        "c5.4xlarge",
+        "c5.9xlarge",
+        "c5.18xlarge",
+        "c5n.large",
+        "c5n.xlarge",
+        "c5n.2xlarge",
+        "c5n.4xlarge",
+        "c5n.9xlarge",
+        "c5n.18xlarge",
+        "t2.xlarge",
+        "t2.2xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 instance type"
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": "1",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "ControlGatewayOverPrivateOrPublicAddress": {
+      "Description": "Determines if the Security Gateway is provisioned using its private or public address",
+      "Default": "private",
+      "Type": "String",
+      "AllowedValues": [
+        "private",
+        "public"
+      ]
+    },
+    "ManagementServer": {
+      "Description": "The name that represents the Security Management Server in the automatic provisioning configuration",
+      "Type": "String"
+    },
+    "ConfigurationTemplate": {
+      "Description": "A name of a Security Gateway configuration template in the automatic provisioning configuration",
+      "Type": "String"
+    },
+    "AllocatePublicAddress": {
+      "Default": "true",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "EnableInstanceConnect": {
+      "Description": "Ec2 Instance Connect is not supported with versions prior to R80.40",
+      "Default": "false",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "Shell": {
+      "Description": "Change the admin shell to enable advanced command line configuration",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "PasswordHash": {
+      "Description": "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) (optional)",
+      "NoEcho": "true",
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+    },
+    "Hostname": {
+      "Description": "(optional)",
+      "Type": "String",
+      "AllowedPattern": "^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$",
+      "ConstraintDescription": "A valid hostname label or an empty string"
+    },
+    "SICKey": {
+      "Description": "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "MinLength": "8",
+      "Type": "String",
+      "AllowedPattern": "[a-zA-Z0-9]*"
+    },
+    "VolumeSize": {
+      "Type": "Number",
+      "MinValue": "100",
+      "Default": "100"
+    },
+    "VolumeEncryption": {
+      "Description": "KMS or CMK key Identifier: Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs'). Will be ignored for versions lower than R80.30",
+      "Type": "String",
+      "Default": "alias/aws/ebs"
+    },
+    "AllowUploadDownload": {
+      "Description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "NTPPrimary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "169.254.169.123",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "NTPSecondary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "0.pool.ntp.org",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    }
+  },
+  "Conditions": {
+    "R80.30": {
+      "Fn::Equals": [
+        {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Split": [
+                "-",
+                {
+                  "Ref": "Version"
+                }
+              ]
+            }
+          ]
+        },
+        "R80.30"
+      ]
+    },
+    "R80.40": {
+      "Fn::Equals": [
+        {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Split": [
+                "-",
+                {
+                  "Ref": "Version"
+                }
+              ]
+            }
+          ]
+        },
+        "R80.40"
+      ]
+    },
+    "EnableEncryptedVolume": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "VolumeEncryption"
+                },
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Or": [
+            {
+              "Condition": "R80.30"
+            },
+            {
+              "Condition": "R80.40"
+            }
+          ]
+        }
+      ]
+    },
+    "ResourcesTagNameGiven": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "ResourcesTagName"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "ProvidedManagementParameters": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "ManagementServer"
+                },
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "ConfigurationTemplate"
+                },
+                ""
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "AllocatePublicAddress": {
+      "Fn::Equals": [
+        {
+          "Ref": "AllocatePublicAddress"
+        },
+        "true"
+      ]
+    },
+    "EnableInstanceConnect": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableInstanceConnect"
+        },
+        "true"
+      ]
+    },
+    "RouteTableIdExist": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "InternalRouteTable"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "ProvidedPassHash": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "PasswordHash"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "ReadyHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle",
+      "Condition": "AllocatePublicAddress",
+      "Properties": {}
+    },
+    "ReadyCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "Condition": "AllocatePublicAddress",
+      "DependsOn": [
+        "ChkpInstance"
+      ],
+      "Properties": {
+        "Handle": {
+          "Ref": "ReadyHandle"
+        },
+        "Timeout": "3600"
+      }
+    },
+    "AMI": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/utils/amis-deprecated.yaml",
+        "Parameters": {
+          "Version": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "Version"
+                },
+                "GW"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "ExternalNetworkInterface": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "_",
+                [
+                  {
+                    "Fn::If": [
+                      "ResourcesTagNameGiven",
+                      {
+                        "Ref": "ResourcesTagName"
+                      },
+                      {
+                        "Ref": "AWS::StackName"
+                      }
+                    ]
+                  },
+                  "ExternalNetworkInterface"
+                ]
+              ]
+            }
+          }
+        ],
+        "Description": "eth0",
+        "SourceDestCheck": "false",
+        "GroupSet": [
+          {
+            "Ref": "PermissiveSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "ExternalSubnet"
+        }
+      }
+    },
+    "InternalNetworkInterface": {
+      "Type": "AWS::EC2::NetworkInterface",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "_",
+                [
+                  {
+                    "Fn::If": [
+                      "ResourcesTagNameGiven",
+                      {
+                        "Ref": "ResourcesTagName"
+                      },
+                      {
+                        "Ref": "AWS::StackName"
+                      }
+                    ]
+                  },
+                  "InternalNetworkInterface"
+                ]
+              ]
+            }
+          }
+        ],
+        "Description": "eth1",
+        "SourceDestCheck": "false",
+        "GroupSet": [
+          {
+            "Ref": "PermissiveSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "InternalSubnet"
+        }
+      }
+    },
+    "PermissiveSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "_",
+                [
+                  {
+                    "Fn::If": [
+                      "ResourcesTagNameGiven",
+                      {
+                        "Ref": "ResourcesTagName"
+                      },
+                      {
+                        "Ref": "AWS::StackName"
+                      }
+                    ]
+                  },
+                  "PermissiveSecurityGroup"
+                ]
+              ]
+            }
+          }
+        ],
+        "GroupDescription": "Permissive security group",
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "-1",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "InternalDefaultRoute": {
+      "Type": "AWS::EC2::Route",
+      "Condition": "RouteTableIdExist",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NetworkInterfaceId": {
+          "Ref": "InternalNetworkInterface"
+        },
+        "RouteTableId": {
+          "Ref": "InternalRouteTable"
+        }
+      }
+    },
+    "ChkpInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "Name"
+            }
+          },
+          {
+            "Fn::If": [
+              "ProvidedManagementParameters",
+              {
+                "Key": "x-chkp-tags",
+                "Value": {
+                  "Fn::Join": [
+                    ":",
+                    [
+                      {
+                        "Fn::Join": [
+                          "=",
+                          [
+                            "management",
+                            {
+                              "Ref": "ManagementServer"
+                            }
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "=",
+                          [
+                            "template",
+                            {
+                              "Ref": "ConfigurationTemplate"
+                            }
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "=",
+                          [
+                            "ip-address",
+                            {
+                              "Ref": "ControlGatewayOverPrivateOrPublicAddress"
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          }
+        ],
+        "ImageId": {
+          "Fn::GetAtt": [
+            "AMI",
+            "Outputs.ImageId"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "Encrypted": {
+                "Fn::If": [
+                  "EnableEncryptedVolume",
+                  "true",
+                  "false"
+                ]
+              },
+              "KmsKeyId": {
+                "Fn::If": [
+                  "EnableEncryptedVolume",
+                  {
+                    "Ref": "VolumeEncryption"
+                  },
+                  {
+                    "Ref": "AWS::NoValue"
+                  }
+                ]
+              },
+              "VolumeType": "gp2",
+              "VolumeSize": {
+                "Ref": "VolumeSize"
+              }
+            }
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "\n",
+              [
+                "#!/bin/bash",
+                "logfile=/var/log/aws-user-data.log",
+                "> ${logfile}",
+                "exec 1>>${logfile} 2>>${logfile}",
+                {
+                  "Fn::If": [
+                    "ProvidedPassHash",
+                    {
+                      "Fn::Join": [
+                        "\n",
+                        [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "pwd_hash='",
+                                {
+                                  "Ref": "PasswordHash"
+                                },
+                                "'"
+                              ]
+                            ]
+                          },
+                          "echo \"set admin password\"",
+                          "clish -c \"set user admin password-hash $pwd_hash\" -s"
+                        ]
+                      ]
+                    },
+                    "pwd_hash=\"$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)\""
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "hname='",
+                      {
+                        "Ref": "Hostname"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "wait_handle='",
+                      {
+                        "Fn::If": [
+                          "AllocatePublicAddress",
+                          {
+                            "Ref": "ReadyHandle"
+                          },
+                          {
+                            "Ref": "AWS::NoValue"
+                          }
+                        ]
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "enable_eic='",
+                      {
+                        "Fn::If": [
+                          "EnableInstanceConnect",
+                          {
+                            "Ref": "EnableInstanceConnect"
+                          },
+                          {
+                            "Ref": "AWS::NoValue"
+                          }
+                        ]
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "echo \"Generating TOKEN\"",
+                "TOKEN=`curl_cli -X PUT \"http://169.254.169.254/latest/api/token\" -H \"X-aws-ec2-metadata-token-ttl-seconds: 3600\"`",
+                "echo \"Getting instance id\"",
+                "instance_id=\"$(curl_cli -H \"X-aws-ec2-metadata-token: $TOKEN\" -v http://169.254.169.254/latest/meta-data/instance-id)\"",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "ntp1='",
+                      {
+                        "Ref": "NTPPrimary"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "ntp2='",
+                      {
+                        "Ref": "NTPSecondary"
+                      },
+                      "'"
+                    ]
+                  ]
+                },
+                "echo \"Updating cloud-version file\"",
+                "template=\"gateway\"",
+                "echo \"template_name: ${template}\" >> /etc/cloud-version",
+                "echo \"template_version: 20211212\" >> /etc/cloud-version",
+                "echo \"set admin shell\"",
+                {
+                  "Fn::Sub": "clish -c \"set user admin shell ${Shell}\" -s"
+                },
+                "printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >$CPDIR/tmp/wait-handle.crt",
+                "cat $CPDIR/conf/ca-bundle.crt >>$CPDIR/tmp/wait-handle.crt",
+                "test -z \"$hname\" || {",
+                "   echo \"set hostname\"",
+                "   clish -c \"set hostname $hname\" -s",
+                "}",
+                "test -z \"$ntp1\" || {",
+                "   echo \"set primary NTP server\"",
+                "   clish -c \"set ntp server primary $ntp1 version 4\" -s",
+                "   test -z \"$ntp2\" || {",
+                "       echo \"set secondary NTP server\"",
+                "       clish -c \"set ntp server secondary $ntp2 version 4\" -s",
+                "   }",
+                "   clish -c \"set ntp active on\" -s",
+                "}",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "sic=$(echo '",
+                      {
+                        "Fn::Base64": {
+                          "Ref": "SICKey"
+                        }
+                      },
+                      "' | base64 --decode)"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Sub": "blink_config -s \"gateway_cluster_member=false&ftw_sic_key='$sic'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'\""
+                },
+                "rc=$?",
+                "test -z \"$enable_eic\" || {",
+                "echo \"enabling ec2 instance connect\"",
+                "if [ -d \"/etc/ec2-instance-connect\" ]; then",
+                "    ec2-instance-connect-config on",
+                "else",
+                "    echo \"Could not enable eic, not supported in versions R80.30 and below\"",
+                "fi",
+                "}",
+                "if test -n \"$wait_handle\"; then",
+                "    if test $rc -ne 0; then",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"FAILURE\", \"Reason\" : \"Security Gateway configuration failed\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"None\"}' \"$wait_handle\"",
+                "    else",
+                "        curl_cli -s -S --cacert $CPDIR/tmp/wait-handle.crt -X PUT -H 'Content-Type:' --data-binary '{\"Status\" : \"SUCCESS\", \"Reason\" : \"Security Gateway Configuration Complete\", \"UniqueId\" : \"'$instance_id'\", \"Data\" : \"Configuration completed.\"}' \"$wait_handle\"",
+                "    fi",
+                "fi",
+                ""
+              ]
+            ]
+          }
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "NetworkInterfaces": [
+          {
+            "DeviceIndex": "0",
+            "NetworkInterfaceId": {
+              "Ref": "ExternalNetworkInterface"
+            }
+          },
+          {
+            "DeviceIndex": "1",
+            "NetworkInterfaceId": {
+              "Ref": "InternalNetworkInterface"
+            }
+          }
+        ]
+      }
+    },
+    "PublicAddress": {
+      "Type": "AWS::EC2::EIP",
+      "Condition": "AllocatePublicAddress",
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "AddressAssoc": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Condition": "AllocatePublicAddress",
+      "DependsOn": "ChkpInstance",
+      "Properties": {
+        "NetworkInterfaceId": {
+          "Ref": "ExternalNetworkInterface"
+        },
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "PublicAddress",
+            "AllocationId"
+          ]
+        },
+        "PrivateIpAddress": {
+          "Fn::GetAtt": [
+            "ExternalNetworkInterface",
+            "PrimaryPrivateIpAddress"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "PublicAddress": {
+      "Description": "The public address of the Check Point instance",
+      "Value": {
+        "Ref": "PublicAddress"
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "SSH": {
+      "Description": "SSH command to the Check Point instance",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh admin@",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "URL": {
+      "Description": "URL to the portal",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "PublicAddress"
+            }
+          ]
+        ]
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "ManagementName": {
+      "Description": "The name that represents the Security Management Server",
+      "Value": {
+        "Ref": "ManagementServer"
+      }
+    },
+    "ConfigurationTemplateName": {
+      "Description": "The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name",
+      "Value": {
+        "Ref": "ConfigurationTemplate"
+      }
+    }
+  }
+}

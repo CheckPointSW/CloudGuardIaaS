@@ -56,7 +56,11 @@
       "containerName": {
           "type": "string",
           "defaultValue": "azure-function"
-      }
+      },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
     },
     "variables": {
         "resourceGroup": "[resourceGroup()]",
@@ -178,7 +182,8 @@
                 },
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "reserved": true
-            }
+            },
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Function App'), parameters('tagsByResource')['Function App'], json('{}')) ]"
         },
         {
           "type": "Microsoft.Web/serverfarms",
@@ -217,7 +222,8 @@
                     "[variables('storageAccountName')]"
                   ]
                 }
-            ]
+            ],
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Function App'), parameters('tagsByResource')['Function App'], json('{}')) ]"
         },
         {
             "apiVersion": "2020-02-02",

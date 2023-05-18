@@ -44,6 +44,7 @@ module "tgw-gwlb"{
   enable_volume_encryption = var.enable_volume_encryption
   volume_size = var.volume_size
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   allow_upload_download = var.allow_upload_download
   management_server = var.management_server
   configuration_template = var.configuration_template
@@ -63,6 +64,7 @@ module "tgw-gwlb"{
   gateway_password_hash = var.gateway_password_hash
   gateway_SICKey = var.gateway_SICKey
   gateways_provision_address_type = var.gateways_provision_address_type
+  allocate_public_IP = var.allocate_public_IP
   enable_cloudwatch = var.enable_cloudwatch
 
   // --- Check Point CloudGuard IaaS Security Management Server Configuration ---

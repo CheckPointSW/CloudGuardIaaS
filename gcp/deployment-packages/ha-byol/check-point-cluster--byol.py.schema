@@ -43,6 +43,12 @@ properties:
     type: string
     pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$
     default: ''
+  smart1CloudTokenA:
+    type: string
+    default: ''
+  smart1CloudTokenB:
+    type: string
+    default: '' 
   diskType:
     type: string
     default: pd-ssd
@@ -62,10 +68,10 @@ properties:
     type: string
     default: R81.10 Cluster
     enum:
-      - R80.30 Cluster
       - R80.40 Cluster
       - R81 Cluster
       - R81.10 Cluster
+      - R81.20 Cluster
   enableMonitoring:
     type: boolean
     default: False
@@ -76,7 +82,7 @@ properties:
   managementNetwork:
     type: string
     default: ''
-    pattern: ^(?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$
+    pattern: ^((?!0\.0\.0\.0/0)([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2]))|(S1C)$
   generatePassword:
     type: boolean
     default: False

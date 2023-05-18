@@ -43,7 +43,7 @@ variable "volume_encryption" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version & license"
-  default = "R80.40-PAYG-NGTP"
+  default = "R81.10-BYOL"
 }
 variable "gateway_instance_type" {
   type = string
@@ -69,6 +69,10 @@ variable "ami_id" {
   type = string
   description = "The AMI to use for the instance"
 }
+variable "iam_instance_profile_id" {
+  type = string
+  description = "The IAM instance profile id"
+}
 variable "gateway_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
@@ -82,6 +86,10 @@ variable "admin_shell" {
 variable "gateway_SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters"
+}
+variable "gateway_TokenKey" {
+  type = string
+  description = "Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud."
 }
 variable "gateway_bootstrap_script" {
   type = string
@@ -98,6 +106,11 @@ variable "allow_upload_download" {
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
   default = true
 }
+variable "enable_cloudwatch" {
+  type = bool
+  description = "Report Check Point specific CloudWatch metrics"
+  default = false
+}
 variable "primary_ntp" {
   type = string
   description = "(Optional)"
@@ -111,5 +124,10 @@ variable "secondary_ntp" {
 variable "enable_instance_connect" {
   type = bool
   description = "Enable SSH connection over AWS web console"
+  default = false
+}
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
   default = false
 }

@@ -1,6 +1,6 @@
 {
   "defaultDeploymentType": "MULTI_VM",
-  "imageName": "check-point-r8110-gw-byol-cluster-335-985-v20220126",
+  "imageName": "check-point-r8110-gw-byol-cluster-335-991001221-v20221221",
   "projectId": "checkpoint-public",
   "templateName": "nonexistent_template",
   "useSolutionPackage": "true"

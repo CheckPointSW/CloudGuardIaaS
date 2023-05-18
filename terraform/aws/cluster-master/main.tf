@@ -26,7 +26,6 @@ resource "aws_route_table_association" "private_rtb_to_private_subnets" {
   route_table_id = aws_route_table.private_subnet_rtb.id
   subnet_id = module.launch_vpc.private_subnets_ids_list[0]
 }
-
 module "launch_cluster_into_vpc" {
   source = "../cluster"
   providers = {
@@ -44,15 +43,19 @@ module "launch_cluster_into_vpc" {
   volume_size = var.volume_size
   volume_encryption = var.volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   instance_tags = var.instance_tags
   predefined_role = var.predefined_role
   gateway_version = var.gateway_version
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
   gateway_password_hash = var.gateway_password_hash
+  memberAToken = var.memberAToken
+  memberBToken = var.memberBToken
   resources_tag_name = var.resources_tag_name
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download
+  enable_cloudwatch = var.enable_cloudwatch
   gateway_bootstrap_script = var.gateway_bootstrap_script
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp

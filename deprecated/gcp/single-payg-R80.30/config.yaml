@@ -1,0 +1,46 @@
+imports:
+- path: check-point-vsec--payg.py
+- path: common.py
+- path: default.py
+- path: password.py
+- path: images.py
+
+resources:
+- name: check-point-vsec--payg
+  type: check-point-vsec--payg.py
+  properties:
+    zone: "PLEASE ENTER A ZONE"
+    machineType: "PLEASE ENTER A MACHINE TYPE"
+    network: "PLEASE ENTER AN EXTERNAL NETWORK ID"
+    subnetwork: "PLEASE ENTER A SUBNETWORK ID"
+    network_enableTcp: "PLEASE ENTER true or false"
+    network_tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    network_enableIcmp: "PLEASE ENTER true or false"
+    network_icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    network_enableUdp: "PLEASE ENTER true or false"
+    network_udpSourceRanges: "PLEASE ENTER UDP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    network_enableSctp: "PLEASE ENTER true or false"
+    network_sctpSourceRanges: "PLEASE ENTER SCTP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    network_enableEsp: "PLEASE ENTER true or false"
+    network_espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    externalIP: "PLEASE ENTER AN EXTERNAL IP ADDRESS TYPE"
+    installationType: "PLEASE ENTER AN INSTALLATION TYPE"
+    diskType: "PLEASE ENTER A DISK TYPE"
+    bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
+    generatePassword: "PLEASE ENTER true or false"
+    allowUploadDownload: "PLEASE ENTER true or false"
+    enableMonitoring: "PLEASE ENTER true or false"
+    shell: "PLEASE ENTER A SHELL"
+    instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
+    sicKey: "PLEASE ENTER A SIC KEY"
+    managementGUIClientNetwork: "PLEASE ENTER A MANAGEMENT GUI CLIENT NETWORK"
+    numAdditionalNICs: "PLEASE ENTER A NUMBER OF ADDITIONAL NICS"
+    #Define additional NICs networks and subnetworks according the defined numAdditionalNICs value
+    #If there is no need in additional NICs remove additionalNetwork1 and additionalSubnetwork1 variables
+    additionalNetwork1: "PLEASE ENTER AN ADDITIONAL NETWORK1 ID"
+    additionalSubnetwork1: "PLEASE ENTER AN ADDITIONAL SUBNETWORK1 ID"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-vsec--payg.deployment)
+- name: "Instance"
+  value: $(ref.check-point-vsec--payg.vmName)

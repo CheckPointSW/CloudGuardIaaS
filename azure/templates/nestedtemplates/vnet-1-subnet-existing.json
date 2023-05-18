@@ -20,24 +20,27 @@
       "defaultValue": ""
     },
     "vmName": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "[concat(resourceGroup().name, '-vnet')]"
     },
     "deployNsg": {
       "type": "bool",
-      "defaultValue": true
-    },
-    "deployGWLB": {
-      "type": "bool",
       "defaultValue": false
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'), '-nsg')]"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
     "vnetId": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
     "nsgProperties": {
-      "id": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
-    },
-    "deployGWLB": "[parameters('deployGWLB')]"
+      "id": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -45,7 +48,7 @@
       "condition": "[parameters('deployNsg')]",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
-      "name": "[variables('nsgName')]",
+      "name": "[parameters('NewNsgName')]",
       "properties": {
         "securityRules": [
           {
@@ -63,7 +66,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {

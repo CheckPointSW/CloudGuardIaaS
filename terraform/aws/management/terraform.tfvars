@@ -7,11 +7,12 @@ subnet_id = "subnet-abc123"
 // --- EC2 Instances Configuration ---
 management_name = "CP-Management-tf"
 management_instance_type = "m5.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
 enable_instance_connect = false
+disable_instance_termination = false
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -25,7 +26,7 @@ sts_roles = []
 // --- Check Point Settings ---
 management_version = "R81-BYOL"
 admin_shell = "/bin/bash"
-management_password_hash = "12345678"
+management_password_hash = ""
 
 // --- Security Management Server Settings ---
 management_hostname = "mgmt-tf"

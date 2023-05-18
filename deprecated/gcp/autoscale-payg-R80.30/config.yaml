@@ -1,0 +1,50 @@
+imports:
+- path: check-point-autoscale--payg.py
+- path: common.py
+- path: default.py
+- path: password.py
+- path: images.py
+
+resources:
+- name: check-point-autoscale--payg
+  type: check-point-autoscale--payg.py
+  properties:
+    autoscalingVersion: "PLEASE ENTER AUTOSCALE VERSION"
+    managementName: "PLEASE ENTER MANAGEMENT NAME"
+    AutoProvTemplate: "PLEASE ENTER AUTOPROVISION TEMPLATE NAME"
+    instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
+    mgmtNIC: "PLEASE ENTER MANAGEMENT NIC TYPE"
+    networkDefinedByRoutes: "PLEASE ENTER true or false"
+    shell: "PLEASE ENTER A SHELL"
+    allowUploadDownload: "PLEASE ENTER true or false"
+    zone: "PLEASE ENTER A ZONE"
+    networks: "PLEASE ENTER A LIST OF EXTERNAL AND INTERNAL NETWORKS ID"
+    subnetworks: "PLEASE ENTER A LIST OF EXTERNAL AND INTERNAL SUBNETWORKS ID"
+    enableIcmp: "PLEASE ENTER true or false"
+    icmpSourceRanges: "PLEASE ENTER ICMP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableTcp: "PLEASE ENTER true or false"
+    tcpSourceRanges: "PLEASE ENTER TCP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableUdp: "PLEASE ENTER true or false"
+    udpSourceRanges: "PLEASE ENTER UDP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableSctp: "PLEASE ENTER true or false"
+    sctpSourceRanges: "PLEASE ENTER SCTP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    enableEsp: "PLEASE ENTER true or false"
+    espSourceRanges: "PLEASE ENTER ESP SOURCE RANGES OR LEAVE EMPTY DOUBLE QUOTES"
+    machineType: "PLEASE ENTER A MACHINE TYPE"
+    cpuUsage: "PLEASE ENTER CPU USAGE (%)"
+    minInstances: "PLEASE ENTER MINIMUM NUMBER OF INSTANCES"
+    maxInstances: "PLEASE ENTER MAXIMUM NUMBER OF INSTANCES"
+    diskType: "PLEASE ENTER A DISK TYPE"
+    bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
+    enableMonitoring: "PLEASE ENTER true or false"
+outputs:
+- name: "Deployment"
+  value: $(ref.check-point-autoscale--payg.deployment)
+- name: "Managed instance group"
+  value: $(ref.check-point-autoscale--payg.IGMLink)
+- name: "Minimum instances"
+  value: $(ref.check-point-autoscale--payg.minInstancesInt)
+- name: "Maximum instances"
+  value: $(ref.check-point-autoscale--payg.maxInstancesInt)
+- name: "Target CPU usage"
+  value: $(ref.check-point-autoscale--payg.cpuUsagePercentage)

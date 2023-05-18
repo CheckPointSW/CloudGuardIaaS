@@ -10,10 +10,11 @@ The repository contains:
 * Community-supported content
 
 ## Related Products and Solutions
-* CloudGuard for Azure
-* CloudGuard for AWS
-* CloudGuard for GCP
-* CloudGuard for Azure Stack
+* CloudGuard Network Security for Azure
+* CloudGuard Network Security  for AWS
+* CloudGuard Network Security for GCP
+* CloudGuard Network Security for AliCloud
+* CloudGuard Network Security  for Azure Stack
 
 ## References
 * For more information about Check Point CloudGuard for Public Cloud, see https://www.checkpoint.com/products/iaas-public-cloud-security/

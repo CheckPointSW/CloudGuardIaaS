@@ -40,6 +40,10 @@
       "type": "bool",
       "defaultValue": false
     },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "[concat(parameters('vmName'), '-nsg')]"
+    },
     "deployRouteTable": {
       "type": "bool",
       "defaultValue": false
@@ -47,6 +51,10 @@
     "deployGWLB": {
       "type": "bool",
       "defaultValue": false
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
     }
   },
   "variables": {
@@ -67,9 +75,8 @@
       }
     ],
     "routesArray": "[variables('localSubnetRoute')]",
-    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
     "nsgProperties": {
-      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
     },
     "routeTableID": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
     "routeTableProperties": {
@@ -102,7 +109,8 @@
       "name": "[parameters('subnet1Name')]",
       "properties": {
         "routes": "[variables('routesArray')]"
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/virtualNetworks",
@@ -112,14 +120,15 @@
       "dependsOn": [
         "[variables('routeTableID')]"
       ],
-      "properties": "[variables('vnetProperties')]"
+      "properties": "[variables('vnetProperties')]",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "condition": "[parameters('deployNsg')]",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
-      "name": "[variables('nsgName')]",
+      "name": "[parameters('NewNsgName')]",
       "properties": {
         "securityRules": [
           {
@@ -137,7 +146,8 @@
             }
           }
         ]
-      }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
     }
   ],
   "outputs": {

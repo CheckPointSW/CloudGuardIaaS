@@ -89,7 +89,7 @@ resource "google_compute_instance_template" "instance_template" {
     sicKey = ""
     allowUploadDownload = var.allow_upload_download
     templateName = "autoscale_tf"
-    templateVersion = "20201206"
+    templateVersion = "20230109"
     templateType = "terraform"
     mgmtNIC = var.management_nic
     hasInternet = "false"
@@ -101,6 +101,11 @@ resource "google_compute_instance_template" "instance_template" {
     primary_cluster_address_name = ""
     secondary_cluster_address_name = ""
     managementNetwork = ""
+    numAdditionalNICs = ""
+    smart_1_cloud_token = ""
+    name = ""
+    zoneConfig = ""
+    region = ""
   })
 
   metadata = local.admin_SSH_key_condition ? {

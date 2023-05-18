@@ -25,7 +25,7 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The autoscaling (MIG) image name (e.g. check-point-r8040-gw-byol-mig-123-456-v12345678). You can choose the desired mig image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py"
+  description = "The autoscaling (MIG) image name (e.g. check-point-r8110-gw-byol-mig-335-985-v20220126). You can choose the desired mig image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py"
 }
 variable "management_nic" {
   type = string

@@ -25,6 +25,7 @@ module "launch_tgw_asg_into_vpc" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   allow_upload_download = var.allow_upload_download
   gateway_name = var.gateway_name
   gateway_instance_type = var.gateway_instance_type

@@ -140,7 +140,7 @@ resource "alicloud_instance" "management_instance" {
   vswitch_id = var.vswitch_id
   security_groups = [alicloud_security_group.management_sg.id]
   system_disk_size = var.volume_size
-  system_disk_category = "cloud_essd"
+  system_disk_category = var.disk_category
 
   tags = merge({
     Name = var.instance_name
@@ -151,15 +151,16 @@ resource "alicloud_instance" "management_instance" {
     Hostname = var.hostname,
     PasswordHash = var.password_hash,
     AllowUploadDownload = var.allow_upload_download,
-    NTPPrimary = var.primary_ntp
-    NTPSecondary = var.secondary_ntp
+    NTPPrimary = var.primary_ntp,
+    NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
-    AdminCidr = var.admin_cidr
-    IsPrimary = var.is_primary_management
+    AdminCidr = var.admin_cidr,
+    IsPrimary = var.is_primary_management,
     SICKey = var.SICKey,
-    AllocateElasticIP = var.allocate_and_associate_eip
-    GatewayManagement = var.gateway_management
-    BootstrapScript = var.bootstrap_script
+    AllocateElasticIP = var.allocate_and_associate_eip,
+    GatewayManagement = var.gateway_management,
+    BootstrapScript = var.bootstrap_script,
+    mgmt_new_config = local.mgmt_new_config
   })
 }
 

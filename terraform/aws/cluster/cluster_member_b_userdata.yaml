@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" "smart1CloudToken=\"${TokenB}\"" installationType=\"cluster\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" elasticIp=\"${MemberBPublicAddress}\" templateVersion=\"20230503\" templateName=\"cluster\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" allocatePublicAddress=\"${AllocateAddress}\" bootstrapScript64=\"${GatewayBootstrapScript}\"

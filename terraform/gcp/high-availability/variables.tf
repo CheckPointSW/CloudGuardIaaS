@@ -25,7 +25,7 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8040-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
 }
 
 # --- Instances Configuration ---
@@ -74,11 +74,14 @@ variable "enable_monitoring" {
 # --- Check Point ---
 variable "management_network" {
   type = string
-  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
+  description = "Security Management Server address - The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address."
   validation {
     condition = var.management_network != "0.0.0.0/0"
     error_message = "Var.management_network value cannot be the zero-address."
   }
+}
+resource "null_resource" "validate_mgmt_network_if_required" {
+  count = var.smart_1_cloud_token_a == "" && var.management_network == "S1C" ? "Public address of the Security Management Server is required" : 0
 }
 variable "sic_key" {
   type = string
@@ -99,7 +102,24 @@ variable "admin_shell" {
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
 }
+# --- Quick connect to Smart-1 Cloud ---
+variable "smart_1_cloud_token_a" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member A to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
+variable "smart_1_cloud_token_b" {
+  type = string
+  description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
 
+resource "null_resource" "validate_both_tokens" {
+  count = (var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_b != "") || (var.smart_1_cloud_token_a == "" && var.smart_1_cloud_token_b == "") ? 0 : "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
+}
+resource "null_resource" "validate_different_tokens" {
+  count = var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_a == var.smart_1_cloud_token_b ? "To connect to Smart-1 Cloud, you must provide two different tokens" : 0
+}
 # --- Networking ---
 variable "cluster_network_cidr" {
   type = string

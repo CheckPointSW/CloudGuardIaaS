@@ -46,6 +46,16 @@ variable "admin_password" {
   type = string
 }
 
+variable "smart_1_cloud_token_a" {
+  description = "Smart-1 Cloud Token, for configuring member A"
+  type = string
+}
+
+variable "smart_1_cloud_token_b" {
+  description = "Smart-1 Cloud Token, for configuring member B"
+  type = string
+}
+
 variable "sic_key" {
   description = "Secure Internal Communication(SIC) key"
   type = string
@@ -95,10 +105,10 @@ variable "os_version" {
 
 locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
-    "R80.30",
     "R80.40",
     "R81",
-    "R81.10"
+    "R81.10",
+    "R81.20"
   ]
   // will fail if [var.os_version] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
@@ -110,16 +120,16 @@ variable "vm_os_sku" {
 }
 
 variable "vm_os_offer" {
-  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
+  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8040, check-point-cg-r81, check-point-cg-r8110, check-point-cg-r8120"
   type = string
 }
 
 locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
-    "check-point-cg-r8030",
     "check-point-cg-r8040",
     "check-point-cg-r81",
-    "check-point-cg-r8110"
+    "check-point-cg-r8110",
+    "check-point-cg-r8120"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
@@ -287,4 +297,21 @@ variable "existing_public_ip_prefix_id" {
   description = "The existing public IP prefix resource id."
   type = string
   default = ""
+}
+
+locals{
+  # Validate both s1c tokens are used or both empty
+  is_both_tokens_used = length(var.smart_1_cloud_token_a) > 0 == length(var.smart_1_cloud_token_b) > 0
+  validation_message_both = "To connect to Smart-1 Cloud, you must provide two tokens (one per member)"
+  _ = regex("^$", (local.is_both_tokens_used ? "" : local.validation_message_both))
+
+  is_tokens_used = length(var.smart_1_cloud_token_a) > 0
+  # Validate both s1c tokens are unqiue
+  token_parts_a = split(" ",var.smart_1_cloud_token_a)
+  token_parts_b = split(" ",var.smart_1_cloud_token_b)
+  acutal_token_a = local.token_parts_a[length(local.token_parts_a) - 1]
+  acutal_token_b = local.token_parts_b[length(local.token_parts_b) - 1]
+  is_both_tokens_the_same = local.acutal_token_a == local.acutal_token_b
+  validation_message_unique = "Same Smart-1 Cloud token used for both memeber, you must provide unique token for each member"
+  __ = local.is_tokens_used ? regex("^$", (local.is_both_tokens_the_same ? local.validation_message_unique : "")) : ""
 }

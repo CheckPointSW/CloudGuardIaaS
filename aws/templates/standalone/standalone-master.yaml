@@ -19,8 +19,10 @@ Metadata:
           - KeyName
           - AllocatePublicAddress
           - VolumeSize
+          - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
+          - TerminationProtection
       - Label:
           default: Check Point Settings
         Parameters:
@@ -33,10 +35,11 @@ Metadata:
           - ResourcesTagName
           - StandaloneHostname
           - AllowUploadDownload
+          - CloudWatch
           - StandaloneBootstrapScript
           - NTPPrimary
           - NTPSecondary
-          - AdminSubnet
+          - AdminCIDR
           - GatewaysAddresses
     ParameterLabels:
       AvailabilityZone:
@@ -57,10 +60,14 @@ Metadata:
         default: Allocate an Elastic IP
       VolumeSize:
         default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
       VolumeEncryption:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
       StandaloneVersion:
         default: License
       Shell:
@@ -73,19 +80,21 @@ Metadata:
         default: Standalone Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       StandaloneBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
         default: Primary NTP server
       NTPSecondary:
         default: Secondary NTP server
-      AdminSubnet:
+      AdminCIDR:
         default: Administrator addresses
       GatewaysAddresses:
         default: Gateways addresses
 Parameters:
   AvailabilityZone:
-    Description: The availability zone in which to deploy the instance
+    Description: The availability zone in which to deploy the instance.
     Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
   VPCCIDR:
@@ -93,20 +102,20 @@ Parameters:
     Type: String
     Default: 10.0.0.0/16
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
-    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   PublicSubnetCIDR:
-    Description: The public subnet of the Security Gateway
+    Description: The public subnet of the Security Gateway.
     Type: String
     Default: 10.0.10.0/24
   PrivateSubnetCIDR:
-    Description: The private subnet of the Security Gateway
+    Description: The private subnet of the Security Gateway.
     Type: String
     Default: 10.0.11.0/24
   StandaloneName:
     Type: String
     Default: Check-Point-Instance
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
@@ -120,28 +129,42 @@ Parameters:
     Type: Number
     MinValue: 100
     Default: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Ec2 Instance Connect is not supported with versions prior to R80.40
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
     Default: false
     Type: String
     AllowedValues:
       - true
       - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StandaloneVersion:
-    Description: Select BYOL if you plan on using your own license or PAYG if you
-      wish to pay as you go
+    Description: Standalone Version & License.
     Type: String
     Default: R81.10-PAYG-NGTP
     AllowedValues:
       - R80.40-PAYG-NGTP
       - R81-PAYG-NGTP
       - R81.10-PAYG-NGTP
+      - R81.20-PAYG-NGTP
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -151,7 +174,7 @@ Parameters:
       - /bin/tcsh
   StandalonePasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash) (optional)
+      to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
@@ -177,27 +200,77 @@ Parameters:
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.12xlarge
+      - m6i.24xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.12xlarge
+      - c6i.24xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.12xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.12xlarge
+      - r5n.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.12xlarge
+      - m6a.24xlarge
     ConstraintDescription: Must be a valid EC2 instance type
   ResourcesTagName:
-    Description: The name tag of the resources (optional)
+    Description: The name tag of the resources. (optional)
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StandaloneBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -211,16 +284,16 @@ Parameters:
     Type: String
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
-  AdminSubnet:
-    Description: Allow web, SSH, and graphical clients only from this network to communicate
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate.
       with the Management Server
     Type: String
-    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$'
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management
-      Server (optional)
+    Description: Allow gateways only from this network to communicate with the Management.
+      Server. (optional)
     Type: String
-    AllowedPattern: '^(([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2]))?$'
+    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
 Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
@@ -236,7 +309,7 @@ Resources:
         PublicSubnet1CIDR: !Ref PublicSubnetCIDR
         CreatePrivateSubnets: true
         PrivateSubnet1CIDR: !Ref PrivateSubnetCIDR
-        CreateTgwSubnets: false
+        CreateAttachmentSubnets: false
   InternalRoutingTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -266,29 +339,32 @@ Resources:
         KeyName: !Ref KeyName
         AllocatePublicAddress: !Ref AllocatePublicAddress
         VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
         VolumeEncryption: !Ref VolumeEncryption
         EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
         StandaloneVersion: !Ref StandaloneVersion
         Shell: !Ref Shell
         StandalonePasswordHash: !Ref StandalonePasswordHash
         ResourcesTagName: !Ref ResourcesTagName
         StandaloneHostname: !Ref StandaloneHostname
         AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
         StandaloneBootstrapScript: !Ref StandaloneBootstrapScript
         NTPPrimary: !Ref NTPPrimary
         NTPSecondary: !Ref NTPSecondary
-        AdminSubnet: !Ref AdminSubnet
+        AdminCIDR: !Ref AdminCIDR
         GatewaysAddresses: !Ref GatewaysAddresses
 Outputs:
   CheckPointInstancePublicAddress:
     Condition: AllocateAddress
-    Description: The public address of the Check Point instance
+    Description: The public address of the Check Point instance.
     Value: !GetAtt StandaloneStack.Outputs.PublicAddress
   CheckPointInstanceSSH:
     Condition: AllocateAddress
-    Description: SSH command to the Check Point instance
+    Description: SSH command to the Check Point instance.
     Value: !GetAtt StandaloneStack.Outputs.SSH
   CheckPointInstanceURL:
     Condition: AllocateAddress
-    Description: URL to the portal
+    Description: URL to the portal.
     Value: !GetAtt StandaloneStack.Outputs.URL

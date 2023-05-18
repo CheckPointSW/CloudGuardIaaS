@@ -19,6 +19,7 @@ Metadata:
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
+          - TerminationProtection
       - Label:
           default: IAM Permissions (ignored when the installation is not Primary Management
             Server)
@@ -66,6 +67,8 @@ Metadata:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
       ManagementPermissions:
         default: IAM role
       ManagementPredefinedRole:
@@ -100,37 +103,92 @@ Metadata:
         default: Secondary NTP server
 Parameters:
   VPC:
-    Description: Select an existing VPC
+    Description: Select an existing VPC.
     Type: AWS::EC2::VPC::Id
     MinLength: 1
   ManagementSubnet:
     Description: To access the instance from the internet, make sure the subnet has
-      a route to the internet
+      a route to the internet.
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   ManagementName:
-    Description: The Management name tag
+    Description: The Management name tag.
     Type: String
     Default: Check-Point-Management
   ManagementInstanceType:
-    Description: The instance type of the Security Management Server
+    Description: The instance type of the Security Management Server.
     Type: String
     Default: m5.xlarge
     AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.18xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
       - m5.large
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
+      - m5.8xlarge
       - m5.12xlarge
       - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.12xlarge
+      - m6i.24xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.12xlarge
+      - c6i.24xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.12xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.12xlarge
+      - r5n.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.12xlarge
+      - m6a.24xlarge
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
   AllocatePublicAddress:
-    Description: Allocate an elastic IP for the Management
+    Description: Allocate an elastic IP for the Management.
     Type: String
     Default: true
     AllowedValues:
@@ -148,18 +206,25 @@ Parameters:
       - gp3
       - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Enable SSH connection over AWS web console
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
     AllowedValues:
       - true
       - false
   ManagementPermissions:
-    Description: IAM role to attach to the instance profile
+    Description: IAM role to attach to the instance profile.
     Type: String
     Default: Create with read permissions
     AllowedValues:
@@ -169,18 +234,18 @@ Parameters:
       - Create with read permissions
       - Create with read-write permissions
   ManagementPredefinedRole:
-    Description: A predefined IAM role to attach to the instance profile. Ignored
+    Description: A predefined IAM role to attach to the instance profile. Ignored.
       if IAM role is not set to 'Use existing'
     Type: String
     Default: ''
   ManagementSTSRoles:
     Description: The IAM role will be able to assume these STS Roles (comma separated
       list of ARNs, without spaces). Ignored if IAM role is set to 'None' or 'Use
-      existing'
+      existing'.
     Type: CommaDelimitedList
     Default: ''
   ManagementVersion:
-    Description: The license to install on the Security Management Server
+    Description: The license to install on the Security Management Server.
     Type: String
     Default: R81.10-BYOL
     AllowedValues:
@@ -190,8 +255,10 @@ Parameters:
       - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
+      - R81.20-BYOL
+      - R81.20-PAYG
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -201,19 +268,19 @@ Parameters:
       - /bin/tcsh
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash) (optional)
+      to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ManagementHostname:
-    Description: (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: mgmt-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   PrimaryManagement:
-    Description: Determines if this is the primary Management Server or not
+    Description: Determines if this is the primary Management Server or not.
     Type: String
     Default: true
     AllowedValues:
@@ -223,16 +290,15 @@ Parameters:
     Description: >-
       Mandatory only if deploying a secondary Management Server, the Secure Internal
       Communication key creates trusted connections between Check Point components.
-      Choose a random string consisting of at least 8 alphanumeric characters
+      Choose a random string consisting of at least 8 alphanumeric characters.
     Type: String
     Default: ''
     AllowedPattern: '(|[a-zA-Z0-9]{8,})'
     ConstraintDescription: Can be empty if this is a primary Management Server. Otherwise,
-      at least 8 alpha numeric characters
+      at least 8 alpha numeric characters.
     NoEcho: true
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
@@ -240,24 +306,24 @@ Parameters:
       - false
   AdminCIDR:
     Description: Allow web, SSH, and graphical clients only from this network to communicate
-      with the Management Server
+      with the Management Server.
     Type: String
-    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$'
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewaysAddresses:
     Description: Allow gateways only from this network to communicate with the Management
-      Server
+      Server.
     Type: String
-    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$'
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewayManagement:
     Description: Select 'Over the internet' if any of the gateways you wish to manage
-      are not directly accessed via their private IP address
+      are not directly accessed via their private IP address.
     Type: String
     Default: Locally managed
     AllowedValues:
       - Locally managed
       - Over the internet
   ManagementBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -395,127 +461,24 @@ Resources:
             KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
             VolumeType: !Ref VolumeType
             VolumeSize: !Ref VolumeSize
+      DisableApiTermination: !Ref TerminationProtection
       UserData:
         'Fn::Base64':
           !Join
           - |+
 
-          - - '#!/bin/bash'
-            - 'set -e'
-            - 'logfile=/var/log/aws-user-data.log'
-            - '> ${logfile}'
-            - 'exec 1>>${logfile} 2>>${logfile}'
-            - 'function report-status() {'
-            - '    local rc=${?}'
-            - '    local status=""'
-            - '    local reason="Security Management Server configuration"'
-            - '    local data=""'
-            - '    set +e'
-            - '    printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >${CPDIR}/tmp/wait-handle.crt'
-            - '    cat ${CPDIR}/conf/ca-bundle.crt >>${CPDIR}/tmp/wait-handle.crt'
-            - '    if [[ ${rc} -eq 0 ]]; then'
-            - '        status="SUCCESS"'
-            - '        reason+=" completed"'
-            - '        data="Configuration completed."'
-            - '    else'
-            - '        status="FAILURE"'
-            - '        reason+=" failed"'
-            - '        data="None"'
-            - '    fi'
-            - '    echo "Reporting status ${status}: ${reason}"'
-            - '    curl_cli -s -S --cacert ${CPDIR}/tmp/wait-handle.crt -X PUT -H "Content-Type:" --data-binary "{\"Status\" : \"${status}\", \"Reason\" : \"${reason}\", \"UniqueId\" : \"${instance_id}\", \"Data\" : \"${data}\"}" ${wait_handle}'
-            - '}'
-            - 'echo -e "\nStarting user-data\n"'
-            - 'echo "Setting up parameters"'
-            - !Sub 'pwd_hash=''${ManagementPasswordHash}'' ; shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; primary=${PrimaryManagement} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
-            - !If [EIP, !Sub 'wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [NoSIC, 'sic=""', !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref ManagementSICKey, ' | base64 -d)"']]]
-            - !If [ManageOverInternetAndEIP, 'pub_mgmt=true', 'pub_mgmt=false']
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ' | base64 -d)"']]
-            - 'echo "Generating TOKEN"'
-            - 'TOKEN=`curl_cli -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 3600"`'
-            - 'echo "Getting instance id"'
-            - 'instance_id="$(curl_cli -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)"'
-            - 'if [[ -n ${wait_handle} ]] && ${eip}; then'
-            - '    trap report-status EXIT'
-            - 'fi'
-            - 'echo "Updating cloud-version file"'
-            - 'template="management"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'echo "Updating cloud-version file"'
-            - 'if test -f ${cv_path}; then'
-            - '    echo template_name: ${template} >> ${cv_path}'
-            - '    echo template_version: 20211212 >> ${cv_path}'
-            - 'fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then'
-            - '    cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' | jq ''.template_version = "20211212"'' > ${cv_json_path_tmp}'
-            - '    mv ${cv_json_path_tmp} ${cv_json_path}'
-            - 'fi'
-            - 'if [[ -z ${pwd_hash} ]]; then'
-            - '    echo "Generating random password hash"'
-            - '    pwd_hash="$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)"'
-            - 'fi'
-            - 'echo "Setting admin password"'
-            - 'clish -c "set user admin password-hash ${pwd_hash}" -s'
-            - 'echo "Setting admin shell to ${shell}"'
-            - 'clish -c "set user admin shell ${shell}" -s'
-            - 'if [[ -n ${ntp1} ]]; then'
-            - '    echo "Setting primary NTP server to ${ntp1}"'
-            - '    clish -c "set ntp server primary ${ntp1} version 4" -s'
-            - '    if [[ -n ${ntp2} ]]; then'
-            - '        echo "Setting secondary NTP server to ${ntp2}"'
-            - '        clish -c "set ntp server secondary ${ntp2} version 4" -s'
-            - '    fi'
-            - '    clish -c "set ntp active on" -s'
-            - 'fi'
-            - 'if [[ -n ${hostname} ]]; then'
-            - '    echo "Setting hostname to ${hostname}"'
-            - '    clish -c "set hostname ${hostname}" -s'
-            - 'fi'
-            - 'if [[ "0.0.0.0/0" == ${admin_subnet} ]]; then'
-            - '    mgmt_clients="mgmt_gui_clients_radio=any"'
-            - 'else'
-            - '    admin_subnet_ip="$(echo ${admin_subnet} | cut -d / -f 1)"'
-            - '    admin_subnet_bits="$(echo ${admin_subnet} | cut -d / -f 2)"'
-            - '    mgmt_clients="mgmt_gui_clients_radio=network&mgmt_gui_clients_ip_field=${admin_subnet_ip}&mgmt_gui_clients_subnet_field=${admin_subnet_bits}"'
-            - 'fi'
-            - 'if ${primary}; then'
-            - '    secondary=false'
-            - '    sic=notused'
-            - 'else'
-            - '    secondary=true'
-            - 'fi'
-            - 'echo "Starting First Time Wizard"'
-            - 'config_system -s "install_security_gw=false&install_security_managment=true&${mgmt_clients}&install_mgmt_primary=${primary}&install_mgmt_secondary=${secondary}&mgmt_admin_radio=gaia_admin&ftw_sic_key=${sic}&download_info=${allow_info}&upload_info=${allow_info}"'
-            - 'if ${eic}; then'
-            - '    echo "Enabling ec2 instance connect"'
-            - '    if [[ -d "/etc/ec2-instance-connect" ]]; then'
-            - '        ec2-instance-connect-config on'
-            - '    else'
-            - '        echo "Could not enable eic, /etc/ec2-instance-connect was not found"'
-            - '    fi'
-            - 'fi'
-            - 'if ${primary}; then'
-            - '    until mgmt_cli -r true discard; do'
-            - '        sleep 30'
-            - '    done'
-            - 'fi'
-            - 'if ${pub_mgmt}; then'
-            - '    addr="$(ip addr show dev eth0 | sed -n -e ''s|^ *inet \([^/]*\)/.*eth0$|\1|p'')"'
-            - '    pub_addr="$(ip addr show dev eth0 | sed -n -e ''s|^ *inet \([^/]*\)/.*eth0:1$|\1|p'')"'
-            - '    uid="$(mgmt_cli -r true show-generic-objects class-name com.checkpoint.objects.classes.dummy.CpmiHostCkp details-level full -f json | jq -r ''.objects[] | select(.ipaddr == "''"${addr}"''") | .uid'')"'
-            - '    if [[ -n ${uid}  && -n ${pub_addr} ]]; then'
-            - '        mgmt_cli -r true set-generic-object uid "${uid}" ipaddr "${pub_addr}"'
-            - '    fi'
-            - 'fi'
-            - 'chkconfig --add autoprovision'
-            - 'service autoprovision start'
-            - 'if [[ -n ${bootstrap} ]]; then'
-            - '    echo "Invoking bootstrap script"'
-            - '    eval ${bootstrap}'
-            - 'fi'
+          - - '#cloud-config'
+            - 'runcmd:'
+            - '  - |'
+            - '    set -e'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; primary_mgmt=${PrimaryManagement} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
+            - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref ManagementSICKey, ')"']]]
+            - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
+            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
+            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
+            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
+            - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
   PublicAddress:
     Type: AWS::EC2::EIP
     Condition: EIP
@@ -531,13 +494,13 @@ Resources:
 Outputs:
   PublicAddress:
     Condition: EIP
-    Description: The public address of the Management Server
+    Description: The public address of the Management Server.
     Value: !Ref PublicAddress
   SSH:
     Condition: EIP
-    Description: SSH command
+    Description: SSH command.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
   URL:
     Condition: EIP
-    Description: URL to the portal
+    Description: URL to the portal.
     Value: !Join ['', ['https://', !Ref PublicAddress]]

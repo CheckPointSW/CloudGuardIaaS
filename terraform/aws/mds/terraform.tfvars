@@ -7,10 +7,11 @@ subnet_id = "subnet-abc123"
 // --- EC2 Instances Configuration ---
 mds_name = "CP-MDS-tf"
 mds_instance_type = "m5.12xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
 enable_instance_connect = false
+disable_instance_termination = false
 instance_tags = {
   key1 = "value1"
   key2 = "value2"
@@ -24,7 +25,7 @@ sts_roles = []
 // --- Check Point Settings ---
 mds_version = "R81-BYOL"
 mds_admin_shell = "/bin/bash"
-mds_password_hash = "12345678"
+mds_password_hash = ""
 
 // --- Multi-Domain Server Settings ---
 mds_hostname = "mds-tf"

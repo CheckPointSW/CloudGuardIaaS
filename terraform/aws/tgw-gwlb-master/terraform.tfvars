@@ -30,10 +30,11 @@ gwlbe_subnet_3_cidr = "10.0.34.0/24"
 gwlbe_subnet_4_cidr = "10.0.44.0/24"
 
 // --- General Settings ---
-key_name = ""
+key_name = "publickey"
 enable_volume_encryption = true
 volume_size = 100
 enable_instance_connect = false
+disable_instance_termination = false
 allow_upload_download = true
 management_server = "CP-Management-gwlb-tf"
 configuration_template = "gwlb-configuration"
@@ -50,16 +51,17 @@ gateway_instance_type = "c5.xlarge"
 minimum_group_size = 2
 maximum_group_size = 10
 gateway_version = "R80.40-BYOL"
-gateway_password_hash = "12345678"
+gateway_password_hash = ""
 gateway_SICKey = "12345678"
 gateways_provision_address_type = "private"
+allocate_public_IP = false
 enable_cloudwatch = false
 
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
 management_deploy = true
 management_instance_type = "m5.xlarge"
 management_version = "R81.10-BYOL"
-management_password_hash = "12345678"
+management_password_hash = ""
 gateways_policy = "Standard"
 gateway_management = "Locally managed"
 admin_cidr = "0.0.0.0/0"

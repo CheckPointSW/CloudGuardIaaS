@@ -5,7 +5,7 @@ locals {
   // will fail if [var.license] is invalid:
   validate_license = index(local.license_allowed_values, upper(var.license))
 
-  regex_validate_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-mig-[0-9]{3}-([0-9]{3}|[a-z]+)-v[0-9]{8,}"
+  regex_validate_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-mig-[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}"
   // will fail if the image name is not in the right syntax
   validate_image_name = length(regexall(local.regex_validate_image_name, var.image_name)) > 0 ? 0 : index(split("-", var.image_name), "INVALID IMAGE NAME")
 

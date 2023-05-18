@@ -130,6 +130,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
@@ -230,6 +235,18 @@ variable "gateways_provision_address_type" {
   description = "Determines if the gateways are provisioned using their private or public address"
   default = "private"
 }
+
+variable "allocate_public_IP" {
+  type = bool
+  description = "Allocate an Elastic IP for security gateway."
+  default = false
+}
+
+resource "null_resource" "invalid_allocation" {
+  // Will fail if var.gateways_provision_address_type is public and var.allocate_public_IP is false
+  count = var.gateways_provision_address_type != "public" ? 0 : var.allocate_public_IP == true ? 0 : "Gateway's selected to be provisioned by public IP, but [allocate_public_IP] parameter is false"
+}
+
 variable "enable_cloudwatch" {
   type = bool
   description = "Report Check Point specific CloudWatch metrics."

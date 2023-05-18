@@ -11,13 +11,16 @@ resources:
   properties:
       ha_version: "PLEASE ENTER HA VERSION"
       zoneA: "PLEASE ENTER ZONE A"
-      zoneB: "PLEASE ENTER ZONE B. MUST BE EQUAL TO ZONE A"
+      zoneB: "PLEASE ENTER ZONE B. MUST BE IN THE SAME REGION AS MEMBER A ZONE"
       machineType: "PLEASE ENTER A MACHINE TYPE"
       diskType: "PLEASE ENTER A DISK TYPE"
+      #To connect to Smart-1 Cloud you must provide two valid tokens (one per member)
+      smart1CloudTokenA: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD FOR MEMBER A OR LEAVE EMPTY DOUBLE QUOTES"
+      smart1CloudTokenB: "PLEASE ENTER A TOKEN TO CONNECT TO SMART-1 CLOUD FOR MEMBER B OR LEAVE EMPTY DOUBLE QUOTES"
       bootDiskSizeGb: "PLEASE ENTER A DISK SIZE"
       instanceSSHKey: "PLEASE ENTER A VALID PUBLIC KEY"
       enableMonitoring: "PLEASE ENTER true or false"
-      managementNetwork: "PLEASE ENTER MANAGEMENT IP"
+      managementNetwork: "PLEASE ENTER MANAGEMENT IP, if using Smart-1 Cloud insert 'S1C'"
       sicKey: "PLEASE ENTER A SIC KEY"
       generatePassword: "PLEASE ENTER true or false"
       allowUploadDownload: "PLEASE ENTER true or false"

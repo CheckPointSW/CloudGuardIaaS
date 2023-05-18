@@ -117,7 +117,7 @@ project = "project-name"
 # --- Check Point Deployment ---
 prefix = "chkp-tf-ha"
 license = "BYOL"
-image_name = "check-point-r8040-gw-byol-cluster-123-456-v12345678"
+image_name = "check-point-r8110-gw-byol-cluster-335-985-v20220126"
 
 # --- Instances Configuration ---
 region = "us-central1"
@@ -135,6 +135,10 @@ sic_key = "aaaaaaaa"
 generate_password = false
 allow_upload_download = false
 admin_shell = "/bin/bash"
+
+#--- Quick connect to Smart-1 Cloud ---
+smart_1_cloud_token_a = "xxxxxxxxxxxxxxxxxxxxxxxx"
+smart_1_cloud_token_b = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Networking ---
 cluster_network_cidr = "10.0.1.0/24"
@@ -221,7 +225,7 @@ internal_network1_subnetwork_name = ""
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-ha" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
-| image_name | The High Availability (cluster) image name (e.g. check-point-r8040-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
+| image_name | The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
 |  |  |  |  |  |
 | region  | GCP region  | string  | N/A | "us-central1" | no |
 | zoneA  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
@@ -231,11 +235,13 @@ internal_network1_subnetwork_name = ""
 | disk_size | Disk size in GB - Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. | number | number between 100 and 4096 | 100 | no |
 | enable_monitoring | Enable Stackdriver monitoring | bool | true/false | false | no |
 |  |  |  |  |  |
-| management_network  | Security Management Server address - The public address of the Security Management Server, in CIDR notation. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address.  | string  | N/A | N/A | yes |
+| management_network  | Security Management Server address - The public address of the Security Management Server, in CIDR notation. If using Smart-1 Cloud management, insert 'S1C'. VPN peers addresses cannot be in this CIDR block, so this value cannot be the zero-address.  | string  | N/A | N/A | yes |
 | sic_key  | The Secure Internal Communication one time secret used to set up trust between the cluster object and the management server. At least 8 alpha numeric characters. If SIC is not provided and needed, a key will be automatically generated  | string  | N/A | N/A | yes |
 | generate_password  | Automatically generate an administrator password.  | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
 | admin_shell | Change the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
+| smart_1_cloud_token_a | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
+| smart_1_cloud_token_b | Smart-1 Cloud token to connect ***member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 | cluster_network_cidr  | Cluster external subnet CIDR. If the variable's value is not empty double quotes, a new network will be created. The Cluster public IP will be translated to a private address assigned to the active member in this external network.  | string  | N/A | "10.0.0.0/24" | no |
 | cluster_network_name  | Cluster external network ID in the chosen zone. The network determines what network traffic the instance can access.If you have specified a CIDR block at var.cluster_network_cidr, this network name will not be used.  | string  | N/A | "" | no |
 | cluster_network_subnetwork_name  | Cluster subnet ID in the chosen network. Assigns the instance an IPv4 address from the subnetwork’s range. If you have specified a CIDR block at var.cluster_network_cidr, this subnetwork will not be used. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network.  | string  | N/A | "" | no |
@@ -293,6 +299,10 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230209 | Added Smart-1 Cloud support. |
+| | | |
+| 20230109 | Updated startup script to use cloud-config. |
+| | | |
 | 20201208 | First release of Check Point Check Point CloudGuard IaaS High Availability Terraform solution on GCP. |
 | | | |
 |  | Addition of "template_type" parameter to "cloud-version" files. |

@@ -51,6 +51,11 @@ variable "volume_size" {
   description = "Root volume size (GB) - minimum 100"
   default = 100
 }
+variable "disk_category" {
+  type = string
+  description = "(Optional) Category of the ECS disk"
+  default = "cloud_efficiency"
+}
 variable "ram_role_name" {
   type = string
   description = "A predefined RAM role name to attach to the cluster's security gateway instances"

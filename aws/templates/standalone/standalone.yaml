@@ -22,6 +22,7 @@ Metadata:
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
+          - TerminationProtection
       - Label:
           default: Check Point Settings
         Parameters:
@@ -34,10 +35,11 @@ Metadata:
           - ResourcesTagName
           - StandaloneHostname
           - AllowUploadDownload
+          - CloudWatch
           - StandaloneBootstrapScript
           - NTPPrimary
           - NTPSecondary
-          - AdminSubnet
+          - AdminCIDR
           - GatewaysAddresses
     ParameterLabels:
       VPC:
@@ -64,6 +66,8 @@ Metadata:
         default: Volume encryption KMS key identifier
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
       StandaloneVersion:
         default: License
       Shell:
@@ -76,13 +80,15 @@ Metadata:
         default: Standalone Hostname
       AllowUploadDownload:
         default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
       StandaloneBootstrapScript:
         default: Bootstrap Script
       NTPPrimary:
         default: Primary NTP server
       NTPSecondary:
         default: Secondary NTP server
-      AdminSubnet:
+      AdminCIDR:
         default: Administrator addresses
       GatewaysAddresses:
         default: Gateways addresses
@@ -91,15 +97,15 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     MinLength: 1
   PublicSubnet:
-    Description: The public subnet of the Security Gateway
+    Description: The public subnet of the Security Gateway.
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   PrivateSubnet:
-    Description: The private subnet of the Security Gateway
+    Description: The private subnet of the Security Gateway.
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   InternalRouteTable:
-    Description: Set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the Route Table. (optional)
+    Description: The route table id in which to set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
     Type: String
     Default: ''
   StandaloneName:
@@ -126,9 +132,53 @@ Parameters:
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.12xlarge
+      - m6i.24xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.12xlarge
+      - c6i.24xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.12xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.12xlarge
+      - r5n.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.12xlarge
+      - m6a.24xlarge
     ConstraintDescription: Must be a valid EC2 instance type
   KeyName:
-    Description: The EC2 Key Pair to allow SSH access to the instance
+    Description: The EC2 Key Pair to allow SSH access to the instance.
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
@@ -150,27 +200,34 @@ Parameters:
       - gp3
       - gp2
   VolumeEncryption:
-    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs')
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
     Type: String
     Default: alias/aws/ebs
   EnableInstanceConnect:
-    Description: Ec2 Instance Connect is not supported with versions prior to R80.40
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
     Default: false
     Type: String
     AllowedValues:
       - true
       - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StandaloneVersion:
-    Description: Select BYOL if you plan on using your own license or PAYG if you
-      wish to pay as you go.
+    Description: Standalone Version & License.
     Type: String
     Default: R81.10-PAYG-NGTP
     AllowedValues:
       - R80.40-PAYG-NGTP
       - R81-PAYG-NGTP
       - R81.10-PAYG-NGTP
+      - R81.20-PAYG-NGTP
   Shell:
-    Description: Change the admin shell to enable advanced command line configuration
+    Description: Change the admin shell to enable advanced command line configuration.
     Type: String
     Default: /etc/cli.sh
     AllowedValues:
@@ -180,31 +237,37 @@ Parameters:
       - /bin/tcsh
   StandalonePasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
-      to get the PASSWORD's hash) (optional)
+      to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ResourcesTagName:
-    Description: The name tag of the resources (optional)
+    Description: The name tag of the resources. (optional)
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
-    ConstraintDescription: A valid hostname label or an empty string
+    ConstraintDescription: A valid hostname label or an empty string.
   AllowUploadDownload:
-    Description: Automatically download Blade Contracts and other important data.
-      Improve product experience by sending data to Check Point
+    Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
     Default: true
     AllowedValues:
       - true
       - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   StandaloneBootstrapScript:
-    Description: An optional script with semicolon (;) separated commands to run on the initial boot (optional)
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
     NoEcho: true
@@ -218,21 +281,22 @@ Parameters:
     Type: String
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
-  AdminSubnet:
-    Description: Allow web, SSH, and graphical clients only from this network to communicate
-      with the Management Server
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate.
+      with the Management Server.
     Type: String
-    AllowedPattern: '^([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2])$'
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management
-      Server (optional)
+    Description: Allow gateways only from this network to communicate with the Management.
+      Server. (optional)
     Type: String
-    AllowedPattern: '^(([0-9]{1,3}\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2]))?$'
+    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
 Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
 Resources:
   ReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -245,6 +309,32 @@ Resources:
     Properties:
       Handle: !Ref ReadyHandle
       Timeout: 1800
+  StandaloneIAMRole:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ ec2.amazonaws.com ]
+            Action: sts:AssumeRole
+      Path: /
+  StandaloneInstanceProfile:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [ !Ref StandaloneIAMRole ]
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
+        PolicyRole: !Ref StandaloneIAMRole
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -288,7 +378,7 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - PermissiveSecurityGroup
-      GroupDescription: Permissive security group
+      GroupDescription: Permissive security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: -1
@@ -315,109 +405,23 @@ Resources:
             KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
             VolumeType: !Ref VolumeType
             VolumeSize: !Ref VolumeSize
+      IamInstanceProfile: !If [EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue']
+      DisableApiTermination: !Ref TerminationProtection
       UserData:
         'Fn::Base64':
           !Join
           - |+
 
-          - - '#!/bin/bash'
-            - 'set -e'
-            - 'logfile=/var/log/aws-user-data.log'
-            - '> ${logfile}'
-            - 'exec 1>>${logfile} 2>>${logfile}'
-            - 'function report-status() {'
-            - '    local rc=${?}'
-            - '    local status=""'
-            - '    local reason="Standalone instance configuration"'
-            - '    local data=""'
-            - '    set +e'
-            - '    printf H4sIAEQeOVoCAzNoYuE3aGL6voCZiZGJiZHBgJeNU6vNo+07LyMjKyuDQYYhtwEnG3MoC5swU2iwoaqBMojDJSwTXJJYlJaZmpOiEJKanJGXn5OfnplarKPgmZesZ2hkYABSxi2siVDmnJNYXKxgpOCcWlSSmZaZnFiSmZ+n4FhakpFflFlSaSAnzmtgYmBmZGlobmxpaBYlzmuMzKWjS5oYFZCDgZGVgbmJkZcBKM7B1MTIyLDd6MS/l4XLWFrX8gim3D/n+/4Es0S7/cLVv22Wzf9weOGtKzfytIMn/FZZYtfyYd6L+DdP1V2+aiyzr773QOvDifXB+vNOsTJOlutPk7Fc7vsralsxi2ra6/L655HHvGaqioS8Vjv+uV7yqkFB//oNblr/177WfHt9/iqW9sVXfnYuNYm/7Tyxyexmms3GHTub/s6xshM4Yf2eLTWtarakhO3/wkAbA734fbblxZti2XIOK4fN0m5VmySznGnzE3ve9RyVTTvMbF/NuWy6eU/mqa9n5r74m9Ir3mCcF+cVO/OkXPuWuVIHruYJmyrH3Z8db/v+2veyQ6/sdlfwyjilZ7Pc+HHtVn73J5cFjKuZGJkXNx41aDxkIAsMW1k+FjEWkf3x2y+euyvf9iU6dM2d6wKH+FZ2PDdonASSV2Zp7DJobG/AqmZhzpIs+kVtEzCB84DcJMzCasDMyPgfLbkzg6KXda59x9yLJ6VCF67J/Pw58tZsxnYp//CVCys5tW5/198kd+Z4XNaN5vaF0997mtqVszlGJO3vi9jBlW7/ZvNdxTT5kyG/is7Y+jjcaFxfPq+5avei419NxPtuCjp8+aOj5StavzwpVk/1MgO3gpRsxk/xHV/2dr/ViLzrK9Yt3nxiU+px3aqlq/YEt+XeDV9y6oeCI3fGhy+/S/aFxVZVfv0p2/pYd+q+r4UTnM/0ys9i4GrXfBmqFMGg/OqxkLNmtDvH3R7HrFS2FU8VVzlumao4dWftRZPVwtfW7rnzyNby7F670oKFEpHMJ5W29M+5Gqd1fem2K1y5P7Y7CLrNkq/kS9rPP/3NA3158SkAHEuNARMEAAA= | base64 -d | gunzip -c | cpopenssl x509 -inform DER >${CPDIR}/tmp/wait-handle.crt'
-            - '    cat ${CPDIR}/conf/ca-bundle.crt >>${CPDIR}/tmp/wait-handle.crt'
-            - '    if [[ ${rc} -eq 0 ]]; then'
-            - '        status="SUCCESS"'
-            - '        reason+=" completed"'
-            - '        data="Configuration completed."'
-            - '    else'
-            - '        status="FAILURE"'
-            - '        reason+=" failed"'
-            - '        data="None"'
-            - '    fi'
-            - '    echo "Reporting status ${status}: ${reason}"'
-            - '    curl_cli -s -S --cacert ${CPDIR}/tmp/wait-handle.crt -X PUT -H "Content-Type:" --data-binary "{\"Status\" : \"${status}\", \"Reason\" : \"${reason}\", \"UniqueId\" : \"${instance_id}\", \"Data\": \"${data}\"}" "${wait_handle}"'
-            - '}'
-            - 'echo -e "\nStarting user-data\n"'
-            - 'echo "Setting up parameters"'
-            - !Sub 'pwd_hash=''${StandalonePasswordHash}'' ; shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; admin_subnet=${AdminSubnet}'
-            - !If [AllocateAddress, !Sub 'wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ' | base64 -d)"']]
-            - !Join ['', ['bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ' | base64 -d)"']]
-            - 'echo "Generating TOKEN"'
-            - 'TOKEN=`curl_cli -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 3600"`'
-            - 'echo "Getting instance id"'
-            - 'instance_id="$(curl_cli -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)"'
-            - 'if [[ -n ${wait_handle} ]] && ${eip}; then'
-            - '    trap report-status EXIT'
-            - 'fi'
-            - 'echo "Updating cloud-version file"'
-            - 'template="standalone"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'echo "Updating cloud-version file"'
-            - 'if test -f ${cv_path}; then'
-            - '    echo template_name: ${template} >> ${cv_path}'
-            - '    echo template_version: 20211212 >> ${cv_path}'
-            - 'fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then'
-            - '    cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' | jq ''.template_version = "20211212"'' > ${cv_json_path_tmp}'
-            - '    mv ${cv_json_path_tmp} ${cv_json_path}'
-            - 'fi'
-            - 'if [[ -z ${pwd_hash} ]]; then'
-            - '    echo "Generating random password hash"'
-            - '    pwd_hash="$(dd if=/dev/urandom count=1 2>/dev/null | sha1sum | cut -c -28)"'
-            - 'fi'
-            - 'echo "Setting admin shell to ${shell}"'
-            - 'clish -c "set user admin shell ${shell}" -s'
-            - 'if [[ -n ${ntp1} ]]; then'
-            - '   echo "Setting primary NTP server to ${ntp1}"'
-            - '   clish -c "set ntp server primary ${ntp1} version 4" -s'
-            - '   if [[ -n ${ntp2} ]]; then'
-            - '       echo "Setting secondary NTP server to ${ntp2}"'
-            - '       clish -c "set ntp server secondary ${ntp2} version 4" -s'
-            - '   fi'
-            - '   clish -c "set ntp active on" -s'
-            - 'fi'
-            - 'if [[ -n ${hostname} ]]; then'
-            - '   echo "Setting hostname to ${hostname}"'
-            - '   clish -c "set hostname ${hostname}" -s'
-            - 'fi'
-            - 'if [[ "0.0.0.0/0" == ${admin_subnet} ]]; then'
-            - '    mgmt_clients="mgmt_gui_clients_radio=any"'
-            - 'else'
-            - '    admin_subnet_ip="$(echo ${admin_subnet} | cut -d / -f 1)"'
-            - '    admin_subnet_bits="$(echo ${admin_subnet} | cut -d / -f 2)"'
-            - '    mgmt_clients="mgmt_gui_clients_radio=network&mgmt_gui_clients_ip_field=${admin_subnet_ip}&mgmt_gui_clients_subnet_field=${admin_subnet_bits}"'
-            - 'fi'
-            - 'echo "Starting First Time Wizard"'
-            - 'config_system -s "install_security_gw=true&install_ppak=true&gateway_cluster_member=false&install_security_managment=true&${mgmt_clients}&download_info=${allow_info}&upload_info=${allow_info}&install_mgmt_primary=true&install_mgmt_secondary=false&mgmt_admin_radio=gaia_admin&ftw_sic_key=notused"'
-            - 'echo "Setting admin password"'
-            - 'clish -c "set user admin password-hash ${pwd_hash}" -s'
-            - 'if ${eic}; then'
-            - '    echo "Enabling ec2 instance connect"'
-            - '    if [[ -d "/etc/ec2-instance-connect" ]]; then'
-            - '        ec2-instance-connect-config on'
-            - '    else'
-            - '        echo "Could not enable eic, /etc/ec2-instance-connect was not found"'
-            - '    fi'
-            - 'fi'
-            - 'chkconfig --add autoprovision'
-            - 'service autoprovision start'
-            - 'if [[ -n ${bootstrap} ]]; then'
-            - '    echo "Invoking bootstrap script"'
-            - '    eval ${bootstrap}'
-            - 'fi'
-            - 'echo "Rebooting..."'
-            - 'shutdown -r now'
+          - - '#cloud-config'
+            - 'runcmd:'
+            - '  - |'
+            - '    set -e'
+            - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; admin_subnet=${AdminCIDR}'
+            - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
+            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"']]
+            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"']]
+            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref StandaloneVersion]]}]
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       KeyName: !Ref KeyName
       NetworkInterfaces:
         - DeviceIndex: 0
@@ -440,13 +444,13 @@ Resources:
 Outputs:
   PublicAddress:
     Condition: AllocateAddress
-    Description: The public address of the Check Point instance
+    Description: The public address of the Check Point instance.
     Value: !Ref PublicAddress
   SSH:
     Condition: AllocateAddress
-    Description: SSH command to the Check Point instance
+    Description: SSH command to the Check Point instance.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
   URL:
     Condition: AllocateAddress
-    Description: URL to the portal
+    Description: URL to the portal.
     Value: !Join ['', ['https://', !Ref PublicAddress ]]

@@ -17,4 +17,9 @@ locals {
 
   // Create RAM Role only if input variable ram_role_name was not provided
   create_ram_role = var.ram_role_name == "" ? 1 : 0
+  gw_old_config_values = [
+    "R81-BYOL",
+    "R81.10-BYOL"
+  ]
+   cluster_new_config = contains(local.gw_old_config_values, var.gateway_version) ? 0 : 1
 }

@@ -5,7 +5,7 @@ locals {
   // will fail if [var.license] is invalid:
   validate_license = index(local.license_allowed_values, upper(var.license))
 
-  regex_validate_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-cluster-[0-9]{3}-([0-9]{3}|[a-z]+)-v[0-9]{8,}"
+  regex_validate_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-cluster-[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}"
   // will fail if the image name is not in the right syntax
   validate_image_name = length(regexall(local.regex_validate_image_name, var.image_name)) > 0 ? 0 : index(split("-", var.image_name), "INVALID IMAGE NAME")
 
@@ -14,9 +14,9 @@ locals {
   // will fail if the var.zoneA and var.zoneB are not at the same region:
   validate_zones = index(local.split_zoneA, local.split_zoneB[0]) == local.split_zoneA[0] && index(local.split_zoneA, local.split_zoneB[1]) == local.split_zoneA[0] ? 0 : "var.zoneA and var.zoneB are not at the same region"
 
-  regex_valid_management_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
+  regex_valid_management_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))|(S1C)$"
   // Will fail if var.management_network is invalid
-  regex_management_network = regex(local.regex_valid_management_network, var.management_network) == var.management_network ? 0 : "Variable [management_network] must be a valid address in CIDR notation."
+  regex_management_network = regex(local.regex_valid_management_network, var.management_network) == var.management_network ? 0 : "Variable [management_network] must be a valid address in CIDR notation or 'S1C'."
 
   regex_valid_network_cidr = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))|$"
 

@@ -47,6 +47,11 @@ variable "enable_instance_connect" {
   description = "Enable SSH connection over AWS web console"
   default = false
 }
+variable "disable_instance_termination" {
+  type = bool
+  description = "Prevents an instance from accidental termination"
+  default = false
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
@@ -104,7 +109,7 @@ variable "gateways_max_group_size" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81-BYOL"
+  default = "R81.10-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"
@@ -147,7 +152,7 @@ module "validate_management_instance_type" {
 variable "management_version" {
   type = string
   description =  "The license to install on the Security Management Server"
-  default = "R80.40-PAYG"
+  default = "R81.10-BYOL"
 }
 module "validate_management_version" {
   source = "../modules/common/version_license"

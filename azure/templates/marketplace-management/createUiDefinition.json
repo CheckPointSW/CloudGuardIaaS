@@ -69,10 +69,6 @@
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "R80.30",
-                  "value": "R80.30"
-                },
-                {
                   "label": "R80.40",
                   "value": "R80.40"
                 },
@@ -83,6 +79,10 @@
                 {
                   "label": "R81.10",
                   "value": "R81.10"
+                },
+                {
+                  "label": "R81.20",
+                  "value": "R81.20"
                 }
               ]
             }
@@ -108,69 +108,14 @@
             }
           },
           {
-            "name": "R8030vmSizeUiBYOL",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.30'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D3_v2"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8030",
-              "sku": "mgmt-byol"
-            },
-            "count": 1
-          },
-          {
-            "name": "R8030vmSizeUiMGMT25",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.30'), contains(steps('chkp').R80Offer, '(MGMT25)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D3_v2"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8030",
-              "sku": "mgmt-25"
-            },
-            "count": 1
-          },
-          {
             "name": "R8040vmSizeUiBYOL",
             "type": "Microsoft.Compute.SizeSelector",
             "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.40'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -198,7 +143,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -226,7 +172,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -254,7 +201,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -282,7 +230,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -310,7 +259,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D3_v2"
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
             ],
             "constraints": {
               "excludedSizes": [
@@ -327,6 +277,64 @@
             "imageReference": {
               "publisher": "checkpoint",
               "offer": "check-point-cg-r8110",
+              "sku": "mgmt-25"
+            },
+            "count": 1
+          },
+          {
+            "name": "R8120vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Management",
+            "recommendedSizes": [
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8120",
+              "sku": "mgmt-byol"
+            },
+            "count": 1
+          },
+          {
+            "name": "R8120vmSizeUiMGMT25",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, '(MGMT25)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Management",
+            "recommendedSizes": [
+              "Standard_DS3_v2",
+              "Standard_D3_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8120",
               "sku": "mgmt-25"
             },
             "count": 1
@@ -406,6 +414,46 @@
             }
           },
           {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
             "name": "enableApi",
             "type": "Microsoft.Common.DropDown",
             "label": "Accept Management API calls",
@@ -427,13 +475,13 @@
                 }
               ]
             },
-            "visible": "[not(or(equals(steps('chkp').cloudGuardVersion, 'R81'), equals(steps('chkp').cloudGuardVersion, 'R80.40'), equals(steps('chkp').cloudGuardVersion, 'R80.30')))]"
+            "visible": "[not(or(equals(steps('chkp').cloudGuardVersion, 'R81'), equals(steps('chkp').cloudGuardVersion, 'R80.40'))))]"
           },
           {
             "visible": "[equals(steps('chkp').installationType, 'management')]",
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Allow download from/upload to Check Point",
+            "label": "Automatically download updates and share statistical data for product improvement purpose",
             "defaultValue": "Yes",
             "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
             "constraints": {
@@ -458,26 +506,6 @@
             "constraints": {
               "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
               "validationMessage": "Select a number between 0 and 3995"
-            }
-          },
-          {
-            "name": "VMDiskType",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "VM disk type",
-            "toolTip": "Type of CloudGuard disk.",
-            "visible": "[or(contains(steps('chkp').R8030vmSizeUiBYOL, 'DS'), contains(steps('chkp').R8030vmSizeUiMGMT25, 'DS'))]",
-            "defaultValue": "Standard",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Standard",
-                  "value": "Standard_LRS"
-                },
-                {
-                  "label": "Premium",
-                  "value": "Premium_LRS"
-                }
-              ]
             }
           },
           {
@@ -559,6 +587,78 @@
                 }
               }
             }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "toolTip": "Choose between using an existing NSG or using a new NSG",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": true
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": false
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing NSG",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, false)]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "[concat(basics('gatewayNameUi') , '-nsg')]",
+            "toolTip": "Insert Name for the new NSG",
+            "multiLine": false,
+            "constraints": {
+              "required": "[steps('network').NSG]",
+              "regex": "^[a-z0-9A-Z-]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[steps('network').NSG]"
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "toolTip": "Create Azure tags for the new resources",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Network/networkSecurityGroups",
+              "Microsoft.Network/networkInterfaces",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks"
+            ]
           }
         ]
       }
@@ -570,7 +670,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8030vmSizeUiBYOL, steps('chkp').R8030vmSizeUiMGMT25, steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiMGMT25)]",
+      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiMGMT25, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiMGMT25)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
@@ -583,10 +683,14 @@
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
-      "diskType": "[coalesce(steps('chkp').VMDiskType, 'Standard_LRS')]",
+      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "enableApi": "[steps('chkp').enableApi]",
-      "adminShell": "[steps('chkp').adminShell]"
+      "adminShell": "[steps('chkp').adminShell]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[steps('network').NSG]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }

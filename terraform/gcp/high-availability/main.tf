@@ -245,4 +245,6 @@ module "members_a_b" {
   management_network = var.management_network
   primary_cluster_address_name = google_compute_address.primary_cluster_ip_ext_address.name
   secondary_cluster_address_name = google_compute_address.secondary_cluster_ip_ext_address.name
+  smart_1_cloud_token_a = var.smart_1_cloud_token_a
+  smart_1_cloud_token_b = var.smart_1_cloud_token_b
 }

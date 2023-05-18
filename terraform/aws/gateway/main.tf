@@ -19,6 +19,37 @@ module "common_permissive_sg" {
   gateway_name = var.gateway_name
 }
 
+resource "aws_iam_instance_profile" "gateway_instance_profile" {
+  count = local.enable_cloudwatch_policy
+  path = "/"
+  role = aws_iam_role.gateway_iam_role[count.index].name
+}
+
+resource "aws_iam_role" "gateway_iam_role" {
+  count = local.enable_cloudwatch_policy
+  assume_role_policy = data.aws_iam_policy_document.gateway_role_assume_policy_document.json
+  path = "/"
+}
+
+data "aws_iam_policy_document" "gateway_role_assume_policy_document" {
+  version = "2012-10-17"
+  statement {
+    effect = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+module "attach_cloudwatch_policy" {
+  source = "../modules/cloudwatch-policy"
+  count = local.enable_cloudwatch_policy
+  role = aws_iam_role.gateway_iam_role[count.index].name
+  tag_name = var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name
+}
+
 resource "aws_network_interface" "public_eni" {
   subnet_id = var.public_subnet_id
   security_groups = [module.common_permissive_sg.permissive_sg_id]
@@ -69,14 +100,18 @@ module "common_gateway_instance" {
   gateway_instance_type = var.gateway_instance_type
   instance_tags = var.instance_tags
   key_name = var.key_name
+  iam_instance_profile_id = (local.enable_cloudwatch_policy == 1 ? aws_iam_instance_profile.gateway_instance_profile[0].id : "")
   ami_id = module.amis.ami_id
   gateway_password_hash = var.gateway_password_hash
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
+  gateway_TokenKey = var.gateway_TokenKey
   gateway_bootstrap_script = var.gateway_bootstrap_script
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download
+  enable_cloudwatch = var.enable_cloudwatch
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
 }

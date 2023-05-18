@@ -45,12 +45,14 @@ module "launch_standalone_into_vpc" {
   volume_size = var.volume_size
   volume_encryption = var.volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  disable_instance_termination = var.disable_instance_termination
   instance_tags = var.instance_tags
   standalone_version = var.standalone_version
   admin_shell = var.admin_shell
   standalone_password_hash = var.standalone_password_hash
   standalone_hostname = var.standalone_hostname
   allow_upload_download = var.allow_upload_download
+  enable_cloudwatch = var.enable_cloudwatch
   standalone_bootstrap_script = var.standalone_bootstrap_script
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp
