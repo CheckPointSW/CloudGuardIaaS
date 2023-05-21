@@ -87,7 +87,6 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
-
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Gateway EC2 Instance"
@@ -103,7 +102,7 @@ variable "predefined_role" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81.10-BYOL"
+  default = "R81-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"

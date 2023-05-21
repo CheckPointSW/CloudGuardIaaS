@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point Cluster in a new VPC (20221123)
+Description: Deploy a Check Point Cluster in a new VPC (20230503)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -31,6 +31,11 @@ Metadata:
           - Shell
           - GatewayPasswordHash
           - GatewaySICKey
+      - Label:
+          default: Quick connect to Smart-1 Cloud (Recommended)
+        Parameters:
+          - MemberAToken
+          - MemberBToken
       - Label:
           default: Advanced Settings
         Parameters:
@@ -80,6 +85,10 @@ Metadata:
         default: Password hash
       GatewaySICKey:
         default: SIC key
+      MemberAToken:
+        default: Smart-1 Cloud Token for member A
+      MemberBToken:
+        default: Smart-1 Cloud Token for member B
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
@@ -269,12 +278,22 @@ Parameters:
     AllowedPattern: '^[a-zA-Z0-9]{8,}$'
     ConstraintDescription: At least 8 alpha numeric characters.
     NoEcho: true
+  MemberAToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
+    Type: String
+    NoEcho: true
+  MemberBToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
+    Type: String
+    NoEcho: true
   ResourcesTagName:
     Description: Name tag prefix of the resources. (optional)
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The host name will be appended with member-a/b accordingly. (optional)
+    Description: The host name will be appended with member-a/b accordingly (optional). The name must not contain reserved words. For details, refer to sk40179.
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
@@ -315,7 +334,7 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: 2
@@ -336,7 +355,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      TemplateURL: __URL__/cluster/geo-cluster.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/cross-az-cluster.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnetA: !GetAtt VPCStack.Outputs.PublicSubnet1ID
@@ -357,6 +376,8 @@ Resources:
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
         GatewaySICKey: !Ref GatewaySICKey
+        MemberAToken: !Ref MemberAToken
+        MemberBToken: !Ref MemberBToken
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload
@@ -392,3 +413,21 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !GetAtt ClusterStack.Outputs.MemberBURL
+Rules:
+  MemberATokenNotProvided:
+    RuleCondition: !Equals [!Ref MemberAToken, '']
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+        Assert: !Equals [!Ref MemberBToken, '']
+  MemberBTokenNotProvided:
+    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+        Assert: !Equals [ !Ref MemberAToken, '' ]
+  MembersTokenValueEquals:
+    RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]
+    Assertions:
+      - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
+        Assert: !Equals [ !Ref MemberAToken, '' ]
+      - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
+        Assert: !Equals [ !Ref MemberBToken, '' ]

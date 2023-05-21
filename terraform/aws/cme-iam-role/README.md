@@ -71,25 +71,25 @@ secret_key = "my-secret-key"
 
 
 ## Inputs
-| Name          | Description   | Type          | Allowed values | Default       | Required      |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| permissions  | The IAM role permissions | string | - Create with assume role permissions (specify an STS role ARN) <br/> - Create with read permissions <br/> - Create with read-write permissions  | Create with read permissions  | no |
-| sts_roles  | The IAM role will be able to assume these STS Roles (map of string ARNs)  | list(string) | n/a   | []  | no  |
-| trusted_account  | A 12 digits number that represents the ID of a trusted account. IAM users in this account will be able assume the IAM role and receive the permissions attached to it  | string  | n/a  | ""  | no  |
+| Name            | Description                                                                                                                                                           | Type         | Allowed values                                                                                                                                  | Default                      | Required |
+|-----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|----------|
+| permissions     | The IAM role permissions                                                                                                                                              | string       | - Create with assume role permissions (specify an STS role ARN) <br/> - Create with read permissions <br/> - Create with read-write permissions | Create with read permissions | no       |
+| sts_roles       | The IAM role will be able to assume these STS Roles (map of string ARNs)                                                                                              | list(string) | n/a                                                                                                                                             | []                           | no       |
+| trusted_account | A 12 digits number that represents the ID of a trusted account. IAM users in this account will be able assume the IAM role and receive the permissions attached to it | string       | n/a                                                                                                                                             | ""                           | no       |
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
+| Name              | Description                   |
+|-------------------|-------------------------------|
 | cme_iam_role_arn  | The created AWS IAM Role arn  |
-| cme_iam_role_name  | The created AWS IAM Role name  |
+| cme_iam_role_name | The created AWS IAM Role name |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20210309 | First release of Check Point CME IAM Role Terraform module for AWS |
+| Template Version | Description                                                        |
+|------------------|--------------------------------------------------------------------|
+| 20210309         | First release of Check Point CME IAM Role Terraform module for AWS |
 
 
 

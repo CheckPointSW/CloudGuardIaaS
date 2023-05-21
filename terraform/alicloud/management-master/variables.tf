@@ -2,12 +2,12 @@
 variable "vpc_name" {
   type = string
   description = "The name of the VPC"
-default = "cp-vpc"
+  default = "cp-vpc"
 }
 variable "vpc_cidr" {
   type = string
   description = "The CIDR block of the VPC"
-default = "10.0.0.0/16"
+  default = "10.0.0.0/16"
 }
 variable "public_vswitchs_map" {
   type = map(string)

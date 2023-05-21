@@ -1,0 +1,703 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Deployment location"
+      },
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "cloudGuardVersion": {
+      "type": "string",
+      "allowedValues": [
+        "R80.30 - Bring Your Own License",
+        "R80.30 - Pay As You Go (NGTP)",
+        "R80.30 - Pay As You Go (NGTX)"
+      ],
+      "defaultValue": "R80.30 - Bring Your Own License",
+      "metadata": {
+        "description": "Version of Check Point CloudGuard"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Administrator password"
+      },
+      "defaultValue": ""
+    },
+    "authenticationType": {
+      "type": "string",
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "defaultValue": "password",
+      "metadata": {
+        "description": "Authentication type"
+      }
+    },
+    "sshPublicKey": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Administrator SSH public key"
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the Check Point Cluster object"
+      }
+    },
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "Size of the VM"
+      }
+    },
+    "sicKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "One time key for Secure Internal Communication"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "[concat(resourceGroup().name, '-vnet')]"
+    },
+    "virtualNetworkAddressPrefixes": {
+      "type": "array",
+      "metadata": {
+        "description": "The address prefixes of the virtual network"
+      },
+      "defaultValue": [
+        "10.0.0.0/16"
+      ]
+    },
+    "subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the frontend subnet"
+      },
+      "defaultValue": "Frontend"
+    },
+    "subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the frontend subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "subnet1StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first available address on the frontend subnet"
+      },
+      "defaultValue": "10.0.1.10"
+    },
+    "subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the backend subnet"
+      },
+      "defaultValue": "Backend"
+    },
+    "subnet2Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the backend subnet"
+      },
+      "defaultValue": "10.0.2.0/24"
+    },
+    "subnet2StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first available address on the 2nd subnet"
+      },
+      "defaultValue": "10.0.2.10"
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+      },
+      "defaultValue": "[deployment().properties.templateLink.uri]"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+      },
+      "defaultValue": ""
+    },
+    "bootstrapScript": {
+      "type": "string",
+      "metadata": {
+        "description": "Bootstrap script"
+      },
+      "defaultValue": ""
+    },
+    "allowDownloadFromUploadToCheckPoint": {
+      "type": "string",
+      "allowedValues": [
+        "true",
+        "false"
+      ],
+      "defaultValue": "true",
+      "metadata": {
+        "description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
+      }
+    },
+    "additionalDiskSizeGB": {
+      "type": "int",
+      "defaultValue": 0,
+      "metadata": {
+        "description": "Amount of additional disk space (in GB)"
+      },
+      "minValue": 0,
+      "maxValue": 3995
+    },
+    "diskType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "metadata": {
+        "description": "The type of the OS disk. Premium is applicable only to DS machine sizes"
+      },
+      "allowedValues": [
+        "Standard_LRS",
+        "Premium_LRS"
+      ]
+    },
+    "preview": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Deploy the staged image"
+      },
+      "allowedValues": [
+        "",
+        "-preview"
+      ]
+    },
+    "sourceImageVhdUri": {
+      "type": "string",
+      "defaultValue": "noCustomUri",
+      "metadata": {
+        "description": "The URI of the blob containing the development image"
+      }
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
+  },
+  "variables": {
+    "installationType": "cluster-stack",
+    "templateName": "stack-ha",
+    "templateVersion": "20190626",
+    "location": "[parameters('location')]",
+    "offers": {
+      "R80.30 - Bring Your Own License": "BYOL",
+      "R80.30 - Pay As You Go (NGTP)": "NGTP",
+      "R80.30 - Pay As You Go (NGTX)": "NGTX"
+    },
+    "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
+    "osVersions": {
+      "R80.30 - Bring Your Own License": "R8030",
+      "R80.30 - Pay As You Go (NGTP)": "R8030",
+      "R80.30 - Pay As You Go (NGTX)": "R8030"
+    },
+    "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
+    "isBlink": true,
+    "computeApiVersion": "2017-03-30",
+    "storageApiVersion": "2016-01-01",
+    "networkApiVersion": "2017-10-01",
+    "deploymentsApiVersion": "2016-02-01",
+    "storageAccountName": "[concat('bootdiag', uniqueString(resourceGroup().id, deployment().name))]",
+    "storageAccountType": "Standard_LRS",
+    "diskSizeGBR8030": 100,
+    "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables(concat('diskSizeGB', variables('osVersion'))))]",
+    "customData": "[concat('#!/usr/bin/python /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'resourceGroup=\"', resourceGroup().name, '\"', '\n', 'subscriptionId=\"', subscription().subscriptionId, '\"', '\n', 'subnet1Prefix=\"', first(split(parameters('subnet1Prefix'), '/')), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n')]",
+    "imageOfferR8030": "check-point-cg-stack-r8030",
+    "imageOffer": "[concat(variables(concat('imageOffer', variables('osVersion'))), parameters('preview'))]",
+    "imagePublisher": "checkpoint",
+    "imageReferenceBYOL": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-byol",
+      "version": "latest"
+    },
+    "imageReferenceNGTP": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-ngtp",
+      "version": "latest"
+    },
+    "imageReferenceNGTX": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "sg-ngtx",
+      "version": "latest"
+    },
+    "imageReferenceMarketplace": "[variables(concat('imageReference', variables('offer')))]",
+    "customImage": "customImage",
+    "imageReferenceCustomUri": {
+      "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
+    },
+    "imageReference": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('imageReferenceMarketplace'), variables('imageReferenceCustomUri'))]",
+    "nic1Name": "eth0",
+    "nic2Name": "eth1",
+    "linuxConfigurationpassword": {},
+    "linuxConfigurationsshPublicKey": {
+      "disablePasswordAuthentication": "true",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "[parameters('sshPublicKey')]",
+            "path": "/home/notused/.ssh/authorized_keys"
+          }
+        ]
+      }
+    },
+    "linuxConfiguration": "[variables(concat('linuxConfiguration', parameters('authenticationType')))]",
+    "planBYOL": {
+      "name": "sg-byol",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planNGTP": {
+      "name": "sg-ngtp",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planNGTX": {
+      "name": "sg-ngtx",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "plan": "[variables(concat('plan', variables('offer')))]",
+    "publicIPAddressName": "[parameters('vmName')]",
+    "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
+    "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
+    "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
+    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-', parameters('vnetNewOrExisting'), '-stack-ha', '.json', parameters('_artifactsLocationSasToken')))]",
+    "sicKey": "[parameters('sicKey')]",
+    "managementGUIClientNetwork": "",
+    "externalPrivateAddresses": [
+      "[parameters('Subnet1StartAddress')]",
+      "[concat(split(parameters('subnet1StartAddress'), '.')[0],'.', split(parameters('subnet1StartAddress'), '.')[1],'.', split(parameters('subnet1StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet1StartAddress'), '.')[3]),1)))]"
+    ],
+    "Subnet2PrivateAddresses": [
+      "[parameters('subnet2StartAddress')]",
+      "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]"
+    ],
+    "publicIPAddressName1": "[concat(parameters('vmName'), 1)]",
+    "publicIPAddressId1": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName1'))]",
+    "publicIPAddressName2": "[concat(parameters('vmName'), 2)]",
+    "publicIPAddressId2": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName2'))]",
+    "availabilitySetName": "[concat(parameters('vmName'), '-AvailabilitySet')]",
+    "count": 2,
+    "frontEndIPConfMember1Id": "[concat(variables('lbId'), '/frontendIPConfigurations/LoadBalancerFrontEnd1')]",
+    "frontEndIPConfMember2Id": "[concat(variables('lbId'), '/frontendIPConfigurations/LoadBalancerFrontEnd2')]",
+    "member1IPConfigId": "[concat(variables('lbId'), '/frontendIPConfigurations/LoadBalancerFrontEnd1')]",
+    "member2IPConfigId": "[concat(variables('lbId'), '/frontendIPConfigurations/LoadBalancerFrontEnd2')]",
+    "elbBEAddressPool": "[concat(variables('lbName'), '-pool')]",
+    "elbBEAddressPoolID": "[concat(variables('lbId'),'/backendAddressPools/',variables('elbBEAddressPool'))]",
+    "appProbeName": "health_prob_port",
+    "elbPublicIPName": "frontend-lb-address",
+    "elbPublicIPId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('elbPublicIPName'))]",
+    "lbId": "[resourceId('Microsoft.Network/loadBalancers', variables('lbName'))]",
+    "lbName": "frontend-lb"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "[variables('storageApiVersion')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "name": "networkSetup",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "[variables('deploymentsApiVersion')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "apiVersion": {
+            "value": "[variables('networkApiVersion')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressPrefixes": {
+            "value": "[parameters('virtualNetworkAddressPrefixes')]"
+          },
+          "subnet1Name": {
+            "value": "[parameters('subnet1Name')]"
+          },
+          "subnet1Prefix": {
+            "value": "[parameters('subnet1Prefix')]"
+          },
+          "subnet1StartAddress": {
+            "value": "[parameters('subnet1StartAddress')]"
+          },
+          "subnet2Name": {
+            "value": "[parameters('subnet2Name')]"
+          },
+          "subnet2Prefix": {
+            "value": "[parameters('subnet2Prefix')]"
+          },
+          "subnet2StartAddress": {
+            "value": "[parameters('subnet2StartAddress')]"
+          },
+          "vnetNewOrExisting": {
+            "value": "[parameters('vnetNewOrExisting')]"
+          },
+          "virtualNetworkExistingRGName": {
+            "value": "[parameters('virtualNetworkExistingRGName')]"
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "[variables('computeApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[concat(variables('availabilitySetName'))]",
+      "properties": {
+        "platformFaultDomainCount": 2
+      },
+      "sku": {
+        "name": "Aligned"
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('elbPublicIPName')]",
+      "properties": {
+        "idleTimeoutInMinutes": 30,
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), copyIndex(1))]",
+      "copy": {
+        "name": "publicAddressCopy",
+        "count": "[variables('count')]"
+      },
+      "properties": {
+        "idleTimeoutInMinutes": 30,
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
+        }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'networkSetup')]",
+        "[variables('lbId')]",
+        "[variables('publicIPAddressId1')]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), '1-', variables('nic1Name'))]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAddress": "[variables('externalPrivateAddresses')[0]]",
+              "privateIPAllocationMethod": "Static",
+              "PublicIpAddress": {
+                "Id": "[variables(concat('publicIPAddressId', 1))]"
+              },
+              "subnet": {
+                "id": "[concat(reference('networkSetup').outputs.vnetId.value, '/subnets/', parameters('Subnet1Name'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('elbBEAddressPoolID')]"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'networkSetup')]",
+        "[variables('lbId')]",
+        "[variables('publicIPAddressId2')]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), '2-', variables('nic1Name'))]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig2",
+            "properties": {
+              "privateIPAddress": "[variables('externalPrivateAddresses')[1]]",
+              "privateIPAllocationMethod": "Static",
+              "PublicIpAddress": {
+                "Id": "[variables(concat('publicIPAddressId', 2))]"
+              },
+              "subnet": {
+                "id": "[concat(reference('networkSetup').outputs.vnetId.value, '/subnets/', parameters('Subnet1Name'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[variables('elbBEAddressPoolID')]"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'networkSetup')]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name'))]",
+      "copy": {
+        "name": "interface2Copy",
+        "count": "[variables('count')]"
+      },
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig2",
+            "properties": {
+              "privateIPAddress": "[variables('Subnet2PrivateAddresses')[copyIndex(0)]]",
+              "privateIPAllocationMethod": "Static",
+              "subnet": {
+                "id": "[concat(reference('networkSetup').outputs.vnetId.value, '/subnets/', parameters('Subnet2Name'))]"
+              }
+            }
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
+      "type": "Microsoft.Compute/images",
+      "apiVersion": "2017-12-01",
+      "name": "[variables('customImage')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Linux",
+            "osState": "Generalized",
+            "blobUri": "[parameters('sourceImageVhdUri')]",
+            "storageAccountType": "Standard_LRS"
+          }
+        }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "[variables('computeApiVersion')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic1Name')))]",
+        "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name')))]",
+        "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
+        "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(parameters('vmName'), copyIndex(1))]",
+      "copy": {
+        "name": "virtualMachineCopy",
+        "count": "[variables('count')]"
+      },
+      "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]"
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), variables('storageApiVersion')).primaryEndpoints.blob]"
+          }
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic1Name')))]",
+              "properties": {
+                "primary": true
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name')))]",
+              "properties": {
+                "primary": false
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "adminPassword": "[parameters('adminPassword')]",
+          "adminUsername": "notused",
+          "computerName": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
+          "customData": "[base64(variables('customData'))]",
+          "linuxConfiguration": "[variables('linuxConfiguration')]"
+        },
+        "storageProfile": {
+          "imageReference": "[variables('imageReference')]",
+          "osDisk": {
+            "caching": "ReadWrite",
+            "createOption": "FromImage",
+            "diskSizeGB": "[variables('diskSizeGB')]",
+            "name": "[concat(parameters('vmName'), copyIndex(1))]",
+            "managedDisk": {
+              "storageAccountType": "[parameters('diskType')]"
+            }
+          }
+        }
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "[variables('networkApiVersion')]",
+      "dependsOn": [
+        "[variables('elbPublicIPId')]"
+      ],
+      "name": "[variables('lbName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LoadBalancerFrontend",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('elbPublicIPId')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('elbBEAddressPool')]"
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('appProbeName')]",
+            "properties": {
+              "protocol": "tcp",
+              "port": 8081,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "Member1IPAddr": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressId1')).IpAddress]"
+    },
+    "Member1FQDN": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressId1')).dnsSettings.fqdn]"
+    },
+    "Member2IPAddr": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressId2')).IpAddress]"
+    },
+    "Member2FQDN": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressId2')).dnsSettings.fqdn]"
+    }
+  }
+}

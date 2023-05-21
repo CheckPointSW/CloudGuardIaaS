@@ -52,7 +52,8 @@ Configure envrionment variables in Windows:
 | allocate_and_associate_eip | If set to TRUE, an elastic IP will be allocated and associated with the launched instance                                                                            | bool   | true/false                                                                                                                                                                                                                                    | true                     | no       |
 | volume_size                | Root volume size (GB) - minimum 100                                                                                                                                  | number | n/a                                                                                                                                                                                                                                           | 100                      | no       |
 | disk_category              | The ECS disk category                                                                                                                                                | string | - cloud <br/> - cloud_efficiency <br/> - cloud_ssd, <br/> - cloud_essd                                                                                                                                                                        | "cloud_efficiency"       | no       |
-| gateway_version            | Gateway version and license                                                                                                                                          | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                                                                                                                                                            | R81-BYOL                 |
+| ram_role_name              | A predefined RAM role name to attach to the security gateway instance                                                                                                | string | n/a                                                                                                                                                                                                                                           | ""                       | no       |
+| gateway_version            | Gateway version and license                                                                                                                                          | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                                                                                                                                                            | R81-BYOL                 | no       |
 | admin_shell                | Set the admin shell to enable advanced command line configuration.                                                                                                   | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh                                                                                                                                                                            | "/etc/cli.sh"            | no       |
 | gateway_SIC_Key            | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a                                                                                                                                                                                                                                           | n/a                      | yes      |
 | password_hash              | Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) (optional)                                                        | string | n/a                                                                                                                                                                                                                                           | ""                       | no       |
@@ -66,34 +67,37 @@ Configure envrionment variables in Windows:
 ## Example for terraform.tfvars
 ```
 // --- VPC Network Configuration ---
-vpc_id = "vpc-12345678"
-vpc_cidr = "10.0.0.0/16"
-public_vswitch_id = "vsw-01234"
-private_vswitch_id = "vsw-56789"
-private_route_table = "rtb-12345678"
+vpc_id = "vpc-"
+public_vswitch_id = "vsw-"
+private_vswitch_id = "vsw-"
+private_route_table = "vtb-"
 
 // --- ECS Instance Configuration ---
 gateway_name = "Check-Point-Gateway-tf"
 gateway_instance_type = "ecs.g5ne.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 disk_category = "cloud_efficiency"
+ram_role_name = ""
+instance_tags = {
+  key1 = "value1"
+  key2 = "value2"
+}
 
 // --- Check Point Settings ---
 gateway_version = "R81-BYOL"
 admin_shell = "/bin/bash"
-gateway_SIC_Key = "12345678"
-gateway_password_hash = "12345678"
+gateway_SICKey = "12345678"
+gateway_password_hash = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
-gateway_bootstrap_script = "echo 12345678"
-primary_ntp = "123.456.789.123"
-secondary_ntp = "abc.def.ghi.jkl"
-
+gateway_bootstrap_script = ""
+primary_ntp = ""
+secondary_ntp = ""
 ```
 ## Conditional creation
 - To create an Elastic IP and associate it to the Gateway instance:
@@ -106,20 +110,21 @@ private_route_table = "rtb-12345678"
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| image_id  | The image id of the deployed Security Gateway  |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group id name  |
-| gateway_eip_id  | The id of the elastic IP  |
-| gateway_eip_public_ip  | The elastic pubic IP  |
-| gateway_instance_id  | The Security Gateway instance id  |
-| gateway_instance_name  | The deployed Gateway AliCloud instance name  |
+| Name                  | Description                                   |
+|-----------------------|-----------------------------------------------|
+| image_id              | The image id of the deployed Security Gateway |
+| permissive_sg_id      | The permissive security group id              |
+| permissive_sg_name    | The permissive security group id name         |
+| gateway_eip_id        | The id of the elastic IP                      |
+| gateway_eip_public_ip | The elastic pubic IP                          |
+| gateway_instance_id   | The Security Gateway instance id              |
+| gateway_instance_name | The deployed Gateway AliCloud instance name   |
 
 ## Revision History
 
 | Template Version | Description                                                                                                                         |
 |------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
 | 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
 | 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
 | 20211011         | First release of Check Point CloudGaurd Gateway Terraform deployment into an existing VPC in Alibaba cloud.                         |

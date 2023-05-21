@@ -109,7 +109,7 @@ secret_key = "my-secret-key"
     }
 
     // --- Check Point Settings ---
-    gateway_version = "R81.10-BYOL"
+    gateway_version = "R81-BYOL"
     admin_shell = "/bin/bash"
     gateway_SICKey = "12345678"
     gateway_password_hash = ""
@@ -178,19 +178,19 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| internal_rt_id  | The internal route table id  |
-| vpc_public_subnets_ids_list  | A list of the public subnets ids  |
-| vpc_private_subnets_ids_list  | A list of the private subnets ids  |
-| ami_id  | The ami id of the deployed Security Gateway |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group id name  |
-| gateway_url  | URL to the portal of the deployed Security Gateway  |
-| gateway_public_ip  | The deployed Security Gateway Server AWS public ip  |
-| gateway_instance_id  | The deployed Security Gateway AWS instance id  |
-| gateway_instance_name  | The deployed Security Gateway AWS instance name  |
+| Name                         | Description                                        |
+|------------------------------|----------------------------------------------------|
+| vpc_id                       | The id of the deployed vpc                         |
+| internal_rt_id               | The internal route table id                        |
+| vpc_public_subnets_ids_list  | A list of the public subnets ids                   |
+| vpc_private_subnets_ids_list | A list of the private subnets ids                  |
+| ami_id                       | The ami id of the deployed Security Gateway        |
+| permissive_sg_id             | The permissive security group id                   |
+| permissive_sg_name           | The permissive security group id name              |
+| gateway_url                  | URL to the portal of the deployed Security Gateway |
+| gateway_public_ip            | The deployed Security Gateway Server AWS public ip |
+| gateway_instance_id          | The deployed Security Gateway AWS instance id      |
+| gateway_instance_name        | The deployed Security Gateway AWS instance name    |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -201,6 +201,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220606         | New instance type support                                                         |
 | 20221123         | R81.20 version support                                                            |
 | 20230411         | Improved deployment experience for gateways and clusters managed by Smart-1 Cloud |
+| 20230503         | Smart-1 Cloud token validation                                                    |
 
 ## License
 

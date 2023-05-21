@@ -184,16 +184,16 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| ami_id  | The ami id of the deployed Security Cross AZ Cluster members  |
-| cluster_public_ip  | The public address of the cluster  |
-| member_a_public_ip  | The public address of member A |
-| member_b_public_ip  | The public address of member B  |
-| member_a_ssh  | SSH command to member A |
-| member_b_ssh  | SSH command to member B |
-| member_a_url  | URL to the member A portal  |
-| member_b_url  | URL to the member B portal  |
+| Name               | Description                                                  |
+|--------------------|--------------------------------------------------------------|
+| ami_id             | The ami id of the deployed Security Cross AZ Cluster members |
+| cluster_public_ip  | The public address of the cluster                            |
+| member_a_public_ip | The public address of member A                               |
+| member_b_public_ip | The public address of member B                               |
+| member_a_ssh       | SSH command to member A                                      |
+| member_b_ssh       | SSH command to member B                                      |
+| member_a_url       | URL to the member A portal                                   |
+| member_b_url       | URL to the member B portal                                   |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -204,6 +204,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221123         | Changed default version and added instances types                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 20221123         | R81.20 version support                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 20230411         | - Improved deployment experience for gateways and clusters managed by Smart-1 Cloud<br/>- Multiple VIPs support for Cross Availability Zone Cluster. For more details refer to the [Cross Availability Zone Cluster for AWS R81.20 Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Content/Topics-AWS-CrossAZ-Cluster-AG/Check-Point-CloudGuard-for-AWS.htm) -> "Deploying Cross AZ Cluster with multiple VIPs" section. |
+| 20230503         | Smart-1 Cloud token validation                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 ## License
 
