@@ -17,3 +17,4 @@ externalPrivateAddresses="${external_private_addresses}"
 customMetrics="${enable_custom_metrics}"
 adminShell="${admin_shell}"
 smart1CloudToken="${smart_1_cloud_token}"
+Vips='[{"name": "cluster-vip", "privateIPAddress": "${external_private_addresses}", "publicIPAddress": "${cluster_name}"}]'
