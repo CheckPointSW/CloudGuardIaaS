@@ -311,7 +311,7 @@ Parameters:
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The host name will be appended with member-a/b accordingly. (optional)
+    Description: The host name will be appended with member-a/b accordingly (optional). The name must not contain reserved words. For details, refer to sk40179.
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
