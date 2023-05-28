@@ -1519,9 +1519,9 @@
           {
             "name": "Vips_Number",
             "type": "Microsoft.Common.TextBox",
-            "label": "Number of Virtual IP's (Vip)",
+            "label": "Number of Virtual IPs (VIP)",
             "defaultValue": "1",
-            "toolTip": "Choose number of Virtual Ip Addresses to deploy for the cluster's external NIC",
+            "toolTip": "Choose number of Virtual IP Addresses to deploy for the cluster's external NIC",
             "multiLine": false,
             "constraints": {
               "required": true,
@@ -1534,6 +1534,7 @@
             },
             "visible": true
           },
+
           {
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",

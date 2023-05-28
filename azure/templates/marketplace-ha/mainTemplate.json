@@ -987,7 +987,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
-        "UserData": "[base64(concat(variables('customData'), '\n','smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+        "UserData": "[base64(concat(variables('customData'), '\n','smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -1018,7 +1018,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computername": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
-          "customData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n','Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n',  'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+          "customData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n','Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n',  'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
