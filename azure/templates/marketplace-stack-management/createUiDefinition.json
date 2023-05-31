@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-  "handler": "Microsoft.Compute.MultiVm",
+  "handler": "Microsoft.Azure.CreateUIDef",
   "version": "0.1.2-preview",
   "parameters": {
     "basics": [
@@ -78,7 +78,7 @@
             "label": "License type",
             "toolTip": "The type of license.",
             "defaultValue": "Bring Your Own License",
-            "visible": "[equals(substring(steps('chkp').cloudGuardVersion,0,3), 'R80')]",
+            "visible": true,
             "constraints": {
               "allowedValues": [
                 {
