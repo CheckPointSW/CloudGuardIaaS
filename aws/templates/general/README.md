@@ -10,11 +10,11 @@
     <tbody>
         <tr>
             <td>
-                <b>Create a IAM Role for Security Management Server</b><br/>
-                Creates a IAM role in your account preconfigured with permissions to manage resources.<br/>    
+                <b>Create an Instance profile for Security Management Server</b><br/>
+                Creates an Instance profile in your account preconfigured with permissions to manage resources.<br/>    
                 For more details, refer to <a href="https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk122074">sk122074 </a>.
             </td>
-            <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/iam/cme-iam-role.yaml&stackName=Check-Point-IAM-Role"><img src="../../images/launch.png"></a></td>
+            <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/iam/cme-iam-role.yaml&stackName=Check-Point-Instance-profile"><img src="../../images/launch.png"></a></td>
         </tr>
         <tr>
             <td>

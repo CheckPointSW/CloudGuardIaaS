@@ -129,3 +129,6 @@ resource "aws_iam_role_policy_attachment" "attach_write_policy" {
   policy_arn = aws_iam_policy.cme_role_write_policy[0].arn
   role = aws_iam_role.cme_iam_role.id
 }
+resource "aws_iam_instance_profile" "iam_instance_profile" {
+  role = aws_iam_role.cme_iam_role.id
+}
