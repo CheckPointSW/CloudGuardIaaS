@@ -210,11 +210,11 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                                                 |
 |------------------|---------------------------------------------------------------------------------------------|
-| 20230521         | Change default shell for the admin user to /etc/cli.sh                                      |
 | 20220414         | First release of Check Point CloudGuard Network Gateway Load Balancer master module for AWS |
 | 20220606         | New instance type support                                                                   |
 | 20221123         | R81.20 version support                                                                      |
 | 20221215         | Support ASG Launch Template instead of Launch Configuration                                 |
+| 20230521         | Change default shell for the admin user to /etc/cli.sh                                      |
 
 
 ## License
