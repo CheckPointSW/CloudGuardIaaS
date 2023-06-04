@@ -163,12 +163,13 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                             |
-|------------------|-------------------------------------------------------------------------|
-| 20220414         | First release of Check Point Auto Scaling GWLB Terraform module for AWS |
-| 20220606         | New instance type support                                               |
-| 20221123         | R81.20 version support                                                  |
-| 20221226         | Support ASG Launch Template instead of Launch Configuration             |
+| Template Version | Description                                                                                                   |
+|------------------|---------------------------------------------------------------------------------------------------------------|
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname |
+| 20220414         | First release of Check Point Auto Scaling GWLB Terraform module for AWS                                       |
+| 20220606         | New instance type support                                                                                     |
+| 20221123         | R81.20 version support                                                                                        |
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                                                   |
 
 ## License
 

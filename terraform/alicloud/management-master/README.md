@@ -118,13 +118,14 @@ bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 
 ## Revision History
 
-| Template Version | Description                                                                                              |
-|------------------|----------------------------------------------------------------------------------------------------------|
-| 20230512         | New images with Jumbo Hotfix                                                    |
-| 20230420         | Change alicloud terraform provider version to 1.203.0                                                    |
-| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                           |
-| 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                     |
-| 20211011         | First release of Check Point CloudGuard Management Terraform deployment into a new VPC in Alibaba cloud. |
+| Template Version | Description                                                                                                   |
+|------------------|---------------------------------------------------------------------------------------------------------------|
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname |
+| 20230512         | New images with Jumbo Hotfix                                                                                  |
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                         |
+| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                |
+| 20230129         | First release of R81.20 CloudGuard Management Terraform deployment in Alibaba Cloud.                          |
+| 20211011         | First release of Check Point CloudGuard Management Terraform deployment into a new VPC in Alibaba cloud.      |
 
 ## License
 

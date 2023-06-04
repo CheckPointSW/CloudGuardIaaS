@@ -202,6 +202,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                                          |
 |------------------|--------------------------------------------------------------------------------------|
+| 20230521         | Change default shell for the admin user to /etc/cli.sh                               |
 | 20220414         | First release of Check Point CloudGuard Network Gateway Load Balancer module for AWS |
 | 20220523         | Add support for cross zone load balancing                                            |
 | 20220606         | New instance type support                                                            |

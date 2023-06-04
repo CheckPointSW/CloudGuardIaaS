@@ -169,11 +169,12 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                               |
-|------------------|---------------------------------------------------------------------------|
-| 20210309         | First release of Check Point Multi-Domain Server Terraform module for AWS |
-| 20210329         | Stability fixes                                                           |
-| 20221123         | R81.20 version support                                                    |
+| Template Version | Description                                                                                                   |
+|------------------|---------------------------------------------------------------------------------------------------------------|
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname |
+| 20210309         | First release of Check Point Multi-Domain Server Terraform module for AWS                                     |
+| 20210329         | Stability fixes                                                                                               |
+| 20221123         | R81.20 version support                                                                                        |
 
 
 ## License
