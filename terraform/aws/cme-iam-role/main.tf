@@ -109,7 +109,8 @@ data "aws_iam_policy_document" "cme_role_write_policy_doc" {
     effect = "Allow"
     actions = [
       "cloudformation:DescribeStacks",
-      "cloudformation:DescribeStackResources"]
+      "cloudformation:DescribeStackResources",
+      "cloudformation:ListStacks"]
     resources = ["*"]
   }
   statement {

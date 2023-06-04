@@ -129,6 +129,7 @@ Resources:
                   Action:
                     - cloudformation:DescribeStacks
                     - cloudformation:DescribeStackResources
+                    - cloudformation:ListStacks
                   Resource: '*'
                 - !Ref 'AWS::NoValue'
               - !If
