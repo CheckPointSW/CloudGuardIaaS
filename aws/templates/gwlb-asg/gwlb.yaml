@@ -540,17 +540,6 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
         CloudWatch: !Ref CloudWatch
-        GatewayBootstrapScript: !Join
-          - ';'
-          - - 'echo -e "\nStarting Bootstrap script\n"'
-            - 'echo "Updating cloud-version file"'
-            - 'template="autoscale_gwlb"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'if test -f ${cv_path}; then sed -i ''/template_name/c\template_name: ''"${template}"'''' /etc/cloud-version; fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' > ${cv_json_path_tmp}; mv ${cv_json_path_tmp} ${cv_json_path}; fi'
-            - 'echo -e "\nFinished Bootstrap script\n"'
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
   ManagementStack:
@@ -580,17 +569,9 @@ Resources:
         ManagementBootstrapScript: !Join
           - ';'
           - - 'echo -e "\nStarting Bootstrap script\n"'
-            - 'echo "Setting up bootstrap parameters"'
             - !Sub 'policy=${GatewaysPolicy} ; region=${AWS::Region} ; conf_template=${ConfigurationTemplate} ; mgmt=${ManagementServer}'
             - !Sub ['version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
             - !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ' | base64 -d)"']]
-            - 'echo "Adding GatewayLoadBalancer identifier to cloud-version"'
-            - 'template="management_gwlb"'
-            - 'cv_path="/etc/cloud-version"'
-            - 'if test -f ${cv_path}; then sed -i ''/template_name/c\template_name: ''"${template}"'''' /etc/cloud-version; fi'
-            - 'cv_json_path="/etc/cloud-version.json"'
-            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
-            - 'if test -f ${cv_json_path}; then cat ${cv_json_path} | jq ''.template_name = "''"${template}"''"'' > ${cv_json_path_tmp}; mv ${cv_json_path_tmp} ${cv_json_path}; fi'
             - 'controller="gwlb-controller"'
             - 'echo "Creating CME configuration"'
             - 'autoprov_cfg -f init AWS -mn "${mgmt}" -tn "${conf_template}" -cn "${controller}" -po "${policy}" -otp "${sic}" -r "${region}" -ver "${version}" -iam'
