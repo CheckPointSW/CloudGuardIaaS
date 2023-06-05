@@ -332,10 +332,15 @@
       "defaultValue": 1,
       "minValue": 1,
       "maxValue": 10
+    },
+    "VipNames": {
+      "type": "string",
+      "defaultValue": ""
     }
   },
   "variables": {
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
+    "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
     "templateVersion": "20220130",
     "location": "[parameters('location')]",
@@ -592,7 +597,7 @@
             "privateIPAddress": "[variables('externalPrivateAddresses')[add(copyIndex('Vips'), 3)]]",
             "privateIPAllocationMethod": "Static",
             "PublicIpAddress": {
-              "Id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(parameters('vmName'),'Vip', copyIndex('Vips', 1)))]"
+              "Id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('Vip_Names')[copyIndex('Vips')])]"
             },
             "subnet": {
               "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
@@ -606,7 +611,7 @@
         "input": {
           "name": "[concat('cluster-vip-', copyIndex('VipsInformation', 1))]",
           "privateIPAddress": "[variables('externalPrivateAddresses')[add(copyIndex('VipsInformation'), 3)]]",
-          "publicIPAddress": "[concat(parameters('vmName'),'Vip', copyIndex('VipsInformation', 1))]"
+          "publicIPAddress": "[variables('Vip_Names')[copyIndex('VipsInformation')]]"
         }
       }
     ],
@@ -833,7 +838,7 @@
         "[variables('prefixDependsOn')]"
       ],
       "location": "[variables('location')]",
-      "name": "[concat(parameters('vmName'),'Vip', copyIndex(1))]",
+      "name": "[variables('Vip_Names')[copyIndex()]]",
       "sku": {
         "name": "Standard"
       },
