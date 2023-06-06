@@ -342,7 +342,7 @@
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
     "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
-    "templateVersion": "20220130",
+    "templateVersion": "20230124",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -871,7 +871,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations":"[union(variables('DefaultIpAddresses'),variables('Vips'))]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
@@ -890,7 +890,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",
