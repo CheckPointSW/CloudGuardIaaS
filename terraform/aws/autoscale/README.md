@@ -92,7 +92,7 @@ secret_key = "my-secret-key"
 
     // --- Check Point Settings ---
     gateway_version = "R81-BYOL"
-    admin_shell = "/bin/bash"
+    admin_shell = "/etc/cli.sh"
     gateway_password_hash = ""
     gateway_SICKey = "12345678"
     enable_instance_connect = false
@@ -182,6 +182,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220606         | New instance type support                                          |
 | 20221123         | R81.20 version support                                             |
 | 20221226         | Support ASG Launch Template instead of Launch Configuration        |
+| 20230521         | Change default shell for the admin user to /etc/cli.sh             |
 
 ## License
 

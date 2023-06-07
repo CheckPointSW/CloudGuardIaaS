@@ -38,7 +38,7 @@ disable_instance_termination = false
 allow_upload_download = true
 management_server = "CP-Management-gwlb-tf"
 configuration_template = "gwlb-configuration"
-admin_shell = "/bin/bash"
+admin_shell = "/etc/cli.sh"
 
 // --- Gateway Load Balancer Configuration ---
 gateway_load_balancer_name = "gwlb1"

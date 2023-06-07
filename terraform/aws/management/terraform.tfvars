@@ -25,7 +25,7 @@ sts_roles = []
 
 // --- Check Point Settings ---
 management_version = "R81-BYOL"
-admin_shell = "/bin/bash"
+admin_shell = "/etc/cli.sh"
 management_password_hash = ""
 
 // --- Security Management Server Settings ---

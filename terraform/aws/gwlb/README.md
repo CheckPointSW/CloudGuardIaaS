@@ -95,7 +95,7 @@ secret_key = "my-secret-key"
     allow_upload_download = true
     management_server = "CP-Management-gwlb-tf"
     configuration_template = "gwlb-configuration"
-    admin_shell = "/bin/bash"
+    admin_shell = "/etc/cli.sh"
         
     // --- Gateway Load Balancer Configuration ---
     gateway_load_balancer_name = "gwlb1"
@@ -207,6 +207,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20220606         | New instance type support                                                            |
 | 20221123         | R81.20 version support                                                               |
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                          |
+| 20230521         | Change default shell for the admin user to /etc/cli.sh                               |
 
 ## License
 
