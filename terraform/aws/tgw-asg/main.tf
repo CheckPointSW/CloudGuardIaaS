@@ -26,8 +26,8 @@ module "autoscale" {
   enable_cloudwatch = var.enable_cloudwatch
   gateway_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; echo 'Adding tgw identifier to cloud-version'; cv_path='/etc/cloud-version'\n if test -f \"$cv_path\"; then sed -i '/template_name/c\\template_name: autoscale_tgw' /etc/cloud-version; fi; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"autoscale_tgw\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; fi; echo 'Setting ASN to: ${var.asn}'; clish -c 'set as ${var.asn}' -s; echo -e '\nFinished Bootstrap script\n'"
   gateways_provision_address_type = var.control_gateway_over_public_or_private_address
-  management_server = local.deploy_management_condition ? var.management_server : ""
-  configuration_template = local.deploy_management_condition ? var.configuration_template : ""
+  management_server =  var.management_server
+  configuration_template = var.configuration_template
 }
 
 data "aws_region" "current"{}
