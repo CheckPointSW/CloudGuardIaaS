@@ -20,7 +20,7 @@ gateway_version = "R81.10-BYOL"
 gateway_password_hash = ""
 gateway_SICKey = "12345678"
 enable_cloudwatch = true
-asn = "6500"
+asn = "65000"
 
 // --- Check Point CloudGuard Network Security Management Server Configuration ---
 management_deploy = true
