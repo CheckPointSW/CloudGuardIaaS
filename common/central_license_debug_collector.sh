@@ -89,19 +89,19 @@ cp $MDS_FWDIR/log/vseclic.elg* $TMPPATH
 
 # Collect licenses data from DB
 log_msg "  Collecting licenses with cprlic into $TMPPATH"
-cprlic print -all -x -a >> $TMPPATH/Attached_licenses
+cprlic print -all -x -a >> $TMPPATH/attached_licenses
 
 log_msg "  Collecting vsec view into $TMPPATH"
-vsec_lic_cli view >> $TMPPATH/View_licenses.txt
+vsec_lic_cli view >> $TMPPATH/view_licenses.txt
 
 log_msg "  Collecting management licenses into $TMPPATH"
-cplic print -n -x >> $TMPPATH/Management_licenses.txt
+cplic print -n -x >> $TMPPATH/management_licenses.txt
 
 log_msg "  Collecting licensepool_data DB into $TMPPATH"
 psql_client cpm postgres -c "select * from licensePool_data;" >> $TMPPATH/licensePoolData.txt
 
 log_msg "  Collecting GatewayLicenses_data DB into $TMPPATH"
-psql_client cpm postgres -c "select * from GatewayLicenses_data;" >> $TMPPATH/GatewayLicensesData.txt
+psql_client cpm postgres -c "select * from GatewayLicenses_data;" >> $TMPPATH/gatewayLicensesData.txt
 
 log_msg "  Compressing $TMPPATH into $OUTPUTFILE_NAME"
 tar -cvf $OUTPUTFILE_NAME $TMPPATH > /dev/null 2>&1
