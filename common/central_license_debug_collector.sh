@@ -10,7 +10,7 @@
 # Written by: Check Point Software Technologies LTD. 
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
-# Licenses_Collector - version 2
+# Licenses_Collector - version 3
 
 usage()
 {
@@ -90,6 +90,12 @@ cp $MDS_FWDIR/log/vseclic.elg* $TMPPATH
 # Collect licenses data from DB
 log_msg "  Collecting licenses with cprlic into $TMPPATH"
 cprlic print -all -x -a >> $TMPPATH/Attached_licenses
+
+log_msg "  Collecting vsec view into $TMPPATH"
+vsec_lic_cli view >> $TMPPATH/View_licenses.txt
+
+log_msg "  Collecting management licenses into $TMPPATH"
+cplic print -n -x >> $TMPPATH/Management_licenses.txt
 
 log_msg "  Collecting licensepool_data DB into $TMPPATH"
 psql_client cpm postgres -c "select * from licensePool_data;" >> $TMPPATH/licensePoolData.txt
