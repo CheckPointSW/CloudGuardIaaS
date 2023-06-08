@@ -1,6 +1,6 @@
 locals {
   gw_types = [
-       "c4.large",
+    "c4.large",
     "c4.xlarge",
     "c5.large",
     "c5.xlarge",
@@ -208,7 +208,7 @@ locals {
     "m6a.48xlarge"
   ]
   mds_types = [
- "c5.large",
+    "c5.large",
     "c5.xlarge",
     "c5.2xlarge",
     "c5.4xlarge",
