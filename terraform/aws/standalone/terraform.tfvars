@@ -9,7 +9,7 @@ private_route_table = "rtb-12345678"
 // --- EC2 Instance Configuration ---
 standalone_name = "Check-Point-Standalone-tf"
 standalone_instance_type = "c5.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
@@ -22,8 +22,8 @@ instance_tags = {
 
 // --- Check Point Settings ---
 standalone_version = "R81.10-PAYG-NGTP"
-admin_shell = "/bin/bash"
-standalone_password_hash = "12345678"
+admin_shell = "/etc/cli.sh"
+standalone_password_hash = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"

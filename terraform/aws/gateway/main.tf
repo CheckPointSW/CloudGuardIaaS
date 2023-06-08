@@ -105,6 +105,7 @@ module "common_gateway_instance" {
   gateway_password_hash = var.gateway_password_hash
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
+  gateway_TokenKey = var.gateway_TokenKey
   gateway_bootstrap_script = var.gateway_bootstrap_script
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download

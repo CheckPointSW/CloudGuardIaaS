@@ -152,7 +152,7 @@ module "validate_management_instance_type" {
 variable "management_version" {
   type = string
   description =  "The license to install on the Security Management Server"
-  default = "R81.10-PAYG"
+  default = "R81.10-BYOL"
 }
 module "validate_management_version" {
   source = "../modules/common/version_license"

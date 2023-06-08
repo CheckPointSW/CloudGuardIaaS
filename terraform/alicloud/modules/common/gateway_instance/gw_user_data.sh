@@ -10,13 +10,13 @@ template="gateway"
 cv_path="/etc/cloud-version"
 if test -f $cv_path; then
   echo "template_name: $template" >> $cv_path
-  echo "template_version: __VERSION__" >> $cv_path
+  echo "template_version: 20230329" >> $cv_path
   echo "template_type: terraform" >> $cv_path
 fi
 cv_json_path="/etc/cloud-version.json"
 cv_json_path_tmp="/etc/cloud-version-tmp.json"
 if test -f $cv_json_path; then
-   cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "__VERSION__"' | jq '.template_type = "terraform"' > $cv_json_path_tmp
+   cat $cv_json_path | jq '.template_name = "'"$template"'"' | jq '.template_version = "20230329"' | jq '.template_type = "terraform"' > $cv_json_path_tmp
    mv $cv_json_path_tmp $cv_json_path
 fi
 
@@ -48,6 +48,12 @@ if [[ -n "${Hostname}" ]]; then
 fi
 
 echo "Starting First Time Wizard"
+
+if [ "${gw_new_config}" = "1" ]; then
+  file_name="/etc/.blink_cloud_mode"
+  > file_name
+fi
+
 blink_config -s "gateway_cluster_member=false&ftw_sic_key='${SICKey}'&upload_info=${AllowUploadDownload}&download_info=${AllowUploadDownload}&admin_hash='$pwd_hash'"
 echo "Setting LocalGatewayExternal dynamic object"
 addr_ex="$(ip addr show dev eth0 | awk '/inet/{print $2; exit}' | cut -d / -f 1)"

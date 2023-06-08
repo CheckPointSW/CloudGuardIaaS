@@ -47,32 +47,36 @@ Configure envrionment variables in Windows:
 
 ### terraform.tfvars variables:
 
-| Name          | Description   | Type          | Allowed values | Default       | Required      |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| vpc_cidr | The CIDR block of the VPC. | string | n/a | n/a | yes |
-| public_vswitchs_map | A map of pairs {availability-zone = vswitch-suffix-number}. Each entry creates a vswitch. Minimum 1 pair.  (e.g. {\"us-east-1a\" = 1} ) | map | n/a |  n/a | yes |
-| private_vswitchs_map | A map of pairs {availability-zone = vswitch-suffix-number}. Each entry creates a vswitch. Minimum 1 pair. (e.g. {\"us-east-1a\" = 2} ) | map | n/a | n/a | yes |
-| vswitchs_bit_length | Number of additional bits with which to extend the vpc cidr. For example, if given a vpc_cidr ending in /16 and a vswitchs_bit_length value of 4, the resulting vswitch address will have length /20. | number | n/a | n/a | yes |
-| gateway_name | The name tag of the Security Gateway instances (optional) | string | n/a | "Check-Point-Gateway-tf" | no |
-| gateway_instance_type | The instance type of the Security Gateways | string | - ecs.g5ne.large <br/> - ecs.g5ne.xlarge <br/> - ecs.g5ne.2xlarge <br/> - ecs.g5ne.4xlarge <br/> - ecs.g5ne.8xlarge  | "ecs.g5ne.xlarge" | no |
-| key_name | The ECS Key Pair name to allow SSH access to the instances | string  | n/a | n/a | yes |
-| allocate_and_associate_eip | If set to TRUE, an elastic IP will be allocated and associated with the launched instance | bool | true/false | true | no |
-| volume_size | Root volume size (GB) - minimum 100 | number | n/a | 100 | no |
-| gateway_version | Gateway version and license | string | - R81-BYOL | R81-BYOL |
-| admin_shell | Set the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
-| gateway_SIC_Key | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters | string | n/a | n/a | yes |
-| password_hash | Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) (optional) | string | n/a | "" | no |
-| resources_tag_name | (optional) | string | n/a | "" | no |
-| gateway_hostname | (optional) | string | n/a | "" | no |
-| allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | n/a | true | no |
-| gateway_bootstrap_script | (Optional) Semicolon (;) separated commands to run on the initial boot | string | n/a | "" | no |
-| primary_ntp | (optional) | string | n/a | "" | no |
-| secondary_ntp | (optional) | string | n/a | "" | no |
+| Name                       | Description                                                                                                                                                                                           | Type   | Allowed values                                                                                                                                                                                                                                                                                                                                                                    | Default                  | Required |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|----------|
+| vpc_name                   | (Optional) The name of the VPC                                                                                                                                                                        | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | "cp-vpc"                 | no       |
+| vpc_cidr                   | The CIDR block of the VPC.                                                                                                                                                                            | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| public_vswitchs_map        | A map of pairs {availability-zone = vswitch-suffix-number}. Each entry creates a vswitch. Minimum 1 pair.  (e.g. {\"us-east-1a\" = 1} )                                                               | map    | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| private_vswitchs_map       | A map of pairs {availability-zone = vswitch-suffix-number}. Each entry creates a vswitch. Minimum 1 pair. (e.g. {\"us-east-1a\" = 2} )                                                                | map    | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| vswitchs_bit_length        | Number of additional bits with which to extend the vpc cidr. For example, if given a vpc_cidr ending in /16 and a vswitchs_bit_length value of 4, the resulting vswitch address will have length /20. | number | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| gateway_name               | The name tag of the Security Gateway instances (optional)                                                                                                                                             | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | "Check-Point-Gateway-tf" | no       |
+| gateway_instance_type      | The instance type of the Security Gateways                                                                                                                                                            | string | - ecs.g5ne.large <br/> - ecs.g5ne.xlarge <br/> - ecs.g5ne.2xlarge <br/> - ecs.g5ne.4xlarge <br/> - ecs.g5ne.8xlarge <br/> - ecs.g7ne.large <br/> - ecs.g7ne.xlarge <br/> - ecs.g7ne.2xlarge <br/> - ecs.g7ne.4xlarge <br/> - ecs.g7ne.8xlarge <br/> - ecs.g7nene.large <br/> - ecs.g7nene.xlarge <br/> - ecs.g7nene.2xlarge <br/> - ecs.g7nene.4xlarge <br/> - ecs.g7nene.8xlarge | "ecs.g5ne.xlarge"        | no       |
+| key_name                   | The ECS Key Pair name to allow SSH access to the instances                                                                                                                                            | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| allocate_and_associate_eip | If set to TRUE, an elastic IP will be allocated and associated with the launched instance                                                                                                             | bool   | true/false                                                                                                                                                                                                                                                                                                                                                                        | true                     | no       |
+| volume_size                | Root volume size (GB) - minimum 100                                                                                                                                                                   | number | n/a                                                                                                                                                                                                                                                                                                                                                                               | 100                      | no       |
+| disk_category              | The ECS disk category                                                                                                                                                                                 | string | - cloud <br/> - cloud_efficiency <br/> - cloud_ssd, <br/> - cloud_essd                                                                                                                                                                                                                                                                                                            | "cloud_efficiency"       | no       |
+| ram_role_name              | A predefined RAM role name to attach to the security gateway instance                                                                                                                                 | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| gateway_version            | Gateway version and license                                                                                                                                                                           | string | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                                                                                                                                                                                                                                                                                                | R81-BYOL                 | no       |
+| admin_shell                | Set the admin shell to enable advanced command line configuration.                                                                                                                                    | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh                                                                                                                                                                                                                                                                                                                | "/etc/cli.sh"            | no       |
+| gateway_SIC_Key            | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters                                  | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | n/a                      | yes      |
+| password_hash              | Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash) (optional)                                                                                         | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| resources_tag_name         | (optional)                                                                                                                                                                                            | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| gateway_hostname           | (optional) The name must not contain reserved words. For details, refer to sk40179.                                                                                                                                                                                           | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| allow_upload_download      | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point                                                                            | bool   | n/a                                                                                                                                                                                                                                                                                                                                                                               | true                     | no       |
+| gateway_bootstrap_script   | (Optional) Semicolon (;) separated commands to run on the initial boot                                                                                                                                | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| primary_ntp                | (optional)                                                                                                                                                                                            | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
+| secondary_ntp              | (optional)                                                                                                                                                                                            | string | n/a                                                                                                                                                                                                                                                                                                                                                                               | ""                       | no       |
 
 ## Example for terraform.tfvars
 
 ```
 // --- VPC Network Configuration ---
+vpc_name = "cp-vpc"
 vpc_cidr = "10.0.0.0/16"
 public_vswitchs_map = {
   "us-east-1a" = 1
@@ -85,25 +89,29 @@ vswitchs_bit_length = 8
 // --- ECS Instance Configuration ---
 gateway_name = "Check-Point-Gateway-tf"
 gateway_instance_type = "ecs.g5ne.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
-enable_instance_connect = false
+disk_category = "cloud_efficiency"
+ram_role_name = ""
+instance_tags = {
+  key1 = "value1"
+  key2 = "value2"
+}
 
 // --- Check Point Settings ---
 gateway_version = "R81-BYOL"
-admin_shell = "/bin/bash"
-gateway_SIC_Key = "12345678"
-gateway_password_hash = "12345678"
+admin_shell = "/etc/cli.sh"
+gateway_SICKey = "12345678"
+gateway_password_hash = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
-gateway_bootstrap_script = "echo 12345678"
-primary_ntp = "123.456.789.123"
-secondary_ntp = "abc.def.ghi.jkl"
-
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+primary_ntp = ""
+secondary_ntp = ""
 ```
 ## Conditional creation
 - To create an Elastic IP and associate it to the Gateway instance:
@@ -112,26 +120,29 @@ allocate_and_associate_eip = true
 ```
 
 ## Outputs
-| Name  | Description |
-| ------------- | ------------- |
-| vpc_id  | The id of the deployed vpc  |
-| internal_rt_id  | The internal route table id id  |
-| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| vpc_private_vswitchs_ids_list  | A list of the private vswitchs ids  |
-| image_id  | The ami id of the deployed Security Gateway  |
-| permissive_sg_id  | The permissive security group id  |
-| permissive_sg_name  | The permissive security group id name  |
-| gateway_eip_id  | The id of the elastic IP  |
-| gateway_eip_public_ip  | The elastic pubic IP  |
-| gateway_instance_id  | The Security Gateway instance id  |
-| gateway_instance_name  | The deployed Gateway AliCloud instance name  |
+| Name                          | Description                                 |
+|-------------------------------|---------------------------------------------|
+| vpc_id                        | The id of the deployed vpc                  |
+| internal_rt_id                | The internal route table id id              |
+| vpc_public_vswitchs_ids_list  | A list of the private vswitchs ids          |
+| vpc_private_vswitchs_ids_list | A list of the private vswitchs ids          |
+| image_id                      | The ami id of the deployed Security Gateway |
+| permissive_sg_id              | The permissive security group id            |
+| permissive_sg_name            | The permissive security group id name       |
+| gateway_eip_id                | The id of the elastic IP                    |
+| gateway_eip_public_ip         | The elastic pubic IP                        |
+| gateway_instance_id           | The Security Gateway instance id            |
+| gateway_instance_name         | The deployed Gateway AliCloud instance name |
 
 ## Revision History
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20211011 | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud. |
-| | | |
+| Template Version | Description                                                                                                                         |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname                       |
+| 20230420         | Change alicloud terraform provider version to 1.203.0                                                                               |
+| 20230330         | - Added support of ECS disk category. <br/> - Stability fixes.                                                                      |
+| 20230329         | First release of R81.20 & R81.10 CloudGuard Gateway Terraform deployment in Alibaba Cloud and added support for g7ne instance type. |
+| 20211011         | First release of Check Point CloudGuard Gateway Terraform deployment into a new VPC in Alibaba cloud.                               |
 
 ## License
 

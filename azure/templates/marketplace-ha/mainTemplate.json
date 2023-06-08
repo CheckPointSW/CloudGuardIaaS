@@ -303,6 +303,14 @@
         "Description": "Indicates whether CloudGuard Metrics will be used for Cluster members monitoring"
       }
     },
+    "smart1CloudTokenA": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
+    "smart1CloudTokenB": {
+      "type": "securestring",
+      "defaultValue": ""
+    },
     "tagsByResource": {
       "type": "object",
       "defaultValue": {}
@@ -523,6 +531,10 @@
     "publicIPPrefixProperty": {
       "Id": "[variables('usepublicIPPrefix')]"
     },
+    "tokens":[
+      "[parameters('smart1CloudTokenA')]",
+      "[parameters('smart1CloudTokenB')]"
+    ],
     "prefixDependsOn": "[if(equals(parameters('publicIPPrefix'), 'yes'), if(equals(parameters('createNewIPPrefix'), 'yes'), variables('publicIPNewPrefixId'), variables('ipNewPrefixId')), variables('ipNewPrefixId'))]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
@@ -563,7 +575,7 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "apiVersion": "2021-04-01",
+      "apiVersion": "2022-09-01",
       "properties": {
         "supportsHttpsTrafficOnly": true,
         "allowBlobPublicAccess": false,
@@ -905,12 +917,12 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
-        "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+        "UserData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2021-04-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2022-09-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {
@@ -936,7 +948,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computername": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
-          "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+          "customData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {

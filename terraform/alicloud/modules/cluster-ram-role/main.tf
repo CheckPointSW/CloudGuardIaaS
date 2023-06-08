@@ -33,7 +33,8 @@ resource "alicloud_ram_policy" "ram_policy" {
         "Action": [
           "ecs:*",
           "vpc:*",
-          "eip:*"
+          "eip:*",
+          "ram:ListPolicyVersions"
         ],
         "Effect": "Allow",
         "Resource": ["*"]

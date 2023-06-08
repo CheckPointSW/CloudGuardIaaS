@@ -19,6 +19,7 @@ module "common_gateway_instance" {
     module.common_permissive_sg.permissive_sg_id]
   gateway_name = var.gateway_name
   volume_size = var.volume_size
+  disk_category = var.disk_category
   vswitch_id = var.public_vswitch_id
   gateway_instance_type = var.gateway_instance_type
   instance_tags = var.instance_tags
@@ -32,12 +33,13 @@ module "common_gateway_instance" {
   allow_upload_download = var.allow_upload_download
   primary_ntp = var.primary_ntp
   secondary_ntp = var.secondary_ntp
+  gateway_version = var.gateway_version
 }
 
 resource "alicloud_network_interface" "internal_eni" {
-  name = format("%s-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
+  network_interface_name = format("%s-internal-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.private_vswitch_id
-  security_groups = [
+  security_group_ids = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth1"
 }

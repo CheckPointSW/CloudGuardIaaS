@@ -2,12 +2,12 @@
 variable "vpc_name" {
   type = string
   description = "The name of the VPC"
-default = "cp-vpc"
+  default = "cp-vpc"
 }
 variable "vpc_cidr" {
   type = string
   description = "The CIDR block of the VPC"
-default = "10.0.0.0/16"
+  default = "10.0.0.0/16"
 }
 variable "public_vswitchs_map" {
   type = map(string)
@@ -47,6 +47,11 @@ variable "volume_size" {
   type = number
   description = "Root volume size (GB) - minimum 100"
   default = 100
+}
+variable "disk_category" {
+  type = string
+  description = "(Optional) Category of the ECS disk"
+  default = "cloud_essd"
 }
 variable "ram_role_name" {
   type = string

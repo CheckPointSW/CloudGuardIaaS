@@ -54,6 +54,8 @@ module "launch_cluster_into_vpc" {
   gateway_version = var.gateway_version
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
+  memberAToken = var.memberAToken
+  memberBToken = var.memberBToken
   gateway_password_hash = var.gateway_password_hash
   resources_tag_name = var.resources_tag_name
   gateway_hostname = var.gateway_hostname

@@ -129,6 +129,7 @@ Resources:
                   Action:
                     - cloudformation:DescribeStacks
                     - cloudformation:DescribeStackResources
+                    - cloudformation:ListStacks
                   Resource: '*'
                 - !Ref 'AWS::NoValue'
               - !If
@@ -139,6 +140,12 @@ Resources:
                     - cloudformation:DeleteStack
                   Resource: 'arn:aws:cloudformation:*:*:stack/vpn-by-tag--*/*'
                 - !Ref 'AWS::NoValue'
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Ref CMEIAMRole
+      Roles:
+        - !Ref CMEIAMRole
 Outputs:
   CMEIAMRole:
     Description: The IAM role.
@@ -146,3 +153,6 @@ Outputs:
   CMEARNRole:
     Description: The IAM role ARN.
     Value: !GetAtt CMEIAMRole.Arn
+  InstanceProfile:
+    Description: The Instance Profile ARN.
+    Value: !GetAtt InstanceProfile.Arn

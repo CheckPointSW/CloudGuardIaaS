@@ -391,8 +391,9 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
       virtual_network = module.vnet.vnet_name
       cluster_name = var.cluster_name
       external_private_addresses = azurerm_network_interface.nic_vip.ip_configuration[1].private_ip_address
-      enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
+      enable_custom_metrics = var.enable_custom_metrics ? "yes" : "no"
       admin_shell = var.admin_shell
+      smart_1_cloud_token = count.index == 0 ? var.smart_1_cloud_token_a : var.smart_1_cloud_token_b 
     })
   }
 
@@ -482,8 +483,9 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
       virtual_network = module.vnet.vnet_name
       cluster_name = var.cluster_name
       external_private_addresses = cidrhost(module.vnet.subnet_prefixes[0], 7)
-      enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
+      enable_custom_metrics = var.enable_custom_metrics ? "yes" : "no"
       admin_shell = var.admin_shell
+      smart_1_cloud_token = count.index == 0 ? var.smart_1_cloud_token_a : var.smart_1_cloud_token_b
     })
   }
 

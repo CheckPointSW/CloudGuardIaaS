@@ -5,20 +5,11 @@
   "parameters": {
     "basics": [
       {
-        "name": "publicPreviewInfoBox",
-        "type": "Microsoft.Common.InfoBox",
-        "visible": true,
-        "options": {
-          "icon": "Warning",
-          "text": "This solution is currently supported as a public preview, the purpose of this is to obtain feedback prior to the full commercial release of such product, solution or service. The following terms will apply in addition to the general terms and conditions. Any solution released under Public Preview:\n\n1. Is excluded from the Service Level Agreement.\n\n2. May not be covered by customer support.\n\n3. May be changed or discontinued by Check Point Software Technologies at any time without notice."
-        }
-      },
-      {
         "name": "basics settings text block",
         "type": "Microsoft.Common.TextBlock",
         "visible": true,
         "options": {
-          "text": "Please follow the CloudGuard Network for Azure VMSS Gateway Load Balancer Public Preview R81.10 and Higher Administration Guide.",
+          "text": "Please follow the CloudGuard Network for Azure VMSS Gateway Load Balancer R81.10 and Higher Administration Guide.",
           "link": {
             "label": "Administration Guide",
             "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_Azure_VMSS_GWLB/Default.htm"
@@ -1093,7 +1084,6 @@
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
-            "defaultValue": true,
             "toolTip": "Choose between using an existing NSG or using a new NSG",
             "constraints": {
               "allowedValues": [
@@ -1132,12 +1122,12 @@
             "name": "NSGName",
             "type": "Microsoft.Common.TextBox",
             "label": "Name",
-            "defaultValue": "None",
+            "defaultValue": "[concat(basics('gatewayScaleSetNameUi') , '-nsg')]",
             "toolTip": "Insert Name for the new NSG",
             "multiLine": false,
             "constraints": {
               "required": "[steps('network').NSG]",
-              "regex": "^[a-z0-9A-Z]{1,30}$",
+              "regex": "^[a-z0-9A-Z-]{1,30}$",
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
             "visible": "[steps('network').NSG]"

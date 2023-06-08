@@ -88,7 +88,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **mgmt_name** | Management name. | string |  
  |  |  |  |  |  |
- | **location** | The name of the resource group that will contain the contents of the deployment. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
+ | **location** | The region where the resources will be deployed at. | string | The full list of Azure regions can be found at https://azure.microsoft.com/regions |
  |  |  |  |  |  |
  | **vnet_name** | The name of virtual network that will be created  | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens |
  |  |  |  |  |  |

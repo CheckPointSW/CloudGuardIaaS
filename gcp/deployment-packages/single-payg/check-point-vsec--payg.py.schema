@@ -124,6 +124,9 @@ properties:
       type: GCE_FIREWALL_RANGE
       gceFirewallRange:
         firewallProperty: network_enableEsp
+  smart1CloudToken:
+    type: string
+    default: ''
   diskType:
     type: string
     default: pd-ssd

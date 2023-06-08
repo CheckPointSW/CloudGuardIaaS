@@ -293,7 +293,7 @@ Parameters:
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'

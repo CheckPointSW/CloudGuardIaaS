@@ -37,6 +37,8 @@ module "member_a" {
   management_network = var.management_network
   primary_cluster_address_name = var.primary_cluster_address_name
   secondary_cluster_address_name = var.secondary_cluster_address_name
+  smart_1_cloud_token_a = var.smart_1_cloud_token_a
+  smart_1_cloud_token_b = var.smart_1_cloud_token_b
 }
 
 module "member_b" {
@@ -78,4 +80,6 @@ module "member_b" {
   management_network = var.management_network
   primary_cluster_address_name = var.primary_cluster_address_name
   secondary_cluster_address_name = var.secondary_cluster_address_name
+  smart_1_cloud_token_a = var.smart_1_cloud_token_a
+  smart_1_cloud_token_b = var.smart_1_cloud_token_b
 }

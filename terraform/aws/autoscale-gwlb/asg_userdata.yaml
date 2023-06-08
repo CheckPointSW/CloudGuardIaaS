@@ -26,4 +26,4 @@ bootcmd:
     - echo "cpprod_util CPPROD_SetValue \"fw1\" \"AwsGwlb\" 4 1 1" >> /etc/rc.local
 runcmd:
   - |
-    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"autoscale\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20221226\" templateName=\"autoscale\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" passwordHash=\"${PasswordHash}\" bootstrapScript64=\"${BootstrapScript}\"
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"autoscale\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20230521\" templateName=\"autoscale_gwlb\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" passwordHash=\"${PasswordHash}\" bootstrapScript64=\"${BootstrapScript}\"

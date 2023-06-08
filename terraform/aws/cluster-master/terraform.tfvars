@@ -13,7 +13,7 @@ subnets_bit_length = 8
 // --- EC2 Instance Configuration ---
 gateway_name = "Check-Point-Cluster-tf"
 gateway_instance_type = "c5.xlarge"
-key_name = "privatekey"
+key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100
 volume_encryption = "alias/aws/ebs"
@@ -26,10 +26,14 @@ instance_tags = {
 predefined_role = ""
 
 // --- Check Point Settings ---
-gateway_version = "R81.10-BYOL"
-admin_shell = "/bin/bash"
-gateway_SICKey = ""
-gateway_password_hash = "12345678"
+gateway_version = "R81-BYOL"
+admin_shell = "/etc/cli.sh"
+gateway_SICKey = "12345678"
+gateway_password_hash = ""
+
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+memberAToken = ""
+memberBToken = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"

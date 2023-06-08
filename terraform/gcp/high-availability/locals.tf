@@ -14,9 +14,9 @@ locals {
   // will fail if the var.zoneA and var.zoneB are not at the same region:
   validate_zones = index(local.split_zoneA, local.split_zoneB[0]) == local.split_zoneA[0] && index(local.split_zoneA, local.split_zoneB[1]) == local.split_zoneA[0] ? 0 : "var.zoneA and var.zoneB are not at the same region"
 
-  regex_valid_management_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
+  regex_valid_management_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))|(S1C)$"
   // Will fail if var.management_network is invalid
-  regex_management_network = regex(local.regex_valid_management_network, var.management_network) == var.management_network ? 0 : "Variable [management_network] must be a valid address in CIDR notation."
+  regex_management_network = regex(local.regex_valid_management_network, var.management_network) == var.management_network ? 0 : "Variable [management_network] must be a valid address in CIDR notation or 'S1C'."
 
   regex_valid_network_cidr = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))|$"
 
