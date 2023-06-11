@@ -159,7 +159,6 @@ Parameters:
       - c5n.2xlarge
       - c5n.4xlarge
       - c5n.9xlarge
-      - c5n.12xlarge
       - c5n.18xlarge
       - m5.large
       - m5.xlarge

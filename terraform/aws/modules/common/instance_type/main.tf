@@ -15,7 +15,6 @@ locals {
     "c5n.2xlarge",
     "c5n.4xlarge",
     "c5n.9xlarge",
-    "c5n.12xlarge",
     "c5n.18xlarge",
     "m5.large",
     "m5.xlarge",
@@ -100,7 +99,7 @@ locals {
     "m6a.8xlarge",
     "m6a.12xlarge",
     "m6a.16xlarge",
-    "m6a.24xlarge"
+    "m6a.24xlarge",
     "m6a.32xlarge",
     "m6a.48xlarge"
   ]
@@ -118,7 +117,6 @@ locals {
     "c5n.2xlarge",
     "c5n.4xlarge",
     "c5n.9xlarge",
-    "c5n.12xlarge",
     "c5n.18xlarge",
     "m5.large",
     "m5.xlarge",
@@ -203,7 +201,7 @@ locals {
     "m6a.8xlarge",
     "m6a.12xlarge",
     "m6a.16xlarge",
-    "m6a.24xlarge"
+    "m6a.24xlarge",
     "m6a.32xlarge",
     "m6a.48xlarge"
   ]
@@ -221,7 +219,6 @@ locals {
     "c5n.2xlarge",
     "c5n.4xlarge",
     "c5n.9xlarge",
-    "c5n.12xlarge",
     "c5n.18xlarge",
     "m5.large",
     "m5.xlarge",
@@ -306,7 +303,7 @@ locals {
     "m6a.8xlarge",
     "m6a.12xlarge",
     "m6a.16xlarge",
-    "m6a.24xlarge"
+    "m6a.24xlarge",
     "m6a.32xlarge",
     "m6a.48xlarge"
   ]
