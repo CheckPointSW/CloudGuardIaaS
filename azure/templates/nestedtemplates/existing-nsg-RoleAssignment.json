@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "ExistingNSG": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "vmName": {
+      "type": "string"
+    },
+    "roleDefinitionId": {
+      "type": "string",
+      "defaultValue": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]"
+    },
+    "principalId1": {
+      "type": "string"
+    },
+    "principalId2": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[concat('Microsoft.Network/networkSecurityGroups/', parameters('ExistingNSG').name)]",
+      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), '1', '-nsg'))]",
+      "properties": {
+        "roleDefinitionId": "[parameters('roleDefinitionId')]",
+        "principalId": "[parameters('principalId1')]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "scope": "[concat('Microsoft.Network/networkSecurityGroups/', parameters('ExistingNSG').name)]",
+      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), '2', '-nsg'))]",
+      "properties": {
+        "roleDefinitionId": "[parameters('roleDefinitionId')]",
+        "principalId": "[parameters('principalId2')]"
+      }
+    }
+  ]
+}
