@@ -486,6 +486,7 @@
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha2-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "ExsitingNsgRoleAssignmentURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/existing-nsg-RoleAssignment', '.json'))]",
     "sicKey": "[parameters('sicKey')]",
     "installationType": "cluster",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
@@ -1028,6 +1029,39 @@
         "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2021-07-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
+    },
+    {
+      "condition": "[and(equals(parameters('managedSystemAssigned'), 'yes'), not(parameters('deployNewNSG')))]",
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1'))]"],
+      "name": "ExistingNsgRoleAssignment",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[if(not(parameters('deployNewNSG')), split(parameters('ExistingNSG').id, '/')[4], '')]",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('ExsitingNsgRoleAssignmentURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "ExistingNSG": {
+            "value": "[parameters('ExistingNSG')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "roleDefinitionId": {
+            "value": "[variables('roleDefinitionId')]"
+          },
+          "principalId1": {
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2021-07-01', 'Full').identity.principalId]"
+          },
+          "principalId2": {
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2021-07-01', 'Full').identity.principalId]"
+          }
+        }
+      }
     },
     {
       "type": "Microsoft.Network/loadBalancers",
