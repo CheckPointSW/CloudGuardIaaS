@@ -288,8 +288,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D2s_v5",
-              "Standard_D2_v5"
+              "Standard_D4ds_v5",
+              "Standard_D4d_v5"
             ],
             "constraints": {
               "excludedSizes": [
@@ -317,8 +317,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Management",
             "recommendedSizes": [
-              "Standard_D2s_v5",
-              "Standard_D2_v5"
+              "Standard_D4ds_v5",
+              "Standard_D4d_v5"
             ],
             "constraints": {
               "excludedSizes": [

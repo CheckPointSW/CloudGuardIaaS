@@ -197,8 +197,8 @@
             "label": "Virtual machine size",
             "toolTip": "The VM size. Minimum of 16 cores and 64 GB RAM is required.",
             "recommendedSizes": [
-              "Standard_D2s_v5",
-              "Standard_D2_v5"
+              "Standard_D4ds_v5",
+              "Standard_D4d_v5"
             ],
             "constraints": {
               "excludedSizes": [
