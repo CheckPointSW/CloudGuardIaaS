@@ -381,7 +381,6 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -606,6 +605,11 @@
         }
       },
       {
+        "name": "customData",
+        "count": "[variables('count')]",
+        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', '\n','smart1CloudToken=\"', variables('tokens')[copyIndex('customData')], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n')]"
+      },
+      {
         "name": "VipsInformation",
         "count": "[sub(variables('VIPs_Number'), 1)]",
         "input": {
@@ -706,8 +710,7 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName":
-          {
+          "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
@@ -740,8 +743,7 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName":
-          {
+          "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
@@ -992,7 +994,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
-        "UserData": "[base64(concat(variables('customData'), '\n','smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+        "UserData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -1023,7 +1025,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computername": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
-          "customData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n','Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n',  'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+          "customData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
