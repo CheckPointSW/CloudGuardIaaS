@@ -10,7 +10,13 @@ import traceback
 import collections
 import urllib.parse as _urllib
 
-import rest
+
+try:
+    import rest
+except ModuleNotFoundError:
+    import pytest
+    pytestmark = pytest.mark.skipif(True, reason="Needs refactoring - WIP")
+    import cloud_connectors.azure as rest
 
 ARM_VERSIONS = {
     'stack': collections.OrderedDict([
@@ -34,7 +40,7 @@ def set_arm_versions():
     if templateName == 'stack-ha':
         ARM_VERSIONS = ARM_VERSIONS['stack']
         log('Stack ARM versions are: %s\n' % json.dumps(ARM_VERSIONS,
-            indent=2))
+                                                        indent=2))
         return
     ARM_VERSIONS = ARM_VERSIONS['ha']
     log('ARM versions are: %s\n' % json.dumps(ARM_VERSIONS, indent=2))
@@ -86,11 +92,21 @@ def get_vm_primary_nic(vm):
 
 
 def test_cluster_ip():
-    cluster_ip_id = (conf['baseId'] +
-                     'Microsoft.Network/publicIPAddresses/' +
-                     conf['clusterName'])
+    def test_vip(vip_resource):
+        if '/' in vip_resource:
+            cluster_ip_id = vip_resource
+        else:
+            cluster_ip_id = conf['baseId'] + \
+                'Microsoft.Network/publicIPAddresses/' + vip_resource
+        test_rw(cluster_ip_id, allow_not_found=True)
 
-    test_rw(cluster_ip_id, allow_not_found=True)
+    for interface in conf['clusterNetworkInterfaces']:
+        if isinstance(conf['clusterNetworkInterfaces'][interface][0], dict):
+            for vip in conf['clusterNetworkInterfaces'][interface]:
+                test_vip(vip["pub"])
+        else:
+            if len(conf['clusterNetworkInterfaces'][interface]) > 1:
+                test_vip(conf['clusterNetworkInterfaces'][interface][1])
 
 
 def test_load_balancer():
@@ -148,7 +164,7 @@ def get_route_table_ids_for_peering(vnet):
             continue
         try:
             vnet = azure.arm('GET', vnet_id)[1]
-        except:
+        except Exception:
             log('\nFailed to retrieve peered network %s' % vnet_id)
             log('\n%s' % traceback.format_exc())
             continue
@@ -186,8 +202,8 @@ def test_cluster_parameters():
                            "output_timeout_multiplier",
                            "output_problem_tolerance"],
                           False)
-    error = 'ClusterXL kernel parameters are not optimized for Azure. ' \
-            'See sk122218 for more information.'
+    error = 'ClusterXL kernel parameters are not optimized for ' \
+            'Azure. See sk122218 for more information.'
 
     with open(path) as f:
         for line in f:
@@ -223,39 +239,16 @@ def test():
     if not is_azure():
         raise Exception('This does not look like an Azure environment\n')
 
-    with open('/etc/in-azure', 'r') as content_file:
-        content = content_file.read()
-
-    image_version = content.split('.')[:2][0]
-    log('Image version is: %s\n' % image_version)
-
-    take_number = int(image_version.split('-')[1])
-    branch = image_version.split('-')[0]
-
-    if branch == "gey_hvm":
-        raise Exception('The version of this GAIA is not supported\n')
-
-    log('Reading configuration file...\n')
-    if take_number <= 13 and branch == "ogu":
-        confpath = os.environ['FWDIR'] + '/conf/azure-ha.json'
-        try:
-            with open(confpath) as f:
-                conf = json.load(f)
-        except:
-            raise Exception(
-                'Failed to read configuration file: %s\n' % confpath)
-
-    else:
-        command = [os.environ['FWDIR'] + '/bin/azure-ha-conf', '--dump']
-        proc = subprocess.Popen(
-            command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        out, err = proc.communicate()
-        rc = proc.wait()
-        if rc:
-            log('\nfailed to run %s: %s\n%s' % (command, rc, err))
-            raise Exception('Failed to load configuration file\n')
-        conf = json.loads(out)
+    command = [os.environ['FWDIR'] + '/bin/azure-ha-conf', '--dump']
+    proc = subprocess.Popen(
+        command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    out, err = proc.communicate()
+    rc = proc.wait()
+    if rc:
+        log('\nfailed to run %s: %s\n%s' % (command, rc, err))
+        raise Exception('Failed to load configuration file\n')
+    conf = json.loads(out)
 
     for k in ['clusterName', 'resourceGroup', 'subscriptionId']:
         if not conf.get(k):
@@ -308,7 +301,7 @@ def test():
     try:
         dns = subprocess.check_output(
             ['/bin/clish', '-c', 'show dns primary']).decode('utf-8').strip()
-    except:
+    except Exception:
         traceback.print_exc()
         raise
     match = re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', dns)
@@ -334,7 +327,7 @@ def test():
     try:
         socket.gethostbyname(host)
         log(' - DNS resolving test was successful\n')
-    except:
+    except Exception:
         raise Exception('Failed to resolve %s\n' % host)
 
     log('Testing connectivity to %s:%d...\n' % (host, port))
@@ -351,7 +344,7 @@ def test():
     try:
         cphaconf = json.loads(
             subprocess.check_output(['cphaconf', 'aws_mode']))
-    except:
+    except Exception:
         raise Exception('''You do not seem to have a valid cluster
 configuration
 ''')
@@ -372,8 +365,8 @@ configuration
         vm = azure.arm('GET', conf['baseId'] +
                        'microsoft.compute/virtualmachines/' + vmname)[1]
         if templateName != 'stack-ha':
-            for interface_id in vm['properties'][
-                    'networkProfile']['networkInterfaces']:
+            for interface_id in \
+                    vm['properties']['networkProfile']['networkInterfaces']:
                 if templateName == 'ha':
                     rid = interface_id['id']
                     interface_name = rid.split('/')[8]
@@ -406,9 +399,10 @@ configuration
 def main():
     try:
         test()
-    except:
+    except Exception:
         log('Error:\n' + str(sys.exc_info()[1]) + '\n')
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main()
