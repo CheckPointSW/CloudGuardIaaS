@@ -101,6 +101,12 @@ variable "gateway_password_hash" {
 default = ""
 }
 
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+variable "gateway_TokenKey" {
+  type = string
+  description = "Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud."
+}
+
 // --- Advanced Settings ---
 variable "resources_tag_name" {
   type = string

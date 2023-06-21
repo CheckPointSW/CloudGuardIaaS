@@ -146,21 +146,21 @@ resource "alicloud_instance" "management_instance" {
     Name = var.instance_name
   }, var.instance_tags)
 
-  user_data = templatefile("${path.module}/mgmt_user_data.sh", {
+  user_data = templatefile("${path.module}/management_userdata.yaml", {
     // script's arguments
     Hostname = var.hostname,
-    PasswordHash = var.password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
-    AdminCidr = var.admin_cidr,
+    AdminSubnet = var.admin_cidr,
     IsPrimary = var.is_primary_management,
-    SICKey = var.SICKey,
+    SICKey = local.gateway_SICkey_base64,
     AllocateElasticIP = var.allocate_and_associate_eip,
     GatewayManagement = var.gateway_management,
-    BootstrapScript = var.bootstrap_script,
-    mgmt_new_config = local.mgmt_new_config
+    BootstrapScript = local.gateway_bootstrap_script64,
+    OsVersion = local.version_split
   })
 }
 

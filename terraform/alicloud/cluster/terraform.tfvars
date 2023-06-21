@@ -26,11 +26,15 @@ admin_shell = "/etc/cli.sh"
 gateway_SICKey = "12345678"
 gateway_password_hash = ""
 
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+memberAToken = ""
+memberBToken = ""
+
 // --- Advanced Settings ---
 management_ip_address = "1.2.3.4"
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
 gateway_bootstrap_script = ""
-primary_ntp = ""
-secondary_ntp = ""
+primary_ntp = "ntp1.cloud.aliyuncs.com"
+secondary_ntp = "ntp2.cloud.aliyuncs.com"

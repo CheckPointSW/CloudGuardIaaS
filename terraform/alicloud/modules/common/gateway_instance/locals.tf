@@ -14,9 +14,9 @@ locals {
   regex_valid_gateway_hostname = "^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$"
   // Will fail if var.gateway_hostname is invalid
   regex_gateway_hostname = regex(local.regex_valid_gateway_hostname, var.gateway_hostname) == var.gateway_hostname ? 0 : "Variable [gateway_hostname] must be a valid hostname label or an empty string"
-  gw_old_config_values = [
-    "R81-BYOL",
-    "R81.10-BYOL"
-  ]
-   gw_new_config = contains(local.gw_old_config_values, var.gateway_version) ? 0 : 1
+
+  version_split = element(split("-", var.gateway_version), 0)
+  gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
+  gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
+  gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
 }
