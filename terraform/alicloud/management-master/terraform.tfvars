@@ -23,7 +23,7 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-version_license = "R81.10-BYOL"
+version_license = "R81-BYOL"
 admin_shell = "/etc/cli.sh"
 password_hash = ""
 hostname = "mgmt-tf"
@@ -35,6 +35,6 @@ allow_upload_download = "true"
 gateway_management = "Locally managed"
 admin_cidr = "0.0.0.0/0"
 gateway_addresses = "0.0.0.0/0"
-primary_ntp = ""
-secondary_ntp = ""
+primary_ntp = "ntp1.cloud.aliyuncs.com"
+secondary_ntp = "ntp2.cloud.aliyuncs.com"
 bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"

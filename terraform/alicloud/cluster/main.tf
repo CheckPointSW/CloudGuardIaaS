@@ -29,18 +29,19 @@ resource "alicloud_instance" "member-a-instance" {
     Name = format("%s-Member-A", var.gateway_name)
   }, var.instance_tags)
 
-  user_data = templatefile("${path.module}/cluster_member_user_data.sh", {
+  user_data = templatefile("${path.module}/cluster_member_a_userdata.yaml", {
     // script's arguments
     Hostname = format("%s-member-a", var.gateway_hostname),
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
-    SICKey = var.gateway_SICKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
+    SICKey = local.gateway_SICkey_base64,
+    TokenA = var.memberAToken,
     ManagementIpAddress = var.management_ip_address,
-    cluster_new_config = local.cluster_new_config
+    OsVersion = local.version_split
   })
 }
 resource "alicloud_instance" "member-b-instance" {
@@ -58,18 +59,19 @@ resource "alicloud_instance" "member-b-instance" {
     Name = format("%s-Member-B", var.gateway_name)
   }, var.instance_tags)
 
-  user_data = templatefile("${path.module}/cluster_member_user_data.sh", {
+  user_data = templatefile("${path.module}/cluster_member_b_userdata.yaml", {
     // script's arguments
     Hostname = format("%s-member-b", var.gateway_hostname),
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
     Shell = var.admin_shell,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
-    SICKey = var.gateway_SICKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
+    SICKey = local.gateway_SICkey_base64,
+    TokenB = var.memberBToken,
     ManagementIpAddress = var.management_ip_address,
-    cluster_new_config = local.cluster_new_config
+    OsVersion = local.version_split
   })
 }
 
@@ -77,7 +79,7 @@ resource "alicloud_instance" "member-b-instance" {
 resource "alicloud_network_interface" "member_a_mgmt_eni" {
   network_interface_name = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_group_ids = [
+  security_group_ids  = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }
