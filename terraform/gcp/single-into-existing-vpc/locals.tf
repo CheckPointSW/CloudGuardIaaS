@@ -41,4 +41,10 @@ locals {
   UDP_traffic_condition = length(var.network_udpSourceRanges	) == 0 ? 0 : 1
   SCTP_traffic_condition = length(var.network_sctpSourceRanges) == 0 ? 0 : 1
   ESP_traffic_condition = length(var.network_espSourceRanges) == 0 ? 0 : 1
+  // Will fail if management_only and payg
+  is_management_only = var.installationType == "Management only"
+  is_license_payg = var.license == "PAYG" 
+  validation_massage = "Cannot use 'Management only' installation type with 'PAYG' license."
+  _= regex("^$",local.is_management_only && local.is_license_payg ? local.validation_massage : "") 
+
 }
