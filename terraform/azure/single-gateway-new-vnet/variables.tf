@@ -56,13 +56,13 @@ variable "template_name" {
 }
 
 variable "template_version" {
-  description = "Template version. It is reccomended to always use the latest template version"
+  description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20220130"
+  default = "20230629"
 }
 
 variable "installation_type" {
-  description = "Installaiton type"
+  description = "installation type"
   type = string
   default = "gateway"
 }
@@ -154,7 +154,7 @@ locals {
   validate_admin_shell_value = index(local.admin_shell_allowed_values, var.admin_shell)
 }
 
-//********************** Natworking Variables **************************//
+//********************** Networking Variables **************************//
 variable "vnet_name" {
   description = "Virtual Network name"
   type = string
@@ -231,7 +231,7 @@ variable "subscription_id" {
 }
 
 variable "client_id" {
-  description = "Aplication ID(Client ID)"
+  description = "Application ID(Client ID)"
   type = string
 }
 

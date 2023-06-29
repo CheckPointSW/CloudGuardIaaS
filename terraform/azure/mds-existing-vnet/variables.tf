@@ -1,6 +1,6 @@
 //********************** Basic Configuration Variables **************************//
 variable "mds_name" {
-  description = "Management name"
+  description = "MDS name"
   type = string
 }
 
@@ -53,7 +53,7 @@ variable "template_name" {
 variable "template_version" {
   description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20210111"
+  default = "20230629"
 }
 
 variable "installation_type" {
@@ -72,6 +72,14 @@ variable "secondary" {
 
 variable "logserver" {
   type = string
+}
+
+locals {  //locals for 'installation_type'
+  isntallation_type_allowed_values = [
+    "mds-primary",
+    "mds-secondary",
+    "mds-logserver"
+  ]
 }
 
 variable "vm_size" {
@@ -106,7 +114,7 @@ variable "vm_os_sku" {
 }
 
 variable "vm_os_offer" {
-  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8030, check-point-cg-r8040, check-point-cg-r81"
+  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r8040, check-point-cg-r81, check-point-cg-r8110, check-point-cg-r8120"
   type = string
 }
 

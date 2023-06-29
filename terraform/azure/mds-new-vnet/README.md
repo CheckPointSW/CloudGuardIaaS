@@ -1,4 +1,4 @@
-# Check Point CloudGuard IaaS Management Terraform deployment for Azure
+# Check Point CloudGuard Network Security MDS Terraform deployment for Azure
 
 This Terraform module deploys Check Point CloudGuard IaaS Management solution into a new Vnet in Azure.
 As part of the deployment the following resources are created:
@@ -159,8 +159,10 @@ This solution uses the following modules:
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description   |
-| ---------------- | ------------- |
+| Template Version | Description                                                                                 |
+|------------------|---------------------------------------------------------------------------------------------|
+| 20230629         | First release of Check Point CloudGuard Network Security MDS Terraform deployment for Azure |
+|                  |                                                                                             | |
 
 ## License
 
