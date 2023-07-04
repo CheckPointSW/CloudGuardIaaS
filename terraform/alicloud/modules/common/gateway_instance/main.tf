@@ -12,16 +12,17 @@ resource "alicloud_instance" "gateway_instance" {
     Name = var.gateway_name
   }, var.instance_tags)
 
-  user_data = templatefile("${path.module}/gw_user_data.sh", {
+  user_data = templatefile("${path.module}/gateway_userdata.yaml", {
     // script's arguments
-    PasswordHash = var.gateway_password_hash,
+    PasswordHash = local.gateway_password_hash_base64,
     Shell = var.admin_shell,
-    SICKey = var.gateway_SICKey,
-    GatewayBootstrapScript = var.gateway_bootstrap_script,
+    SICKey = local.gateway_SICkey_base64,
+    TokenKey = var.gateway_TokenKey,
+    GatewayBootstrapScript = local.gateway_bootstrap_script64,
     Hostname = var.gateway_hostname,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp,
     NTPSecondary = var.secondary_ntp,
-    gw_new_config = local.gw_new_config
+    OsVersion = local.version_split
   })
 }

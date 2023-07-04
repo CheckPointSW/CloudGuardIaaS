@@ -17,9 +17,8 @@ locals {
   // Will fail if var.admin_cidr or var.gateway_addresses are invalid
   mgmt_vswitch_regex_result = regex(local.regex_valid_cidr_range, var.admin_cidr) == var.admin_cidr ? 0 : "var.admin_cidr must be a valid CIDR range"
   gw_addr_regex_result = regex(local.regex_valid_cidr_range, var.gateway_addresses) == var.gateway_addresses ? 0 : "var.gateway_addresses must be a valid CIDR range"
-  mgmt_old_config_values = [
-    "R81-BYOL",
-    "R81.10-BYOL"
-  ]
-  mgmt_new_config = contains(local.mgmt_old_config_values, var.version_license) ? 0 : 1
+  version_split = element(split("-", var.version_license), 0)
+  gateway_bootstrap_script64 = base64encode(var.bootstrap_script)
+  gateway_SICkey_base64 = base64encode(var.SICKey)
+  gateway_password_hash_base64 = base64encode(var.password_hash)
 }
