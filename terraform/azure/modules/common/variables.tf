@@ -85,7 +85,12 @@ locals { // locals for 'installation_type' allowed values
   installation_type_allowed_values = [
     "cluster",
     "vmss",
-    "management"
+    "management",
+    "standalone",
+    "gateway",
+    "mds-primary",
+    "mds-secondary",
+    "mds-logserver"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_installation_type_value = index(local.installation_type_allowed_values, var.installation_type)
