@@ -72,7 +72,7 @@ This solution uses the following modules:
 ### terraform.tfvars variables:
  | Name          | Description                                                                                                                                                                          | Type          | Allowed values |
  |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------- | ------------- | -------------  |
- | **client_secret** | The client secret password of the Service Principal used to deploy the solution                                                                                                      | string |
+ | **client_secret** | The client secret value of the Service Principal used to deploy the solution                                                                                                      | string |
  |  |                                                                                                                                                                                      |  |  |  |
  | **client_id** | The client ID of the Service Principal used to deploy the solution                                                                                                                   | string |
  |  |                                                                                                                                                                                      |  |  |  |
