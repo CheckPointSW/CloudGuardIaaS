@@ -31,4 +31,6 @@ enable_floating_ip              = "PLEASE ENTER true or false"                  
 use_public_ip_prefix            = "PLEASE ENTER true or false"                                     # false
 create_public_ip_prefix         = "PLEASE ENTER true or false"                                     # false
 existing_public_ip_prefix_id    = "PLEASE ENTER IP PREFIX RESOURCE ID"                             # ""
-admin_shell                     = "PLEASE ETNER ADMIN SHELL"                                       # "/etc/cli.sh"
+admin_shell                     = "PLEASE ETNER ADMIN SHELL"                                       # "/etc/cli.sh
+serial_console_password_hash    = "PLEASE ENTER SERIAL CONSOLE PASSWORD HASH"                      # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+maintenance_mode_password_hash  = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                    # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

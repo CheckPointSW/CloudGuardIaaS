@@ -26,6 +26,16 @@ variable "admin_password" {
   type = string
 }
 
+variable "serial_console_password_hash" {
+  description = "Optional parameter, used to enable serial console connection in case of SSH key as authentication type"
+  type = string
+}
+
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
+}
+
 variable "tags" {
   type        = map(string)
   description = "A map of the tags to use on the resources that are deployed with this module."

@@ -26,6 +26,8 @@ module "common" {
   vm_os_sku = var.vm_os_sku
   vm_os_offer = var.vm_os_offer
   authentication_type = var.authentication_type
+  serial_console_password_hash = var.serial_console_password_hash
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 //********************** Networking **************************//
@@ -270,6 +272,8 @@ resource "azurerm_virtual_machine" "mds-vm-instance" {
       primary = var.primary
       secondary = var.secondary
       logserver = var.logserver
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 

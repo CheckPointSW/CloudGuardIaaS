@@ -35,3 +35,5 @@ enable_custom_metrics           = "PLEASE ENTER true or false"                  
 enable_floating_ip              = "PLEASE ENTER true or false"                                     # false
 deployment_mode                 = "PLEASE ENTER DEPLOYMENT MODE"                                   # "Standard"
 admin_shell                     = "PLEASE ETNER ADMIN SHELL"                                       # "/etc/cli.sh"
+serial_console_password_hash    = "PLEASE ENTER SERIAL CONSOLE PASSWORD HASH"                      # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+maintenance_mode_password_hash  = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                    # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

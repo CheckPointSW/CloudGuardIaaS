@@ -23,3 +23,5 @@ bootstrap_script                = "PLEASE ENTER CUSTOM SCRIPT OR LEAVE EMPTY DOU
 allow_upload_download           = "PLEASE ENTER true or false"                                     # true
 authentication_type             = "PLEASE ENTER AUTHENTICATION TYPE"                               # "Password"
 admin_shell                     = "PLEASE ENTER ADMIN SHELL"                                       # "/etc/cli.sh"
+serial_console_password_hash    = "PLEASE ENTER SERIAL CONSOLE PASSWORD HASH"                      # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+maintenance_mode_password_hash  = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                    # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

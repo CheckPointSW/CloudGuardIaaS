@@ -28,3 +28,5 @@ authentication_type             = "PLEASE ENTER AUTHENTICATION TYPE"            
 enable_custom_metrics           = "PLEASE ENTER true or false"                                     # true
 admin_shell                     = "PLEASE ENTER ADMIN SHELL"                                       # "/etc/cli.sh"
 installation_type               = "PLEASE ENTER INSTALLATION TYPE"								   # "gateway"
+serial_console_password_hash    = "PLEASE ENTER SERIAL CONSOLE PASSWORD HASH"                      # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+maintenance_mode_password_hash  = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                    # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

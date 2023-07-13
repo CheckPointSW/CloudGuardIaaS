@@ -26,6 +26,8 @@ module "common" {
   vm_os_offer = var.vm_os_offer
   is_blink = var.is_blink
   authentication_type = var.authentication_type
+  serial_console_password_hash = var.serial_console_password_hash
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 //********************** Networking **************************//
@@ -201,6 +203,8 @@ resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
       management_GUI_client_network = var.management_GUI_client_network
       smart_1_cloud_token = var.smart_1_cloud_token
       enable_custom_metrics = var.enable_custom_metrics ? "yes" : "no"
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 
