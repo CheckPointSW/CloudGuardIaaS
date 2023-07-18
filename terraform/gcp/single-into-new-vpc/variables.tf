@@ -8,6 +8,10 @@ variable "project" {
   description = "Personal project id. The project indicates the default GCP project all of your resources will be created in."
   default = ""
 }
+variable "region" {
+  type = string
+  default = "us-central1"
+}
 variable "zone" {
   type = string
   description = "The zone determines what computing resources are available and where your data is stored and used"
@@ -36,15 +40,13 @@ variable "machine_type" {
   type = string
   default = "n1-standard-4"
 }
-variable "network" {
-  type = list(string)
-  description = "The network determines what network traffic the instance can access"
-  default = ["default"]
+variable "subnetwork_cidr" {
+  type = string
+  description = "The range of external addresses that are owned by this subnetwork, only IPv4 is supported (e.g. \"10.0.0.0/8\" or \"192.168.0.0/16\")."
 }
-variable "subnetwork" {
-  type = list(string)
-  description = "Assigns the instance an IPv4 address from the subnetwork’s range. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network."
-  default = ["default"]
+variable "internal_subnetwork_cidr" {
+  type = string
+  description = "The range of internal addresses that are owned by this subnetwork, only IPv4 is supported (e.g. \"10.0.0.0/8\" or \"192.168.0.0/16\")."
 }
 variable "network_enableTcp" {
   type = bool
