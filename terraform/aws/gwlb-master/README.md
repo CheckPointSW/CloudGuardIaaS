@@ -1,4 +1,4 @@
-# Check Point CloudGuard Network Gateway Load Balancer Master Terraform module for AWS
+## Check Point CloudGuard Network Gateway Load Balancer Master Terraform module for AWS
 
 Terraform module which deploys an AWS Auto Scaling group configured for Gateway Load Balancer into a new VPC.
 
