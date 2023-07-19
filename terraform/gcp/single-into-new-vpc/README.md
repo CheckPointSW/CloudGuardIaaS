@@ -125,25 +125,24 @@ managementGUIClientNetwork = "0.0.0.0/0"
 smart_1_cloud_token = "xxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Networking ---
-zone = "us-central1-a
-network = ["default"]
-subnetwork = ["default"]
+region = "us-central1"
+zone = "us-central1-a"
+subnetwork_cidr = "10.0.0.0/24"
 network_enableTcp= true
 network_tcpSourceRanges= ["0.0.0.0/0"]
 network_enableGwNetwork= false
-network_gwNetworkSourceRanges= [""]
+network_gwNetworkSourceRanges= []
 network_enableIcmp= false
-network_icmpSourceRanges = [""]
+network_icmpSourceRanges = []
 network_enableUdp=  false
-network_udpSourceRanges= [""]
+network_udpSourceRanges= []
 network_enableSctp= false
-network_sctpSourceRanges= [""]
+network_sctpSourceRanges= []
 network_enableEsp= false
-network_espSourceRanges= [""]
+network_espSourceRanges= []
 numAdditionalNICs= 0
 externalIP= "static"
-internal_network1_network= [""]
-internal_network1_subnetwork  = [""]
+internal_subnetwork_cidr = "10.0.1.0/24"
 
 # --- Instance Configuration ---
 machine_type = "n1-standard-4"
@@ -176,6 +175,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | project  | Personal project id. The project indicates the default GCP project all of your resources will be created in.  | string  | N/A | "" | yes |
 |  |  |  |  |  |
+| region  | GCP region  | string  | N/A | N/A  | yes |
+|  |  |  |  |  |
 | zone | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |us-central1-a|yes|
 |  |  |  |  |  |
 | image_name |The single gateway or management image name (e.g. check-point-r8110-gw-byol-single-335-985-v20220126 for gateway or check-point-r8110-byol-335-883-v20210706 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
@@ -188,9 +189,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | machineType | Machine types determine the specifications of your machines, such as the amount of memory, virtual cores, and persistent disk limits an instance will have | string | [Learn more about Machine Types](https://cloud.google.com/compute/docs/machine-types?hl=en_US&_ga=2.267871494.-962483654.1585043745) | n1-standard-4|no|
 |  |  |  |  |  |
-| network | The network determines what network traffic the instance can access | list(string) | Available network in the chosen zone  |N/A|yes|
-|  |  |  |  |  |
-| Subnetwork | Assigns the instance an IPv4 address from the subnetwork’s range. Instances in different subnetworks can communicate with each other using their internal IPs as long as they belong to the same network. | list(string) | Available subnetwork in the chosen network  |N/A|yes|
+| subnetwork_cidr | The range of internal addresses that are owned by this subnetwork, only IPv4 is supported (e.g. "10.0.0.0/8" or "192.168.0.0/16"). | string | N/A | N/A | yes |
 |  |  |  |  |  |
 | network_enableTcp | Allow TCP traffic from the Internet | boolean | true; <br/>false;  |false|no|
 |  |  |  |  |  |
@@ -239,6 +238,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | numAdditionalNICs | Number of additional network interfaces | number | A number in the range 0 - 8.<br/>Multiple network interfaces deployment is described in [sk121637 - Deploy a CloudGuard for GCP with Multiple Network Interfaces](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk121637) |0|no|
 |  |  |  |  |  |
 | externalIP | External IP address type | string | Static;<br/>Ephemeral;<br/>An external IP address associated with this instance. Selecting "None" will result in the instance having no external internet access. [Learn more](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address?_ga=2.259654658.-962483654.1585043745) |static|no|
+|  |  |  |  |  |
+| internal_subnetwork_cidr | The range of internal addresses that are owned by this subnetwork, only IPv4 is supported (e.g. "10.0.0.0/8" or "192.168.0.0/16"). | string | N/A | N/A | yes |
 |  |  |  |  |  |
 | management_nic | Management Interface - Security Gateways in GCP can be managed by an ephemeral public IP or using the private IP of the internal interface (eth1). | string | Ephemeral Public IP (eth0) <br/> - Private IP (eth1) |XEphemeral Public IP (eth0)|no|
 |  |  |  |  |  |
