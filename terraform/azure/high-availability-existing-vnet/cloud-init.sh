@@ -2,7 +2,7 @@
 
 installationType="${installation_type}"
 allowUploadDownload="${allow_upload_download}"
-osVersion= "${os_version}"
+osVersion="${os_version}"
 templateName="${template_name}"
 templateVersion="${template_version}"
 templateType="${template_type}"

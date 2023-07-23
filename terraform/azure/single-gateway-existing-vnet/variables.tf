@@ -102,10 +102,10 @@ variable "os_version" {
 
 locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
-    "R80.40",
+    "R8040",
     "R81",
-    "R81.10",
-    "R81.20"
+    "R8110",
+    "R8120"
   ]
   // will fail if [var.os_version] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)

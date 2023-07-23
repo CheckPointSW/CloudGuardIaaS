@@ -160,7 +160,7 @@ This solution uses the following modules:
     disk_size                       = "110"
     vm_os_sku                       = "sg-byol"
     vm_os_offer                     = "check-point-cg-r8110"
-    os_version                      = "R81.10"
+    os_version                      = "R8110"
     bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
     allow_upload_download           = true
     authentication_type             = "Password"
