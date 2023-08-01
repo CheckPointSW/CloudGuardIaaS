@@ -195,6 +195,8 @@ availability_type = "Availability Zone"
     create_public_ip_prefix         = false
     existing_public_ip_prefix_id    = ""
     admin_shell                     = "/etc/cli.sh"
+    serial_console_password_hash    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	maintenance_mode_password_hash  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
