@@ -1,6 +1,5 @@
 # Local .terraform directories
 **/.terraform/*
-/gcp/*.json
 
 # .tfstate files
 *.tfstate
@@ -8,5 +7,8 @@
 
 # Crash log files
 crash.log
+
+# json files under /gcp
+/gcp/*.json
 
 .idea
