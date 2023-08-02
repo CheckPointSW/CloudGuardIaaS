@@ -8,7 +8,7 @@
 # Crash log files
 crash.log
 
-# json files under /gcp
-/gcp/*.json
+# JSON files under terraform/gcp/ directory
+gcp/*.json
 
 .idea
