@@ -177,6 +177,10 @@ variable "vnet_allocation_method" {
 variable "management_GUI_client_network" {
   description = "Allowed GUI clients - GUI clients network CIDR"
   type = string
+  validation {
+    condition     = can(regex("(^0\\.0\\.0\\.0\\/0$)|(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/32)?$)", var.management_GUI_client_network)) && var.management_GUI_client_network != "0.0.0.0/32"
+    error_message = "Variable [management_GUI_client_network] must be a valid IPv4 network CIDR (only 0.0.0.0/0, X.X.X.X/32 or X.X.X.X are acceptable)."
+  }
 }
 
 variable "mds_enable_api" {
@@ -186,10 +190,6 @@ variable "mds_enable_api" {
 }
 
 locals {
-  regex_valid_management_GUI_client_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
-  // Will fail if var.management_GUI_client_network is invalid
-  regex_management_GUI_client_network = regex(local.regex_valid_management_GUI_client_network, var.management_GUI_client_network) == var.management_GUI_client_network ? 0 : "Variable [management_GUI_client_network] must be a valid IPv4 network CIDR."
-
   mds_enable_api_allowed_values = [
     "disable",
     "all",
