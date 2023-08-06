@@ -24,7 +24,7 @@ This solution uses the following modules:
 - Choose the preferred login method to Azure in order to deploy the solution:
     <br>1. Using Service Principal:
     - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
-    - Grant the Service Principal at least "**Owner**" permissions to the Azure subscription<br>
+    - Grant the Service Principal at least "**Managed Application Contributor**", "**Storage Account Contributor**", "**Network Contributor**", "**Virtual Machine Contributor**", "**User Access Administrator**" permissions to the Azure subscription<br>
     - The Service Principal credentials can be stored either in the terraform.tfvars or as [Environment Variables](https://www.terraform.io/docs/providers/azuread/guides/service_principal_client_secret.html)<br>
     
       In case the Environment Variables are used, perform modifications described below:<br>
