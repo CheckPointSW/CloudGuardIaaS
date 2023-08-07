@@ -327,7 +327,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        public_ip_address_configuration {
         name = "${var.vmss_name}-public-ip"
         idle_timeout = 15
-        domain_name_label = "${var.vmss_name}-dns-name"
+        domain_name_label = "${lower(var.vmss_name)}-dns-name"
        }
      }
  }
