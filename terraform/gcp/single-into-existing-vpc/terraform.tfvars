@@ -1,6 +1,6 @@
 # --- Google Provider ---
 service_account_path                        = "PLEASE ENTER SERVICE_ACCOUNT_PATH"                                        # "service-accounts/service-account-file-name.json"
-project                                     = "PLEASE ENTER PROJECT"                                                     # "project-name"
+project                                     = "PLEASE ENTER PROJECT ID"                                                  # "project-id"
 
 # --- Check Point Deployment---
 image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8110-gw-byol-single-335-985-v20220126"
