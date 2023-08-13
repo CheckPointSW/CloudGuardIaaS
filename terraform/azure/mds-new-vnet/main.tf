@@ -153,7 +153,7 @@ resource "azurerm_public_ip" "public-ip" {
   allocation_method = var.vnet_allocation_method
   idle_timeout_in_minutes = 30
   domain_name_label = join("", [
-    var.mds_name,
+    lower(var.mds_name),
     "-",
     random_id.randomId.hex])
 }
