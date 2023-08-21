@@ -25,7 +25,7 @@ module "common" {
   source = "../modules/common"
   resource_group_name = var.resource_group_name
   location = var.location
-  admin_password = var.admin_password
+  admin_password = var.authentication_type == "SSH Public Key" ? random_id.random_id.hex : var.admin_password
   installation_type = var.installation_type
   template_name = var.template_name
   template_version = var.template_version
