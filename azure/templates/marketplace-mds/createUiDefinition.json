@@ -300,6 +300,100 @@
             "visible": "[not(equals(steps('chkp').installationType, 'mds-primary'))]"
           },
           {
+            "name": "SerialPasswordInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[bool(basics('auth').sshPublicKey)]",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends setting serial console password and maintenance-mode password for recovery purposes.      For R81.10 and below the serial console password is used also as maintenance-mode password"
+            }
+          },
+          {
+             "visible": "[bool(basics('auth').sshPublicKey)]",
+            "name": "EnableSerialConsolePassword",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable Serial console password",
+            "defaultValue": "Yes",
+            "toolTip": "A unique password hash to enable VM connection via serial console.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "AdditionalPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "toolTip": "Serial console password hash, used to enable password authentication (using serial console). To generate password hash use the command 'openssl passwd -6 PASSWORD'",
+            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp').EnableSerialConsolePassword)]",
+            "label": {
+              "password": "Password hash",
+              "confirmPassword": "Confirm password"
+            },
+            "constraints": {
+              "required": true,
+              "regex": "^.{12,300}$",
+              "validationMessage": "The value must be the output of the hash command."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
+          },
+          {
+            "name": "MaintenanceModeInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(bool(basics('auth').password), not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion)))]",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends setting a maintenance-mode password for recovery purposes."
+            }
+          },
+          {
+            "visible": "[not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion))]",
+            "name": "EnableMaintenanceMode",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable Maintenance Mode",
+            "defaultValue": "Yes",
+            "toolTip": "A unique password hash to enable VM maintenance mode.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "visible": "[and(not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion)), steps('chkp').EnableMaintenanceMode)]",
+            "name": "MaintenanceModePassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "defaultValue": "",
+            "toolTip": "To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here.",
+            "label": {
+              "password": "Maintenance Mode password hash",
+              "confirmPassword": "Confirm Password"
+            },
+            "constraints": {
+              "required": true,
+              "validationMessage": "The value must be the output of the hash command."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
+          },
+          {
             "name": "bootstrapScript",
             "type": "Microsoft.Common.FileUpload",
             "label": "Bootstrap script",
@@ -567,7 +661,9 @@
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
-      "NewNsgName": "[steps('network').NSGName]"
+      "NewNsgName": "[steps('network').NSGName]",
+      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
+      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
     }
   }
 }
