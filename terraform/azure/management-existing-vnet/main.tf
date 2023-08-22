@@ -26,6 +26,8 @@ module "common" {
   vm_os_sku = var.vm_os_sku
   vm_os_offer = var.vm_os_offer
   authentication_type = var.authentication_type
+  serial_console_password_hash = var.serial_console_password_hash
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 //********************** Networking **************************//
@@ -260,6 +262,8 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
       management_GUI_client_network = var.management_GUI_client_network
       enable_api = var.mgmt_enable_api
       admin_shell = var.admin_shell
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 

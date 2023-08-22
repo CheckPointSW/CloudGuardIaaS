@@ -129,7 +129,10 @@ This solution uses the following modules:
  | **secondary** | Indicates if the installation type is mds-secondary                                                                                                                                  | boolean | true; <br/>false;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
  |  |                                                                                                                                                                                      |  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |  |
  | **logserver** | Indicates if the installation type is mds-logserver                                                                                                                                  | boolean | true; <br/>false;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-
+ |  |  |  |  |  |
+ | **serial_console_password_hash** | Optional parameter, used to enable serial console connection in case of SSH key as authentication type, to generate password hash use the command 'openssl passwd -6 PASSWORD' on Linux and paste it here. | string |
+ |  |  |  |  |  |
+ | **maintenance_mode_password_hash** | Maintenance mode password hash, relevant only for R81.20 and higher versions, to generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here. | string |
 
 
 ## Example
@@ -152,7 +155,7 @@ This solution uses the following modules:
 	disk_size                       = "110"
 	vm_os_sku                       = "mgmt-byol"
 	vm_os_offer                     = "check-point-cg-r8110"
-	os_version                      = "R81.10"
+	os_version                      = "R8110"
 	bootstrap_script                = "touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
 	allow_upload_download           = true
 	authentication_type             = "Password"
@@ -162,6 +165,8 @@ This solution uses the following modules:
 	primary                         = "true"
 	secondary                       = "false"
 	logserver                       = "false"
+    serial_console_password_hash    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	maintenance_mode_password_hash  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

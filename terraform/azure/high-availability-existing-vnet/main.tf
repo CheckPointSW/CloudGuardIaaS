@@ -27,6 +27,8 @@ module "common" {
   vm_os_sku = var.vm_os_sku
   vm_os_offer = var.vm_os_offer
   authentication_type = var.authentication_type
+  serial_console_password_hash = var.serial_console_password_hash
+   maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 //********************** Networking **************************//
@@ -373,6 +375,8 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
       enable_custom_metrics = var.enable_custom_metrics ? "yes" : "no"
       admin_shell = var.admin_shell
       smart_1_cloud_token = count.index == 0 ? var.smart_1_cloud_token_a : var.smart_1_cloud_token_b
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 
@@ -465,6 +469,8 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
       enable_custom_metrics = var.enable_custom_metrics ? "yes" : "no"
       admin_shell = var.admin_shell
       smart_1_cloud_token = count.index == 0 ? var.smart_1_cloud_token_a : var.smart_1_cloud_token_b
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 

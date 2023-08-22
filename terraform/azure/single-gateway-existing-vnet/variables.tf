@@ -32,6 +32,16 @@ variable "admin_password" {
   type = string
 }
 
+variable "serial_console_password_hash" {
+  description = "Optional parameter, used to enable serial console connection in case of SSH key as authentication type"
+  type = string
+}
+
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
+}
+
 variable "smart_1_cloud_token" {
   description = "Smart-1 Cloud Token"
   type = string
@@ -92,10 +102,10 @@ variable "os_version" {
 
 locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
-    "R80.40",
+    "R8040",
     "R81",
-    "R81.10",
-    "R81.20"
+    "R8110",
+    "R8120"
   ]
   // will fail if [var.os_version] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
