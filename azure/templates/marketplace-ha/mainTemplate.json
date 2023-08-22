@@ -633,7 +633,7 @@
       "name": "[variables('ipPrefixNewName')]",
       "location": "[variables('location')]",
       "properties": {
-        "prefixLength": "30",
+        "prefixLength": "[if(greater(variables('VIPs_Number'), 5), '28', if(greater(variables('VIPs_Number'), 1), '29', '30'))]",
         "publicIPAddressVersion": "IPv4"
       },
       "sku": {
