@@ -24,7 +24,7 @@ variable "disk_category" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81-BYOL"
+  default = "R81.20-BYOL"
 }
 variable "gateway_instance_type" {
   type = string

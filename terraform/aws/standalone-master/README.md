@@ -106,7 +106,7 @@ secret_key = "my-secret-key"
     }
 
     // --- Check Point Settings ---
-    standalone_version = "R81.10-PAYG-NGTP"
+    standalone_version = "R81.20-PAYG-NGTP"
     admin_shell = "/etc/cli.sh"
     standalone_password_hash = ""
 
@@ -187,6 +187,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221123         | R81.20 version support                                                                                                  |
 | 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname           |
 | 20230806         | Add support for c6in instance type                                                                                      |
+| 20230830         | Change default Check Point version to R81.20                                   |
 
 
 ## License

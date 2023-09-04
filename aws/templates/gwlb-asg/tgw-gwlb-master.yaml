@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in a new VPC for Transit Gateway (20211212)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in a new VPC for Transit Gateway (20230830)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -493,7 +493,7 @@ Parameters:
   GatewayVersion:
     Description: The version and license to install on the Security Gateways.
     Type: String
-    Default: R80.40-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP
@@ -650,7 +650,7 @@ Parameters:
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R81.10-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG

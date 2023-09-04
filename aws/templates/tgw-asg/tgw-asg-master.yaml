@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server in a new VPC (20211212)
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server in a new VPC (20230830)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -340,7 +340,7 @@ Parameters:
   GatewayVersion:
     Description: The version and license to install on the Security Gateways.
     Type: String
-    Default: R81.10-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP
@@ -500,7 +500,7 @@ Parameters:
   ManagementVersion:
     Description: The version and license to install on the Security Management Server.
     Type: String
-    Default: R81.10-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG
