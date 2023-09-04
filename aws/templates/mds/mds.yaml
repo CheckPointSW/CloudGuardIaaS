@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server (20211212)
+Description: Deploys a Check Point Multi-Domain Server (20230830)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -273,7 +273,7 @@ Parameters:
   MDSVersion:
     Description: The license to install on the Multi-Domain Server.
     Type: String
-    Default: R81.10-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R81-BYOL

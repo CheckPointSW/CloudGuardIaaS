@@ -22,7 +22,7 @@ instance_tags = {
 predefined_role = ""
 
 // --- Check Point Settings ---
-gateway_version = "R81-BYOL"
+gateway_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 gateway_SICKey = "12345678"
 gateway_password_hash = ""

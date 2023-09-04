@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into a new VPC (20230503)
+Description: Deploys a Check Point Security Gateway into a new VPC (20230830)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -278,7 +278,7 @@ Parameters:
       - false
   GatewayVersion:
     Type: String
-    Default: R81.10-BYOL
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-BYOL
       - R80.40-PAYG-NGTP

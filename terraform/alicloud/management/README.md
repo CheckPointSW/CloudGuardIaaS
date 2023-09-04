@@ -49,7 +49,7 @@ Configure envrionment variables in Windows:
 | disk_category         | The ECS disk category                                                                                                                                                                                                                   | string      | - cloud <br/> - cloud_efficiency <br/> - cloud_ssd, <br/> - cloud_essd                                         | "cloud_essd"              | no       |
 | ram_role_name         | RAM role name to attach to the instance profile, leave it empty for automatic creation                                                                                                                                                  | string      | n/a                                                                                                            | ""                        | no       |
 | instance_tags         | (Optional) A map of tags as key=value pairs. All tags will be added to the Management ECS Instance                                                                                                                                      | map(string) | n/a                                                                                                            | {}                        | no       |
-| version_license       | Version and license of the Check Point Security Management                                                                                                                                                                              | string      | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                             | R81-BYOL                  |          |
+| version_license       | Version and license of the Check Point Security Management                                                                                                                                                                              | string      | - R81-BYOL <br/> - R81.10-BYOL <br/> - R81.20-BYOL                                                             | R81.20-BYOL               |          |
 | admin_shell           | Set the admin shell to enable advanced command line configuration                                                                                                                                                                       | string      | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh                                             | /etc/cli.sh               | no       |
 | password_hash         | (Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash)                                                                                                                           | string      | n/a                                                                                                            | ""                        | no       |
 | hostname              | (Optional) Management prompt hostname. The name must not contain reserved words. For details, refer to sk40179.                                                                                                                         | string      | n/a                                                                                                            | n/a                       | no       | 
@@ -84,7 +84,7 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-version_license = "R81-BYOL"
+version_license = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 password_hash = ""
 hostname = "mgmt-tf"
@@ -114,6 +114,7 @@ bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
 
 | Template Version | Description                                                                                                                                                                                                        |
 |------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 20230830         | Change default Check Point version to R81.20                                   |
 | 20230615         | - Improved userdata quality and stability by moving to cloud-config<br/>- Define default primary and secondary NTP servers<br/>- Improved deployment experience for gateways and clusters managed by Smart-1 Cloud |
 | 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname                                                                                                      |
 | 20230512         | New images with Jumbo Hotfix                                                                                                                                                                                       |

@@ -25,7 +25,7 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-standalone_version = "R81.10-PAYG-NGTP"
+standalone_version = "R81.20-PAYG-NGTP"
 admin_shell = "/etc/cli.sh"
 standalone_password_hash = ""
 

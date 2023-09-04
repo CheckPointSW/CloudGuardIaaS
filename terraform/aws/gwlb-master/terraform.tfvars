@@ -30,7 +30,7 @@ gateway_name = "Check-Point-GW-tf"
 gateway_instance_type = "c5.xlarge"
 minimum_group_size = 2
 maximum_group_size = 10
-gateway_version = "R80.40-BYOL"
+gateway_version = "R81.20-BYOL"
 gateway_password_hash = ""
 gateway_SICKey = "12345678"
 gateways_provision_address_type = "private"
@@ -40,7 +40,7 @@ enable_cloudwatch = false
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
 management_deploy = true
 management_instance_type = "m5.xlarge"
-management_version = "R81.10-BYOL"
+management_version = "R81.20-BYOL"
 management_password_hash = ""
 gateways_policy = "Standard"
 gateway_management = "Locally managed"

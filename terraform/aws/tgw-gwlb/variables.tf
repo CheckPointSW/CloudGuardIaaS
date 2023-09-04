@@ -213,7 +213,7 @@ variable "maximum_group_size" {
 variable "gateway_version" {
   type = string
   description =  "The version and license to install on the Security Gateways."
-  default = "R80.40-BYOL"
+  default = "R81.20-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"
@@ -274,7 +274,7 @@ module "validate_management_instance_type" {
 variable "management_version" {
   type = string
   description =  "The license to install on the Security Management Server"
-  default = "R81.10-BYOL"
+  default = "R81.20-BYOL"
 }
 module "validate_management_version" {
   source = "../modules/common/version_license"

@@ -3,7 +3,7 @@ Parameters:
   Version:
     Description: Security Gateway or Management Server version
     Type: String
-    Default: R81-BYOL-GW
+    Default: R81.20-BYOL-GW
     AllowedValues:
       - R81-BYOL-GW
       - R81-BYOL-MGMT

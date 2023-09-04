@@ -1,4 +1,4 @@
 #cloud-config
 runcmd:
   - |
-    python3 /etc/cloud_config.py sicKey=\"${SICKey}\" installationType=\"management\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20230615\" templateName=\"management\" templateType=\"terraform\" shell=\"${Shell}\" hostName=\"${Hostname}\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" primary=\"${IsPrimary}\" adminSubnet=\"${AdminSubnet}\" allocatePublicAddress=\"${AllocateElasticIP}\" "overTheInternet=\"${GatewayManagement}\"" bootstrapScript64=\"${BootstrapScript}\"
+    python3 /etc/cloud_config.py sicKey=\"${SICKey}\" installationType=\"management\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20230830\" templateName=\"management\" templateType=\"terraform\" shell=\"${Shell}\" hostName=\"${Hostname}\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" primary=\"${IsPrimary}\" adminSubnet=\"${AdminSubnet}\" allocatePublicAddress=\"${AllocateElasticIP}\" "overTheInternet=\"${GatewayManagement}\"" bootstrapScript64=\"${BootstrapScript}\"
