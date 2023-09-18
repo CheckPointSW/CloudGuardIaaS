@@ -243,63 +243,6 @@
             }
           },
           {
-            "name": "adminShell",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Default shell for the admin user",
-            "defaultValue": "/etc/cli.sh",
-            "toolTip": "The default shell for the admin user",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "/etc/cli.sh",
-                  "value": "/etc/cli.sh"
-                },
-                {
-                  "label": "/bin/bash",
-                  "value": "/bin/bash"
-                },
-                {
-                  "label": "/bin/csh",
-                  "value": "/bin/csh"
-                },
-                {
-                  "label": "/bin/tcsh",
-                  "value": "/bin/tcsh"
-                }
-              ]
-            }
-          },
-          {
-            "name": "managementGUIClientNetwork",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Allowed GUI clients",
-            "toolTip": "GUI clients network CIDR",
-            "constraints": {
-              "required": true,
-              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-              "validationMessage": "Enter a valid IPv4 network CIDR"
-            },
-            "visible": true
-          },
-          {
-            "name": "sicKeyUi",
-            "type": "Microsoft.Common.PasswordBox",
-            "label": {
-              "password": "SIC key",
-              "confirmPassword": "Confirm SIC key"
-            },
-            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the primary and secondary servers. SIC key must be provided if installing a secondary Multi-Domain Server.",
-            "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z]{12,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
-            },
-            "options": {
-              "hideConfirmation": false
-            },
-            "visible": "[not(equals(steps('chkp').installationType, 'mds-primary'))]"
-          },
-          {
             "name": "SerialPasswordInfoBox",
             "type": "Microsoft.Common.InfoBox",
             "visible": "[bool(basics('auth').sshPublicKey)]",
@@ -392,6 +335,63 @@
             "options": {
               "hideConfirmation": false
             }
+          },
+          {
+            "name": "adminShell",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Default shell for the admin user",
+            "defaultValue": "/etc/cli.sh",
+            "toolTip": "The default shell for the admin user",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/etc/cli.sh",
+                  "value": "/etc/cli.sh"
+                },
+                {
+                  "label": "/bin/bash",
+                  "value": "/bin/bash"
+                },
+                {
+                  "label": "/bin/csh",
+                  "value": "/bin/csh"
+                },
+                {
+                  "label": "/bin/tcsh",
+                  "value": "/bin/tcsh"
+                }
+              ]
+            }
+          },
+          {
+            "name": "managementGUIClientNetwork",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Allowed GUI clients",
+            "toolTip": "GUI clients network CIDR",
+            "constraints": {
+              "required": true,
+              "regex": "(^0\\.0\\.0\\.0\\/0$)|(^(?!0\\.0\\.0\\.0$)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/32)?$)",
+              "validationMessage": "Enter a valid IPv4 network CIDR (only 0.0.0.0/0, X.X.X.X/32 or X.X.X.X are acceptable)"
+            },
+            "visible": true
+          },
+          {
+            "name": "sicKeyUi",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "SIC key",
+              "confirmPassword": "Confirm SIC key"
+            },
+            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the primary and secondary servers. SIC key must be provided if installing a secondary Multi-Domain Server.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{12,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[not(equals(steps('chkp').installationType, 'mds-primary'))]"
           },
           {
             "name": "bootstrapScript",
