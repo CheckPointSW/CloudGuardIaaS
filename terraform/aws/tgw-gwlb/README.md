@@ -245,6 +245,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                                                        |
 | 20230806         | Add support for c6in instance type                                                                                 |
 | 20230830         | Change default Check Point version to R81.20                                   |
+| 20230923         | Add support for C5d instance type                               |
 
 ## License
 
