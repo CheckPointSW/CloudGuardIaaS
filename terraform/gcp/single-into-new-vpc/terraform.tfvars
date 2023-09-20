@@ -3,7 +3,7 @@ service_account_path                        = "PLEASE ENTER SERVICE_ACCOUNT_PATH
 project                                     = "PLEASE ENTER PROJECT ID"                                                 # "project-id"
 
 # --- Check Point Deployment---
-image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8040-gw-byol-123-456-v12345678"
+image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8120-gw-byol-single-631-991001335-v20230622"
 installationType                            = "PLEASE ENTER INSTALLATION TYPE"                                          # "Gateway only"
 license                                     = "PLEASE ENTER LICENSE"                                                    # "BYOL"
 prefix                                      = "PLEASE ENTER PREFIX"                                                     # "chkp-single-tf-"

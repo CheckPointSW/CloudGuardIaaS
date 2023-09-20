@@ -109,7 +109,7 @@ service_account_path = "service-accounts/service-account-file-name.json"
 project = "project-id"
 
 # --- Check Point---
-image_name = "check-point-r8110-gw-byol-single-335-985-v20220126"
+image_name = "check-point-r8120-gw-byol-single-631-991001335-v20230622"
 installationType = "Gateway only"
 license = "BYOL"
 prefix = "chkp-single-tf-"
@@ -179,7 +179,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | zone | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |us-central1-a|yes|
 |  |  |  |  |  |
-| image_name |The single gateway or management image name (e.g. check-point-r8110-gw-byol-single-335-985-v20220126 for gateway or check-point-r8110-byol-335-883-v20210706 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
+| image_name |The single gateway or management image name (e.g. check-point-r8120-gw-byol-single-631-991001335-v20230622 for gateway or check-point-r8120-byol-631-991001335-v20230621 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
 |  |  |  |  |  |
 | installationType | Installation type and version | string |Gateway only;<br/> Management only;<br/> Manual Configuration<br/>Gateway and Management (Standalone) |Gateway only|yes|
 |  |  |  |  |  |
