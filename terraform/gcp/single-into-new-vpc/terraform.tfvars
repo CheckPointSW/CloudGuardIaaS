@@ -34,7 +34,7 @@ network_enableSctp                          = "PLEASE ENTER NETWORK ENABLE SCTP"
 network_sctpSourceRanges                    = "PLEASE ENTER NETWORK SCTP SOURCE RANGES"                                 # []
 network_enableEsp                           = "PLEASE ENTER NETWORK ENABLE ESP"                                         # false
 network_espSourceRanges                     = "PLEASE ENTER NETWORK ESP SOURCE RANGES"                                  # []
-numAdditionalNICs                           = "PLEASE ENTER NUM ADDITIONAL NICS"                                        # 0
+numAdditionalNICs                           = "PLEASE ENTER NUM ADDITIONAL NICS"                                        # 1
 externalIP                                  = "PLEASE ENTER EXTERNAL IP"                                                # "static"
 internal_subnetwork_cidr                    = "PLEASE ENTER INTERNAL SUBNETWORK CIDR"                                   # "10.0.2.0/24"
 

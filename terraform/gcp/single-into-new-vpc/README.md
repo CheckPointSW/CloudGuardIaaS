@@ -140,7 +140,7 @@ network_enableSctp= false
 network_sctpSourceRanges= []
 network_enableEsp= false
 network_espSourceRanges= []
-numAdditionalNICs= 0
+numAdditionalNICs= 1
 externalIP= "static"
 internal_subnetwork_cidr = "10.0.1.0/24"
 
