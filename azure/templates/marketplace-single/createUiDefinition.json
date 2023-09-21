@@ -1825,6 +1825,8 @@
       "location": "[location()]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
       "adminPassword": "[basics('auth').password]",
+      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
+      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]",
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
@@ -1853,9 +1855,7 @@
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
-      "NewNsgName": "[steps('network').NSGName]",
-      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
+      "NewNsgName": "[steps('network').NSGName]"
     }
   }
 }
