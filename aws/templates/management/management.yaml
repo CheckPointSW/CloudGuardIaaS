@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server (20230830)
+Description: Deploys a Check Point Management Server (20230926)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -395,6 +395,7 @@ Conditions:
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
   NoSIC: !Equals [!Ref ManagementSICKey, '']
+  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
 Resources:
   AMI:
     Type: AWS::CloudFormation::Stack
@@ -477,11 +478,11 @@ Resources:
         STSRoles: !Join [',', !Ref ManagementSTSRoles]
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Condition: UseRole
+    Condition: PreRole
     Properties:
       Path: /
       Roles:
-        - !If [CreateRole, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole, !Ref ManagementPredefinedRole]
+        - !Ref ManagementPredefinedRole
   ManagementInstance:
     Type: AWS::EC2::Instance
     DependsOn: ManagementSecurityGroup
@@ -491,7 +492,7 @@ Resources:
           Value: !Ref ManagementName
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref ManagementInstanceType
-      IamInstanceProfile: !If [UseRole, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+      IamInstanceProfile: !If [UseRole, !If [PreRole, !Ref InstanceProfile, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole], !Ref 'AWS::NoValue']
       KeyName: !Ref KeyName
       NetworkInterfaces:
         - DeviceIndex: 0
