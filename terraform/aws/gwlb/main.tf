@@ -90,4 +90,5 @@ module "management" {
   gateway_management = var.gateway_management
   management_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"management_gwlb\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; fi; autoprov_cfg -f init AWS -mn ${var.management_server} -tn ${var.configuration_template} -cn gwlb-controller -po ${var.gateways_policy} -otp ${var.gateway_SICKey} -r ${data.aws_region.current.name} -ver ${split("-", var.gateway_version)[0]} -iam; echo -e '\nFinished Bootstrap script\n'"
   volume_type = var.volume_type
+  is_gwlb_iam = true
 }
