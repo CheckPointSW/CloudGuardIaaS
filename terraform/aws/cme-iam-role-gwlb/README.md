@@ -1,6 +1,6 @@
-# AWS IAM Role for Cloud Management Extension (CME) Terraform module
+# AWS IAM Role for Cloud Management Extension (CME) manages Gateway Load Balancer Auto Scale Group Terraform module
 
-Terraform module which creates an AWS IAM Role for Cloud Management Extension (CME) on Security Management Server.
+Terraform module which creates an AWS IAM Role for Cloud Management Extension (CME) manages Gateway Load Balancer Auto Scale Group on Security Management Server.
 
 These types of Terraform resources are supported:
 * [AWS IAM role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)
@@ -23,7 +23,7 @@ provider "aws" {
 }
 ```
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables).
-- Static credentials can be provided by adding an access_key and secret_key in /terraform/aws/cme-iam-role/**terraform.tfvars** file as follows:
+- Static credentials can be provided by adding an access_key and secret_key in /terraform/aws/cme-iam-role-gwlb/**terraform.tfvars** file as follows:
 ```
 region     = "us-east-1"
 access_key = "my-access-key"
@@ -40,7 +40,7 @@ secret_key = "my-secret-key"
   ```
   
 ## Usage
-- Fill all variables in the /terraform/aws/cme-iam-role/**terraform.tfvars** file with proper values (see below for variables descriptions).
+- Fill all variables in the /terraform/aws/cme-iam-role-gwlb/**terraform.tfvars** file with proper values (see below for variables descriptions).
 - From a command line initialize the Terraform configuration directory:
     ```
     terraform init
@@ -54,7 +54,7 @@ secret_key = "my-secret-key"
     terraform apply
     ```
 
-- Variables are configured in /terraform/aws/cme-iam-role/**terraform.tfvars** file as follows:
+- Variables are configured in /terraform/aws/cme-iam-role-gwlb/**terraform.tfvars** file as follows:
 
   ```
     //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
@@ -91,8 +91,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                        |
 |------------------|--------------------------------------------------------------------|
-| 20210309         | First release of Check Point CME IAM Role Terraform module for AWS |
-| 20230529         | CME instance profile for IAM Role                                  | 
+| 20230926         | CME instance profile for IAM Role                                  |
 
 
 
