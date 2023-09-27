@@ -1115,7 +1115,7 @@
     },
     {
       "condition": "[and(equals(parameters('managedSystemAssigned'), 'yes'), not(parameters('deployNewNSG')))]",
-      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1'))]"],
+      "dependsOn": "[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1'))]",
       "name": "[concat('ExistingNsgRoleAssignment', copyIndex())]",
       "copy": {
         "name": "ExistingNsgRoleAssignmentCopy",
@@ -1146,6 +1146,9 @@
           },
           "principalId2": {
             "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2022-11-01', 'Full').identity.principalId]"
+          },
+          "index": {
+            "value": "[copyIndex()]"
           }
         }
       }
