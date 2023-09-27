@@ -16,7 +16,7 @@ See the [Check Point CloudGuard Gateway Load Balancer on AWS](https://sc1.checkp
 This solution uses the following modules:
 - /terraform/aws/autoscale-gwlb
 - /terraform/aws/management
-- /terraform/aws/cme-iam-role
+- /terraform/aws/cme-iam-role-gwlb
 - /terraform/aws/modules/amis
 ## Configurations
 
