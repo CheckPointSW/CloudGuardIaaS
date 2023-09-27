@@ -256,13 +256,6 @@
         "Premium_LRS"
       ]
     },
-    "role": {
-      "type": "string",
-      "defaultValue": "Contributor",
-      "metadata": {
-        "description": "Role"
-      }
-    },
     "managedSystemAssigned": {
       "type": "string",
       "allowedValues": [
@@ -489,8 +482,7 @@
       "publisher": "[variables('imagePublisher')]"
     },
     "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
-    "roleDefinitionId": "[if(equals(parameters('role'), 'Contributor'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c'), parameters('role'))]",
-    "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
+    "roleDefinitionIds": "[createArray(subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', '361898ef-9ed1-48c2-849c-a832951106bb'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'))]",
     "subnet2PrivateAddresses": [
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),1)))]",
       "[concat(split(parameters('subnet2StartAddress'), '.')[0],'.', split(parameters('subnet2StartAddress'), '.')[1],'.', split(parameters('subnet2StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet2StartAddress'), '.')[3]),2)))]"
@@ -1109,22 +1101,26 @@
       "name": "[guid(resourceGroup().id, concat(parameters('vmName'), copyIndex(1)))]",
       "copy": {
         "name": "virtualMachineCopy",
-        "count": "[variables('count')]"
+        "count": "[mul(length(variables('roleDefinitionIds')), variables('count'))]"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1)))]"
+        "[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2')))]"
       ],
       "properties": {
-        "roleDefinitionId": "[variables('roleDefinitionId')]",
+        "roleDefinitionId": "[variables('roleDefinitionIds')[mod(copyIndex(1), 2)]]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2022-11-01', 'Full').identity.principalId]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2022-11-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
       "condition": "[and(equals(parameters('managedSystemAssigned'), 'yes'), not(parameters('deployNewNSG')))]",
       "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1'))]"],
-      "name": "ExistingNsgRoleAssignment",
+      "name": "[concat('ExistingNsgRoleAssignment', copyIndex())]",
+      "copy": {
+        "name": "ExistingNsgRoleAssignmentCopy",
+        "count": "[length(variables('roleDefinitionIds'))]"
+      },
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[if(not(parameters('deployNewNSG')), split(parameters('ExistingNSG').id, '/')[4], '')]",
@@ -1143,7 +1139,7 @@
             "value": "[parameters('vmName')]"
           },
           "roleDefinitionId": {
-            "value": "[variables('roleDefinitionId')]"
+            "value": "[variables('roleDefinitionIds')[copyIndex()]]"
           },
           "principalId1": {
             "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2022-11-01', 'Full').identity.principalId]"
