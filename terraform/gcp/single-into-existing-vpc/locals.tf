@@ -15,7 +15,7 @@ locals {
 
   regex_valid_sicKey = "^([a-z0-9A-Z]{8,30})$"
   // Will fail if var.sicKey is invalid
-  regex_sicKey = regex(local.regex_valid_sicKey, var.sicKey) == var.sicKey ? 0 : "Variable [sicKey] must be at least 8 alpha numeric characters."
+  regex_sicKey = regex(local.regex_valid_sicKey, var.sicKey) == var.sicKey ? 0 : "Variable [sicKey] must be at least 8 alphanumeric characters."
 
   regex_validate_mgmt_image_name = "check-point-r8[0-1][1-4]0-(byol|payg)-[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}"
   regex_validate_single_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-single-[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}"
