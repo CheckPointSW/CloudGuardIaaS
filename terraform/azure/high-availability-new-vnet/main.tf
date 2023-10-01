@@ -514,12 +514,15 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
   }
 }
 //********************** Role Assigments **************************//
-data "azurerm_role_definition" "role_definition" {
-  name = module.common.role_definition
+data "azurerm_role_definition" "virtual_machine_contributor_role_definition" {
+  name = "Reader"
+}
+data "azurerm_role_definition" "reader_role_definition" {
+  name = "Virtual Machine Contributor"
 }
 data "azurerm_client_config" "client_config" {
 }
-resource "azurerm_role_assignment" "cluster_assigment" {
+resource "azurerm_role_assignment" "virtual_machine_contributor_role_definition" {
   count = 2
   lifecycle {
     ignore_changes = [
@@ -527,6 +530,17 @@ resource "azurerm_role_assignment" "cluster_assigment" {
     ]
   }
   scope = module.common.resource_group_id
-  role_definition_id = data.azurerm_role_definition.role_definition.id
+  role_definition_id = data.azurerm_role_definition.virtual_machine_contributor_role_definition.id
+  principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
+}
+resource "azurerm_role_assignment" "cluster_reader_assigment" {
+  count = 2
+  lifecycle {
+    ignore_changes = [
+      role_definition_id, principal_id
+    ]
+  }
+  scope = module.common.resource_group_id
+  role_definition_id = data.azurerm_role_definition.reader_role_definition.id
   principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
 }
