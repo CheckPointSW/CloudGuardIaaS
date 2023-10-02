@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server (20230830)
+Description: Deploys a Check Point Multi-Domain Server (20230926)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -128,6 +128,14 @@ Parameters:
       - c5n.4xlarge
       - c5n.9xlarge
       - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
       - m5.large
       - m5.xlarge
       - m5.2xlarge
@@ -367,6 +375,7 @@ Conditions:
   UseRole: !And [!Or [!Condition PrimaryMDS, !Condition SecondaryMDS], !Not [!Equals [!Ref MDSPermissions, None (configure later)]]]
   PrimaryMDS: !Equals [!Ref MDSInstallationType, Primary Multi-Domain Server]
   SecondaryMDS: !Equals [!Ref MDSInstallationType, Secondary Multi-Domain Server]
+  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
 Resources:
   AMI:
     Type: AWS::CloudFormation::Stack
@@ -438,11 +447,11 @@ Resources:
         STSRoles: !Join [',', !Ref MDSSTSRoles]
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Condition: UseRole
+    Condition: PreRole
     Properties:
       Path: /
       Roles:
-        - !If [CreateRole, !GetAtt MDSRoleStack.Outputs.CMEIAMRole, !Ref MDSPredefinedRole]
+        - !Ref MDSPredefinedRole
   MDSInstance:
     Type: AWS::EC2::Instance
     DependsOn: MDSSecurityGroup
@@ -452,7 +461,7 @@ Resources:
           Value: !Ref MDSName
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref MDSInstanceType
-      IamInstanceProfile: !If [UseRole, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+      IamInstanceProfile: !If [UseRole, !If [PreRole, !Ref InstanceProfile, !GetAtt MDSRoleStack.Outputs.CMEIAMRole], !Ref 'AWS::NoValue']
       KeyName: !Ref KeyName
       NetworkInterfaces:
         - DeviceIndex: 0
