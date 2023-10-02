@@ -494,14 +494,14 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
 }
 //********************** Role Assigments **************************//
 data "azurerm_role_definition" "virtual_machine_contributor_role_definition" {
-  name = "Reader"
+  name = "Virtual Machine Contributor"
 }
 data "azurerm_role_definition" "reader_role_definition" {
-  name = "Virtual Machine Contributor"
+  name = "Reader"
 }
 data "azurerm_client_config" "client_config" {
 }
-resource "azurerm_role_assignment" "virtual_machine_contributor_role_definition" {
+resource "azurerm_role_assignment" "cluster_virtual_machine_contributor_assignment" {
   count = 2
   lifecycle {
     ignore_changes = [
