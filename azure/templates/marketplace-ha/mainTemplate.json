@@ -356,7 +356,7 @@
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
     "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
-    "templateVersion": "20230124",
+    "templateVersion": "20231002",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",

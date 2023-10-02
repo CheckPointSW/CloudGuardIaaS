@@ -391,7 +391,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20230124",
+    "templateVersion": "20231002",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
