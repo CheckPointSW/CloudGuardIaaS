@@ -19,8 +19,8 @@ resource "aws_lb_target_group" "lb_target_group" {
   protocol = var.load_balancer_protocol
   port = var.target_group_port
   health_check {
-    port     =  var.load_balancers_type != "gateway" ? null : 8117
-    protocol = var.load_balancers_type != "gateway" ? null : "TCP"
+    port     =  var.load_balancers_type != "gateway" && var.load_balancers_type != "Network Load Balancer" ? null : 8117
+    protocol = var.load_balancers_type != "gateway" && var.load_balancers_type != "Network Load Balancer" ? null : "TCP"
   }
 }
 resource "aws_lb_listener" "lb_listener" {
