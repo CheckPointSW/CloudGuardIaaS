@@ -63,8 +63,8 @@ module "autoscale" {
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
   gateway_bootstrap_script = "echo -e '\nStarting Bootstrap script\n'; echo 'Adding quickstart identifier to cloud-version'; cv_path='/etc/cloud-version'\n if test -f \"$cv_path\"; then sed -i '/template_name/c\\template_name: autoscale_qs' /etc/cloud-version; fi; cv_json_path='/etc/cloud-version.json'\n cv_json_path_tmp='/etc/cloud-version-tmp.json'\n if test -f \"$cv_json_path\"; then cat \"$cv_json_path\" | jq '.template_name = \"'\"autoscale_qs\"'\"' > \"$cv_json_path_tmp\"; mv \"$cv_json_path_tmp\" \"$cv_json_path\"; fi; echo -e '\nFinished Bootstrap script\n'"
-  management_server = local.deploy_management_condition ? "${var.provision_tag}-management" : ""
-  configuration_template = local.deploy_management_condition ? "${var.provision_tag}-template" : ""
+  management_server = "${var.provision_tag}-management"
+  configuration_template = "${var.provision_tag}-template"
 }
 
 data "aws_region" "current"{}

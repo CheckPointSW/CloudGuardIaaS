@@ -58,8 +58,8 @@ module "autoscale_gwlb" {
   admin_shell = var.admin_shell
   gateways_provision_address_type = var.gateways_provision_address_type
   allocate_public_IP = var.allocate_public_IP
-  management_server = local.deploy_management_condition ? var.management_server : ""
-  configuration_template = local.deploy_management_condition ? var.configuration_template : ""
+  management_server = var.management_server
+  configuration_template = var.configuration_template
   volume_type = var.volume_type
 }
 
