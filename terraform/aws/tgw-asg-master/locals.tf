@@ -52,11 +52,11 @@ locals {
   // Will fail if var.gateways_addresses is invalid
   regex_gateways_addresses = regex(local.regex_valid_gateways_addresses, var.gateways_addresses) == var.gateways_addresses ? 0 : "Variable [gateways_addresses] must be a valid gateways addresses"
 
-  regex_valid_management_server = "^[0-9a-zA-Z]+$"
+  regex_valid_management_server = "^[0-9a-zA-Z-._]+$"
   // Will fail if var.management_server is invalid
   regex_management_server = regex(local.regex_valid_management_server, var.management_server) == var.management_server ? 0 : "Variable [management_server] can not be an empty string"
 
-  regex_valid_configuration_template = "^[0-9a-zA-Z]+$"
+  regex_valid_configuration_template = "^[0-9a-zA-Z-._]+$"
   // Will fail if var.configuration_template is invalid
   regex_configuration_template = regex(local.regex_valid_configuration_template, var.configuration_template) == var.configuration_template ? 0 : "Variable [configuration_template] can not be an empty string"
 

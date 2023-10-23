@@ -16,8 +16,6 @@ tgw_subnets_map = {
 }
 subnets_bit_length = 8
 
-availability_zones = ["us-east-1a", "us-east-1b"]
-
 // --- EC2 Instance Configuration ---
 gateway_name = "Check-Point-Cluster-tf"
 gateway_instance_type = "c5.xlarge"
@@ -44,6 +42,6 @@ resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
 enable_cloudwatch = false
-gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
 primary_ntp = ""
 secondary_ntp = ""

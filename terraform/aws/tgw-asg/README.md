@@ -177,14 +177,14 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name                     | Description                                                                                                                                                                                                                                                 |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| management_instance_name | The deployed Security Management AWS instance name                                                                                                                                                                                                          |
-| management_public_ip     | The deployed Security Management Server AWS public ip                                                                                                                                                                                                       |
-| management_url           | URL to the portal of the deployed Security Management Server                                                                                                                                                                                                |
-| autoscaling_group_name   | The name of the deployed AutoScaling Group                                                                                                                                                                                                                  |
+| Name                     | Description                                                                                            |
+|--------------------------|--------------------------------------------------------------------------------------------------------|
+| management_instance_name | The deployed Security Management AWS instance name                                                     |
+| management_public_ip     | The deployed Security Management Server AWS public ip                                                  |
+| management_url           | URL to the portal of the deployed Security Management Server                                           |
+| autoscaling_group_name   | The name of the deployed AutoScaling Group                                                             |
 | configuration_template   | The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name |
-| controller_name          | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name                                                                             |
+| controller_name          | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name                                                                  |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -197,8 +197,9 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                              |
 | 20230626         | Fixed missing x-chkp-* tags on Auto Scale Group                                          |
 | 20230806         | Add support for c6in instance type                                                       | 
-| 20230830         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                               |
+| 20230829         | Change default Check Point version to R81.20                                             |
+| 20230923         | Add support for C5d instance type                                                        |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                          |
 
 ## License
 

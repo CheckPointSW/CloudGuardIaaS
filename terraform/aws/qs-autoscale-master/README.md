@@ -205,25 +205,25 @@ secret_key = "my-secret-key"
 
 
 ## Outputs
-| Name                             | Description                                                                                                                                                                                                                                                 |
-|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vpc_id                           | The id of the deployed vpc                                                                                                                                                                                                                                  |
-| public_subnets_ids_list          | A list of the public subnets ids                                                                                                                                                                                                                            |
-| private_subnets_ids_list         | A list of the private subnets ids                                                                                                                                                                                                                           |
-| public_rout_table                | The public route table id                                                                                                                                                                                                                                   |
-| internal_port                    | The internal Load Balancer should listen to this port                                                                                                                                                                                                       |
-| management_name                  | The deployed Security Management AWS instance name                                                                                                                                                                                                          |
-| load_balancer_url                | The URL of the external Load Balancer                                                                                                                                                                                                                       |
-| external_load_balancer_arn       | The external Load Balancer arn                                                                                                                                                                                                                              |
-| internal_load_balancer_arn       | The internal Load Balancer arn                                                                                                                                                                                                                              |
-| external_lb_target_group_arn     | The external Load Balancer Target Group arn                                                                                                                                                                                                                 |
-| internal_lb_target_group_arn     | The internal Load Balancer Target Group arn                                                                                                                                                                                                                 |
-| autoscale_autoscaling_group_name | The name of the deployed AutoScaling Group                                                                                                                                                                                                                  |
-| autoscale_autoscaling_group_arn  | The ARN for the deployed AutoScaling Group                                                                                                                                                                                                                  |
-| autoscale_security_group_id      | The deployed AutoScaling Group's security group id                                                                                                                                                                                                          |
-| autoscale_iam_role_name          | The deployed AutoScaling Group's IAM role name (if created)                                                                                                                                                                                                 |
+| Name                             | Description                                                                                                |
+|----------------------------------|------------------------------------------------------------------------------------------------------------|
+| vpc_id                           | The id of the deployed vpc                                                                                 |
+| public_subnets_ids_list          | A list of the public subnets ids                                                                           |
+| private_subnets_ids_list         | A list of the private subnets ids                                                                          |
+| public_rout_table                | The public route table id                                                                                  |
+| internal_port                    | The internal Load Balancer should listen to this port                                                      |
+| management_name                  | The deployed Security Management AWS instance name                                                         |
+| load_balancer_url                | The URL of the external Load Balancer                                                                      |
+| external_load_balancer_arn       | The external Load Balancer ARN                                                                             |
+| internal_load_balancer_arn       | The internal Load Balancer ARN                                                                             |
+| external_lb_target_group_arn     | The external Load Balancer Target Group ARN                                                                |
+| internal_lb_target_group_arn     | The internal Load Balancer Target Group ARN                                                                |
+| autoscale_autoscaling_group_name | The name of the deployed AutoScaling Group                                                                 |
+| autoscale_autoscaling_group_arn  | The ARN for the deployed AutoScaling Group                                                                 |
+| autoscale_security_group_id      | The deployed AutoScaling Group's security group id                                                         |
+| autoscale_iam_role_name          | The deployed AutoScaling Group's IAM role name (if created)                                                |
 | configuration_template           | The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name |
-| controller_name                  | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name                                                                             |
+| controller_name                  | The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name                                                                              |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -235,8 +235,9 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221123         | R81.20 version support                                                                |
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                           |
 | 20230806         | Add support for c6in instance type                                                    | 
-| 20230830         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                               |
+| 20230829         | Change default Check Point version to R81.20                                          |
+| 20230923         | Add support for C5d instance type                                                     |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                       |
 
 ## License
 

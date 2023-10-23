@@ -19,7 +19,7 @@ subnets_bit_length = 8
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"]
 number_of_AZs = 4
 
-nat_gw_subnet_1_cidr ="10.0.13.0/24"
+nat_gw_subnet_1_cidr = "10.0.13.0/24"
 nat_gw_subnet_2_cidr = "10.0.23.0/24"
 nat_gw_subnet_3_cidr = "10.0.33.0/24"
 nat_gw_subnet_4_cidr = "10.0.43.0/24"
@@ -56,6 +56,7 @@ gateway_SICKey = "12345678"
 gateways_provision_address_type = "private"
 allocate_public_IP = false
 enable_cloudwatch = false
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
 
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
 management_deploy = true

@@ -55,6 +55,7 @@ module "autoscale_gwlb" {
   gateway_SICKey = var.gateway_SICKey
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
+  gateway_bootstrap_script = var.gateway_bootstrap_script
   admin_shell = var.admin_shell
   gateways_provision_address_type = var.gateways_provision_address_type
   allocate_public_IP = var.allocate_public_IP

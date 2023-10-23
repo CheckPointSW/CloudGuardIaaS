@@ -17,7 +17,7 @@ This solution uses the following modules:
 - /terraform/aws/autoscale-gwlb
 - /terraform/aws/modules/vpc
 - /terraform/aws/management
-- /terraform/aws/cme-iam-role
+- /terraform/aws/cme-iam-role-gwlb
 - /terraform/aws/modules/amis
 - /terraform/aws/gwlb
 ## Configurations
@@ -38,7 +38,7 @@ access_key = "my-access-key"
 secret_key = "my-secret-key"
 ```
 - In case the Static credentials are used, perform modifications described below:<br/>
-  a. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale-gwlb, /terraform/aws/management and /terraform/aws/cme-iam-role:
+  a. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale-gwlb, /terraform/aws/management and /terraform/aws/cme-iam-role-gwlb:
   ```
   provider "aws" {
   //  region = var.region
@@ -55,7 +55,7 @@ secret_key = "my-secret-key"
   //    secret_key = var.aws_secret_access_key
   }
   ```
-  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale, /terraform/aws/modules/management and /terraform/aws/modules/cme-iam-role:
+  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale, /terraform/aws/modules/management and /terraform/aws/modules/cme-iam-role-gwlb:
   ```
   provider "aws" {
   //    region = var.region
@@ -92,20 +92,16 @@ secret_key = "my-secret-key"
        "us-east-1c" = 3
        "us-east-1d" = 4
       }
-      subnets_bit_length = 8
       tgw_subnets_map = {
        "us-east-1a" = 5
        "us-east-1b" = 6
        "us-east-1c" = 7
        "us-east-1d" = 8
       }
-      availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"]
-      number_of_AZs = 2
+    subnets_bit_length = 8
       
-      transit_gateway_attachment_subnet_1_id="subnet-3456"
-      transit_gateway_attachment_subnet_2_id="subnet-4567"
-      transit_gateway_attachment_subnet_3_id="subnet-5678"
-      transit_gateway_attachment_subnet_4_id="subnet-6789"
+      availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d"]
+      number_of_AZs = 4
       
       nat_gw_subnet_1_cidr ="10.0.13.0/24"
       nat_gw_subnet_2_cidr = "10.0.23.0/24"
@@ -115,8 +111,7 @@ secret_key = "my-secret-key"
       gwlbe_subnet_1_cidr = "10.0.14.0/24"
       gwlbe_subnet_2_cidr = "10.0.24.0/24"
       gwlbe_subnet_3_cidr = "10.0.34.0/24"
-      gwlbe_subnet_4_cidr = "10.0.44.0/24"
-
+      gwlbe_subnet_4_cidr = "10.0.44.0/24" 
         
       // --- General Settings ---
       key_name = "publickey"
@@ -130,9 +125,8 @@ secret_key = "my-secret-key"
       admin_shell = "/etc/cli.sh"
         
       // --- Gateway Load Balancer Configuration ---
-      gateway_load_balancer_name = "gwlb"
+      gateway_load_balancer_name = "gwlb1"
       target_group_name = "tg1"
-      connection_acceptance_required = "false"
       enable_cross_zone_load_balancing = "true"
         
       // --- Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration ---
@@ -146,6 +140,7 @@ secret_key = "my-secret-key"
       gateways_provision_address_type = "private"
       allocate_public_IP = false
       enable_cloudwatch = false
+    gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
         
       // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
       management_deploy = true
@@ -158,9 +153,7 @@ secret_key = "my-secret-key"
       gateways_addresses = ""
         
       // --- Other parameters ---
-      VolumeType = "gp3"
-        
-        
+    volume_type = "gp3"
     ```
 
 - Conditional creation
@@ -216,6 +209,23 @@ secret_key = "my-secret-key"
 | gateway_password_hash            | (Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)                                                                                        | string | n/a                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | ""                    | no       |
 | gateway_SICKey                   | The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters                               | string | n/a                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | "12345678"            | yes      |
 | enable_cloudwatch                | Report Check Point specific CloudWatch metrics                                                                                                                                                     | bool   | true/false                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | false                 | no       |
+| gateway_bootstrap_script        | (Optional) An optional script with semicolon (;) separated commands to run on the initial boot                                                               | string | n/
+a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+| ""                    | no      |                                               
 | gateways_provision_address_type  | Determines if the gateways are provisioned using their private or public address.                                                                                                                  | string | - private <br/> - public                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | private               | no       |
 | allocate_public_IP               | Allocate a Public IP for gateway members.                                                                                                                                                          | bool   | true/false                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | false                 | no       |                                                                                                                                                                                                                                                                           
 | management_deploy                | Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section                                                             | bool   | true/false                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | true                  | no       |
@@ -252,8 +262,10 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221123         | R81.20 version support                                                                                                     |
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                                                                |
 | 20230806         | Add support for c6in instance type                                                                                         | 
-| 20230830         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                               |
+| 20230829         | Change default Check Point version to R81.20                                                                               |
+| 20230910         | Add bootstrap script execution option for deployed gateways                                                                |
+| 20230923         | Add support for C5d instance type                                                                                          |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                                                            |
 
 ## License
 

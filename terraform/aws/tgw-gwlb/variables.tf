@@ -253,6 +253,12 @@ variable "enable_cloudwatch" {
   default = false
 }
 
+variable "gateway_bootstrap_script" {
+  type = string
+  description = "(Optional) An optional script with semicolon (;) separated commands to run on the initial boot"
+  default = ""
+}
+
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
 
 variable "management_deploy" {

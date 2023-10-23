@@ -95,7 +95,7 @@ secret_key = "my-secret-key"
     gateway_hostname = "gw-hostname"
     allow_upload_download = true
     enable_cloudwatch = false
-    gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+    gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
     primary_ntp = ""
     secondary_ntp = ""
 
@@ -177,8 +177,9 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20230503         | Smart-1 Cloud token validation                                                                                |
 | 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname |
 | 20230806         | Add support for c6in instance type                                                                            |
-| 20230830         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                               |
+| 20230829         | Change default Check Point version to R81.20                                                                  |
+| 20230923         | Add support for C5d instance type                                                                             |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                                               |
 
 ## License
 

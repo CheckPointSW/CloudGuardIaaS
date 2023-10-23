@@ -36,6 +36,7 @@ gateway_SICKey = "12345678"
 gateways_provision_address_type = "private"
 allocate_public_IP = false
 enable_cloudwatch = false
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
 
 // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
 management_deploy = true
