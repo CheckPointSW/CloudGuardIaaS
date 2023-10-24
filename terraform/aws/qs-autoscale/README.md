@@ -216,15 +216,10 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20221123         | R81.20 version support                                                         |
 | 20221226         | Support ASG Launch Template instead of Launch Configuration                    |
 | 20230806         | Add support for c6in instance type                                             | 
-<<<<<<< Updated upstream
-| 20230830         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                                              |
-| 20231022         | Fixed template to populate x-chkp-tags correctly                               |
-=======
 | 20230829         | Change default Check Point version to R81.20                                   |
 | 20230923         | Add support for C5d instance type                                              |
 | 20231012         | Update AWS Terraform provider version to 5.20.1                                |
->>>>>>> Stashed changes
+| 20231022         | Fixed template to populate x-chkp-tags correctly                               |
 
 ## License
 
