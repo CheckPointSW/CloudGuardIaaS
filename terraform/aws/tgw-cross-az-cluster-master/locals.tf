@@ -49,7 +49,6 @@ locals {
   // Will fail if var.secondary_ntp is invalid
   regex_secondary_ntp = regex(local.regex_valid_secondary_ntp, var.secondary_ntp) == var.secondary_ntp ? 0 : "Variable [secondary_ntp] must be a valid ntp"
 
-  gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
   //Splits the version and licence and returns the os version
   version_split = element(split("-", var.gateway_version), 0)
 

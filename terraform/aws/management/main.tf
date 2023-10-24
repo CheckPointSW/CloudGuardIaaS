@@ -108,7 +108,6 @@ resource "aws_network_interface" "external-eni" {
 
 resource "aws_eip" "eip" {
   count = var.allocate_and_associate_eip ? 1 : 0
-  vpc = true
   network_interface = aws_network_interface.external-eni.id
 }
 

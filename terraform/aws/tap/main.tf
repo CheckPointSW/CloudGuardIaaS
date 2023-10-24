@@ -63,7 +63,6 @@ resource "aws_network_interface" "internal-eni" {
   }
 }
 resource "aws_eip" "eip" {
-  vpc = true
   network_interface = aws_network_interface.external-eni.id
 }
 resource "aws_instance" "tap_gateway" {

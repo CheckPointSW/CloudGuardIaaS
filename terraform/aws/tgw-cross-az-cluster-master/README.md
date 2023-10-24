@@ -108,7 +108,7 @@ secret_key = "my-secret-key"
       gateway_hostname = "gw-hostname"
       allow_upload_download = true
       enable_cloudwatch = false
-      gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+      gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
       primary_ntp = ""
       secondary_ntp = ""
     ```
@@ -186,15 +186,19 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 20221123         | First release of Check Point Security Cluster Terraform module for AWS                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 20221123         | R81.20 version support                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 20230411         | - Improved deployment experience for gateways and clusters managed by Smart-1 Cloud<br/>- Multiple VIPs support for Cross Availability Zone Cluster. For more details refer to the [Cross Availability Zone Cluster for AWS R81.20 Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Content/Topics-AWS-CrossAZ-Cluster-AG/Check-Point-CloudGuard-for-AWS.htm) -> "Deploying Cross AZ Cluster with multiple VIPs" section. |
-| 20230503         | Smart-1 Cloud token validation                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname                                                                                                                                                                                                                                                                                                                                                                                     |
-| 20230806         | Add support for c6in instance type                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 20230923         | Add support for C5d instance type                               | 
+| Template Version | Description                                                                                                   |
+|------------------|---------------------------------------------------------------------------------------------------------------|
+| 20221123         | First release of Check Point Security Cluster Terraform module for AWS                                        |
+| 20221229         | Removed unsupported versions                                                                                  |
+| 20221123         | R81.20 version support                                                                                        |
+| 20230411         | - Improved deployment experience for gateways and clusters managed by Smart-1 Cloud<br/>- Multiple VIPs support for Cross Availability Zone Cluster. For more details refer to the [Cross Availability Zone Cluster for AWS R81.20 Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_for_AWS_Cross_AZ_Cluster/Content/Topics-AWS-CrossAZ-Cluster-AG/Check-Point-CloudGuard-for-AWS.htm) -> "Deploying Cross AZ Cluster with multiple VIPs" section.                                    |
+| 20230503         | Smart-1 Cloud token validation                                                                                |
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname |
+| 20230829         | Change default Check Point version to R81.20                                                                  |
+| 20230806         | Add support for c6in instance type                                                                            |
+| 20230923         | Add support for C5d instance type                                                                             |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                                               |
+
 
 
 ## License

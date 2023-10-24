@@ -12,7 +12,8 @@ resource "aws_security_group" "servers_security_group" {
   }
 
   tags = {
-    Name = format("%s_ServersSecurityGroup", local.asg_name) }
+    Name = format("%s_ServersSecurityGroup", local.asg_name) 
+  }
 }
 
 
@@ -41,10 +42,11 @@ resource "aws_autoscaling_group" "servers_group" {
   max_size = var.servers_max_group_size
   target_group_arns = local.provided_target_groups_condition ? [var.servers_target_groups] : []
 
-  tags = [{
+  tag {
       key = "Name"
       value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.server_name)
-      propagate_at_launch = true }]
+      propagate_at_launch = true 
+  }
 }
 resource "aws_autoscaling_policy" "scale_up_policy" {
   adjustment_type = "ChangeInCapacity"

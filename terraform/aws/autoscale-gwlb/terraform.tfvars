@@ -36,5 +36,5 @@ gateway_SICKey = "12345678"
 enable_instance_connect = false
 allow_upload_download = true
 enable_cloudwatch = false
-gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
 

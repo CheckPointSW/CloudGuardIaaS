@@ -84,21 +84,26 @@ resource "aws_autoscaling_group" "asg" {
   vpc_zone_identifier = var.subnet_ids
   health_check_grace_period = 0
 
-  tags = concat(
-  [
-    {
+  tag {
       key = "Name"
       value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.gateway_name)
       propagate_at_launch = true
-    },
-    {
+  }
+
+  tag {
       key = "x-chkp-tags"
       value = format("management=%s:template=%s:ip-address=%s", var.management_server, var.configuration_template, var.gateways_provision_address_type)
       propagate_at_launch = true
     }
-  ],
-  local.tags_asg_format
-  )
+
+  dynamic "tag" {
+    for_each = var.instances_tags
+    content {
+      key = tag.key
+      value = tag.value
+      propagate_at_launch = true
+    }
+  }
 }
 
 data "aws_iam_policy_document" "assume_role_policy_document" {
