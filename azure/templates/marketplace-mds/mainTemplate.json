@@ -250,7 +250,7 @@
   },
   "variables": {
     "templateName": "mds",
-    "templateVersion": "20230124",
+    "templateVersion": "20231002",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
