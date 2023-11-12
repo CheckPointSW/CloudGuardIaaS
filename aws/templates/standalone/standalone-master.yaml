@@ -348,7 +348,7 @@ Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
 Resources:
-  Vpc:
+  VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
@@ -363,7 +363,7 @@ Resources:
   InternalRoutingTable:
     Type: AWS::EC2::RouteTable
     Properties:
-      VpcId: !GetAtt Vpc.Outputs.VPCID
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
       Tags:
         - Key: Name
           Value: !Join
@@ -374,15 +374,15 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref InternalRoutingTable
-      SubnetId: !GetAtt Vpc.Outputs.PrivateSubnet1ID
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
   StandaloneStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gateway/standalone.yaml
       Parameters:
-        VPC: !GetAtt Vpc.Outputs.VPCID
-        PublicSubnet: !GetAtt Vpc.Outputs.PublicSubnet1ID
-        PrivateSubnet: !GetAtt Vpc.Outputs.PrivateSubnet1ID
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        PublicSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PrivateSubnet: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
         InternalRouteTable: !Ref InternalRoutingTable
         StandaloneName: !Ref StandaloneName
         StandaloneInstanceType: !Ref StandaloneInstanceType
