@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20230830)
+  Security Gateway & Management (Standalone) instance in a new VPC (20231113)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -157,12 +157,16 @@ Parameters:
   StandaloneVersion:
     Description: Standalone Version & License.
     Type: String
-    Default: R81.20-PAYG-NGTP
+    Default: R81.20-BYOL
     AllowedValues:
       - R80.40-PAYG-NGTP
+      - R80.40-BYOL
       - R81-PAYG-NGTP
+      - R81-BYOL
       - R81.10-PAYG-NGTP
+      - R81.10-BYOL
       - R81.20-PAYG-NGTP
+      - R81.20-BYOL
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
