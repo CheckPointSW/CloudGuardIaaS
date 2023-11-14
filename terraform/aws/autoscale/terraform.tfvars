@@ -28,14 +28,14 @@ maximum_group_size = 10
 target_groups = ["arn:aws:tg1/abc123", "arn:aws:tg2/def456"]
 
 // --- Check Point Settings ---
-gateway_version = "R81-BYOL"
+gateway_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 gateway_password_hash = ""
 gateway_SICKey = "12345678"
 enable_instance_connect = false
 allow_upload_download = true
 enable_cloudwatch = false
-gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"
 
 // --- Outbound Proxy Configuration (optional) ---
 proxy_elb_type = "internet-facing"

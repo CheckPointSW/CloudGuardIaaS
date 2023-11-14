@@ -24,7 +24,7 @@ predefined_role = ""
 sts_roles = []
 
 // --- Check Point Settings ---
-management_version = "R81-BYOL"
+management_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 management_password_hash = ""
 
@@ -38,4 +38,4 @@ admin_cidr = "0.0.0.0/0"
 gateway_addresses = "0.0.0.0/0"
 primary_ntp = ""
 secondary_ntp = ""
-management_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+management_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"

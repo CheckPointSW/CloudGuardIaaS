@@ -15,7 +15,7 @@ variable "zone" {
 }
 variable "image_name" {
   type = string
-  description = "The single gateway and management image name"
+  description = "The single gateway and management image name.  You can choose the desired image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py"
 }
 variable "installationType" {
   type = string

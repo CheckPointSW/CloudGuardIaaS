@@ -30,13 +30,6 @@
         "description": "Check Point CloudGuard version"
       }
     },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Administrator password"
-      },
-      "defaultValue": ""
-    },
     "authenticationType": {
       "type": "string",
       "allowedValues": [
@@ -53,6 +46,27 @@
       "defaultValue": "",
       "metadata": {
         "description": "Administrator SSH public key"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Administrator password"
+      },
+      "defaultValue": ""
+    },
+    "MaintenanceModePasswordHash": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "Description": "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+      }
+    },
+    "SerialConsolePasswordHash": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "Description": "Optional parameter, used to enable serial console connection in case of SSH key as authentication type"
       }
     },
     "floatingIP": {
@@ -326,11 +340,23 @@
     "NewNsgName": {
       "type": "string",
       "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
+    },
+    "VipsNumber": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "maxValue": 10
+    },
+    "VipNames": {
+      "type": "string",
+      "defaultValue": ""
     }
   },
   "variables": {
+    "VIPs_Number": "[int(parameters('VipsNumber'))]",
+    "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
-    "templateVersion": "20230124",
+    "templateVersion": "20231002",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -369,7 +395,6 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -464,11 +489,6 @@
       "publisher": "[variables('imagePublisher')]"
     },
     "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
-    "externalPrivateAddresses": [
-      "[parameters('Subnet1StartAddress')]",
-      "[concat(split(parameters('subnet1StartAddress'), '.')[0],'.', split(parameters('subnet1StartAddress'), '.')[1],'.', split(parameters('subnet1StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet1StartAddress'), '.')[3]),1)))]",
-      "[concat(split(parameters('subnet1StartAddress'), '.')[0],'.', split(parameters('subnet1StartAddress'), '.')[1],'.', split(parameters('subnet1StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet1StartAddress'), '.')[3]),2)))]"
-    ],
     "roleDefinitionId": "[if(equals(parameters('role'), 'Contributor'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c'), parameters('role'))]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
     "subnet2PrivateAddresses": [
@@ -486,6 +506,7 @@
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha2-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "ExsitingNsgRoleAssignmentURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/existing-nsg-RoleAssignment', '.json'))]",
     "sicKey": "[parameters('sicKey')]",
     "installationType": "cluster",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
@@ -538,9 +559,89 @@
     "prefixDependsOn": "[if(equals(parameters('publicIPPrefix'), 'yes'), if(equals(parameters('createNewIPPrefix'), 'yes'), variables('publicIPNewPrefixId'), variables('ipNewPrefixId')), variables('ipNewPrefixId'))]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
-    "NewNsgReference": {
-      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"},
+    "DefaultIpAddresses":
+    [{
+      "name": "member-ip",
+      "properties": {
+        "primary": true,
+        "privateIPAddress": "[variables('externalPrivateAddresses')[0]]",
+        "privateIPAllocationMethod": "Static",
+        "PublicIpAddress": {
+          "Id": "[variables('gwPublicIPIds')[0]]"
+        },
+        "subnet": {
+          "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+        },
+        "loadBalancerBackendAddressPools": [
+          {
+            "id": "[variables('elbBEAddressPoolID')]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cluster-vip",
+      "properties": {
+        "primary": false,
+        "privateIPAddress": "[variables('externalPrivateAddresses')[2]]",
+        "privateIPAllocationMethod": "Static",
+        "PublicIpAddress": {
+          "Id": "[variables('haPublicIPId')]"
+        },
+        "subnet": {
+          "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+        }
+      }
+    }],
+    "copy":
+    [
+      {
+        "name": "externalPrivateAddresses",
+        "count": "[add(variables('VIPs_Number'),2)]",
+        "input": "[concat(split(parameters('subnet1StartAddress'), '.')[0],'.', split(parameters('subnet1StartAddress'), '.')[1],'.', split(parameters('subnet1StartAddress'), '.')[2],'.', string(add(int(split(parameters('subnet1StartAddress'), '.')[3]),copyIndex('externalPrivateAddresses'))))]"
+      },
+      {
+        "name": "Vips",
+        "count": "[sub(variables('VIPs_Number'), 1)]",
+        "input": {
+          "name": "[concat('cluster-vip-', copyIndex('Vips', 1))]",
+          "properties": {
+            "primary": false,
+            "privateIPAddress": "[variables('externalPrivateAddresses')[add(copyIndex('Vips'), 3)]]",
+            "privateIPAllocationMethod": "Static",
+            "PublicIpAddress": {
+              "Id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('Vip_Names')[copyIndex('Vips')])]"
+            },
+            "subnet": {
+              "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+            }
+          }
+        }
+      },
+      {
+        "name": "VipsInformation",
+        "count": "[sub(variables('VIPs_Number'), 1)]",
+        "input": {
+          "name": "[concat('cluster-vip-', copyIndex('VipsInformation', 1))]",
+          "privateIPAddress": "[variables('externalPrivateAddresses')[add(copyIndex('VipsInformation'), 3)]]",
+          "publicIPAddress": "[variables('Vip_Names')[copyIndex('VipsInformation')]]"
+        }
+      },
+      {
+        "name": "customData",
+        "count": "[variables('count')]",
+        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', '\n','smart1CloudToken=\"', variables('tokens')[copyIndex('customData')], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]"
+      }
+    ],
+    "DefaultVipInformation": [
+      {
+        "name": "cluster-vip",
+        "privateIPAddress": "[variables('externalPrivateAddresses')[2]]",
+        "publicIPAddress": "[parameters('vmName')]"
+      }
+    ],
+    "VipsInformationForCloudConfig": "[union(variables('DefaultVipInformation'), variables('VipsInformation'))]"
   },
   "resources": [
     {
@@ -550,7 +651,7 @@
       "name": "[variables('ipPrefixNewName')]",
       "location": "[variables('location')]",
       "properties": {
-        "prefixLength": "30",
+        "prefixLength": "[if(greater(variables('VIPs_Number'), 5), '28', if(greater(variables('VIPs_Number'), 1), '29', '30'))]",
         "publicIPAddressVersion": "IPv4"
       },
       "sku": {
@@ -748,6 +849,31 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[variables('prefixDependsOn')]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[variables('Vip_Names')[copyIndex()]]",
+      "sku": {
+        "name": "Standard"
+      },
+      "copy": {
+        "name": "publicVipCopy",
+        "count": "[sub(variables('VIPs_Number'), 1)]"
+      },
+      "properties": {
+        "idleTimeoutInMinutes": 30,
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), 'vip', copyIndex(1), '-', uniquestring(resourceGroup().id, deployment().name))]"
+        },
+        "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
+    },
+    {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
@@ -763,41 +889,7 @@
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
         "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-        "ipConfigurations": [
-          {
-            "name": "member-ip",
-            "properties": {
-              "primary": true,
-              "privateIPAddress": "[variables('externalPrivateAddresses')[0]]",
-              "privateIPAllocationMethod": "Static",
-              "PublicIpAddress": {
-                "Id": "[variables('gwPublicIPIds')[0]]"
-              },
-              "subnet": {
-                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
-              },
-              "loadBalancerBackendAddressPools": [
-                {
-                  "id": "[variables('elbBEAddressPoolID')]"
-                }
-              ]
-            }
-          },
-          {
-            "name": "cluster-vip",
-            "properties": {
-              "primary": false,
-              "privateIPAddress": "[variables('externalPrivateAddresses')[2]]",
-              "privateIPAllocationMethod": "Static",
-              "PublicIpAddress": {
-                "Id": "[variables('haPublicIPId')]"
-              },
-              "subnet": {
-                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
-              }
-            }
-          }
-        ]
+        "ipConfigurations": "[union(variables('DefaultIpAddresses'),variables('Vips'))]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
@@ -899,7 +991,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2021-07-01",
+      "apiVersion": "2022-11-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
@@ -917,7 +1009,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(parameters('managedSystemAssigned'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
-        "UserData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+        "UserData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
           "bootDiagnostics": {
@@ -948,7 +1040,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computername": "[concat(toLower(parameters('vmName')), copyIndex(1))]",
-          "customData": "[base64(concat(variables('customData'), '\n', 'smart1CloudToken=\"', variables('tokens')[copyIndex()], '\"', '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+          "customData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -1025,9 +1117,42 @@
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionId')]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2021-07-01', 'Full').identity.principalId]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), copyIndex(1))), '2022-11-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
+    },
+    {
+      "condition": "[and(equals(parameters('managedSystemAssigned'), 'yes'), not(parameters('deployNewNSG')))]",
+      "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1'))]"],
+      "name": "ExistingNsgRoleAssignment",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[if(not(parameters('deployNewNSG')), split(parameters('ExistingNSG').id, '/')[4], '')]",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('ExsitingNsgRoleAssignmentURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "ExistingNSG": {
+            "value": "[parameters('ExistingNSG')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "roleDefinitionId": {
+            "value": "[variables('roleDefinitionId')]"
+          },
+          "principalId1": {
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2022-11-01', 'Full').identity.principalId]"
+          },
+          "principalId2": {
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2022-11-01', 'Full').identity.principalId]"
+          }
+        }
+      }
     },
     {
       "type": "Microsoft.Network/loadBalancers",

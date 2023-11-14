@@ -67,10 +67,10 @@ provider "google" {
    ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
-    - Static credentials can be provided by adding the path to your service-account json file, project-name and region in /gcp/modules/autoscale-into-new-vpc/**terraform.tfvars** file as follows:
+    - Static credentials can be provided by adding the path to your service-account json file, project-id and region in /gcp/modules/autoscale-into-new-vpc/**terraform.tfvars** file as follows:
         ```
         service_account_path = "service-accounts/service-account-file-name.json"
-        project = "project-name"
+        project = "project-id"
         region = "us-central1"
         ```
      - In case the Environment Variables are used, perform modifications described below:<br/>
@@ -107,7 +107,7 @@ The provider credentials can be provided either as static credentials or as [Env
 ```
 # --- Google Provider ---
 service_account_path = "service-accounts/service-account-file-name.json"
-project = "project-name"
+project = "project-id"
 
 # --- Check Point---
 prefix = "chkp-tf-mig"
@@ -169,8 +169,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
 | image_name | The autoscaling (MIG) image name (e.g. check-point-r8110-gw-byol-mig-335-985-v20220126). You can choose the desired mig image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py). | string | N/A | N/A | yes |
 | management_nic | Management Interface - Autoscaling Security Gateways in GCP can be managed by an ephemeral public IP or using the private IP of the internal interface (eth1). | string | Ephemeral Public IP (eth0) <br/> - Private IP (eth1) | "Ephemeral Public IP (eth0)" | no |
-| management_name | The name of the Security Management Server as appears in autoprovisioning configuration. (Please enter a valid Security Management name including ascii characters only). | string | N/A | "checkpoint-management" | no |
-| configuration_template_name | Specify the provisioning configuration template name (for autoprovisioning). (Please enter a valid autoprovisioing configuration template name including ascii characters only). | string | N/A | "gcp-asg-autoprov-tmplt" | no |
+| management_name | The name of the Security Management Server as appears in autoprovisioning configuration. (Please enter a valid Security Management name including lowercase letters, digits and hyphens only). | string | N/A | "checkpoint-management" | no |
+| configuration_template_name | Specify the provisioning configuration template name (for autoprovisioning). (Please enter a valid autoprovisioing configuration template name including lowercase letters, digits and hyphens only). | string | N/A | "gcp-asg-autoprov-tmplt" | no |
 | admin_SSH_key | Public SSH key for the user 'admin' - The SSH public key for SSH authentication to the MIG instances. Leave this field blank to use all project-wide pre-configured SSH keys. | string | A valid public ssh key | "" | no |
 | network_defined_by_routes | Set eth1 topology to define the networks behind this interface by the routes configured on the gateway. | bool | true/false | true | no |
 | admin_shell | Change the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |

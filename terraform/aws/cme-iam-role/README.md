@@ -60,7 +60,7 @@ secret_key = "my-secret-key"
     //PLEASE refer to README.md for accepted values FOR THE VARIABLES BELOW
 
     permissions = "Create with read permissions"
-    sts_roles = []
+    sts_roles = ['arn:aws:iam::111111111111:role/role_name']
     trusted_account = ""
   ```
 
@@ -83,8 +83,8 @@ secret_key = "my-secret-key"
 |----------------------|---------------------------------------|
 | cme_iam_role_arn     | The created AWS IAM Role arn          |
 | cme_iam_role_name    | The created AWS IAM Role name         |
-| cme_iam_profile_arn  | The created AWS instance profile arn  |
 | cme_iam_profile_name | The created AWS instance profile name |
+| cme_iam_profile_arn  | The created AWS instance profile arn  |
 
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
@@ -92,7 +92,8 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | Template Version | Description                                                        |
 |------------------|--------------------------------------------------------------------|
 | 20210309         | First release of Check Point CME IAM Role Terraform module for AWS |
-| 20230529         | Added CME instance profile for IAM Role                            |
+| 20230514         | CME instance profile for IAM Role                                  |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                    |
 
 
 

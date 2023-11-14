@@ -26,6 +26,16 @@ variable "admin_password" {
   type = string
 }
 
+variable "serial_console_password_hash" {
+  description = "Optional parameter, used to enable serial console connection in case of SSH key as authentication type"
+  type = string
+}
+
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
+}
+
 variable "tags" {
   type        = map(string)
   description = "A map of the tags to use on the resources that are deployed with this module."
@@ -67,10 +77,10 @@ variable "os_version"{
 
 locals { // locals for 'os_version' allowed values
   os_version_allowed_values = [
-    "R80.40",
+    "R8040",
     "R81",
-    "R81.10",
-    "R81.20"
+    "R8110",
+    "R8120"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
@@ -85,7 +95,12 @@ locals { // locals for 'installation_type' allowed values
   installation_type_allowed_values = [
     "cluster",
     "vmss",
-    "management"
+    "management",
+    "standalone",
+    "gateway",
+    "mds-primary",
+    "mds-secondary",
+    "mds-logserver"
   ]
   // will fail if [var.installation_type] is invalid:
   validate_installation_type_value = index(local.installation_type_allowed_values, var.installation_type)
@@ -122,7 +137,10 @@ locals {// locals for  'vm_size' allowed values
     "Standard_F4", "Standard_F8", "Standard_F16", "Standard_D4_v3", "Standard_D8_v3", "Standard_D16_v3",
     "Standard_D32_v3", "Standard_D64_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3",
     "Standard_E20_v3", "Standard_E32_v3", "Standard_E64_v3", "Standard_E64i_v3", "Standard_DS11_v2",
-    "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2"
+    "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_D2_v5", "Standard_D4_v5",
+    "Standard_D8_v5", "Standard_D16_v5","Standard_D32_v5", "Standard_D2s_v5", "Standard_D4s_v5", "Standard_D8s_v5",
+    "Standard_D16s_v5", "Standard_D2d_v5", "Standard_D4d_v5", "Standard_D8d_v5", "Standard_D16d_v5", "Standard_D32d_v5",
+    "Standard_D2ds_v5", "Standard_D4ds_v5", "Standard_D8ds_v5", "Standard_D16ds_v5", "Standard_D32ds_v5"
   ]
   // will fail if [var.vm_size] is invalid:
   validate_vm_size_value = index(local.allowed_vm_sizes, var.vm_size)

@@ -24,7 +24,7 @@ variable "disk_category" {
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81-BYOL"
+  default = "R81.20-BYOL"
 }
 variable "gateway_instance_type" {
   type = string
@@ -67,6 +67,11 @@ variable "admin_shell" {
 variable "gateway_SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters"
+}
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+variable "gateway_TokenKey" {
+  type = string
+  description = "Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud."
 }
 variable "gateway_bootstrap_script" {
   type = string

@@ -81,7 +81,7 @@ default = {}
 variable "gateway_version" {
   type = string
   description =  "Gateway version and license"
-  default = "R81-BYOL"
+  default = "R81.20-BYOL"
 }
 module "validate_gateway_version" {
   source = "../modules/common/version_license"
@@ -103,7 +103,15 @@ variable "gateway_password_hash" {
   description = "(Optional) Admin user's password hash (use command \"openssl passwd -6 PASSWORD\" to get the PASSWORD's hash)"
 default = ""
 }
-
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+variable "memberAToken" {
+  type = string
+  description = "Follow the instructions in sk180501 to quickly connect this Single AZ Cluster to Smart-1 Cloud."
+}
+variable "memberBToken" {
+  type = string
+  description = "Follow the instructions in sk180501 to quickly connect this Single AZ Cluster to Smart-1 Cloud."
+}
 // --- Advanced Settings ---
 variable "management_ip_address" {
   type = string

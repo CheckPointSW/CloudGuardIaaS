@@ -68,10 +68,10 @@ provider "google" {
    ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
-    - Static credentials can be provided by adding the path to your service-account json file, project-name and region in /gcp/modules/single/terraform.tfvars file as follows:
+    - Static credentials can be provided by adding the path to your service-account json file, project-id and region in /gcp/modules/single/terraform.tfvars file as follows:
         ```
         service_account_path = "service-accounts/service-account-file-name.json"
-        project = "project-name"
+        project = "project-id"
         ```
      - In case the Environment Variables are used, perform modifications described below:<br/>
         a. The next lines in the main.tf file, in the provider google resource, need to be deleted or commented:
@@ -106,7 +106,7 @@ The provider credentials can be provided either as static credentials or as [Env
 ```
 # --- Google Provider ---
 service_account_path = "service-accounts/service-account-file-name.json"
-project = "project-name"
+project = "project-id"
 
 # --- Check Point---
 image_name = "check-point-r8110-gw-byol-single-335-985-v20220126"
@@ -140,7 +140,7 @@ network_enableSctp= false
 network_sctpSourceRanges= [""]
 network_enableEsp= false
 network_espSourceRanges= [""]
-numAdditionalNICs= 0
+numAdditionalNICs= 1
 externalIP= "static"
 internal_network1_network= [""]
 internal_network1_subnetwork  = [""]

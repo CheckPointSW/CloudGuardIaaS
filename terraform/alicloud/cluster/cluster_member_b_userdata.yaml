@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py managementIpAddress=\"${ManagementIpAddress}\" sicKey=\"${SICKey}\" installationType=\"cluster\" osVersion=\"{OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20230830\" templateName=\"cluster\" templateType=\"terraform\" shell=\"${Shell}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" "smart1CloudToken=\"${TokenB}\"" bootstrapScript64=\"${GatewayBootstrapScript}\"

@@ -103,7 +103,7 @@ variable "sts_roles" {
 variable "management_version" {
   type = string
   description = "Management version and license"
-  default = "R81-BYOL"
+  default = "R81.20-BYOL"
 }
 module "validate_management_version" {
   source = "../modules/common/version_license"
@@ -177,4 +177,8 @@ variable "volume_type" {
   type = string
   description = "General Purpose SSD Volume Type"
   default = "gp3"
+}
+variable "is_gwlb_iam" {
+  type = bool
+  default = false
 }

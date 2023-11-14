@@ -66,6 +66,7 @@ module "tgw-gwlb"{
   gateways_provision_address_type = var.gateways_provision_address_type
   allocate_public_IP = var.allocate_public_IP
   enable_cloudwatch = var.enable_cloudwatch
+  gateway_bootstrap_script = var.gateway_bootstrap_script
 
   // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
   management_deploy = var.management_deploy

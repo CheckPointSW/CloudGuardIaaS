@@ -214,13 +214,10 @@ resource "aws_instance" "member-b-instance" {
 }
 
 resource "aws_eip" "cluster_eip" {
-  vpc = true
 }
 resource "aws_eip" "member_a_eip" {
-  vpc = true
 }
 resource "aws_eip" "member_b_eip" {
-  vpc = true
 }
 
 resource "aws_eip_association" "cluster_address_assoc" {

@@ -32,7 +32,7 @@ service_port = "80"
 gateway_instance_type = "c5.xlarge"
 gateways_min_group_size = 2
 gateways_max_group_size = 8
-gateway_version = "R81.10-BYOL"
+gateway_version = "R81.20-BYOL"
 gateway_password_hash = ""
 gateway_SICKey = "12345678"
 enable_cloudwatch = true
@@ -40,7 +40,7 @@ enable_cloudwatch = true
 // --- Check Point CloudGuard Network Security Management Server Configuration ---
 management_deploy = true
 management_instance_type = "m5.xlarge"
-management_version = "R81.10-BYOL"
+management_version = "R81.20-BYOL"
 management_password_hash = ""
 gateways_policy = "Standard"
 gateways_blades = true

@@ -23,7 +23,7 @@ predefined_role = ""
 sts_roles = []
 
 // --- Check Point Settings ---
-mds_version = "R81-BYOL"
+mds_version = "R81.20-BYOL"
 mds_admin_shell = "/etc/cli.sh"
 mds_password_hash = ""
 
@@ -36,4 +36,4 @@ admin_cidr = "0.0.0.0/0"
 gateway_addresses = "0.0.0.0/0"
 primary_ntp = ""
 secondary_ntp = ""
-mds_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
+mds_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/bootstrap.txt"

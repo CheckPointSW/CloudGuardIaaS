@@ -3,7 +3,7 @@ Parameters:
   Version:
     Description: Security Gateway or Management Server version
     Type: String
-    Default: R81-BYOL-GW
+    Default: R81.20-BYOL-GW
     AllowedValues:
       - R81-BYOL-GW
       - R81-BYOL-MGMT
@@ -27,184 +27,184 @@ Mappings:
       Value: R8120BYOLMGMT
   RegionMap:
     cn-hongkong:
-      R81BYOLMGMT: m-j6c88f6l8jwh9uy8llk7
-      R81BYOLGW: m-j6cd6w5lquawbo38rft5
-      R8110BYOLMGMT: m-j6c8b42u8xehmpb1v4ih
-      R8110BYOLGW: m-j6cbxqoekvbthtmwv02k
-      R8120BYOLMGMT: m-j6c01u4n1pj4tclhmdzp
-      R8120BYOLGW: m-j6c14n7q0nh0d9i68aor
+      R81BYOLMGMT: m-j6c0m6ze2zmnlmwso7px
+      R81BYOLGW: m-j6c9r97nfnz147c75ej1
+      R8110BYOLMGMT: m-j6cah607pvg46dwgbxmv
+      R8110BYOLGW: m-j6c1ayu5lbel5b3yq3lu
+      R8120BYOLMGMT: m-j6cgd1376xf21953p2hk
+      R8120BYOLGW: m-j6cgdsrtmhb9j2c9rw9l
     ap-southeast-1:
-      R81BYOLMGMT: m-t4n01qvc3uiptjn82wv2
-      R81BYOLGW: m-t4na5bkc7wj6ynffveal
-      R8110BYOLMGMT: m-t4navsqfn7j3gsischwd
-      R8110BYOLGW: m-t4n4qy2nk4a0915vtpxo
-      R8120BYOLMGMT: m-t4naig0isko693jzptp0
-      R8120BYOLGW: m-t4nhph05xnruw4wjj64x
+      R81BYOLMGMT: m-t4ne5o25uc28cjn93edi
+      R81BYOLGW: m-t4n6xolhkuqw8hcejgnr
+      R8110BYOLMGMT: m-t4nfsx5szs0as1h12yxk
+      R8110BYOLGW: m-t4nd4y22hlxcsmf0inkc
+      R8120BYOLMGMT: m-t4ni66zwrmuy9rut94py
+      R8120BYOLGW: m-t4n5i2lpyg1fuw67lbwz
     us-west-1:
-      R81BYOLMGMT: m-rj9bcz15pg2iuaz21fug
-      R81BYOLGW: m-rj9ful2e3wjrluebxnog
-      R8110BYOLMGMT: m-rj9f9y7r0fsx6x4auxlo
-      R8110BYOLGW: m-rj9f6sln54jxf8w9h15o
-      R8120BYOLMGMT: m-rj9flwuqbcsxf7dyseu9
-      R8120BYOLGW: m-rj99lrkikybuxrqwpyoa
+      R81BYOLMGMT: m-rj94tnk9u7nvv5qin39i
+      R81BYOLGW: m-rj9fwefitvll902yw4yq
+      R8110BYOLMGMT: m-rj99vyyb4jgpw57ripv1
+      R8110BYOLGW: m-rj906jp65agjn3eojd57
+      R8120BYOLMGMT: m-rj92jfoyr0hm8w8v20p9
+      R8120BYOLGW: m-rj916l709ddi1a95taha
     us-east-1:
-      R81BYOLMGMT: m-0xi7b9pbfh77w5cvn3bf
-      R81BYOLGW: m-0xi12lyp1f159re0i1yn
-      R8110BYOLMGMT: m-0xi045kkoht5nyzx2ajv
-      R8110BYOLGW: m-0xi9gm1l78213sj0fgyn
-      R8120BYOLMGMT: m-0xiaxngp48ivv59rlegh
-      R8120BYOLGW: m-0xicgbbs68qu46wgi18e
+      R81BYOLMGMT: m-0xigc1c4su1ba8nu3f28
+      R81BYOLGW: m-0xidh202w24kbnrczm78
+      R8110BYOLMGMT: m-0xi27vv33oce61sgv20l
+      R8110BYOLGW: m-0xiiyd87jjd6v7zcwk0q
+      R8120BYOLMGMT: m-0xi27vv33ocesgs3xhxy
+      R8120BYOLGW: m-0xii28nms9qs9vhzm1up
     ap-southeast-2:
-      R81BYOLMGMT: m-p0wb72s792wp6cat1msf
-      R81BYOLGW: m-p0w7dxtxlshtpzzej14n
-      R8110BYOLMGMT: m-p0web0c4yfr0ws2hfyap
-      R8110BYOLGW: m-p0wi91mpboixs4ywh24f
-      R8120BYOLMGMT: m-p0w7ubvu1ts92hptuikd
-      R8120BYOLGW: m-p0wg00lc7blue8yw0dww
+      R81BYOLMGMT: m-p0wf174lawcn3ezvlvqb
+      R81BYOLGW: m-p0wgw0jt8m4jw0n6217q
+      R8110BYOLMGMT: m-p0wfcfmbipgiajhqc2y8
+      R8110BYOLGW: m-p0whzfclh9dro297dkgy
+      R8120BYOLMGMT: m-p0w6ipk2wbza7hv91lve
+      R8120BYOLGW: m-p0wfcfmbipgix4egqosy
     ap-southeast-3:
-      R81BYOLMGMT: m-8pscrdvcssz34vv7oibf
-      R81BYOLGW: m-8pscrdvcssz34vv7oibe
-      R8110BYOLMGMT: m-8ps8wr2mes2yxlh0nuod
-      R8110BYOLGW: m-8ps63ssjf3hcz9z005br
-      R8120BYOLMGMT: m-8psbcl71y5j8qb4jzlkb
-      R8120BYOLGW: m-8psdt67wgj0bxcelc534
+      R81BYOLMGMT: m-8pshmjn0v4l691z8jvit
+      R81BYOLGW: m-8pse07zuiqh921r96c4o
+      R8110BYOLMGMT: m-8psaz69kh11begna3jvi
+      R8110BYOLGW: m-8psawwr2qmtw22bo3o3d
+      R8120BYOLMGMT: m-8psaz69kh11c0vmx5zso
+      R8120BYOLGW: m-8psakckoo5mnzk9dwtr0
     ap-southeast-5:
-      R81BYOLMGMT: m-k1a3myj9t5hmzm9rji9g
-      R81BYOLGW: m-k1a01l31nfa5sepghvdy
-      R8110BYOLMGMT: m-k1a74cwumbfczrxo4m90
-      R8110BYOLGW: m-k1adr238tl08on0kyi09
-      R8120BYOLMGMT: m-k1aiy9y0h4b39i1qve2m
-      R8120BYOLGW: m-k1aa9doc0jtv2vcsm7qs
+      R81BYOLMGMT: m-k1air8kw32kpyummbihb
+      R81BYOLGW: m-k1a35n8r6pgu58t89mdb
+      R8110BYOLMGMT: m-k1a4620o82ztjrw9oo51
+      R8110BYOLGW: m-k1afyh7yoblebclulbo6
+      R8120BYOLMGMT: m-k1aalym5blamuxsd0fjb
+      R8120BYOLGW: m-k1aazbn56tthzb1yfves
     ap-southeast-6:
-      R81BYOLMGMT: m-5ts5n4iv17w2dh0lsdtr
-      R81BYOLGW: m-5tsizdvumk60of73byke
-      R8110BYOLMGMT: m-5tsfwo6881n98tj3dgam
-      R8110BYOLGW: m-5ts9xv4znde61yg14k2z
-      R8120BYOLMGMT: m-5ts5y8ehj2jyxw9wmgia
-      R8120BYOLGW: m-5tsc080miew3rp9u8psx
+      R81BYOLMGMT: m-5ts0zf4lyss7y6rb2fbu
+      R81BYOLGW: m-5tsi9vpa500s6rdaw5s2
+      R8110BYOLMGMT: m-5ts9j2zqgx45hg2pgfd6
+      R8110BYOLGW: m-5tsityk540mewl7lbixk
+      R8120BYOLMGMT: m-5tsiqaaifu62gal7qg4t
+      R8120BYOLGW: m-5tsiqaaifu62ggib2m26
     ap-northeast-1:
-      R81BYOLMGMT: m-6we1fvpbio59b0fw7hrq
-      R81BYOLGW: m-6we17hhjtge4mz2uaiew
-      R8110BYOLMGMT: m-6wehpdigvx4a2z15w6cl
-      R8110BYOLGW: m-6we3id7uypov02qi205k
-      R8120BYOLMGMT: m-6wehhhdtbj2j7oxfpm7n
-      R8120BYOLGW: m-6weehafoxkg4o729swfm
+      R81BYOLMGMT: m-6weiktcahyaj270b53gt
+      R81BYOLGW: m-6we4osnliayytesjvgy9
+      R8110BYOLMGMT: m-6wef76o7633cbmjzkh09
+      R8110BYOLGW: m-6we39xo8uhk1o08u63g1
+      R8120BYOLMGMT: m-6weed1m837z081zy56yv
+      R8120BYOLGW: m-6we4w4f68c9ymqsj9ild
     eu-central-1:
-      R81BYOLMGMT: m-gw8iyh9kb8hu0u1i6wj9
-      R81BYOLGW: m-gw887xhzjvyd6pssjj18
-      R8110BYOLMGMT: m-gw8g3dbkt20a9xmemocw
-      R8110BYOLGW: m-gw8if9x1o9oxgco2hc6z
-      R8120BYOLMGMT: m-gw82skzws0o622yqw1u1
-      R8120BYOLGW: m-gw83voa4slijmn4vh8op
+      R81BYOLMGMT: m-gw89m2b7xveitpi1yame
+      R81BYOLGW: m-gw843ynniypgt9j5z8sz
+      R8110BYOLMGMT: m-gw8hyc4l1pmhpw32slv2
+      R8110BYOLGW: m-gw8gtk413xvbn1p8qs5c
+      R8120BYOLMGMT: m-gw83efoj8k4wkjlxd7b2
+      R8120BYOLGW: m-gw8131jh8sbrjmaqiq8w
     eu-west-1:
-      R81BYOLMGMT: m-d7o3w92dle73mo8hacgg
-      R81BYOLGW: m-d7ohro7rj9t8rgizscq6
-      R8110BYOLMGMT: m-d7o632ny4rywotf1mk3z
-      R8110BYOLGW: m-d7o4f7xodjmuooll24rs
-      R8120BYOLMGMT: m-d7oiougungvot3d8cum8
-      R8120BYOLGW: m-d7ofzdj8r10zj5fzzpmi
+      R81BYOLMGMT: m-d7ogbbeli3j4bmd0e8ie
+      R81BYOLGW: m-d7obq5io6epq8ba76r4i
+      R8110BYOLMGMT: m-d7o3oeue1ma304u2zv2k
+      R8110BYOLGW: m-d7oftitww0d4o8mojf6s
+      R8120BYOLMGMT: m-d7o2jkiq71r1684mfp85
+      R8120BYOLGW: m-d7o2jkiq71r16e1prv5i
     me-east-1:
-      R81BYOLMGMT: m-eb37bc07dkgtvk8jpis8
-      R81BYOLGW: m-eb33589hbqphx2mkjnfw
-      R8110BYOLMGMT: m-eb3j84uoy04ku4mkx4zx
-      R8110BYOLGW: m-eb35lg7yor5w0tn7svrh
-      R8120BYOLMGMT: m-eb348nty6t0khlpe51di
-      R8120BYOLGW: m-eb3806cknvk2andr82l3
+      R81BYOLMGMT: m-eb31plliccweve59jg7m
+      R81BYOLGW: m-eb350zisktfx5vyehthn
+      R8110BYOLMGMT: m-eb357gj0h9oljigau58q
+      R8110BYOLGW: m-eb3gptj6ty8cm51hhs27
+      R8120BYOLMGMT: m-eb3aheg75oux7ug9u4yn
+      R8120BYOLGW: m-eb326h3sbagn75zcboty
     ap-south-1:
-      R81BYOLMGMT: m-a2dc6r0hf79bb04ok9f2
-      R81BYOLGW: m-a2dc6r0hf79bb04ok9f1
-      R8110BYOLMGMT: m-a2d7hgpmhomwu6qvz1il
-      R8110BYOLGW: m-a2d296d8d81kpl3ejgq7
-      R8120BYOLMGMT: m-a2dhps4gidrktkce572z
-      R8120BYOLGW: m-a2d7ldswsan9w6kajpa3
+      R81BYOLMGMT: m-a2dhkahp4ftjqqed08hf
+      R81BYOLGW: m-a2d5nkpy0ujboi1fbn0z
+      R8110BYOLMGMT: m-a2dhstq4e9akavykef3c
+      R8110BYOLGW: m-a2d99ah3ltw57mstnw6t
+      R8120BYOLMGMT: m-a2d99ah3ltw5u1sgqc45
+      R8120BYOLGW: m-a2dj2xl3jz3k9l7bdodz
     ap-southeast-7:
-      R81BYOLMGMT: m-0jo2g9aab0b7xzjhe0aq
-      R81BYOLGW: m-0johltgxtasuuqtkvf29
-      R8110BYOLMGMT: m-0joevsjjsbd1xgujpdwc
-      R8110BYOLGW: m-0jo1kvmn950pewhaihpd
-      R8120BYOLMGMT: m-0joixu6bzj8gyp9yhhzq
-      R8120BYOLGW: m-0jo4x85pdeo2mjvgdiph
+      R81BYOLMGMT: m-0joavl1kx73v5n6o3evl
+      R81BYOLGW: m-0jo14eqd3cc7p5zb05xk
+      R8110BYOLMGMT: m-0joco9keuarht77j6mzg
+      R8110BYOLGW: m-0joh8nrns1tsl467g9ot
+      R8120BYOLMGMT: m-0jo1ounulvztp27wc0u8
+      R8120BYOLGW: m-0joco9keuarifs49l8tk
     ap-northeast-2:
-      R81BYOLMGMT: m-mj7bgnp696hisa3cmi9s
-      R81BYOLGW: m-mj7bgnp696hislxjau4i
-      R8110BYOLMGMT: m-mj7dhe4tzdhy1lzxxpfi
-      R8110BYOLGW: m-mj71lz9sp8s63gof4e3o
-      R8120BYOLMGMT: m-mj7bta6cs7yewm23zlg4
-      R8120BYOLGW: m-mj71pkgowjqhb75d2tr1
+      R81BYOLMGMT: m-mj77ad1ami0yow0tnjwo
+      R81BYOLGW: m-mj77ad1ami0yos2rffyf
+      R8110BYOLMGMT: m-mj725dirttu923mxoqjs
+      R8110BYOLGW: m-mj725dirttu923mxoqjr
+      R8120BYOLMGMT: m-mj7hdtir2n9955h690ok
+      R8120BYOLGW: m-mj7crpssiqbqkg3y0jdr
     cn-qingdao:
-      R81BYOLMGMT: m-m5e2jz421ala6th0471h
-      R81BYOLGW: m-m5ebt0jncnud31c3rnb6
-      R8110BYOLMGMT: m-m5e7epib56jtjtshr2l5
-      R8110BYOLGW: m-m5ef6new0eqs331wztmd
-      R8120BYOLMGMT: m-m5eb24dmjfipytotyo5k
-      R8120BYOLGW: m-m5e2h8olkwo03b0bg7oj
+      R81BYOLMGMT: m-m5eikf9p9bnsm3xwux6r
+      R81BYOLGW: m-m5e75efa3ljx1zppl5wp
+      R8110BYOLMGMT: m-m5e9g3zbg5y63fapk8t3
+      R8110BYOLGW: m-m5e9g3zbg5y63fapk8t2
+      R8120BYOLMGMT: m-m5ei2o8az94zm9hygtz9
+      R8120BYOLGW: m-m5eawtv62auj8h8hjaap
     cn-beijing:
-      R81BYOLMGMT: m-2ze5gq9w68wpgdqm0exu
-      R81BYOLGW: m-2ze5gq9w68wpgdqm0ext
-      R8110BYOLMGMT: m-2zeesoaqp09n3a4ajbxm
-      R8110BYOLGW: m-2zecbb1j7e542x0bytjp
-      R8120BYOLMGMT: m-2zegifgmr6rv457ooy16
-      R8120BYOLGW: m-2zef4f07jxwqb4pmv42k
+      R81BYOLMGMT: m-2zeea0q11d7qyaqimprf
+      R81BYOLGW: m-2ze9imiw16gcmu6dfyrs
+      R8110BYOLMGMT: m-2zed3d1akm44mhb3byhh
+      R8110BYOLGW: m-2ze3galt4alwia308en4
+      R8120BYOLMGMT: m-2zecfp87n0ygxnw422n9
+      R8120BYOLGW: m-2ze46ge5j6p9ovtakq56
     cn-zhangjiakou:
-      R81BYOLMGMT: m-8vbg1d16fl9pjkfuuelm
-      R81BYOLGW: m-8vb2zqmrxey5xamgfpgj
-      R8110BYOLMGMT: m-8vbbd73aseiqbcktdb6l
-      R8110BYOLGW: m-8vb9cu4j4uh0rlfbz4cf
-      R8120BYOLMGMT: m-8vbe8ehu8cztlhrqki40
-      R8120BYOLGW: m-8vb6whjy1vmlw1ydulaw
+      R81BYOLMGMT: m-8vbf88w13qv30y8x6x10
+      R81BYOLGW: m-8vb2ludz0a028jk0edyz
+      R8110BYOLMGMT: m-8vba9zzcr1qcbelpp3ox
+      R8110BYOLGW: m-8vb6sgl3xr9zsjfv00d0
+      R8120BYOLMGMT: m-8vba9zzcr1qcxrmbnhmq
+      R8120BYOLGW: m-8vba5l71wmh1hx482e5j
     cn-huhehaote:
-      R81BYOLMGMT: m-hp31j9z6lt21ut54o50a
-      R81BYOLGW: m-hp308d9cobhwwzhdsjlw
-      R8110BYOLMGMT: m-hp33kf18kmyh73kao4xz
-      R8110BYOLGW: m-hp3cobwp0tvkb1y13cjr
-      R8120BYOLMGMT: m-hp3b5osw5zzpoijj3aen
-      R8120BYOLGW: m-hp3i8866a774yasy9jqm
+      R81BYOLMGMT: m-hp3buaoqkfd4cslqgo7g
+      R81BYOLGW: m-hp3b2qox0zxyf9vy1otd
+      R8110BYOLMGMT: m-hp3i036lzqyvgsz15crp
+      R8110BYOLGW: m-hp33swbcd0sbguablwzn
+      R8120BYOLMGMT: m-hp3120mzz3emtq318fg4
+      R8120BYOLGW: m-hp35rwh0a1y54duvz5uy
     cn-wulanchabu:
-      R81BYOLMGMT: m-0jl8b4mijll73vv10xv3
-      R81BYOLGW: m-0jl8b4mijll747p7p9ps
-      R8110BYOLMGMT: m-0jl91t3p5keii668luxd
-      R8110BYOLGW: m-0jl8yzlfag1yyh2xgj6g
-      R8120BYOLMGMT: m-0jlf5pxdyac2xguiog8x
-      R8120BYOLGW: m-0jl0hf3bpk2wn80e60lo
+      R81BYOLMGMT: m-0jla3uopwbsdlh234tfq
+      R81BYOLGW: m-0jl6lprbiiseujviipj6
+      R8110BYOLMGMT: m-0jl5b644af2obedu8otq
+      R8110BYOLGW: m-0jl49hlqbm3mfc9w6tzu
+      R8120BYOLMGMT: m-0jlecspe80vgb4ct596a
+      R8120BYOLGW: m-0jl39mggushagc5k2aad
     cn-hangzhou:
-      R81BYOLMGMT: m-bp1a4374akk0xgzcdjb5
-      R81BYOLGW: m-bp1702pfcdtd44fcuw5u
-      R8110BYOLMGMT: m-bp17m0pc0xpvd24bvve4
-      R8110BYOLGW: m-bp1g6n6mz1h85t4jlhsu
-      R8120BYOLMGMT: m-bp12cfurw1rkfz5n09f7
-      R8120BYOLGW: m-bp1eafssnoso0gi0aoqa
+      R81BYOLMGMT: m-bp1c3scp1s68ytcxnl0w
+      R81BYOLGW: m-bp1ijapwrhoh5uncfcgx
+      R8110BYOLMGMT: m-bp16oglxprid2a4jitx1
+      R8110BYOLGW: m-bp1bb9qp3pkpoezsoimv
+      R8120BYOLMGMT: m-bp1ay2i1x3qvjzzmnfvv
+      R8120BYOLGW: m-bp17fwsz23lonhfhhkli
     cn-shanghai:
-      R81BYOLMGMT: m-uf6enadwjilgdwbd5elg
-      R81BYOLGW: m-uf60mwtsqzt8otg58mq1
-      R8110BYOLMGMT: m-uf67lmfh9fmiz25i8h30
-      R8110BYOLGW: m-uf6b4t1dt7xsb6b1ozns
-      R8120BYOLMGMT: m-uf68002x8jhksgs1p63j
-      R8120BYOLGW: m-uf63m2rplfkier6h5qok
+      R81BYOLMGMT: m-uf62fks1xoat34cudwkk
+      R81BYOLGW: m-uf6f9c6sgklx9243t95p
+      R8110BYOLMGMT: m-uf69no35at6hnyur290j
+      R8110BYOLGW: m-uf6b1m3sqeczzpb1p7wl
+      R8120BYOLMGMT: m-uf6drm9i50lk79sde1ot
+      R8120BYOLGW: m-uf649uz6d6kbjs18870n
     cn-shenzhen:
-      R81BYOLMGMT: m-wz929kxhcdq2rybo7728
-      R81BYOLGW: m-wz9gd1os5taleffj2hdd
-      R8110BYOLMGMT: m-wz91bzaps5b4fy9q5ado
-      R8110BYOLGW: m-wz99irggbuh8nqsjid3e
-      R8120BYOLMGMT: m-wz90tq9p92a3vfk2v118
-      R8120BYOLGW: m-wz91zhyols227mxarmbm
+      R81BYOLMGMT: m-wz9bpmaf5ljfe4jg1b5j
+      R81BYOLGW: m-wz9blvxijvurhfs5jed0
+      R8110BYOLMGMT: m-wz99bsob6mgoqmqb12bm
+      R8110BYOLGW: m-wz943hw625bkj6ic3jt6
+      R8120BYOLMGMT: m-wz9a6ekppk18zty8vos6
+      R8120BYOLGW: m-wz97dfdlzsgyeiwz45xt
     cn-heyuan:
-      R81BYOLMGMT: m-f8zaiz4qdu9ooog5093z
-      R81BYOLGW: m-f8z3wha25o38r28lgpqf
-      R8110BYOLMGMT: m-f8zdlsos1slboxf2wc9s
-      R8110BYOLGW: m-f8z4mwj17gzic0crtjhx
-      R8120BYOLMGMT: m-f8zb8rb6ykc96enbgugp
-      R8120BYOLGW: m-f8z4oi7bpz70rafvcfn6
+      R81BYOLMGMT: m-f8zd722vzj2b67e104uq
+      R81BYOLGW: m-f8zd722vzj2b63fys0wh
+      R8110BYOLMGMT: m-f8zb8v5m47iov1epq6c3
+      R8110BYOLGW: m-f8zi0c6mx7iykv9de56g
+      R8120BYOLMGMT: m-f8z4ofw9uzoeebp7022t
+      R8120BYOLGW: m-f8zb8v5m47iphmbg4s6d
     cn-guangzhou:
-      R81BYOLMGMT: m-7xvhwfa11hstft9tpg5g
-      R81BYOLGW: m-7xv4wfblf84ez3vemt85
-      R8110BYOLMGMT: m-7xv5tcch4kjbzpc81432
-      R8110BYOLGW: m-7xv70nveuzkq0jxr9z7p
-      R8120BYOLMGMT: m-7xvizywiymb7al89ihw9
-      R8120BYOLGW: m-7xv7exrv3p3iotf3fpe3
+      R81BYOLMGMT: m-7xv1xx3p6p4hsqal7hby
+      R81BYOLGW: m-7xvb23z1p5mdmulugmyl
+      R8110BYOLMGMT: m-7xv1v8z7nv9gcejtm7wk
+      R8110BYOLGW: m-7xv1nkwp0iytw06mb316
+      R8120BYOLMGMT: m-7xv73b87rlcjjynnd6gb
+      R8120BYOLGW: m-7xv5bpx9h6jv2vyne89y
     cn-chengdu:
-      R81BYOLMGMT: m-2vc95qlidofi9lagdijv
-      R81BYOLGW: m-2vc35570jx73w6mxvm66
-      R8110BYOLMGMT: m-2vc3k0f06j9k311g7k2p
-      R8110BYOLGW: m-2vc06q1urw9jzpsvkrq8
-      R8120BYOLMGMT: m-2vcbtdebe170s4vmwhrq
-      R8120BYOLGW: m-2vc8p1gw7uxmx3ts338r
+      R81BYOLMGMT: m-2vc9qgr2s4iumofipc94
+      R81BYOLGW: m-2vc5zxdqhnxm452re2ck
+      R8110BYOLMGMT: m-2vcd5eve6xrk6vtq0dkv
+      R8110BYOLGW: m-2vcix4lkv6qhe188y5xu
+      R8120BYOLMGMT: m-2vcduqwhq1tgcpcele2w
+      R8120BYOLGW: m-2vcix4lkv6qi0m4zcruj

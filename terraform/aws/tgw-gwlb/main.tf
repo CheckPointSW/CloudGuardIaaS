@@ -1,4 +1,4 @@
-provider "aws" { 
+provider "aws" {
    region = var.region
    access_key = var.access_key
    secret_key = var.secret_key
@@ -259,6 +259,7 @@ module "gwlb" {
   gateways_provision_address_type = var.gateways_provision_address_type
   allocate_public_IP = var.allocate_public_IP
   enable_cloudwatch = var.enable_cloudwatch
+  gateway_bootstrap_script = var.gateway_bootstrap_script
 
   // --- Check Point CloudGuard IaaS Security Management Server Configuration ---
   management_deploy = var.management_deploy
@@ -384,18 +385,14 @@ resource "aws_route_table_association" "tgw_attachment4_rtb_assoc" {
 
 
 resource "aws_eip" "nat_gw_public_address1" {
-  vpc = true
 }
 resource "aws_eip" "nat_gw_public_address2" {
-  vpc = true
 }
 resource "aws_eip" "nat_gw_public_address3" {
-  count = var.number_of_AZs >= 3 ? 1 :0
-  vpc = true
+  count = var.number_of_AZs >= 3 ? 1 : 0
 }
 resource "aws_eip" "nat_gw_public_address4" {
-  count = var.number_of_AZs >= 4 ? 1 :0
-  vpc = true
+  count = var.number_of_AZs >= 4 ? 1 : 0
 }
 
 resource "aws_nat_gateway" "nat_gateway1" {

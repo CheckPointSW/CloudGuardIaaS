@@ -25,7 +25,7 @@ module "common" {
   source = "../modules/common"
   resource_group_name = var.resource_group_name
   location = var.location
-  admin_password = var.admin_password
+  admin_password = var.authentication_type == "SSH Public Key" ? random_id.random_id.hex : var.admin_password
   installation_type = var.installation_type
   template_name = var.template_name
   template_version = var.template_version
@@ -38,6 +38,8 @@ module "common" {
   vm_os_sku = var.vm_os_sku
   vm_os_offer = var.vm_os_offer
   authentication_type = var.authentication_type
+  serial_console_password_hash = var.serial_console_password_hash
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 //********************** Networking **************************//
@@ -290,6 +292,8 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
       vnet=module.vnet.subnet_prefixes[0]
       enable_custom_metrics=var.enable_custom_metrics ? "yes" : "no"
       admin_shell = var.admin_shell
+      serial_console_password_hash = var.serial_console_password_hash
+      maintenance_mode_password_hash = var.maintenance_mode_password_hash
     })
   }
 
@@ -327,7 +331,7 @@ resource "azurerm_virtual_machine_scale_set" "vmss" {
        public_ip_address_configuration {
         name = "${var.vmss_name}-public-ip"
         idle_timeout = 15
-        domain_name_label = "${var.vmss_name}-dns-name"
+        domain_name_label = "${lower(var.vmss_name)}-dns-name"
        }
      }
  }

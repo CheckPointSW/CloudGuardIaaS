@@ -25,15 +25,18 @@ instance_tags = {
 }
 
 // --- Check Point Settings ---
-gateway_version = "R81-BYOL"
+gateway_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 gateway_SICKey = "12345678"
 gateway_password_hash = ""
+
+// --- Quick connect to Smart-1 Cloud (Recommended) ---
+gateway_TokenKey = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"
 gateway_hostname = "gw-hostname"
 allow_upload_download = true
 gateway_bootstrap_script = "echo 'this is bootstrap script' > /home/admin/testfile.txt"
-primary_ntp = ""
-secondary_ntp = ""
+primary_ntp = "ntp1.cloud.aliyuncs.com"
+secondary_ntp = "ntp2.cloud.aliyuncs.com"

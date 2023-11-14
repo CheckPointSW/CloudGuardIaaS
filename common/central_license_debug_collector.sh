@@ -10,6 +10,7 @@
 # Written by: Check Point Software Technologies LTD. 
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
+
 # Licenses_Collector - version 4
 
 usage()

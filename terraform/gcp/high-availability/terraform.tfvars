@@ -1,6 +1,6 @@
 # --- Google Provider ---
 service_account_path                  = "PLEASE ENTER SERVICE ACCOUNT PATH"           # "service-accounts/service-account-file-name.json"
-project                               = "PLEASE ENTER PROJECT NAME"                   # "project-name"
+project                               = "PLEASE ENTER PROJECT ID"                     # "project-id"
 
 # --- Check Point Deployment ---
 prefix                                = "PLEASE ENTER PREFIX"                         # "chkp-tf-ha"
