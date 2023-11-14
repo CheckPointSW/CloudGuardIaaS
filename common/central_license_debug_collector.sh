@@ -10,7 +10,7 @@
 # Written by: Check Point Software Technologies LTD. 
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
-# Licenses_Collector - version 3
+# Licenses_Collector - version 4
 
 usage()
 {
@@ -57,7 +57,7 @@ mkdir -p $TMPPATH
 
 if [ -n "$DOMAIN_NAME" ]; then
   log_msg "  switch to domain env"
-  mdsenv "$DOMAIN_NAME"
+  . $MDSDIR/scripts/MDSprofile.sh && mdsenv "$DOMAIN_NAME"
 fi
 
 # checking if there's connectivity with userCenter and if TCP port 18208 is open
