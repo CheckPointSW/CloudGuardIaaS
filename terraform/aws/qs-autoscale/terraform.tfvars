@@ -16,6 +16,7 @@ load_balancers_type = "Application Load Balancer"
 load_balancer_protocol = "HTTP"
 certificate = ""
 service_port = "80"
+admin_shell = "/etc/cli.sh"
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
 gateways_subnets = ["subnet-123b5678", "subnet-123a4567"]
