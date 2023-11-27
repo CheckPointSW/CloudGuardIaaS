@@ -79,6 +79,11 @@ variable "service_port" {
   type = string
   description = "The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS"
 }
+variable "admin_shell" {
+  type = string
+  description = "Set the admin shell to enable advanced command line configuration"
+  default = "/etc/cli.sh"
+}
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
 variable "gateways_subnets" {

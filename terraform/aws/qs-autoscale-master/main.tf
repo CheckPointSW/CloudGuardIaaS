@@ -33,6 +33,7 @@ module "launch_qs_autoscale" {
   load_balancer_protocol = var.load_balancer_protocol
   certificate = var.certificate
   service_port = var.service_port
+  admin_shell = var.admin_shell
   gateways_subnets = module.launch_vpc.public_subnets_ids_list
   gateway_instance_type = var.gateway_instance_type
   gateways_min_group_size = var.gateways_min_group_size

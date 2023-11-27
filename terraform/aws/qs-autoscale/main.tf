@@ -58,6 +58,7 @@ module "autoscale" {
   maximum_group_size = var.gateways_max_group_size
   target_groups = tolist([module.external_load_balancer.target_group_arn])
   gateway_version = var.gateway_version
+  admin_shell = var.admin_shell
   gateway_password_hash = var.gateway_password_hash
   gateway_SICKey = var.gateway_SICKey
   allow_upload_download = var.allow_upload_download
@@ -86,6 +87,7 @@ module "management" {
   disable_instance_termination = var.disable_instance_termination
   iam_permissions = "Create with read-write permissions"
   management_version = var.management_version
+  admin_shell = var.admin_shell
   management_password_hash = var.management_password_hash
   allow_upload_download = var.allow_upload_download
   admin_cidr = var.admin_cidr
