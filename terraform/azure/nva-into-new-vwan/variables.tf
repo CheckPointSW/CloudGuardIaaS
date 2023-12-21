@@ -119,6 +119,22 @@ variable "custom-metrics" {
   }
 }
 
+variable "routing-intent-internet-traffic" {
+  default = "yes"
+  validation {
+    condition     = contains(["yes", "no"], var.routing-intent-internet-traffic)
+    error_message = "Valid options are string('yes' or 'no')"
+  }
+}
+
+variable "routing-intent-private-traffic" {
+  default = "yes"
+  validation {
+    condition     = contains(["yes", "no"], var.routing-intent-private-traffic)
+    error_message = "Valid options are string('yes' or 'no')"
+  }
+}
+
 variable "smart1-cloud-token-a" {
   type    = string
   default = ""

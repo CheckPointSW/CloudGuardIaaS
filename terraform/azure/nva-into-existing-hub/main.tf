@@ -41,10 +41,59 @@ data "http" "image-versions" {
 
 locals {
       image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == lower(substr(replace(var.cloudguard-version, ".", ""), 1, 4))])
+      routing_intent-internet-policy = {
+        "name": "InternetTraffic",
+        "destinations": [
+          "Internet"
+        ],
+        "nextHop": "/subscriptions/${var.subscription_id}/resourcegroups/${var.nva-rg-name}/providers/Microsoft.Network/networkVirtualAppliances/${var.nva-name}"
+      }
+      routing_intent-private-policy = {
+        "name": "PrivateTrafficPolicy",
+        "destinations": [
+          "PrivateTraffic"
+        ],
+        "nextHop": "/subscriptions/${var.subscription_id}/resourcegroups/${var.nva-rg-name}/providers/Microsoft.Network/networkVirtualAppliances/${var.nva-name}"
+      }
+      routing-intent-policies = var.routing-intent-internet-traffic == "yes" ? (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-private-policy]) : [])
+      req_body = jsonencode({"properties": {"routingPolicies": local.routing-intent-policies}})
+      req_url = "https://management.azure.com/subscriptions/${var.subscription_id}/resourceGroups/${var.vwan-hub-resource-group}/providers/Microsoft.Network/virtualHubs/${var.vwan-hub-name}/routingIntent/hubRoutingIntent?api-version=2022-01-01"
+}
+
+//********************** Marketplace Terms & Solution Registration **************************//
+data "http" "accept-marketplace-terms-existing-agreement" {
+  method = "GET"
+  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.MarketplaceOrdering/agreements/checkpoint/offers/azure-vwan/plans/vwan-app?api-version=2021-01-01"
+  request_headers = {
+    Accept = "application/json"
+    "Authorization" = "Bearer ${local.access_token}"
+  }
+}
+
+resource "azurerm_marketplace_agreement" "accept-marketplace-terms" {
+  count = can(jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.id) && jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.state == "Active" ? 0 : 1
+  publisher = "checkpoint"
+  offer     = "azure-vwan"
+  plan      = "vwan-app"
+}
+
+data "http" "azurerm_resource_provider_registration-exist" {
+  method = "GET"
+  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.Solutions?api-version=2021-01-01"
+  request_headers = {
+    Accept = "application/json"
+    "Authorization" = "Bearer ${local.access_token}"
+  }
+}
+
+resource "azurerm_resource_provider_registration" "solutions" {
+  count = jsondecode(data.http.azurerm_resource_provider_registration-exist.response_body).registrationState == "Registered" ? 0 : 1
+  name = "Microsoft.Solutions"
 }
 
 //********************** Managed Application Configuration **************************//
 resource "azurerm_managed_application" "nva" {
+  depends_on = [azurerm_marketplace_agreement.accept-marketplace-terms, azurerm_resource_provider_registration.solutions]
   name                        = var.managed-app-name
   location                    = azurerm_resource_group.managed-app-rg.location
   resource_group_name         = azurerm_resource_group.managed-app-rg.name
@@ -117,3 +166,16 @@ resource "azurerm_managed_application" "nva" {
     }
   })
 }
+
+//********************** Routing Intent **************************//
+
+data "external" "update-routing-intent" {
+  count = length(local.routing-intent-policies) != 0 ? 1 : 0
+  depends_on = [azurerm_managed_application.nva]
+  program = ["python", "../modules/add-routing-intent.py", "${local.req_url}", "${local.req_body}", "${local.access_token}"]
+}
+
+output "api_request_result" {
+  value = length(local.routing-intent-policies) != 0 ? data.external.update-routing-intent[0].result : {routing-intent: "not changed"}
+}
+
