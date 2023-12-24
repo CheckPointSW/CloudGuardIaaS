@@ -349,7 +349,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81.10",
+            "defaultValue": "R81.20",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
