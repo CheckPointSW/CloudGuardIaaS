@@ -923,7 +923,6 @@
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
-
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "condition": "[and(parameters('deployNewNSG'),equals(parameters('vnetNewOrExisting'), 'new'))]",
