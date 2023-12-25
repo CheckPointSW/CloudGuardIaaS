@@ -891,8 +891,8 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-        "ipConfigurations":"[union(variables('DefaultIpAddresses'),variables('Vips'))]"
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "ipConfigurations": "[union(variables('DefaultIpAddresses'),variables('Vips'))]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },

@@ -828,7 +828,7 @@
                   "primary": true,
                   "enableIPForwarding": false,
                   "enableAcceleratedNetworking": true,
-                  "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+                  "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1",
