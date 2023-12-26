@@ -72,6 +72,10 @@ variable "cloudguard-version" {
 variable "scale-unit" {
   type    = string
   default = "2"
+  validation {
+    condition     = contains(["2", "4", "10", "20", "30", "60", "80"], var.scale-unit)
+    error_message = "Valid values for CloudGuard version are '2', '4', '10', '20', '30', '60', '80'"
+  }
 }
 
 variable "bootstrap-script" {
@@ -92,6 +96,10 @@ variable "sic-key" {
   type      = string
   default   = ""
   sensitive = true
+  validation {
+    condition = can(regex("^[a-z0-9A-Z]{12,30}$", var.sic-key))
+    error_message = "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+  }
 }
 
 variable "ssh-public-key" {

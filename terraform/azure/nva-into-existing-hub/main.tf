@@ -71,7 +71,7 @@ data "http" "accept-marketplace-terms-existing-agreement" {
 }
 
 resource "azurerm_marketplace_agreement" "accept-marketplace-terms" {
-  count = can(jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.id) && jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.state == "Active" ? 0 : 1
+  count = can(jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).id) && jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.state == "Active" ? 0 : 1
   publisher = "checkpoint"
   offer     = "azure-vwan"
   plan      = "vwan-app"

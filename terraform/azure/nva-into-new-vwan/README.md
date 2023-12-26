@@ -1,4 +1,4 @@
-# Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure
+# Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure - Public Preview
 
 This Terraform module deploys Check Point CloudGuard Network Security vWAN NVA solution into a new vWAN Hub in Azure.
 As part of the deployment the following resources are created:
@@ -160,7 +160,7 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description                                                                                       |
 |------------------|---------------------------------------------------------------------------------------------------|
-|                  |                                                                                                   | |
+|  20231226         | First release of Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure - Public Preview                |                                                                                                   | |
 
 
 ## License

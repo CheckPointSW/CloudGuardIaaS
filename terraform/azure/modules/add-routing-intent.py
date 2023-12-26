@@ -1,7 +1,7 @@
 import json
-
 import requests
 import sys
+
 
 def perform_put_request(url, data, headers=None):
     """
@@ -15,6 +15,7 @@ def perform_put_request(url, data, headers=None):
         result["status"] = "error"
         result["message"] = f"An error occurred: {str(e)}"
     return result
+
 
 if __name__ == "__main__":
     """
