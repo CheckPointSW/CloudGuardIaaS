@@ -677,7 +677,7 @@
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
       "properties": {
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
         "ipConfigurations": [

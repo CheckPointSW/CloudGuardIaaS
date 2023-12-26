@@ -1,0 +1,338 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Compute.MultiVm",
+    "version": "0.1.2-preview",
+    "parameters": {
+      "basics": [
+        {
+          "name": "gatewayNameUi",
+          "type": "Microsoft.Common.TextBox",
+          "label": "VM Name",
+          "toolTip": "This will determine the hostname prefix of the VM",
+          "constraints": {
+            "required": true,
+            "regex": "^[a-z0-9A-Z]{1,30}$",
+            "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+          }
+        },
+        {
+          "name": "inboundSources",
+          "type": "Microsoft.Common.TextBox",
+          "label": "Allow access from",
+          "defaultValue": "0.0.0.0/0",
+          "toolTip": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)",
+          "constraints": {
+            "required": true,
+            "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2])){1,50}$",
+            "validationMessage": "Only CIDR notation is allowed i.e. X.X.X.X/X"
+          },
+          "visible": true
+        },
+        {
+          "name": "user",
+          "type": "Microsoft.Common.TextBlock",
+          "visible": true,
+          "options": {
+            "text": "User is set to 'admin'"
+          }
+        },
+        {
+          "name": "auth",
+          "type": "Microsoft.Compute.CredentialsCombo",
+          "label": {
+            "authenticationType": "Authentication type",
+            "password": "Password",
+            "confirmPassword": "Confirm password",
+            "sshPublicKey": "SSH public key"
+          },
+          "toolTip": {
+            "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
+          },
+          "constraints": {
+            "required": true
+          },
+          "options": {
+            "hideConfirmation": false,
+            "hidePassword": false
+          },
+          "osPlatform": "Linux"
+        },
+        {
+          "name": "waapAgentToken",
+          "type": "Microsoft.Common.PasswordBox",
+          "label": {
+            "password": "Infinity Next Agent Token",
+            "confirmPassword": "Confirm Infinity Next Agent Token"
+          },
+          "toolTip": "Token can be obtained by logging in to [https://portal.checkpoint.com/](https://portal.checkpoint.com/) –> INFINITY POLICY -> CLOUD -> Profiles",
+          "constraints": {
+            "required": true,
+            "regex": "^cp-[a-z0-9A-Z-]{72,72}$",
+            "validationMessage": "Token should begin with 'cp-' and must be 75 characters long"
+          },
+          "options": {
+            "hideConfirmation": false
+          },
+          "visible": true
+        },
+        {
+          "name": "waapAgentFog",
+          "type": "Microsoft.Common.TextBox",
+          "label": "Fog address (optional)",
+          "toolTip": "Fog address",
+          "constraints": {
+            "required": false,
+            "regex": "^https://",
+            "validationMessage": "Should begin with https://"
+          },
+          "visible": true
+        }
+      ],
+      "steps": [
+        {
+          "name": "autoprovision",
+          "label": "VM settings",
+          "subLabel": {
+            "preValidation": "Configure VM settings",
+            "postValidation": "Done"
+          },
+          "bladeTitle": "VM settings",
+          "elements": [
+            {
+              "name": "vmSizeUiBYOL",
+              "type": "Microsoft.Compute.SizeSelector",
+              "visible": true,
+              "label": "Virtual machine size",
+              "toolTip": "The VM size of the Security Gateway",
+              "recommendedSizes": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2"
+              ],
+              "constraints": {
+                "allowedSizes": [
+                  "Standard_DS2_v2",
+                  "Standard_DS3_v2",
+                  "Standard_DS4_v2",
+                  "Standard_DS5_v2",
+                  "Standard_F2s",
+                  "Standard_F4s",
+                  "Standard_F8s",
+                  "Standard_F16s",
+                  "Standard_D4s_v3",
+                  "Standard_D8s_v3",
+                  "Standard_D16s_v3",
+                  "Standard_D32s_v3",
+                  "Standard_D64s_v3",
+                  "Standard_E4s_v3",
+                  "Standard_E8s_v3",
+                  "Standard_E16s_v3",
+                  "Standard_E20s_v3",
+                  "Standard_E32s_v3",
+                  "Standard_E64s_v3",
+                  "Standard_E64is_v3",
+                  "Standard_F4s_v2",
+                  "Standard_F8s_v2",
+                  "Standard_F16s_v2",
+                  "Standard_F32s_v2",
+                  "Standard_F64s_v2",
+                  "Standard_M8ms",
+                  "Standard_M16ms",
+                  "Standard_M32ms",
+                  "Standard_M64ms",
+                  "Standard_M64s",
+                  "Standard_D2_v2",
+                  "Standard_D3_v2",
+                  "Standard_D4_v2",
+                  "Standard_D5_v2",
+                  "Standard_D11_v2",
+                  "Standard_D12_v2",
+                  "Standard_D13_v2",
+                  "Standard_D14_v2",
+                  "Standard_D15_v2",
+                  "Standard_F2",
+                  "Standard_F4",
+                  "Standard_F8",
+                  "Standard_F16",
+                  "Standard_D4_v3",
+                  "Standard_D8_v3",
+                  "Standard_D16_v3",
+                  "Standard_D32_v3",
+                  "Standard_D64_v3",
+                  "Standard_E4_v3",
+                  "Standard_E8_v3",
+                  "Standard_E16_v3",
+                  "Standard_E20_v3",
+                  "Standard_E32_v3",
+                  "Standard_E64_v3",
+                  "Standard_E64i_v3",
+                  "Standard_DS11_v2",
+                  "Standard_DS12_v2",
+                  "Standard_DS13_v2",
+                  "Standard_DS14_v2",
+                  "Standard_DS15_v2"
+                ]
+              },
+              "osPlatform": "Linux",
+              "imageReference": {
+                "publisher": "checkpoint",
+                "offer": "infinity-gw",
+                "sku": "sg-byol"
+              },
+              "count": 1
+            },
+            {
+              "name": "waapPublicIP",
+              "type": "Microsoft.Common.OptionsGroup",
+              "label": "Assign public IP address to the gateway",
+              "toolTip": "Assign public IP address to the gateway",
+              "defaultValue": "Yes",
+              "constraints": {
+                "allowedValues": [
+                  {
+                    "label": "Yes",
+                    "value": "yes"
+                  },
+                  {
+                    "label": "No",
+                    "value": "no"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "bootstrapScript",
+              "type": "Microsoft.Common.FileUpload",
+              "label": "Bootstrap script",
+              "toolTip": "Bootstrap script",
+              "constraints": {
+                "required": false,
+                "accept": ".sh,text/plain"
+              },
+              "options": {
+                "multiple": false,
+                "uploadMode": "file",
+                "openMode": "text",
+                "encoding": "UTF-8"
+              }
+            },
+            {
+              "name": "useCustomImageUri",
+              "type": "Microsoft.Common.OptionsGroup",
+              "label": "Use development image uri",
+              "defaultValue": "No",
+              "toolTip": "Use custom image URI.",
+              "constraints": {
+                "allowedValues": [
+                  {
+                    "label": "Yes",
+                    "value": "Yes"
+                  },
+                  {
+                    "label": "No",
+                    "value": "No"
+                  }
+                ],
+                "required": false
+              },
+              "visible": false
+            },
+            {
+              "name": "sourceImageVhdUri",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Development Image URI",
+              "toolTip": "The URI of the blob containing the development image",
+              "constraints": {
+                "required": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]",
+                "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
+                "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
+              },
+              "visible": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]"
+            }
+          ]
+        },
+        {
+          "name": "network",
+          "label": "Network settings",
+          "subLabel": {
+            "preValidation": "Configure network settings",
+            "postValidation": "Done"
+          },
+          "bladeTitle": "Network settings",
+          "elements": [
+            {
+              "name": "virtualNetwork",
+              "type": "Microsoft.Network.VirtualNetworkCombo",
+              "label": {
+                "virtualNetwork": "Virtual network",
+                "subnets": "Subnets"
+              },
+              "toolTip": {
+                "virtualNetwork": "Virtual Network Name",
+                "subnets": "The subnets to deploy into. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
+              },
+              "defaultValue": {
+                "name": "vnet01",
+                "addressPrefixSize": "/16"
+              },
+              "constraints": {
+                "minAddressPrefixSize": "/28"
+              },
+              "options": {
+                "hideExisting": false
+              },
+              "subnets": {
+                "subnet1": {
+                  "label": "Gateway external subnet",
+                  "defaultValue": {
+                    "name": "VM-External",
+                    "addressPrefixSize": "/24"
+                  },
+                  "constraints": {
+                    "minAddressPrefixSize": "/29",
+                    "minAddressCount": 1,
+                    "requireContiguousAddresses": true
+                  }
+                },
+                "subnet2": {
+                  "label": "Gateway internal subnet",
+                  "defaultValue": {
+                    "name": "VM-Internal",
+                    "addressPrefixSize": "/24"
+                  },
+                  "constraints": {
+                    "minAddressPrefixSize": "/29",
+                    "minAddressCount": 1,
+                    "requireContiguousAddresses": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": {
+        "location": "[location()]",
+        "vmName": "[basics('gatewayNameUi')]",
+        "inboundSources": "[basics('inboundSources')]",
+        "authenticationType": "[basics('auth').authenticationType]",
+        "adminPassword": "[basics('auth').password]",
+        "sshPublicKey": "[basics('auth').sshPublicKey]",
+        "waapAgentToken": "[basics('waapAgentToken')]",
+        "waapAgentFog": "[basics('waapAgentFog')]",
+        "vmSize": "[steps('autoprovision').vmSizeUiBYOL]",
+        "waapPublicIP": "[steps('autoprovision').waapPublicIP]",
+        "bootstrapScript": "[steps('autoprovision').bootstrapScript]",
+        "sourceImageVhdUri": "[coalesce(steps('autoprovision').sourceImageVhdUri, 'noCustomUri')]",
+        "virtualNetworkName": "[steps('network').virtualNetwork.name]",
+        "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
+        "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
+        "Subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
+        "Subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
+        "Subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
+        "Subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
+        "Subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+        "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
+        "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]"
+      }
+    }
+  }

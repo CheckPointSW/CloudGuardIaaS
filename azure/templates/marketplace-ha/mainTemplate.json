@@ -910,7 +910,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": "[not(equals(variables('osVersion'), 'R8010'))]",
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",
