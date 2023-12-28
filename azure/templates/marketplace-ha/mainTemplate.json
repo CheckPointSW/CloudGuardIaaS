@@ -25,7 +25,7 @@
         "R81.20 - Pay As You Go (NGTP)",
         "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
         "description": "Check Point CloudGuard version"
       }
@@ -356,7 +356,7 @@
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
     "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
-    "templateVersion": "20231002",
+    "templateVersion": "20230910",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -505,8 +505,9 @@
     "count": 2,
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
-    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha2-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-    "ExsitingNsgRoleAssignmentURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/existing-nsg-RoleAssignment', '.json'))]",
+    "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/',parameters('_artifactsLocation'))]",
+    "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha2-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "ExsitingNsgRoleAssignmentURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/existing-nsg-RoleAssignment', '.json'))]",
     "sicKey": "[parameters('sicKey')]",
     "installationType": "cluster",
     "internalLBPrivateIPAddress": "[parameters('Subnet2StartAddress')]",
@@ -725,8 +726,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -758,8 +760,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -1246,3 +1249,4 @@
     }
   }
 }
+
