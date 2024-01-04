@@ -21,6 +21,7 @@ required:
   - networkDefinedByRoutes
   - shell
   - enableMonitoring
+  - generatePassword
 
 properties:
   zone:
@@ -166,7 +167,7 @@ properties:
         diskTypeProperty: diskType
   autoscalingVersion:
     type: string
-    default: R81.10 Autoscaling
+    default: R81.20 Autoscaling
     enum:
       - R80.40 Autoscaling
       - R81 Autoscaling
@@ -189,6 +190,13 @@ properties:
   allowUploadDownload:
     type: boolean
     default: True
+  generatePassword:
+    type: boolean
+    default: False
+  maintenanceMode:
+    type: string
+    pattern: ^([a-z0-9A-Z.]{12,300}|)$
+    default: ''
   shell:
     type: string
     default: /etc/cli.sh
@@ -202,4 +210,6 @@ outputs:
   deployment:
     type: string
   project:
+    type: string
+  password:
     type: string
