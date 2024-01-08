@@ -32,7 +32,7 @@
         "R81.20 - Pay As You Go (NGTP)",
         "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -449,31 +449,6 @@
       },
       "defaultValue": ""
     },
-    "remoteAccessVpn": {
-      "type": "string",
-      "allowedValues": [
-        "no",
-        "yes"
-      ],
-      "defaultValue": "no",
-      "metadata": {
-        "Description": "Indicates whether the remote access VPN will be used"
-      }
-    },
-    "dnsZoneResourceId": {
-      "type": "string",
-      "defaultValue": "Define a DNS Zone Resource ID only in case Remote Access VPN usage and DNS Zone(domain) is already exists",
-      "metadata": {
-        "description": "DNS Zone DNS Zone Resource ID"
-      }
-    },
-    "dnsZoneRecordSetName": {
-      "type": "string",
-      "defaultValue": "remote-access-instances",
-      "metadata": {
-        "description": "DNS Zone Record Set name"
-      }
-    },
     "customMetrics": {
       "type": "string",
       "allowedValues": [
@@ -510,7 +485,7 @@
     "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
-    "templateVersion": "20231002",
+    "templateVersion": "20230910",
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
@@ -633,9 +608,9 @@
     "sicKey": "[parameters('sicKey')]",
     "installationType": "vmss",
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
-    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-    "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
-    "azureFunctionSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/azure-func-sami.json', parameters('_artifactsLocationSasToken')))]",
+    "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/',parameters('_artifactsLocation'))]",
+    "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "loadBalacerSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
@@ -690,9 +665,6 @@
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
     },
     "vmssTags": "[if(equals(variables('mgmtIPaddress'), ''), variables('commomTags'), union(variables('commomTags'), variables('uniqueTags')))]",
-    "dnsZoneResourceId": "[parameters('dnsZoneResourceId')]",
-    "dnsZoneRecordSetName": "[parameters('dnsZoneRecordSetName')]",
-    "numberOfRecordSetEntries": "20",
     "customMetrics": "[parameters('customMetrics')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
@@ -724,9 +696,7 @@
     },
     "publicIPPrefixLength": "[variables('IPv4Lengths')[parameters('IPv4Length')]]",
     "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]",
-    "NewNsgReference": {
-      "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
   },
   "resources": [
     {
@@ -813,8 +783,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -850,45 +821,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
-          },
-          "tagsByResource": {
-            "value": "[parameters('tagsByResource')]"
-          }
-        }
-      }
-    },
-    {
-      "condition": "[and(equals(parameters('remoteAccessVpn'), 'yes'),or(contains(parameters('cloudGuardVersion'),'R80.40'),contains(parameters('cloudGuardVersion'),'R81')))]",
-      "name": "azureFunctionSetup",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-06-01",
-      "resourceGroup": "[resourceGroup().name]",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('azureFunctionSetupURL')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "dnsZoneResourceId": {
-            "value": "[variables('dnsZoneResourceId')]"
-          },
-          "dnsZoneRecordSetName": {
-            "value": "[variables('dnsZoneRecordSetName')]"
-          },
-          "numberOfRecordSetEntries": {
-            "value": "[variables('numberOfRecordSetEntries')]"
-          },
-          "vmssResourceGroupName": {
-            "value": "[resourceGroup().name]"
-          },
-          "vmssName": {
-            "value": "[parameters('vmName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"

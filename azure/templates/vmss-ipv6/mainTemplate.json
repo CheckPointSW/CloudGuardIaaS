@@ -32,7 +32,7 @@
         "R81.20 - Pay As You Go (NGTP)",
         "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -313,31 +313,6 @@
       },
       "defaultValue": ""
     },
-    "remoteAccessVpn": {
-      "type": "string",
-      "allowedValues": [
-        "no",
-        "yes"
-      ],
-      "defaultValue": "no",
-      "metadata": {
-        "Description": "Indicates whether the remote access VPN will be used"
-      }
-    },
-    "dnsZoneResourceId": {
-      "type": "string",
-      "defaultValue": "Define a DNS Zone Resource ID only in case Remote Access VPN usage and DNS Zone(domain) is already exists",
-      "metadata": {
-        "description": "DNS Zone DNS Zone Resource ID"
-      }
-    },
-    "dnsZoneRecordSetName": {
-      "type": "string",
-      "defaultValue": "remote-access-instances",
-      "metadata": {
-        "description": "DNS Zone Record Set name"
-      }
-    },
     "customMetrics": {
       "type": "string",
       "allowedValues": [
@@ -382,7 +357,7 @@
     "subnet2Name": "[parameters('Subnet2Name')]",
     "resourceGroup": "[resourceGroup()]",
     "templateName": "vmss-v2",
-    "templateVersion": "20230124",
+    "templateVersion": "20230910",
     "location": "[parameters('location')]",
     "subnet-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "subnet2-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet2Name'))]",
@@ -568,9 +543,7 @@
     "customMetrics": "[parameters('customMetrics')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "NewNsgReference": {
-      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
   },
   "resources": [
     {
@@ -906,45 +879,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
-          },
-          "tagsByResource": {
-            "value": "[parameters('tagsByResource')]"
-          }
-        }
-      }
-    },
-    {
-      "condition": "[and(equals(parameters('remoteAccessVpn'), 'yes'),or(contains(parameters('cloudGuardVersion'),'R80.40'),contains(parameters('cloudGuardVersion'),'R81')))]",
-      "name": "azureFunctionSetup",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-01-01",
-      "resourceGroup": "[resourceGroup().name]",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[variables('azureFunctionSetupURL')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "location": {
-            "value": "[variables('location')]"
-          },
-          "dnsZoneResourceId": {
-            "value": "[variables('dnsZoneResourceId')]"
-          },
-          "dnsZoneRecordSetName": {
-            "value": "[variables('dnsZoneRecordSetName')]"
-          },
-          "numberOfRecordSetEntries": {
-            "value": "[variables('numberOfRecordSetEntries')]"
-          },
-          "vmssResourceGroupName": {
-            "value": "[resourceGroup().name]"
-          },
-          "vmssName": {
-            "value": "[parameters('vmName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
