@@ -333,6 +333,7 @@ Parameters:
     Type: String
     Default: gwlb-ASG-configuration
     MinLength: 1
+    MaxLength: 30
   AdminEmail:
     Description: Notifications about scaling events will be sent to this email address. (optional)
     Type: String

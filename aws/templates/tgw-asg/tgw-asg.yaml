@@ -539,6 +539,7 @@ Parameters:
     Type: String
     Default: TGW-ASG-configuration
     MinLength: 1
+    MaxLength: 30
 Conditions:
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]

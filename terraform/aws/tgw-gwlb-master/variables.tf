@@ -141,6 +141,10 @@ variable "configuration_template" {
   type = string
   description = "A name of a gateway configuration template in the automatic provisioning configuration."
   default = "gwlb-ASG-configuration"
+  validation {
+    condition     = length(var.configuration_template) < 31
+    error_message = "The configuration_template name can not exceed 30 characters"
+  }
 }
 variable "admin_shell" {
   type = string

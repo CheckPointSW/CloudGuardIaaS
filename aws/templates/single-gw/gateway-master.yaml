@@ -383,6 +383,7 @@ Parameters:
     Description: A name of a Security Gateway configuration template in the automatic.
       provisioning configuration.
     Type: String
+    MaxLength: 30
 Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]

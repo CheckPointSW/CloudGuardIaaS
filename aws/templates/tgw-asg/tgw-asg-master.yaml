@@ -585,6 +585,7 @@ Parameters:
     Type: String
     Default: TGW-ASG-configuration
     MinLength: 1
+    MaxLength: 30
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
