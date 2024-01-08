@@ -381,6 +381,7 @@ Parameters:
     Description: A name of a Security Gateway configuration template in the automatic
       provisioning configuration.
     Type: String
+    MaxLength: 30
 Conditions:
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]

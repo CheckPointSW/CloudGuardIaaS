@@ -357,6 +357,7 @@ Parameters:
     Type: String
     Default: ASG-configuration
     MinLength: 1
+    MaxLength: 30
   ELBType:
     Type: String
     Default: none
