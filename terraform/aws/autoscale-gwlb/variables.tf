@@ -63,6 +63,10 @@ variable "management_server" {
 variable "configuration_template" {
   type = string
   description = "Name of the provisioning template in the CME configuration"
+  validation {
+    condition     = length(var.configuration_template) < 31
+    error_message = "The configuration_template name can not exceed 30 characters"
+  }
 }
 
 // --- EC2 Instances Configuration ---
