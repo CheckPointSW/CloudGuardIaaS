@@ -144,7 +144,7 @@ properties:
         diskTypeProperty: diskType
   installationType:
     type: string
-    default: R81.10 Gateway only
+    default: R81.20 Gateway only
     enum:
       - R80.40 Gateway only
       - R80.40 Management only
@@ -162,6 +162,10 @@ properties:
       - R81.20 Management only
       - R81.20 Manual Configuration
       - R81.20 Gateway and Management (Standalone)
+  maintenanceMode:
+    type: string
+    pattern: ^([a-z0-9A-Z.]{12,300}|)$
+    default: ''
   allowUploadDownload:
     type: boolean
     default: True
@@ -210,7 +214,7 @@ properties:
       - 7
     minimum: 0
     maximum: 7
-    default: 0
+    default: 1 
   additionalNetwork1:
     type: string
     x-googleProperty:

@@ -18,12 +18,12 @@ VERSIONS = {
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20230319'
+TEMPLATE_VERSION = '20231221'
 
 startup_script = '''
 #cloud-config
 runcmd:
-  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\"" "smart1CloudToken=\\"{smart1CloudToken}\\"" "name=\\"{name}\\"" "zone=\\"{zoneConfig}\\"" "region=\\"{region}\\""'
+  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\"" "smart1CloudToken=\\"{smart1CloudToken}\\"" "name=\\"{name}\\"" "zone=\\"{zoneConfig}\\"" "region=\\"{region}\\"" "osVersion=\\"{osVersion}\\"" "MaintenanceModePassword=\\"{maintenanceMode}\\""'
 '''
 
 
@@ -101,7 +101,7 @@ def create_instance_template(context,
                              name,
                              nics,
                              depends_on=None,
-                             gw_version=VERSIONS['R81.10-GW']):
+                             gw_version=VERSIONS['R81.20-GW']):
     if 'gw' in gw_version:
         license_name = "{}-{}".format(LICENSE, LICENCE_TYPE)
     else:
@@ -203,7 +203,16 @@ def create_instance_template(context,
                 'value': context.properties['instanceSSHKey']
             }
         )
-    return instance_template
+    passwd = ''
+    if context.properties['generatePassword']:
+        passwd = password.GeneratePassword(12, False)
+        metadata['items'].append(
+            {
+                'key': 'adminPasswordSourceMetadata',
+                'value': passwd
+            }
+        )
+    return instance_template, passwd
 
 
 def GenerateAutscaledGroup(context, name,
@@ -302,12 +311,16 @@ def generate_config(context):
     prop['gatewayExternalIP'] = (prop['mgmtNIC'] ==
                                  'Ephemeral Public IP (eth0)')
     version_chosen = prop['autoscalingVersion'].split(' ')[0] + "-GW"
+    prop['osVersion'] = prop['autoscalingVersion'].split(' ')[0].replace(
+        ".", "")
     nics = create_nics(context)
-    gw_template = create_instance_template(context,
-                                           prop['deployment'],
-                                           nics,
-                                           depends_on=prop['gw_dependencies'],
-                                           gw_version=VERSIONS[version_chosen])
+    gw_template, passwd = create_instance_template(context,
+                                                   prop['deployment'],
+                                                   nics,
+                                                   depends_on=prop[
+                                                       'gw_dependencies'],
+                                                   gw_version=VERSIONS[
+                                                       version_chosen])
     prop['resources'] += [gw_template]
     prop['igm_dependencies'] = [gw_template['name']]
     igm = GenerateAutscaledGroup(context,
@@ -360,5 +373,9 @@ def generate_config(context):
             'name': 'maxInstancesInt',
             'value': str(int(prop['maxInstances']))
         },
+        {
+            'name': 'password',
+            'value': passwd
+        }
     ]
     return common.MakeResource(prop['resources'], prop['outputs'])
