@@ -121,6 +121,10 @@ variable "ssh-public-key" {
 variable "bgp-asn" {
   type    = string
   default = "64512"
+  validation {
+    condition = tonumber(var.bgp-asn) >= 64512 && tonumber(var.bgp-asn) <= 65534 && !contains([65515, 65520], tonumber(var.bgp-asn))
+    error_message = "Only numbers between 64512 to 65534 are allowed excluding 65515, 65520."
+  }
 }
 
 variable "custom-metrics" {
