@@ -41,7 +41,7 @@ locals {
 
 data "http" "image-versions" {
   method = "GET"
-  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSKUs/checkpoint${strcontains(var.cloudguard-version, "NGTX") ? "-ngtx" : ""}?api-version=2020-05-01"
+  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSKUs/checkpoint${var.license-type == "Full Package (NGTX + S1C)" ? "-ngtx" : ""}?api-version=2020-05-01"
   request_headers = {
     Accept = "application/json"
     "Authorization" = "Bearer ${local.access_token}"
@@ -49,7 +49,7 @@ data "http" "image-versions" {
 }
 
 locals {
-      image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == lower(substr(replace(var.cloudguard-version, ".", ""), 1, 4))])
+      image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == substr(lower(var.os-version), 1, 4)])
       routing_intent-internet-policy = {
         "name": "InternetTraffic",
         "destinations": [
@@ -73,7 +73,7 @@ locals {
 //********************** Marketplace Terms & Solution Registration **************************//
 data "http" "accept-marketplace-terms-existing-agreement" {
   method = "GET"
-  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.MarketplaceOrdering/agreements/checkpoint/offers/azure-vwan/plans/vwan-app?api-version=2021-01-01"
+  url = "https://management.azure.com/subscriptions/${var.subscription_id}/providers/Microsoft.MarketplaceOrdering/agreements/checkpoint/offers/cp-vwan-managed-app/plans/vwan-app?api-version=2021-01-01"
   request_headers = {
     Accept = "application/json"
     "Authorization" = "Bearer ${local.access_token}"
@@ -81,9 +81,9 @@ data "http" "accept-marketplace-terms-existing-agreement" {
 }
 
 resource "azurerm_marketplace_agreement" "accept-marketplace-terms" {
-  count = can(jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).id) && jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.state == "Active" ? 0 : 1
+  count = can(jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).id) ? (jsondecode(data.http.accept-marketplace-terms-existing-agreement.response_body).properties.state == "Active" ? 0 : 1) : 1
   publisher = "checkpoint"
-  offer     = "azure-vwan"
+  offer     = "cp-vwan-managed-app"
   plan      = "vwan-app"
 }
 
@@ -113,9 +113,9 @@ resource "azurerm_managed_application" "nva" {
 
   plan {
     name      = "vwan-app"
-    product   = "azure-vwan"
+    product   = "cp-vwan-managed-app"
     publisher = "checkpoint"
-    version   = "1.0.7"
+    version   = "1.0.8"
   }
   parameter_values = jsonencode({
     location = {
@@ -124,8 +124,11 @@ resource "azurerm_managed_application" "nva" {
     hubId = {
       value = azurerm_virtual_hub.vwan-hub.id
     },
-    cloudGuardVersion = {
-      value = var.cloudguard-version
+    osVersion = {
+      value = var.os-version
+    },
+    LicenseType = {
+      value = var.license-type
     },
     imageVersion = {
       value = element(local.image_versions, length(local.image_versions) -1)

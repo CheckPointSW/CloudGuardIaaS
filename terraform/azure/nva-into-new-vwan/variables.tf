@@ -71,12 +71,21 @@ variable "nva-name" {
   default = "tf-vwan-nva"
 }
 
-variable "cloudguard-version" {
-  type    = string
-  default = "R81.10 - Pay As You Go (NGTP)"
+variable "os-version" {
+  description = "GAIA OS version"
+  type = string
   validation {
-    condition     = contains(["R81.10 - Pay As You Go (NGTP)", "R81.20 - Pay As You Go (NGTP)", "R81.10 - Pay As You Go (NGTX)", "R81.20 - Pay As You Go (NGTX)"], var.cloudguard-version)
-    error_message = "Valid values for CloudGuard version are 'R81.10 - Pay As You Go (NGTP)','R81.20 - Pay As You Go (NGTP)','R81.10 - Pay As You Go (NGTX)' and 'R81.20 - Pay As You Go (NGTX)'"
+    condition = contains(["R8110", "R8120"], var.os-version)
+    error_message = "Allowed values for os-version are 'R8110', 'R8120'"
+  }
+}
+
+variable "license-type" {
+  type    = string
+  default = "Security Enforcement (NGTP)"
+  validation {
+    condition     = contains(["Security Enforcement (NGTP)", "Full Package (NGTX + S1C)"], var.license-type)
+    error_message = "Allowed values for License Type are 'Security Enforcement (NGTP)','Full Package (NGTX + S1C)'"
   }
 }
 
