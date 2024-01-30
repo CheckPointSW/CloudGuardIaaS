@@ -50,3 +50,14 @@ variable "cross_zone_load_balancing"{
  default = false
  description = "Select 'true' to enable cross-az load balancing. NOTE! this may cause a spike in cross-az charges."
 }
+
+variable "health_check_port" {
+  description = "The health check port"
+  type = number
+  default = null
+}
+variable "health_check_protocol" {
+  description = "The health check protocol"
+  type = string
+  default = null
+}

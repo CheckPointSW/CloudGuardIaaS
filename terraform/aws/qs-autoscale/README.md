@@ -224,6 +224,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20231012         | Update AWS Terraform provider version to 5.20.1                                |
 | 20231022         | Fixed template to populate x-chkp-tags correctly                               |
 | 20231127         | Add support for parameter admin shell                                          |
+| 20240130         | Added logic to use hc tcp 8117 when gw version below R81 for NLB               |
 
 ## License
 
