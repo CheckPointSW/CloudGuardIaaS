@@ -211,20 +211,20 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                                    |
-|------------------|--------------------------------------------------------------------------------|
-| 20210309         | First release of Check Point Quick Start Auto Scaling Terraform module for AWS |
-| 20210329         | Stability fixes                                                                |
-| 20220606         | New instance type support                                                      |
-| 20221123         | R81.20 version support                                                         |
-| 20221226         | Support ASG Launch Template instead of Launch Configuration                    |
-| 20230806         | Add support for c6in instance type                                             | 
-| 20230829         | Change default Check Point version to R81.20                                   |
-| 20230923         | Add support for C5d instance type                                              |
-| 20231012         | Update AWS Terraform provider version to 5.20.1                                |
-| 20231022         | Fixed template to populate x-chkp-tags correctly                               |
-| 20231127         | Add support for parameter admin shell                                          |
-| 20240130         | Added logic to use hc tcp 8117 when gw version below R81 for NLB               |
+| Template Version | Description                                                                                                                         |
+|------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 20210309         | First release of Check Point Quick Start Auto Scaling Terraform module for AWS                                                      |
+| 20210329         | Stability fixes                                                                                                                     |
+| 20220606         | New instance type support                                                                                                           |
+| 20221123         | R81.20 version support                                                                                                              |
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                                                                         |
+| 20230806         | Add support for c6in instance type                                                                                                  | 
+| 20230829         | Change default Check Point version to R81.20                                                                                        |
+| 20230923         | Add support for C5d instance type                                                                                                   |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                                                                     |
+| 20231022         | Fixed template to populate x-chkp-tags correctly                                                                                    |
+| 20231127         | Add support for parameter admin shell                                                                                               |
+| 20240130         | Network Load Balancer Health Check configuration change for higher than R81 version. New Health Check Port is 8117 and Protocol TCP |
 
 ## License
 
