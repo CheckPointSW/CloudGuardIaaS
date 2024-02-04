@@ -103,6 +103,7 @@ module "common_gateway_instance" {
   iam_instance_profile_id = (local.enable_cloudwatch_policy == 1 ? aws_iam_instance_profile.gateway_instance_profile[0].id : "")
   ami_id = module.amis.ami_id
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
   gateway_TokenKey = var.gateway_TokenKey

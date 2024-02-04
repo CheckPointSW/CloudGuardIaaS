@@ -62,6 +62,7 @@ module "tgw-gwlb"{
   maximum_group_size = var.maximum_group_size
   gateway_version = var.gateway_version
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   gateway_SICKey = var.gateway_SICKey
   gateways_provision_address_type = var.gateways_provision_address_type
   allocate_public_IP = var.allocate_public_IP
@@ -73,6 +74,7 @@ module "tgw-gwlb"{
   management_instance_type = var.management_instance_type
   management_version = var.management_version
   management_password_hash = var.management_password_hash
+  management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash
   gateways_policy = var.gateways_policy
   gateway_management = var.gateway_management
   admin_cidr = var.admin_cidr

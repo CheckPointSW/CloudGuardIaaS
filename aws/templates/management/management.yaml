@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server (20230926)
+Description: Deploys a Check Point Management Server (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -33,12 +33,13 @@ Metadata:
           - ManagementVersion
           - Shell
           - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
       - Label:
           default: Security Management Server Settings
         Parameters:
           - ManagementHostname
-          - PrimaryManagement
-          - ManagementSICKey
+          - ManagementInstallationType
+          - SICKey
           - AllowUploadDownload
           - AdminCIDR
           - GatewayManagement
@@ -81,11 +82,13 @@ Metadata:
         default: Admin shell
       ManagementPasswordHash:
         default: Password hash
+      ManagementMaintenancePasswordHash:
+        default:  Management Maintenance Password hash
       ManagementHostname:
         default: Management hostname
-      PrimaryManagement:
-        default: Primary management
-      ManagementSICKey:
+      ManagementInstallationType:
+        default: Management installation type
+      SICKey:
         default: SIC key
       AllowUploadDownload:
         default: Allow upload & download
@@ -320,22 +323,29 @@ Parameters:
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   ManagementHostname:
     Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: mgmt-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
     ConstraintDescription: A valid hostname label or an empty string.
-  PrimaryManagement:
-    Description: Determines if this is the primary Management Server or not.
+  ManagementInstallationType:
+    Description: Determines the Management Server installation type.
     Type: String
-    Default: true
+    Default: Primary management
     AllowedValues:
-      - true
-      - false
-  ManagementSICKey:
+      - Primary management
+      - Secondary management
+      - Log Server
+  SICKey:
     Description: >-
-      Mandatory only if deploying a secondary Management Server, the Secure Internal
+      Mandatory only if deploying a secondary Management Server or Log Server, the Secure Internal
       Communication key creates trusted connections between Check Point components.
       Choose a random string consisting of at least 8 alphanumeric characters.
     Type: String
@@ -394,7 +404,7 @@ Conditions:
     - !Equals [!Ref ManagementPermissions, Create with read-write permissions]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
-  NoSIC: !Equals [!Ref ManagementSICKey, '']
+  NoSIC: !Equals [!Ref SICKey, '']
   PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
 Resources:
   AMI:
@@ -519,14 +529,15 @@ Resources:
             - 'runcmd:'
             - '  - |'
             - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; primary_mgmt=${PrimaryManagement} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
             - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref ManagementSICKey, ')"']]]
+            - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
             - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
+            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-            - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
   PublicAddress:
     Type: AWS::EC2::EIP
     Condition: EIP

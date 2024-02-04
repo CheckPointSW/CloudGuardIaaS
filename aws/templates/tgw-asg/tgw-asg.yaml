@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (20230830)
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -27,6 +27,7 @@ Metadata:
           - GatewaysMaxSize
           - GatewayVersion
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
           - GatewaySICKey
           - CloudWatch
           - ASN
@@ -38,6 +39,7 @@ Metadata:
           - ManagementInstanceType
           - ManagementVersion
           - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
           - ManagementPermissions
           - ManagementPredefinedRole
           - GatewaysBlades
@@ -81,6 +83,8 @@ Metadata:
         default: Version & license
       GatewayPasswordHash:
         default: Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       GatewaySICKey:
         default: SIC key
       CloudWatch:
@@ -97,6 +101,8 @@ Metadata:
         default: Version & license
       ManagementPasswordHash:
         default: Password hash
+      ManagementMaintenancePasswordHash:
+        default: Management Maintenance Password hash
       ManagementPermissions:
         default: IAM role
       ManagementPredefinedRole:
@@ -322,6 +328,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters.
     Type: String
@@ -486,6 +498,12 @@ Parameters:
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   ManagementPermissions:
     Description: IAM role to attach to the instance profile.
     Type: String
@@ -565,6 +583,7 @@ Resources:
         ManagementPredefinedRole: !Ref ManagementPredefinedRole
         ManagementVersion: !Ref ManagementVersion
         ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
         AllowUploadDownload: !Ref AllowUploadDownload
         AdminCIDR: !Ref AdminCIDR
         GatewayManagement: !Ref GatewayManagement
@@ -616,6 +635,7 @@ Resources:
         AdminEmail: !Ref AdminEmail
         GatewayVersion: !Ref GatewayVersion
         GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
         GatewaySICKey: !Ref GatewaySICKey
         AllowUploadDownload: !Ref AllowUploadDownload
         CloudWatch: !Ref CloudWatch

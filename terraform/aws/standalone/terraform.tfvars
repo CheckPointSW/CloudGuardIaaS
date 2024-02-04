@@ -24,6 +24,7 @@ instance_tags = {
 standalone_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 standalone_password_hash = ""
+standalone_maintenance_mode_password_hash = ""
 
 // --- Advanced Settings ---
 resources_tag_name = "tag-name"

@@ -21,6 +21,10 @@ locals {
   regex_valid_key_name = "[\\S\\s]+[\\S]+"
   // will fail if var.key_name is invalid
   regex_key_name_result=regex(local.regex_valid_key_name, var.key_name) == var.key_name ? 0 : "Variable [key_name] must be a none empty string"
+  regex_valid_gateway_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
+  // Will fail if var.gateway_password_hash is invalid
+  regex_gateway_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_password_hash) == var.gateway_password_hash ? 0 : "Variable [gateway_password_hash] must be a valid password hash"
+  regex_gateway_maintenance_mode_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_maintenance_mode_password_hash) == var.gateway_maintenance_mode_password_hash ? 0 : "Variable [gateway_maintenance_mode_password_hash] must be a valid password hash"
 
   regex_valid_sic_key = "^[a-zA-Z0-9]{8,}$"
   // Will fail if var.gateway_SICKey is invalid
@@ -44,6 +48,7 @@ locals {
   version_split = element(split("-", var.gateway_version), 0)
   gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
   gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
+  maintenance_mode_password_hash_base64 = base64encode(var.gateway_maintenance_mode_password_hash)
   gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
 }
 resource "null_resource" "tags_as_list_of_maps" {

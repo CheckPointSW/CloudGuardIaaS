@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20230418)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -43,6 +43,7 @@ Metadata:
           - GatewaysMaxSize
           - GatewayVersion
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
           - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
@@ -54,6 +55,7 @@ Metadata:
           - ManagementInstanceType
           - ManagementVersion
           - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
           - GatewaysPolicy
           - AdminCIDR
           - GatewayManagement
@@ -115,6 +117,8 @@ Metadata:
         default: Gateways version & license
       GatewayPasswordHash:
         default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       GatewaySICKey:
         default: Gateways SIC key
       ControlGatewayOverPrivateOrPublicAddress:
@@ -131,6 +135,8 @@ Metadata:
         default: Management version & license
       ManagementPasswordHash:
         default: Management password hash
+      ManagementMaintenancePasswordHash:
+        default: Management Maintenance Password hash
       GatewaysPolicy:
         default: Security Policy
       AdminCIDR:
@@ -423,6 +429,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters.
     Type: String
@@ -590,6 +602,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaysPolicy:
     Description: The name of the Security Policy package to be installed on the gateways in the Security Gateways Auto Scaling group.
     Type: String
@@ -661,6 +679,7 @@ Resources:
         GatewaysMaxSize: !Ref GatewaysMaxSize
         GatewayVersion: !Ref GatewayVersion
         GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
         GatewaySICKey: !Ref GatewaySICKey
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
@@ -669,6 +688,7 @@ Resources:
         ManagementInstanceType: !Ref ManagementInstanceType
         ManagementVersion: !Ref ManagementVersion
         ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
         GatewaysPolicy: !Ref GatewaysPolicy
         AdminCIDR: !Ref AdminCIDR
         GatewayManagement: !Ref GatewayManagement

@@ -35,6 +35,7 @@ gateways_min_group_size = 2
 gateways_max_group_size = 8
 gateway_version = "R81.20-BYOL"
 gateway_password_hash = ""
+gateway_maintenance_mode_password_hash = "" # For R81.10 and below the gateway_password_hash is used also as maintenance-mode password.
 gateway_SICKey = "12345678"
 enable_cloudwatch = true
 
@@ -43,6 +44,7 @@ management_deploy = true
 management_instance_type = "m5.xlarge"
 management_version = "R81.20-BYOL"
 management_password_hash = ""
+management_maintenance_mode_password_hash = "" # For R81.10 and below the management_password_hash is used also as maintenance-mode password.
 gateways_policy = "Standard"
 gateways_blades = true
 admin_cidr = "0.0.0.0/0"

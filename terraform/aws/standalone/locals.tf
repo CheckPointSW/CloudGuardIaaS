@@ -30,9 +30,12 @@ locals {
   regex_valid_standalone_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
   // Will fail if var.standalone_password_hash is invalid
   regex_standalone_password_hash = regex(local.regex_valid_standalone_password_hash, var.standalone_password_hash) == var.standalone_password_hash ? 0 : "Variable [standalone_password_hash] must be a valid password hash"
+  regex_maintenance_mode_password_hash = regex(local.regex_valid_standalone_password_hash, var.standalone_maintenance_mode_password_hash) == var.standalone_maintenance_mode_password_hash ? 0 : "Variable [standalone_maintenance_mode_password_hash] must be a valid password hash"
+
   //Splits the version and licence and returns the os version
   version_split = element(split("-", var.standalone_version), 0)
 
   standalone_bootstrap_script64 = base64encode(var.standalone_bootstrap_script)
   standalone_password_hash_base64 = base64encode(var.standalone_password_hash)
+  maintenance_mode_password_hash_base64 = base64encode(var.standalone_maintenance_mode_password_hash)
 }

@@ -62,6 +62,7 @@ module "autoscale" {
   gateway_version = var.gateway_version
   admin_shell = var.admin_shell
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   gateway_SICKey = var.gateway_SICKey
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
@@ -91,6 +92,7 @@ module "management" {
   management_version = var.management_version
   admin_shell = var.admin_shell
   management_password_hash = var.management_password_hash
+  management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash
   allow_upload_download = var.allow_upload_download
   admin_cidr = var.admin_cidr
   gateway_addresses = var.gateways_addresses

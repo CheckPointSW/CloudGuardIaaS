@@ -62,6 +62,7 @@ resource "aws_launch_template" "asg_launch_template" {
   user_data = base64encode(templatefile("${path.module}/asg_userdata.yaml", {
     // script's arguments
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64
     EnableCloudWatch = var.enable_cloudwatch,
     EnableInstanceConnect = var.enable_instance_connect,
     Shell = var.admin_shell,

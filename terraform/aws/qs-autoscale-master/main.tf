@@ -40,12 +40,14 @@ module "launch_qs_autoscale" {
   gateways_max_group_size = var.gateways_max_group_size
   gateway_version = var.gateway_version
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   gateway_SICKey = var.gateway_SICKey
   enable_cloudwatch = var.enable_cloudwatch
   management_deploy = var.management_deploy
   management_instance_type = var.management_instance_type
   management_version = var.management_version
   management_password_hash = var.gateway_password_hash
+  management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash
   gateways_policy = var.gateways_policy
   gateways_blades = var.gateways_blades
   admin_cidr = var.admin_cidr

@@ -145,6 +145,7 @@ resource "aws_instance" "mds-instance" {
     // script's arguments
     Hostname = var.mds_hostname,
     PasswordHash = local.mds_password_hash_base64
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp
     NTPSecondary = var.secondary_ntp
