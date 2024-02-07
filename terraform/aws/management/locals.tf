@@ -67,4 +67,10 @@ locals {
   manage_over_the_internet = var.gateway_management == "Over the internet" ? true : false
   manage_over_internet_and_EIP = var.allocate_and_associate_eip && local.manage_over_the_internet ? true : false
   pub_mgmt = local.manage_over_internet_and_EIP ? true : false
+
+  management_installation_type_allowed_values = [
+    "Primary management",
+    "Secondary management",
+    "Log Server"]
+  validate_management_installation_type = index(local.management_installation_type_allowed_values, var.management_installation_type)
 }
