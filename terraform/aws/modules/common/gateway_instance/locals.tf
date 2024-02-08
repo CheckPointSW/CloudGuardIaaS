@@ -21,6 +21,12 @@ locals {
   // Will fail if var.gateway_hostname is invalid
   regex_gateway_hostname = regex(local.regex_valid_gateway_hostname, var.gateway_hostname) == var.gateway_hostname ? 0 : "Variable [lambda_scheduled_interval] must be a valid hostname label or an empty string"
 
+  regex_valid_gateway_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
+  // Will fail if var.gateway_password_hash is invalid
+  regex_gateway_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_password_hash) == var.gateway_password_hash ? 0 : "Variable [gateway_password_hash] must be a valid password hash"
+  regex_gateway_maintenance_mode_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_maintenance_mode_password_hash) == var.gateway_maintenance_mode_password_hash ? 0 : "Variable [gateway_maintenance_mode_password_hash] must be a valid password hash"
+
+
   volume_encryption_condition = var.volume_encryption != "" ? true : false
 
   //Splits the version and licence and returns the os version
@@ -29,4 +35,5 @@ locals {
   gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
   gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
   gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
+  gateway_maintenance_mode_password_hash_base64 = base64encode(var.gateway_maintenance_mode_password_hash)
 }

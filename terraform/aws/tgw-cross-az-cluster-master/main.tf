@@ -58,6 +58,7 @@ module "tgw_cluster_into_vpc" {
   admin_shell = var.admin_shell
   gateway_SICKey = var.gateway_SICKey
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   memberAToken = var.memberAToken
   memberBToken = var.memberBToken
   resources_tag_name = var.resources_tag_name

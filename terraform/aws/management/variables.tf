@@ -121,6 +121,11 @@ variable "management_password_hash" {
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
   default = ""
 }
+variable "management_maintenance_mode_password_hash" {
+  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
+  type = string
+  default = ""
+}
 
 // --- Security Management Server Settings ---
 variable "management_hostname" {
@@ -128,10 +133,10 @@ variable "management_hostname" {
   description = "(Optional) Security Management Server prompt hostname"
   default = ""
 }
-variable "is_primary_management" {
-  type = bool
-  description = "Determines if this is the primary management server or not"
-  default = true
+variable "management_installation_type" {
+  type = string
+  description = "Determines the Management Server installation type: Primary management, Secondary management, Log Server"
+  default = "Primary management"
 }
 variable "SICKey" {
   type = string

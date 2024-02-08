@@ -26,8 +26,10 @@ locals {
   // Will fail if var.gateway_SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.gateway_SICKey) == var.gateway_SICKey ? 0 : "Variable [gateway_SICKey] must be at least 8 alphanumeric characters"
 
-
-
+  regex_valid_gateway_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
+  // Will fail if var.gateway_password_hash is invalid
+  regex_gateway_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_password_hash) == var.gateway_password_hash ? 0 : "Variable [gateway_password_hash] must be a valid password hash"
+  regex_gateway_maintenance_mode_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_maintenance_mode_password_hash) == var.gateway_maintenance_mode_password_hash ? 0 : "Variable [gateway_maintenance_mode_password_hash] must be a valid password hash"
 
   regex_valid_cidr_range = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))?$"
 
@@ -39,7 +41,7 @@ locals {
   gateway_bootstrap_script64 = base64encode(var.gateway_bootstrap_script)
   gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
   gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
-
+  maintenance_mode_password_hash_base64 = base64encode(var.gateway_maintenance_mode_password_hash)
   is_gwlb_ami = length(regexall(".*R80.40.*", var.gateway_version)) > 0
 
 }

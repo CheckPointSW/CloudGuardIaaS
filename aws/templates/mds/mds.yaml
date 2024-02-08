@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server (20230926)
+Description: Deploys a Check Point Multi-Domain Server (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -32,6 +32,7 @@ Metadata:
           - MDSVersion
           - Shell
           - MDSPasswordHash
+          - MDSMaintenancePasswordHash
       - Label:
           default: Multi-Domain Server Settings
         Parameters:
@@ -77,6 +78,8 @@ Metadata:
         default: Admin shell
       MDSPasswordHash:
         default: Password hash
+      MDSMaintenancePasswordHash:
+        default: MDS Maintenance Password hash
       MDSHostname:
         default: MDS hostname
       MDSInstallationType:
@@ -303,6 +306,12 @@ Parameters:
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
+  MDSMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   MDSHostname:
     Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
@@ -492,5 +501,6 @@ Resources:
             - !If [PrimaryMDS, '    sic=notused', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref MDSSICKey, ')"']]]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref MDSBootstrapScript, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
+            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
-            - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20221123\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'

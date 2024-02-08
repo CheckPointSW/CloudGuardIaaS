@@ -113,6 +113,11 @@ variable "standalone_password_hash" {
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
   default = ""
 }
+variable "standalone_maintenance_mode_password_hash" {
+  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
+  type = string
+  default = ""
+}
 
 // --- Advanced Settings ---
 variable "resources_tag_name" {

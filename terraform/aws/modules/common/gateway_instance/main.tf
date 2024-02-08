@@ -34,6 +34,7 @@ resource "aws_instance" "gateway_instance" {
   user_data = templatefile("${path.module}/gateway_userdata.yaml", {
     // script's arguments
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.gateway_maintenance_mode_password_hash_base64,
     Shell = var.admin_shell,
     SICKey = local.gateway_SICkey_base64,
     TokenKey = var.gateway_TokenKey,

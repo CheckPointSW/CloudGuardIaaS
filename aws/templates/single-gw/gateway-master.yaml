@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into a new VPC (20231113)
+Description: Deploys a Check Point Security Gateway into a new VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,7 @@ Metadata:
           - Shell
           - GatewaySICKey
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
       - Label:
           default: Quick connect to Smart-1 Cloud (Recommended)
         Parameters:
@@ -86,6 +87,8 @@ Metadata:
         default: Smart-1 Cloud Token
       GatewayPasswordHash:
         default: Gateway Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
@@ -328,6 +331,12 @@ Parameters:
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   ResourcesTagName:
     Description: The name tag of the resources. (optional)
     Type: String
@@ -439,6 +448,7 @@ Resources:
         GatewaySICKey: !Ref GatewaySICKey
         GatewayToken: !Ref GatewayToken
         GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
         ResourcesTagName: !Ref ResourcesTagName
         GatewayHostname: !Ref GatewayHostname
         AllowUploadDownload: !Ref AllowUploadDownload

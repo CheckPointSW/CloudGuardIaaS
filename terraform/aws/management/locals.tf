@@ -51,7 +51,7 @@ locals {
   regex_valid_management_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
   // Will fail if var.management_password_hash is invalid
   regex_management_password_hash = regex(local.regex_valid_management_password_hash, var.management_password_hash) == var.management_password_hash ? 0 : "Variable [management_password_hash] must be a valid password hash"
-
+  regex_maintenance_mode_password_hash = regex(local.regex_valid_management_password_hash, var.management_maintenance_mode_password_hash) == var.management_maintenance_mode_password_hash ? 0 : "Variable [management_maintenance_mode_password_hash] must be a valid password hash"
   regex_valid_sic_key = "(|[a-zA-Z0-9]{8,})"
   // Will fail if var.SICKey is invalid
   regex_sic_result = regex(local.regex_valid_sic_key, var.SICKey) == var.SICKey ? 0 : "Variable [SICKey] must be at least 8 alphanumeric characters"
@@ -62,8 +62,15 @@ locals {
   management_bootstrap_script64 = base64encode(var.management_bootstrap_script)
   management_SICkey_base64=base64encode(var.SICKey)
   management_password_hash_base64=base64encode(var.management_password_hash)
+  maintenance_mode_password_hash_base64=base64encode(var.management_maintenance_mode_password_hash)
 
   manage_over_the_internet = var.gateway_management == "Over the internet" ? true : false
   manage_over_internet_and_EIP = var.allocate_and_associate_eip && local.manage_over_the_internet ? true : false
   pub_mgmt = local.manage_over_internet_and_EIP ? true : false
+
+  management_installation_type_allowed_values = [
+    "Primary management",
+    "Secondary management",
+    "Log Server"]
+  validate_management_installation_type = index(local.management_installation_type_allowed_values, var.management_installation_type)
 }

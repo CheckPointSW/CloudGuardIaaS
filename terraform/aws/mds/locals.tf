@@ -54,6 +54,7 @@ locals {
   regex_valid_mds_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
   // Will fail if var.mds_password_hash is invalid
   regex_mds_password_hash = regex(local.regex_valid_mds_password_hash, var.mds_password_hash) == var.mds_password_hash ? 0 : "Variable [mds_password_hash] must be a valid password hash"
+  regex_maintenance_mode_password_hash = regex(local.regex_valid_mds_password_hash, var.mds_maintenance_mode_password_hash) == var.mds_maintenance_mode_password_hash ? 0 : "Variable [mds_maintenance_mode_password_hash] must be a valid password hash"
 
   regex_valid_sic_key = "(|[a-zA-Z0-9]{8,})"
   // Will fail if var.mds_SICKey is invalid
@@ -64,4 +65,5 @@ locals {
   mds_bootstrap_script64 = base64encode(var.mds_bootstrap_script)
   mds_SICkey_base64 = base64encode(var.mds_SICKey)
   mds_password_hash_base64 =base64encode(var.mds_password_hash)
+  maintenance_mode_password_hash_base64 = base64encode(var.mds_maintenance_mode_password_hash)
 }

@@ -27,10 +27,10 @@ sts_roles = []
 management_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 management_password_hash = ""
-
+management_maintenance_mode_password_hash = "" # For R81.10 and below the management_password_hash is used also as maintenance-mode password.
 // --- Security Management Server Settings ---
 management_hostname = "mgmt-tf"
-is_primary_management = "true"
+management_installation_type = "Primary management"
 SICKey = ""
 allow_upload_download = "true"
 gateway_management = "Locally managed"

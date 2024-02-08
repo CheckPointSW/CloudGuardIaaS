@@ -135,6 +135,7 @@ resource "aws_instance" "member-a-instance" {
     // script's arguments
     Hostname = var.gateway_hostname,
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64
     AllowUploadDownload = var.allow_upload_download,
     EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
@@ -194,6 +195,7 @@ resource "aws_instance" "member-b-instance" {
     // script's arguments
     Hostname = var.gateway_hostname,
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64
     AllowUploadDownload = var.allow_upload_download,
     EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,

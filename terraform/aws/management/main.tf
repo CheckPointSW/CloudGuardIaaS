@@ -154,12 +154,13 @@ resource "aws_instance" "management-instance" {
     // script's arguments
     Hostname = var.management_hostname,
     PasswordHash = local.management_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp
     NTPSecondary = var.secondary_ntp
     Shell = var.admin_shell,
     AdminSubnet = var.admin_cidr
-    IsPrimary = var.is_primary_management
+    ManagementInstallationType = var.management_installation_type
     SICKey = local.management_SICkey_base64,
     OsVersion = local.version_split
     EnableInstanceConnect = var.enable_instance_connect

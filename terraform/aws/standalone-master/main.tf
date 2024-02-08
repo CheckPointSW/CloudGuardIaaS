@@ -50,6 +50,7 @@ module "launch_standalone_into_vpc" {
   standalone_version = var.standalone_version
   admin_shell = var.admin_shell
   standalone_password_hash = var.standalone_password_hash
+  standalone_maintenance_mode_password_hash = var.standalone_maintenance_mode_password_hash
   standalone_hostname = var.standalone_hostname
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch

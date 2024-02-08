@@ -40,6 +40,7 @@ locals {
   regex_valid_gateway_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
   // Will fail if var.gateway_password_hash is invalid
   regex_gateway_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_password_hash) == var.gateway_password_hash ? 0 : "Variable [gateway_password_hash] must be a valid password hash"
+  regex_maintenance_mode_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_maintenance_mode_password_hash) == var.gateway_maintenance_mode_password_hash ? 0 : "Variable [gateway_maintenance_mode_password_hash] must be a valid password hash"
 
   regex_valid_primary_ntp = "^[\\.a-zA-Z0-9\\-]*$"
   // Will fail if var.primary_ntp is invalid

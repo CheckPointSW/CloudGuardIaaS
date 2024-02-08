@@ -21,6 +21,7 @@ module "autoscale" {
   maximum_group_size = var.gateways_max_group_size
   gateway_version = var.gateway_version
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   gateway_SICKey = var.gateway_SICKey
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
@@ -52,6 +53,7 @@ module "management" {
   predefined_role = var.management_predefined_role
   management_version = var.management_version
   management_password_hash = var.management_password_hash
+  management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash
   allow_upload_download = var.allow_upload_download
   admin_cidr = var.admin_cidr
   gateway_addresses = var.gateways_addresses
