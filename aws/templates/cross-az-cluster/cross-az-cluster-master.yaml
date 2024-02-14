@@ -459,6 +459,19 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member A portal.
     Value: !GetAtt ClusterStack.Outputs.MemberAURL
+  MemberAExternalInterface:
+    Condition: AllocateAddress
+    Description: The external interface of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAExternalInterface
+  MemberAPrivateExternalAddress:
+    Description: The primary external private address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateExternalAddress
+  MemberAPrivateAliasAddress:
+    Description: The secondary external private IP address of Member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateAliasAddress
+  MemberAPrivateInternalAddress:
+    Description: The private Internal address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateInternalAddress
   MemberBPublicAddress:
     Condition: AllocateAddress
     Description: The public address of member B.
@@ -471,6 +484,15 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !GetAtt ClusterStack.Outputs.MemberBURL
+  MemberBPrivateExternalAddress:
+    Description: The primary external private address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateExternalAddress
+  MemberBPrivateAliasAddress:
+    Description: The secondary external private IP address of Member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateAliasAddress
+  MemberBPrivateInternalAddress:
+    Description: The private Internal address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateInternalAddress
 Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
