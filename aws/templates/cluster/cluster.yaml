@@ -656,6 +656,16 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member A portal.
     Value: !Join ['', ['https://', !Ref MemberAPublicAddress]]
+  MemberAExternalInterface:
+    Condition: AllocateAddress
+    Description: The external interface of member A.
+    Value: !Ref MemberAExternalInterface
+  MemberAPrivateExternalAddress:
+    Description: The private external address of member A.
+    Value: !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress
+  MemberAPrivateInternalAddress:
+    Description: The private internal address of member A.
+    Value: !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress
   MemberBPublicAddress:
     Condition: AllocateAddress
     Description: The public address of member B.
@@ -668,6 +678,18 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !Join ['', ['https://', !Ref MemberBPublicAddress]]
+  MemberBPrivateExternalAddress:
+    Description: The private external address of member B.
+    Value: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
+  MemberBPrivateInternalAddress:
+    Description: The private internal address of member B.
+    Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
+  ClusterPrivateAliasExternalAddress:
+    Description: The secondary external private IP address of the cluster.
+    Value: !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ]
+  ClusterPrivateAliasInternalAddress:
+    Description: The secondary internal private IP address of the cluster.
+    Value: !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ]
 
 Rules:
   MemberATokenNotProvided:
