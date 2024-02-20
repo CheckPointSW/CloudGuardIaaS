@@ -18,6 +18,9 @@
     },
     "principalId2": {
       "type": "string"
+    },
+    "index": {
+      "type": "int"
     }
   },
   "resources": [
@@ -25,7 +28,7 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
       "scope": "[concat('Microsoft.Network/networkSecurityGroups/', parameters('ExistingNSG').name)]",
-      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), parameters('principalId1'), '1', '-nsg'))]",
+      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), parameters('principalId1'), '1', '-nsg', parameters('index')))]",
       "properties": {
         "roleDefinitionId": "[parameters('roleDefinitionId')]",
         "principalId": "[parameters('principalId1')]"
@@ -35,7 +38,7 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2022-04-01",
       "scope": "[concat('Microsoft.Network/networkSecurityGroups/', parameters('ExistingNSG').name)]",
-      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), parameters('principalId2'), '2', '-nsg'))]",
+      "name": "[guid(resourceGroup().id, concat(parameters('vmName'), parameters('principalId1'), '2', '-nsg', parameters('index')))]",
       "properties": {
         "roleDefinitionId": "[parameters('roleDefinitionId')]",
         "principalId": "[parameters('principalId2')]"
