@@ -24,7 +24,7 @@
             }
       },
         "imageVersion": {
-            "defaultValue": "8120.900631.1433",
+            "defaultValue": "8120.900631.1522",
             "type": "String",
             "metadata": {
                 "description": "The image version that will be used to deploy the solution. To get the image version, make API call to https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSkus/checkpoint?api-version=2023-05-01"
