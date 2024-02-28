@@ -24,7 +24,7 @@
             }
       },
         "imageVersion": {
-            "defaultValue": "8120.900631.1433",
+            "defaultValue": "8120.900631.1522",
             "type": "String",
             "metadata": {
                 "description": "The image version that will be used to deploy the solution. To get the image version, make API call to https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSkus/checkpoint?api-version=2023-05-01"
@@ -154,7 +154,36 @@
             "metadata": {
               "description": "Managed app resource group Name"
           }
-        }
+        },
+        "publicIPIngress": {
+            "type": "string",
+            "allowedValues": [
+              "no",
+              "yes"
+            ],
+            "defaultValue": "no",
+            "metadata": {
+              "description": "Use public IP for ingress traffic"
+            }
+          },
+          "createNewIPIngress": {
+            "type": "string",
+            "allowedValues": [
+              "no",
+              "yes"
+            ],
+            "defaultValue": "no",
+            "metadata": {
+              "description": "Create new public IP"
+            }
+          },
+          "ipIngressExistingResourceId": {
+            "type": "string",
+            "metadata": {
+              "description": "The resource id of the public IP"
+            },
+            "defaultValue": ""
+          }
     },
     "variables": {
         "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]"
@@ -170,7 +199,7 @@
                 "name": "vwan-app",
                 "product": "cp-vwan-managed-app",
                 "publisher": "checkpoint",
-                "version": "1.0.8"
+                "version": "1.0.11"
             },
             "properties": {
                 "managedResourceGroupId": "[variables('managedResourceGroupId')]",
@@ -237,6 +266,15 @@
                     },
                     "smart1CloudTokenE": {
                         "value": "[parameters('smart1CloudTokenE')]"
+                    },
+                    "publicIPIngress": {
+                        "value": "[parameters('publicIPIngress')]"
+                    },
+                    "createNewIPIngress": {
+                        "value": "[parameters('createNewIPIngress')]"
+                    },
+                    "ipIngressExistingResourceId": {
+                        "value": "[parameters('ipIngressExistingResourceId')]"
                     }
                 }
             }

@@ -59,8 +59,8 @@ https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft
       }
     ],
     "availableVersions": [
-      "8110.900335.1435",
-      "8120.900631.1433",
+      "8110.900335.1522",
+      "8120.900631.1522",
       "latest"
     ],
     "marketPlaceLink": "https://aka.ms/Checkpointmarketplace",
