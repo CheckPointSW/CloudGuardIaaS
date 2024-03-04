@@ -191,6 +191,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20230914         | Add support for maintenance mode password                                                                     |
 | 20230923         | Add support for C5d instance type                                                                             |
 | 20231012         | Update AWS Terraform provider version to 5.20.1                                                               |
+| 20240304         | Add IPs tag to cluster members                                                                                |
 
 
 ## License
