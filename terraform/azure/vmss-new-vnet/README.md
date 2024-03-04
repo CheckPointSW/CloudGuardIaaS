@@ -8,7 +8,7 @@ As part of the deployment the following resources are created:
 - Role assignment - conditional creation
 
 
-See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics/Overview.htm) 
+See the [Virtual Machine Scale Sets (VMSS) for Microsoft Azure R80.10 and above Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_VMSS_for_Azure/Content/Topics-Azure-VMSS/Additional-Information.htm) 
 
 This solution uses the following modules:
 - /terraform/azure/modules/common - used for creating a resource group and defining common variables.
