@@ -10,7 +10,8 @@ These types of Terraform resources are supported:
 * [Firewall](https://www.terraform.io/docs/providers/google/r/compute_firewall.html) - conditional creation
 
 
-See Check Point's documentation for Cluster High Availability (HA) [here](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_IaaS_HighAvailabilty_for_GCP/Default.htm)
+For additional information,
+please see the [CloudGuard Network for GCP High Availability Cluster Deployment Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_GCP_HA_Cluster/Default.htm)
 
 This solution uses the following modules:
 - \gcp\common\network-and-subnet

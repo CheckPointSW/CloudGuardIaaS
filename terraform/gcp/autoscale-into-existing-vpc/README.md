@@ -9,7 +9,8 @@ These types of Terraform resources are supported:
 * [Autoscaler](https://www.terraform.io/docs/providers/google/r/compute_region_autoscaler.html)
 
 
-See Check Point's documentation for Autoscale (MIG) [here](https://sc1.checkpoint.com/documents/R80.30/WebAdminGuides/EN/CP_R80.30_and_Above_CG_Autoscaling_Managed_Instance_Group_for_GCP/AdminGuide/Content/Overview.htm)
+For additional information,
+please see the [CloudGuard Network for GCP Autoscaling MIG Deployment Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_GCP_Autoscaling_MIG/Default.htm)
 
 Terraform is controlled via a very easy to use command-line interface (CLI). Terraform is only a single command-line application: **terraform**. 
 
