@@ -7,7 +7,8 @@ As part of the deployment the following resources are created:
   - NVA
   - Managed identity
 
-
+For additional information,
+please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_Azure_vWAN/Default.htm)
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure).
