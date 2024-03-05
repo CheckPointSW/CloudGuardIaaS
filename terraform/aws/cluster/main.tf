@@ -113,8 +113,9 @@ resource "aws_instance" "member-a-instance" {
 
   tags = merge({
     Name = format("%s-Member-A",var.gateway_name),
-    IPs = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s:cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
-      var.allocate_and_associate_eip ? aws_eip.member_a_eip[0].public_ip : "", aws_network_interface.member_a_external_eni.private_ip,aws_network_interface.member_a_internal_eni.private_ip,
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      var.allocate_and_associate_eip ? aws_eip.member_a_eip[0].public_ip : "", aws_network_interface.member_a_external_eni.private_ip,aws_network_interface.member_a_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
       aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0),
       element(tolist(setsubtract(tolist(aws_network_interface.member_a_internal_eni.private_ips), [aws_network_interface.member_a_internal_eni.private_ip])), 0))
   }, var.instance_tags)
@@ -173,8 +174,9 @@ resource "aws_instance" "member-b-instance" {
 
   tags = merge({
     Name = format("%s-Member-B",var.gateway_name),
-    IPs = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s:cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
-      var.allocate_and_associate_eip ? aws_eip.member_b_eip[0].public_ip : "", aws_network_interface.member_b_external_eni.private_ip,aws_network_interface.member_b_internal_eni.private_ip,
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      var.allocate_and_associate_eip ? aws_eip.member_b_eip[0].public_ip : "", aws_network_interface.member_b_external_eni.private_ip,aws_network_interface.member_b_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
       aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0),
       element(tolist(setsubtract(tolist(aws_network_interface.member_a_internal_eni.private_ips), [aws_network_interface.member_a_internal_eni.private_ip])), 0))
   }, var.instance_tags)

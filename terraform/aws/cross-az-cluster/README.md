@@ -187,7 +187,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 | 20230914         | Add support for maintenance mode password                                                                     |
 | 20230923         | Add support for C5d instance type                                                                             |
 | 20231012         | Update AWS Terraform provider version to 5.20.1                                                               |
-| 20240304         | Add IPs tag to cluster members                                                                                |
+| 20240304         | Add x-chkp-cluster-ips, x-chkp-member-ips tags to cluster members                                             |
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](../../../cross-az/LICENSE) file for details

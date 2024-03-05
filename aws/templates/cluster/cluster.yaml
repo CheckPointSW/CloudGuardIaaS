@@ -525,13 +525,16 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-A]]
-        - Key: IPs
+        - Key: x-chkp-member-ips
           Value: !Join
             - ':'
             - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberAPublicAddress, '' ] ] ]
               - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
               - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
-              - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
               - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
@@ -577,13 +580,16 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-B]]
-        - Key: IPs
+        - Key: x-chkp-member-ips
           Value: !Join
             - ':'
             - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberBPublicAddress, '' ] ] ]
               - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
               - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
-              - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
               - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
