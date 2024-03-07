@@ -576,6 +576,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-A]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !Ref MemberAPublicAddress ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref GatewayInstanceType
       BlockDeviceMappings:
@@ -623,6 +634,17 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-B]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !Ref MemberBPublicAddress ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref GatewayInstanceType
       BlockDeviceMappings:

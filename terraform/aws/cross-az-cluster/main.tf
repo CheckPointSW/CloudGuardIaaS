@@ -111,7 +111,11 @@ resource "aws_instance" "member-a-instance" {
   }
 
   tags = merge({
-    Name = format("%s-Member-A",var.gateway_name)
+    Name = format("%s-Member-A",var.gateway_name),
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      aws_eip.member_a_eip.public_ip, aws_network_interface.member_a_external_eni.private_ip,aws_network_interface.member_a_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:secondary-external-private-ip=%s",
+      aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0))
   }, var.instance_tags)
 
   ebs_block_device {
@@ -171,7 +175,11 @@ resource "aws_instance" "member-b-instance" {
   }
 
   tags = merge({
-    Name = format("%s-Member-B",var.gateway_name)
+    Name = format("%s-Member-B",var.gateway_name),
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      aws_eip.member_b_eip.public_ip, aws_network_interface.member_b_external_eni.private_ip,aws_network_interface.member_b_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:secondary-external-private-ip=%s",
+      aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_b_external_eni.private_ips), [aws_network_interface.member_b_external_eni.private_ip])), 0))
   }, var.instance_tags)
 
   ebs_block_device {
