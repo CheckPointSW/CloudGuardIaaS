@@ -146,18 +146,20 @@ variable "custom-metrics" {
 }
 
 variable "routing-intent-internet-traffic" {
-  default = "yes"
+  type = bool
+  default = true
   validation {
-    condition     = contains(["yes", "no"], var.routing-intent-internet-traffic)
-    error_message = "Valid options are string('yes' or 'no')"
+    condition     = contains([true, false], var.routing-intent-internet-traffic)
+    error_message = "Valid options are true or false"
   }
 }
 
 variable "routing-intent-private-traffic" {
-  default = "yes"
+  type = bool
+  default = true
   validation {
-    condition     = contains(["yes", "no"], var.routing-intent-private-traffic)
-    error_message = "Valid options are string('yes' or 'no')"
+    condition     = contains([true, false], var.routing-intent-private-traffic)
+    error_message = "Valid options are true or false"
   }
 }
 

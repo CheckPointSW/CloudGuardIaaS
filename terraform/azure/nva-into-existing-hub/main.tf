@@ -40,8 +40,8 @@ data "http" "image-versions" {
 }
 
 locals {
-      image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == substr(lower(var.os-version), 1, 4)])
-      routing_intent-internet-policy = {
+    image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == substr(lower(var.os-version), 1, 4)])
+    routing_intent-internet-policy = {
         "name": "InternetTraffic",
         "destinations": [
           "Internet"
@@ -55,9 +55,9 @@ locals {
         ],
         "nextHop": "/subscriptions/${var.subscription_id}/resourcegroups/${var.nva-rg-name}/providers/Microsoft.Network/networkVirtualAppliances/${var.nva-name}"
       }
-      routing-intent-policies = var.routing-intent-internet-traffic == "yes" ? (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-private-policy]) : [])
-      req_body = jsonencode({"properties": {"routingPolicies": local.routing-intent-policies}})
-      req_url = "https://management.azure.com/subscriptions/${var.subscription_id}/resourceGroups/${var.vwan-hub-resource-group}/providers/Microsoft.Network/virtualHubs/${var.vwan-hub-name}/routingIntent/hubRoutingIntent?api-version=2022-01-01"
+      routing-intent-policies = var.routing-intent-internet-traffic ? (var.routing-intent-private-traffic ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic ? tolist([local.routing_intent-private-policy]) : [])
+
+
 }
 
 //********************** Marketplace Terms & Solution Registration **************************//
@@ -182,14 +182,18 @@ resource "azurerm_managed_application" "nva" {
 
 //********************** Routing Intent **************************//
 
-
-data "external" "update-routing-intent" {
-  count = length(local.routing-intent-policies) != 0 ? 1 : 0
+resource "azurerm_virtual_hub_routing_intent" "routing-intent" {
+  count = (var.routing-intent-internet-traffic || var.routing-intent-private-traffic) ? 1 : 0
   depends_on = [azurerm_managed_application.nva]
-  program = ["python", "../modules/add-routing-intent.py", "${local.req_url}", "${local.req_body}", "${local.access_token}"]
-}
-
-output "api_request_result" {
-  value = length(local.routing-intent-policies) != 0 ? data.external.update-routing-intent[0].result : {routing-intent: "not changed"}
+  name           = "hubRoutingIntent"
+  virtual_hub_id = data.azurerm_virtual_hub.vwan-hub.id
+  dynamic "routing_policy" {
+    for_each = local.routing-intent-policies
+    content {
+      name         = routing_policy.value["name"]
+      destinations = routing_policy.value["destinations"]
+      next_hop     = routing_policy.value["nextHop"]
+    }
+  }
 }
 
