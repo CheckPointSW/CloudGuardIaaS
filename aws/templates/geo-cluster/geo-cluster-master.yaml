@@ -466,6 +466,12 @@ Outputs:
     Condition: AllocateAddress
     Description: The public address of member A.
     Value: !GetAtt ClusterStack.Outputs.MemberAPublicAddress
+  MemberAPrivateExternalAddress:
+    Description: The private external address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateExternalAddress
+  MemberAPrivateInternalAddress:
+    Description: The private internal address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateInternalAddress
   MemberASSH:
     Condition: AllocateAddress
     Description: SSH command to member A.
@@ -478,6 +484,12 @@ Outputs:
     Condition: AllocateAddress
     Description: The public address of member B.
     Value: !GetAtt ClusterStack.Outputs.MemberBPublicAddress
+  MemberBPrivateExternalAddress:
+    Description: The private external address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateExternalAddress
+  MemberBPrivateInternalAddress:
+    Description: The private internal address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateInternalAddress
   MemberBSSH:
     Condition: AllocateAddress
     Description: SSH command to member B.

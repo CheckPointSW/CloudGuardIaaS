@@ -650,6 +650,12 @@ Outputs:
     Condition: AllocateAddress
     Description: The public address of member A.
     Value: !Ref MemberAPublicAddress
+  MemberAPrivateExternalAddress:
+    Description: The private external address of member A.
+    Value: !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress
+  MemberAPrivateInternalAddress:
+    Description: The private internal address of member A.
+    Value: !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress
   MemberAExternalInterface:
     Description: The external interface of member A.
     Value: !Ref MemberAExternalInterface
@@ -665,6 +671,12 @@ Outputs:
     Condition: AllocateAddress
     Description: The public address of member B.
     Value: !Ref MemberBPublicAddress
+  MemberBPrivateExternalAddress:
+    Description: The private external address of member B.
+    Value: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
+  MemberBPrivateInternalAddress:
+    Description: The private internal address of member B.
+    Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
   MemberBExternalInterface:
     Description: The external interface of member B.
     Value: !Ref MemberBExternalInterface
