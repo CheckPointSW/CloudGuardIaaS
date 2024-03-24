@@ -562,6 +562,9 @@ Outputs:
     Description: The public address of the Check Point instance.
     Value: !Ref PublicAddress
     Condition: AllocateAddress
+  PrivateExternalAddress:
+    Description: The private external address of the Check Point instance.
+    Value: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
   SSH:
     Description: SSH command to the Check Point instance.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]

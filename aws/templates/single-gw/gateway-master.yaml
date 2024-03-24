@@ -464,6 +464,9 @@ Outputs:
     Condition: AllocateAddress
     Description: The public address of the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.PublicAddress
+  CheckPointInstancePrivateExternalAddress:
+    Description: The private external address of the Check Point instance.
+    Value: !GetAtt GatewayStack.Outputs.PrivateExternalAddress
   CheckPointInstanceSSH:
     Condition: AllocateAddress
     Description: SSH command to the Check Point instance.
