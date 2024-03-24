@@ -565,6 +565,9 @@ Outputs:
   PrivateExternalAddress:
     Description: The private external address of the Check Point instance.
     Value: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+  PrivateInternalAddress:
+    Description: The private internal address of the Check Point instance.
+    Value: !GetAtt InternalNetworkInterface.PrimaryPrivateIpAddress
   SSH:
     Description: SSH command to the Check Point instance.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
