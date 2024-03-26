@@ -55,7 +55,7 @@ secret_key = "my-secret-key"
   //    secret_key = var.aws_secret_access_key
   }
   ```
-  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale, /terraform/aws/modules/management and /terraform/aws/modules/cme-iam-role-gwlb:
+  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/autoscale, /terraform/aws/management and /terraform/aws/cme-iam-role-gwlb:
   ```
   provider "aws" {
   //    region = var.region
