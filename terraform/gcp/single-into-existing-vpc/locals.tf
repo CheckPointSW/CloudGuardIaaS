@@ -8,7 +8,8 @@ locals {
   installation_type_allowed_values = [
     "Gateway only",
     "Management only",
-    "Standalone"
+    "Standalone",
+    "Manual Configuration"
   ]
   // Will fail if the installation type is none of the above
   validate_installation_type = index(local.installation_type_allowed_values, var.installationType)
