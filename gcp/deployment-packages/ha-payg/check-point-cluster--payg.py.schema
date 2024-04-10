@@ -39,9 +39,9 @@ properties:
       gceMachineType:
         minCpu: 2
         minRamGb: 1.843000054359436
-  deployWithoutPublicIPs:
+  deployWithPublicIPs:
     type: boolean
-    default: False
+    default: True
   instanceSSHKey:
     type: string
     pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$

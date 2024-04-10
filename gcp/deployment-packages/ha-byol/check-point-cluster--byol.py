@@ -153,7 +153,7 @@ def make_static_address(prop, name):
 
 def create_external_addresses_if_needed(
         prop, resources, member_a_nics, member_b_nics):
-    if prop['deployWithoutPublicIPs']:
+    if not prop['deployWithPublicIPs']:
         prop['primary_cluster_address_name'] = NO_PUBLIC_IP
         prop['secondary_cluster_address_name'] = NO_PUBLIC_IP
     else:
@@ -472,7 +472,7 @@ def generate_config(context):
         }
     ]
 
-    if not prop['deployWithoutPublicIPs']:
+    if prop['deployWithPublicIPs']:
         outputs += [
             {
                 'name': 'clusterIP',

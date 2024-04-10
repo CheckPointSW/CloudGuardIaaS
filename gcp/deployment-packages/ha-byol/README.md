@@ -117,7 +117,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **shell** | Admin shell | string | /etc/cli.sh;<br/>/bin/bash;<br/>/bin/csh;<br/>/bin/tcsh;<br/> |
 |  |  |  |  |  |
-| **deployWithoutPublicIPs** | Deploy HA without public IPs | boolean | true; <br/>false; |
+| **deployWithPublicIPs** | Deploy HA with public IPs | boolean | true; <br/>false; |
 |  |  |  |  |  |
 | **instanceSSHKey** | Public SSH key for the user 'admin' | string | A valid public ssh key |
 |  |  |  |  |  |
@@ -151,7 +151,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     generatePassword: false
     allowUploadDownload: false
     shell: "/bin/bash"
-    deployWithoutPublicIPs: true
+    deployWithPublicIPs: true
     cluster-network-cidr: "10.0.1.0/24"
     cluster-network-name: "external-vpc"
     cluster-network-subnetwork-name: "frontend"
