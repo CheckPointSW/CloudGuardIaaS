@@ -31,6 +31,8 @@ INTERNAL_NET_FIELD = 'internal-network{}'
 
 MGMT_NIC = 1
 
+NO_PUBLIC_IP = 'no-public-ip'
+
 startup_script = '''
 #cloud-config
 runcmd:
@@ -149,39 +151,44 @@ def make_static_address(prop, name):
     return address
 
 
-def create_external_addresses(prop, resources, member_a_nics, member_b_nics):
-    member_a_address_name = common.set_name_and_truncate(
-        prop['deployment'], '-member-a-address')
-    member_b_address_name = common.set_name_and_truncate(
-        prop['deployment'], '-member-b-address')
+def create_external_addresses_if_needed(
+        prop, resources, member_a_nics, member_b_nics):
+    if prop['deployWithoutPublicIPs']:
+        prop['primary_cluster_address_name'] = NO_PUBLIC_IP
+        prop['secondary_cluster_address_name'] = NO_PUBLIC_IP
+    else:
+        member_a_address_name = common.set_name_and_truncate(
+            prop['deployment'], '-member-a-address')
+        member_b_address_name = common.set_name_and_truncate(
+            prop['deployment'], '-member-b-address')
 
-    prop['member_a_address_name'] = member_a_address_name
-    prop['member_b_address_name'] = member_b_address_name
+        prop['member_a_address_name'] = member_a_address_name
+        prop['member_b_address_name'] = member_b_address_name
 
-    member_a_address = make_static_address(prop, member_a_address_name)
-    member_b_address = make_static_address(prop, member_b_address_name)
+        member_a_address = make_static_address(prop, member_a_address_name)
+        member_b_address = make_static_address(prop, member_b_address_name)
 
-    resources += [member_a_address, member_b_address]
+        resources += [member_a_address, member_b_address]
 
-    member_a_nics[MGMT_NIC]['accessConfigs'] = [make_access_config(
-        '$(ref.{}.address)'.format(member_a_address_name))]
-    member_b_nics[MGMT_NIC]['accessConfigs'] = [make_access_config(
-        '$(ref.{}.address)'.format(member_b_address_name))]
+        member_a_nics[MGMT_NIC]['accessConfigs'] = [make_access_config(
+            '$(ref.{}.address)'.format(member_a_address_name))]
+        member_b_nics[MGMT_NIC]['accessConfigs'] = [make_access_config(
+            '$(ref.{}.address)'.format(member_b_address_name))]
 
-    primary_cluster_address_name = common.set_name_and_truncate(
-        prop['deployment'], '-primary-cluster-address')
-    secondary_cluster_address_name = common.set_name_and_truncate(
-        prop['deployment'], '-secondary-cluster-address')
+        primary_cluster_address_name = common.set_name_and_truncate(
+            prop['deployment'], '-primary-cluster-address')
+        secondary_cluster_address_name = common.set_name_and_truncate(
+            prop['deployment'], '-secondary-cluster-address')
 
-    primary_cluster_address = make_static_address(
-        prop, primary_cluster_address_name)
-    secondary_cluster_address = make_static_address(
-        prop, secondary_cluster_address_name)
+        primary_cluster_address = make_static_address(
+            prop, primary_cluster_address_name)
+        secondary_cluster_address = make_static_address(
+            prop, secondary_cluster_address_name)
 
-    resources += [primary_cluster_address, secondary_cluster_address]
+        resources += [primary_cluster_address, secondary_cluster_address]
 
-    prop['primary_cluster_address_name'] = primary_cluster_address_name
-    prop['secondary_cluster_address_name'] = secondary_cluster_address_name
+        prop['primary_cluster_address_name'] = primary_cluster_address_name
+        prop['secondary_cluster_address_name'] = secondary_cluster_address_name
 
 
 def make_nic(prop, net_name, subnet_name):
@@ -412,7 +419,8 @@ def generate_config(context):
 
     member_b_nics = copy.deepcopy(member_a_nics)
 
-    create_external_addresses(prop, resources, member_a_nics, member_b_nics)
+    create_external_addresses_if_needed(
+        prop, resources, member_a_nics, member_b_nics)
 
     member_a_name = common.set_name_and_truncate(
         prop['deployment'], '-member-a')
@@ -443,17 +451,8 @@ def generate_config(context):
             'value': prop['project']
         },
         {
-            'name': 'clusterIP',
-            'value': '$(ref.{}.address)'.format(
-                prop['primary_cluster_address_name'])
-        },
-        {
             'name': 'vmAName',
             'value': member_a_name,
-        },
-        {
-            'name': 'vmAExternalIP',
-            'value': '$(ref.{}.address)'.format(prop['member_a_address_name'])
         },
         {
             'name': 'vmASelfLink',
@@ -464,10 +463,6 @@ def generate_config(context):
             'value': member_b_name,
         },
         {
-            'name': 'vmBExternalIP',
-            'value': '$(ref.{}.address)'.format(prop['member_b_address_name'])
-        },
-        {
             'name': 'vmBSelfLink',
             'value': '$(ref.{}.selfLink)'.format(member_b_name),
         },
@@ -476,5 +471,24 @@ def generate_config(context):
             'value': passwd
         }
     ]
+
+    if not prop['deployWithoutPublicIPs']:
+        outputs += [
+            {
+                'name': 'clusterIP',
+                'value': '$(ref.{}.address)'.format(
+                    prop['primary_cluster_address_name'])
+            },
+            {
+                'name': 'vmAExternalIP',
+                'value': '$(ref.{}.address)'.format(
+                    prop['member_a_address_name'])
+            },
+            {
+                'name': 'vmBExternalIP',
+                'value': '$(ref.{}.address)'.format(
+                    prop['member_b_address_name'])
+            }
+        ]
 
     return common.MakeResource(resources, outputs)
