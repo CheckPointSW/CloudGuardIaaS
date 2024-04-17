@@ -39,6 +39,12 @@ resource "aws_security_group" "management_sg" {
     cidr_blocks = [var.gateway_addresses]
   }
   ingress {
+    from_port = 18208
+    to_port = 18208
+    protocol = "tcp"
+    cidr_blocks = [var.gateway_addresses]
+  }
+  ingress {
     from_port = 18210
     to_port = 18210
     protocol = "tcp"

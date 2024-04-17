@@ -83,7 +83,8 @@ resource "aws_autoscaling_group" "asg" {
   load_balancers = aws_elb.proxy_elb.*.name
   target_group_arns = var.target_groups
   vpc_zone_identifier = var.subnet_ids
-  health_check_grace_period = 0
+  health_check_grace_period = 3600
+  health_check_type = "ELB"
 
   tag {
       key = "Name"
