@@ -25,6 +25,7 @@ resources:
       generatePassword: "PLEASE ENTER true or false"
       allowUploadDownload: "PLEASE ENTER true or false"
       shell: "PLEASE ENTER A SHELL"
+      deployWithPublicIPs: "PLEASE ENTER true or false"
       cluster-network-cidr: "PLEASE ENTER CLUSTER NETWORK CIDR"
       cluster-network-name: "PLEASE ENTER CLUSTER NETWORK ID"
       cluster-network-subnetwork-name: "PLEASE ENTER CLUSTER SUBNETWORK ID"

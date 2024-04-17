@@ -117,6 +117,8 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
 |  |  |  |  |  |
 | **shell** | Admin shell | string | /etc/cli.sh;<br/>/bin/bash;<br/>/bin/csh;<br/>/bin/tcsh;<br/> |
 |  |  |  |  |  |
+| **deployWithPublicIPs** | Deploy HA with public IPs | boolean | true; <br/>false; |
+|  |  |  |  |  |
 | **instanceSSHKey** | Public SSH key for the user 'admin' | string | A valid public ssh key |
 |  |  |  |  |  |
 | **smart1CloudTokenA** | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
@@ -149,6 +151,7 @@ To deploy the Deployment Manager's package manually, without using the GCP Marke
     generatePassword: false
     allowUploadDownload: false
     shell: "/bin/bash"
+    deployWithPublicIPs: true
     cluster-network-cidr: "10.0.1.0/24"
     cluster-network-name: "external-vpc"
     cluster-network-subnetwork-name: "frontend"
