@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server (20240204)
+Description: Deploys a Check Point Management Server (20240417)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -446,6 +446,10 @@ Resources:
           IpProtocol: tcp
           FromPort: 18192
           ToPort: 18192
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18208
+          ToPort: 18208
         - CidrIp: !Ref GatewaysAddresses
           IpProtocol: tcp
           FromPort: 18210
