@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20240204)
+Description: Create an Auto Scaling group of Check Point gateways (20240417)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -479,6 +479,8 @@ Resources:
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
       TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref GatewaysTargetGroups], !Ref 'AWS::NoValue']
+      HealthCheckGracePeriod: 3600
+      HealthCheckType: ELB
       NotificationConfiguration: !If
         - ProvidedAdminEmail
         - TopicARN: !Ref NotificationTopic

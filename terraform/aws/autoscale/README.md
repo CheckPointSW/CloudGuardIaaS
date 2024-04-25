@@ -176,20 +176,21 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                        |
-|------------------|--------------------------------------------------------------------|
-| 20200318         | First release of Check Point Auto Scaling Terraform module for AWS |
-| 20210309         | AWS Terraform modules refactor                                     |
-| 20210329         | Stability fixes                                                    |
-| 20220606         | New instance type support                                          |
-| 20221123         | R81.20 version support                                             |
-| 20221226         | Support ASG Launch Template instead of Launch Configuration        |
-| 20230521         | Change default shell for the admin user to /etc/cli.sh             |
-| 20230806         | Add support for c6in instance type                                 | 
-| 20230829         | Change default Check Point version to R81.20                       |
-| 20230914         | Add support for maintenance mode password                          |
-| 20230923         | Add support for C5d instance type                                  |
-| 20231012         | Update AWS Terraform provider version to 5.20.1                    |
+| Template Version | Description                                                                                                                                                      |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 20200318         | First release of Check Point Auto Scaling Terraform module for AWS                                                                                               |
+| 20210309         | AWS Terraform modules refactor                                                                                                                                   |
+| 20210329         | Stability fixes                                                                                                                                                  |
+| 20220606         | New instance type support                                                                                                                                        |
+| 20221123         | R81.20 version support                                                                                                                                           |
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                                                                                                      |
+| 20230521         | Change default shell for the admin user to /etc/cli.sh                                                                                                           |
+| 20230806         | Add support for c6in instance type                                                                                                                               | 
+| 20230829         | Change default Check Point version to R81.20                                                                                                                     |
+| 20230914         | Add support for maintenance mode password                                                                                                                        |
+| 20230923         | Add support for C5d instance type                                                                                                                                |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                                                                                                  |
+| 20240414         | - Add support for Elastic Load Balancer Health Checks.<br/>- EC2 Auto Scaling will start to detect and act on health checks performed by Elastic Load Balancing. |
 
 ## License
 
