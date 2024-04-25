@@ -37,8 +37,8 @@ module "external_load_balancer" {
   target_group_port = local.encrypted_protocol_condition ? 9443 : 9080
   listener_port = local.provided_port_condition ? var.service_port : local.encrypted_protocol_condition ? "443" : "80"
   certificate_arn = local.encrypted_protocol_condition ? var.certificate : ""
-  health_check_port = var.load_balancers_type == "Network Load Balancer" && !local.is_gw_version_r81_below ? 8117 : null
-  health_check_protocol = var.load_balancers_type == "Network Load Balancer" && !local.is_gw_version_r81_below ? "TCP" : null
+  health_check_port = var.load_balancers_type == "Network Load Balancer" ? 8117 : null
+  health_check_protocol = var.load_balancers_type == "Network Load Balancer" ? "TCP" : null
 }
 
 module "autoscale" {
