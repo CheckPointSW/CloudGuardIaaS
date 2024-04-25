@@ -68,6 +68,4 @@ locals {
   encrypted_protocol_condition = (local.alb_condition && var.load_balancer_protocol == "HTTPS") || (local.nlb_condition && var.load_balancer_protocol == "TLS") ? true : false
   deploy_management_condition = var.management_deploy == true
   deploy_servers_condition = var.servers_deploy == true
-  r81_below_gw_versions = ["R80.40-BYOL", "R80.40-PAYG-NGTP", "R80.40-PAYG-NGTX", "R81-BYOL", "R81-PAYG-NGTP", "R81-PAYG-NGTX"]
-  is_gw_version_r81_below = contains(local.r81_below_gw_versions, var.gateway_version)
 }
