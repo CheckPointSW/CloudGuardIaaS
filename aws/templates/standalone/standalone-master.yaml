@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20231113)
+  Security Gateway & Management (Standalone) instance in a new VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,7 @@ Metadata:
           - StandaloneVersion
           - Shell
           - StandalonePasswordHash
+          - StandaloneMaintenancePasswordHash
       - Label:
           default: Advanced Settings
         Parameters:
@@ -74,6 +75,8 @@ Metadata:
         default: Admin shell
       StandalonePasswordHash:
         default: Standalone Password hash
+      StandaloneMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       ResourcesTagName:
         default: Resources prefix tag
       StandaloneHostname:
@@ -179,6 +182,12 @@ Parameters:
   StandalonePasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
       to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  StandaloneMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
@@ -400,6 +409,7 @@ Resources:
         StandaloneVersion: !Ref StandaloneVersion
         Shell: !Ref Shell
         StandalonePasswordHash: !Ref StandalonePasswordHash
+        StandaloneMaintenancePasswordHash: !Ref StandaloneMaintenancePasswordHash
         ResourcesTagName: !Ref ResourcesTagName
         StandaloneHostname: !Ref StandaloneHostname
         AllowUploadDownload: !Ref AllowUploadDownload

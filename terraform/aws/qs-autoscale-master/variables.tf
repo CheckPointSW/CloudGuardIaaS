@@ -96,6 +96,11 @@ variable "service_port" {
   type = string
   description = "The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS"
 }
+variable "admin_shell" {
+  type = string
+  description = "Set the admin shell to enable advanced command line configuration"
+  default = "/etc/cli.sh"
+}
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
 variable "gateway_instance_type" {
@@ -133,6 +138,11 @@ module "validate_gateway_version" {
 variable "gateway_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
+  default = ""
+}
+variable "gateway_maintenance_mode_password_hash" {
+  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
+  type = string
   default = ""
 }
 variable "gateway_SICKey" {
@@ -176,6 +186,11 @@ module "validate_management_version" {
 variable "management_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
+  default = ""
+}
+variable "management_maintenance_mode_password_hash" {
+  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
+  type = string
   default = ""
 }
 variable "gateways_policy" {

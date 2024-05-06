@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Cluster into an existing VPC (20230830)
+Description: Deploys a Check Point Cluster into an existing VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,7 @@ Metadata:
           - GatewayVersion
           - Shell
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
           - GatewaySICKey
       - Label:
           default: Quick connect to Smart-1 Cloud (Recommended)
@@ -80,6 +81,8 @@ Metadata:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       GatewaySICKey:
         default: SIC key
       MemberAToken:
@@ -314,6 +317,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
@@ -516,6 +525,18 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-A]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberAPublicAddress, '' ] ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
+              - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref GatewayInstanceType
       BlockDeviceMappings:
@@ -548,9 +569,10 @@ Resources:
             - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
             - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
             - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
             - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
             - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230923\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
     DependsOn: [MemberBExternalInterface, MemberBInternalInterface]
@@ -558,6 +580,18 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-B]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberBPublicAddress, '' ] ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
+              - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
       ImageId: !GetAtt AMI.Outputs.ImageId
       InstanceType: !Ref GatewayInstanceType
       BlockDeviceMappings:
@@ -646,6 +680,16 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member A portal.
     Value: !Join ['', ['https://', !Ref MemberAPublicAddress]]
+  MemberAExternalInterface:
+    Condition: AllocateAddress
+    Description: The external interface of member A.
+    Value: !Ref MemberAExternalInterface
+  MemberAPrivateExternalAddress:
+    Description: The private external address of member A.
+    Value: !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress
+  MemberAPrivateInternalAddress:
+    Description: The private internal address of member A.
+    Value: !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress
   MemberBPublicAddress:
     Condition: AllocateAddress
     Description: The public address of member B.
@@ -658,6 +702,18 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !Join ['', ['https://', !Ref MemberBPublicAddress]]
+  MemberBPrivateExternalAddress:
+    Description: The private external address of member B.
+    Value: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
+  MemberBPrivateInternalAddress:
+    Description: The private internal address of member B.
+    Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
+  ClusterPrivateAliasExternalAddress:
+    Description: The secondary external private IP address of the cluster.
+    Value: !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ]
+  ClusterPrivateAliasInternalAddress:
+    Description: The secondary internal private IP address of the cluster.
+    Value: !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ]
 
 Rules:
   MemberATokenNotProvided:

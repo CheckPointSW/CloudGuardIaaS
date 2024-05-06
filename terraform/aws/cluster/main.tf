@@ -112,7 +112,12 @@ resource "aws_instance" "member-a-instance" {
   }
 
   tags = merge({
-    Name = format("%s-Member-A",var.gateway_name)
+    Name = format("%s-Member-A",var.gateway_name),
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      var.allocate_and_associate_eip ? aws_eip.member_a_eip[0].public_ip : "", aws_network_interface.member_a_external_eni.private_ip,aws_network_interface.member_a_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
+      aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0),
+      element(tolist(setsubtract(tolist(aws_network_interface.member_a_internal_eni.private_ips), [aws_network_interface.member_a_internal_eni.private_ip])), 0))
   }, var.instance_tags)
 
   ebs_block_device {
@@ -136,6 +141,7 @@ resource "aws_instance" "member-a-instance" {
     // script's arguments
     Hostname = var.gateway_hostname,
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
@@ -145,7 +151,7 @@ resource "aws_instance" "member-a-instance" {
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
     TokenA = var.memberAToken,
-    MemberAPublicAddress =  aws_eip.member_a_eip[0].public_ip,
+    MemberAPublicAddress =  var.allocate_and_associate_eip ? aws_eip.member_a_eip[0].public_ip : "",
     AllocateAddress = var.allocate_and_associate_eip,
     OsVersion = local.version_split
   })
@@ -167,7 +173,12 @@ resource "aws_instance" "member-b-instance" {
   }
 
   tags = merge({
-    Name = format("%s-Member-B",var.gateway_name)
+    Name = format("%s-Member-B",var.gateway_name),
+    x-chkp-member-ips = format("public-ip=%s:external-private-ip=%s:internal-private-ip=%s",
+      var.allocate_and_associate_eip ? aws_eip.member_b_eip[0].public_ip : "", aws_network_interface.member_b_external_eni.private_ip,aws_network_interface.member_b_internal_eni.private_ip),
+    x-chkp-cluster-ips = format("cluster-ip=%s:cluster-eth0-private-ip=%s:cluster-eth1-private-ip=%s",
+      aws_eip.cluster_eip.public_ip, element(tolist(setsubtract(tolist(aws_network_interface.member_a_external_eni.private_ips), [aws_network_interface.member_a_external_eni.private_ip])), 0),
+      element(tolist(setsubtract(tolist(aws_network_interface.member_a_internal_eni.private_ips), [aws_network_interface.member_a_internal_eni.private_ip])), 0))
   }, var.instance_tags)
 
   ebs_block_device {
@@ -191,6 +202,7 @@ resource "aws_instance" "member-b-instance" {
     // script's arguments
     Hostname = var.gateway_hostname,
     PasswordHash = local.gateway_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,
@@ -200,7 +212,7 @@ resource "aws_instance" "member-b-instance" {
     GatewayBootstrapScript = local.gateway_bootstrap_script64,
     SICKey = local.gateway_SICkey_base64,
     TokenB = var.memberBToken,
-    MemberBPublicAddress =  aws_eip.member_b_eip[0].public_ip,
+    MemberBPublicAddress =  var.allocate_and_associate_eip ? aws_eip.member_b_eip[0].public_ip : "",
     AllocateAddress = var.allocate_and_associate_eip,
     OsVersion = local.version_split
   })

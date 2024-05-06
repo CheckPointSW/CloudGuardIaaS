@@ -25,7 +25,7 @@
         "R81.20 - Pay As You Go (NGTP)",
         "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -288,7 +288,7 @@
     "subnetName": "[parameters('Subnet1Name')]",
     "subnet2Name": "[parameters('Subnet2Name')]",
     "templateName": "singleIpv6",
-    "templateVersion": "20230124",
+    "templateVersion": "20230910",
     "location": "[parameters('location')]",
     "subnet-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
     "subnet2-id": "[resourceId(parameters('virtualNetworkExistingRGName'), 'Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnet2Name'))]",
@@ -416,9 +416,7 @@
     "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "sicKey": "[parameters('sicKey')]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
-    "NewNsgReference": {
-      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
   },
   "resources": [
     {
@@ -662,8 +660,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }

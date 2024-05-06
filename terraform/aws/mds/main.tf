@@ -45,6 +45,12 @@ resource "aws_security_group" "mds_sg" {
     cidr_blocks = [var.gateway_addresses]
   }
   ingress {
+    from_port = 18208
+    to_port = 18208
+    protocol = "tcp"
+    cidr_blocks = [var.gateway_addresses]
+  }
+  ingress {
     from_port = 18210
     to_port = 18210
     protocol = "tcp"
@@ -145,6 +151,7 @@ resource "aws_instance" "mds-instance" {
     // script's arguments
     Hostname = var.mds_hostname,
     PasswordHash = local.mds_password_hash_base64
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64
     AllowUploadDownload = var.allow_upload_download,
     NTPPrimary = var.primary_ntp
     NTPSecondary = var.secondary_ntp

@@ -23,6 +23,11 @@ locals {
   // Will fail if var.gateway_hostname is invalid
   regex_gateway_hostname = regex(local.regex_valid_gateway_hostname, var.gateway_hostname) == var.gateway_hostname ? 0 : "Variable [gateway_hostname] must be a valid hostname label or an empty string"
 
+  regex_valid_gateway_password_hash = "^[\\$\\./a-zA-Z0-9]*$"
+  // Will fail if var.gateway_password_hash is invalid
+  regex_gateway_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_password_hash) == var.gateway_password_hash ? 0 : "Variable [gateway_password_hash] must be a valid password hash"
+  regex_gateway_maintenance_mode_password_hash = regex(local.regex_valid_gateway_password_hash, var.gateway_maintenance_mode_password_hash) == var.gateway_maintenance_mode_password_hash ? 0 : "Variable [gateway_maintenance_mode_password_hash] must be a valid password hash"
+
   control_over_public_or_private_allowed_values = [
     "public",
     "private"]

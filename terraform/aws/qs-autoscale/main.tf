@@ -37,6 +37,8 @@ module "external_load_balancer" {
   target_group_port = local.encrypted_protocol_condition ? 9443 : 9080
   listener_port = local.provided_port_condition ? var.service_port : local.encrypted_protocol_condition ? "443" : "80"
   certificate_arn = local.encrypted_protocol_condition ? var.certificate : ""
+  health_check_port = var.load_balancers_type == "Network Load Balancer" ? 8117 : null
+  health_check_protocol = var.load_balancers_type == "Network Load Balancer" ? "TCP" : null
 }
 
 module "autoscale" {
@@ -58,7 +60,9 @@ module "autoscale" {
   maximum_group_size = var.gateways_max_group_size
   target_groups = tolist([module.external_load_balancer.target_group_arn])
   gateway_version = var.gateway_version
+  admin_shell = var.admin_shell
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   gateway_SICKey = var.gateway_SICKey
   allow_upload_download = var.allow_upload_download
   enable_cloudwatch = var.enable_cloudwatch
@@ -86,7 +90,9 @@ module "management" {
   disable_instance_termination = var.disable_instance_termination
   iam_permissions = "Create with read-write permissions"
   management_version = var.management_version
+  admin_shell = var.admin_shell
   management_password_hash = var.management_password_hash
+  management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash
   allow_upload_download = var.allow_upload_download
   admin_cidr = var.admin_cidr
   gateway_addresses = var.gateways_addresses

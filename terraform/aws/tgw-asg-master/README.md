@@ -18,9 +18,9 @@ See the [CloudGuard Network for AWS Transit Gateway R80.10 and Higher Deployment
 
 This solution uses the following modules:
 - /terraform/aws/tgw-asg
-- /terraform/aws/modules/autoscale
-- /terraform/aws/modules/management
-- /terraform/aws/modules/cme-iam-role
+- /terraform/aws/autoscale
+- /terraform/aws/management
+- /terraform/aws/cme-iam-role
 - /terraform/aws/modules/vpc
 
 ## Configurations
@@ -41,7 +41,7 @@ access_key = "my-access-key"
 secret_key = "my-secret-key"
 ```
 - In case the Static credentials are used, perform modifications described below:<br/>
-  a. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/tgw-asg, /terraform/aws/autoscale, /terraform/aws/modules/management and /terraform/aws/modules/cme-iam-role:
+  a. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/tgw-asg, /terraform/aws/autoscale, /terraform/aws/management and /terraform/aws/cme-iam-role:
   ```
   provider "aws" {
   //  region = var.region
@@ -58,7 +58,7 @@ secret_key = "my-secret-key"
   //    secret_key = var.aws_secret_access_key
   }
   ```
-  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/tgw-asg, /terraform/aws/autoscale, /terraform/aws/modules/management and /terraform/aws/modules/cme-iam-role:
+  b. The next lines in main.tf file, in the provider aws resource, need to be commented for sub-modules /terraform/aws/tgw-asg, /terraform/aws/autoscale, /terraform/aws/management and /terraform/aws/cme-iam-role:
   ```
   provider "aws" {
   //    region = var.region

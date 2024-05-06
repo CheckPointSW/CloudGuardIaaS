@@ -57,6 +57,7 @@ module "launch_cluster_into_vpc" {
   memberAToken = var.memberAToken
   memberBToken = var.memberBToken
   gateway_password_hash = var.gateway_password_hash
+  gateway_maintenance_mode_password_hash = var.gateway_maintenance_mode_password_hash
   resources_tag_name = var.resources_tag_name
   gateway_hostname = var.gateway_hostname
   allow_upload_download = var.allow_upload_download

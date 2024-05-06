@@ -26,6 +26,7 @@ sts_roles = []
 mds_version = "R81.20-BYOL"
 mds_admin_shell = "/etc/cli.sh"
 mds_password_hash = ""
+mds_maintenance_mode_password_hash = ""
 
 // --- Multi-Domain Server Settings ---
 mds_hostname = "mds-tf"

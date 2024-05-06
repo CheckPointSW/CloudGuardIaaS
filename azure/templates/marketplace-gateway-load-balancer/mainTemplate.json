@@ -26,7 +26,7 @@
         "R81.20 - Pay As You Go (NGTP)",
         "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.10 - Bring Your Own License",
+      "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
@@ -391,7 +391,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20231002",
+    "templateVersion": "20230910",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
@@ -507,8 +507,9 @@
       }
     },
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
-    "networkSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
-    "loadBalacerSetupURL": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/gateway-load-balancers.json', parameters('_artifactsLocationSasToken')))]",
+    "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/',parameters('_artifactsLocation'))]",
+    "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-1-subnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "loadBalacerSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/gateway-load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
@@ -565,9 +566,7 @@
     "customMetrics": "[parameters('customMetrics')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
-    "NewNsgReference": {
-      "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    "NewNsgReference": {"id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
   },
   "resources": [
     {
@@ -632,8 +631,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "deployRouteTable": {
             "value": true
@@ -675,8 +675,9 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName": {
-            "value": "[parameters('NewNsgName')]"
+          "NewNsgName":
+          {
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"

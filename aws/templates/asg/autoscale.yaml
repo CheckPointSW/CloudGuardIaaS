@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20221226)
+Description: Create an Auto Scaling group of Check Point gateways (20240417)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -31,6 +31,7 @@ Metadata:
           - GatewayVersion
           - Shell
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
           - GatewaySICKey
           - AllowUploadDownload
           - CloudWatch
@@ -80,6 +81,8 @@ Metadata:
         default: Admin shell
       GatewayPasswordHash:
         default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       GatewaySICKey:
         default: Gateways SIC key
       AllowUploadDownload:
@@ -312,6 +315,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
@@ -357,6 +366,7 @@ Parameters:
     Type: String
     Default: ASG-configuration
     MinLength: 1
+    MaxLength: 30
   ELBType:
     Type: String
     Default: none
@@ -469,6 +479,8 @@ Resources:
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
       TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref GatewaysTargetGroups], !Ref 'AWS::NoValue']
+      HealthCheckGracePeriod: 3600
+      HealthCheckType: ELB
       NotificationConfiguration: !If
         - ProvidedAdminEmail
         - TopicARN: !Ref NotificationTopic
@@ -523,9 +535,10 @@ Resources:
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy

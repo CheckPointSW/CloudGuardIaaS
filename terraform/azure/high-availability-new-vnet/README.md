@@ -8,7 +8,8 @@ As part of the deployment the following resources are created:
 - System assigned identity
 - Availability Set - conditional creation
 
-See the [Check Point CloudGuard IaaS High Availability for Azure Administration Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_IaaS_HighAvailability_for_Azure/Content/Topics/Check_Point_CloudGuard_IaaS_High_Availability_for_Azure.htm) for additional information
+For additional information,
+please see the [CloudGuard Network for Azure High Availability Cluster Deployment Guide](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_Azure_HA_Cluster/Default.htm)
 
 This solution uses the following modules:
 - /terraform/azure/modules/common - used for creating a resource group and defining common variables.

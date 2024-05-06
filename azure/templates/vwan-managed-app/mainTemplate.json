@@ -1,0 +1,283 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "hubId": {
+            "type": "String",
+            "metadata": {
+                "description": "The Virtual Wan Hub ID. To get the Hub ID, go to your hub, click on JSON view on the right side, and copy the ID field"
+            }
+        },
+        "tags": {
+            "defaultValue": {},
+            "type": "Object"
+        },
+        "LicenseType": {
+            "defaultValue": "Security Enforcement (NGTP)",
+            "allowedValues": [
+                "Security Enforcement (NGTP)",
+                "Full Package (NGTX + S1C)"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "License type of Check Point CloudGuard"
+            }
+      },
+        "imageVersion": {
+            "defaultValue": "8120.900631.1522",
+            "type": "String",
+            "metadata": {
+                "description": "The image version that will be used to deploy the solution. To get the image version, make API call to https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSkus/checkpoint?api-version=2023-05-01"
+            }
+        },
+        "osVersion": {
+            "defaultValue": "R8120",
+            "allowedValues": [
+                "R8110",
+                "R8120"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "GAIA OS version"
+            }
+        },
+        "scaleUnit": {
+            "defaultValue": "2",
+            "allowedValues": [
+                "2",
+                "4",
+                "10",
+                "20",
+                "30",
+                "40",
+                "60",
+                "80"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "The scale unit size to deploy"
+            }
+        },
+        "bootstrapScript": {
+            "defaultValue": "",
+            "type": "String",
+            "metadata": {
+                "description": "Bootstrap script"
+            }
+        },
+        "adminShell": {
+            "defaultValue": "/etc/cli.sh",
+            "allowedValues": [
+                "/etc/cli.sh",
+                "/bin/bash",
+                "/bin/csh",
+                "/bin/tcsh"
+            ],
+            "type": "String",
+            "metadata": {
+                "Description": "The default shell for the admin user"
+            }
+        },
+        "sicKey": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "One-time key for Secure Internal Communication"
+            }
+        },
+        "sshPublicKey": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Paste an OpenSSH public key. You can generate a key pair using SSH-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
+            }
+        },
+        "BGP": {
+            "defaultValue": "64512",
+            "type": "String",
+            "metadata": {
+                "description": "BGP ASN to peer with Azure Route Service"
+            }
+        },
+        "NVAName": {
+            "type": "String",
+            "metadata": {
+                "description": "NVA name to deploy in the hub"
+            }
+        },
+        "customMetrics": {
+            "defaultValue": "yes",
+            "allowedValues": [
+                "no",
+                "yes"
+            ],
+            "type": "String",
+            "metadata": {
+                "Description": "Indicates whether Custom Metrics will be used for VMSS Scaling policy and VM monitoring"
+            }
+        },
+        "hubASN": {
+            "type": "Int",
+            "metadata": {
+                "description": "ASN from the Hub. To get the Hub ASN, go to your hub, click the JSON view on the right and copy the virtualRouterAsn field"
+            }
+        },
+        "hubPeers": {
+            "type": "Array",
+            "metadata": {
+                "description": "An array of IP addresses obtained from the Hub object. To get the Hub Peers, go to your hub, click the JSON view on the right and copy the virtualRouterIps field. for example:[\"10.10.32.5\",\"10.10.32.4\"]"
+            }
+        },
+        "smart1CloudTokenA": {
+            "defaultValue": "",
+            "type": "SecureString"
+        },
+        "smart1CloudTokenB": {
+            "defaultValue": "",
+            "type": "SecureString"
+        },
+        "smart1CloudTokenC": {
+            "defaultValue": "",
+            "type": "SecureString"
+        },
+        "smart1CloudTokenD": {
+            "defaultValue": "",
+            "type": "SecureString"
+        },
+        "smart1CloudTokenE": {
+            "defaultValue": "",
+            "type": "SecureString"
+        },
+        "applicationResourceName": {
+            "type": "String"
+        },
+        "managedResourceGroupName": {
+            "type": "String",
+            "metadata": {
+              "description": "Managed app resource group Name"
+          }
+        },
+        "publicIPIngress": {
+            "type": "string",
+            "allowedValues": [
+              "no",
+              "yes"
+            ],
+            "defaultValue": "no",
+            "metadata": {
+              "description": "Use public IP for ingress traffic"
+            }
+          },
+          "createNewIPIngress": {
+            "type": "string",
+            "allowedValues": [
+              "no",
+              "yes"
+            ],
+            "defaultValue": "no",
+            "metadata": {
+              "description": "Create new public IP"
+            }
+          },
+          "ipIngressExistingResourceId": {
+            "type": "string",
+            "metadata": {
+              "description": "The resource id of the public IP"
+            },
+            "defaultValue": ""
+          }
+    },
+    "variables": {
+        "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Solutions/applications",
+            "apiVersion": "2021-07-01",
+            "name": "[parameters('applicationResourceName')]",
+            "location": "[resourceGroup().location]",
+            "kind": "MarketPlace",
+            "plan": {
+                "name": "vwan-app",
+                "product": "cp-vwan-managed-app",
+                "publisher": "checkpoint",
+                "version": "1.0.11"
+            },
+            "properties": {
+                "managedResourceGroupId": "[variables('managedResourceGroupId')]",
+                "parameters": {
+                    "hubId": {
+                        "value": "[parameters('hubId')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "imageVersion": {
+                        "value": "[parameters('imageVersion')]"
+                    },
+                    "osVersion": {
+                        "value": "[parameters('osVersion')]"
+                    },
+                    "LicenseType": {
+                        "value": "[parameters('LicenseType')]"
+                    },
+                    "scaleUnit": {
+                        "value": "[parameters('scaleUnit')]"
+                    },
+                    "bootstrapScript": {
+                        "value": "[parameters('bootstrapScript')]"
+                    },
+                    "adminShell": {
+                        "value": "[parameters('adminShell')]"
+                    },
+                    "sicKey": {
+                        "value": "[parameters('sicKey')]"
+                    },
+                    "sshPublicKey": {
+                        "value": "[parameters('sshPublicKey')]"
+                    },
+                    "BGP": {
+                        "value": "[parameters('BGP')]"
+                    },
+                    "NVA": {
+                        "value": "[parameters('NVAName')]"
+                    },
+                    "customMetrics": {
+                        "value": "[parameters('customMetrics')]"
+                    },
+                    "location": {
+                        "value": "[resourceGroup().location]"
+                    },
+                    "hubASN": {
+                        "value": "[parameters('hubASN')]"
+                    },
+                    "hubPeers": {
+                        "value": "[parameters('hubPeers')]"
+                    },
+                    "smart1CloudTokenA": {
+                        "value": "[parameters('smart1CloudTokenA')]"
+                    },
+                    "smart1CloudTokenB": {
+                        "value": "[parameters('smart1CloudTokenB')]"
+                    },
+                    "smart1CloudTokenC": {
+                        "value": "[parameters('smart1CloudTokenC')]"
+                    },
+                    "smart1CloudTokenD": {
+                        "value": "[parameters('smart1CloudTokenD')]"
+                    },
+                    "smart1CloudTokenE": {
+                        "value": "[parameters('smart1CloudTokenE')]"
+                    },
+                    "publicIPIngress": {
+                        "value": "[parameters('publicIPIngress')]"
+                    },
+                    "createNewIPIngress": {
+                        "value": "[parameters('createNewIPIngress')]"
+                    },
+                    "ipIngressExistingResourceId": {
+                        "value": "[parameters('ipIngressExistingResourceId')]"
+                    }
+                }
+            }
+        }
+    ]
+  }

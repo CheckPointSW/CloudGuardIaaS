@@ -113,6 +113,7 @@ resource "aws_instance" "standalone-instance" {
     // script's arguments
     Hostname = var.standalone_hostname,
     PasswordHash = local.standalone_password_hash_base64,
+    MaintenanceModePassword = local.maintenance_mode_password_hash_base64,
     AllowUploadDownload = var.allow_upload_download,
     EnableCloudWatch = var.enable_cloudwatch,
     NTPPrimary = var.primary_ntp,

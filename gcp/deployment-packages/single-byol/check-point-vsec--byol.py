@@ -28,7 +28,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20230319'
+TEMPLATE_VERSION = '20231221'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -56,7 +56,7 @@ ATTRIBUTES = {
 startup_script = '''
 #cloud-config
 runcmd:
-  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\"" "smart1CloudToken=\\"{smart1CloudToken}\\"" "name=\\"{name}\\"" "zone=\\"{zoneConfig}\\"" "region=\\"{region}\\""'
+  - 'python3 /etc/cloud_config.py "generatePassword=\\"{generatePassword}\\"" "allowUploadDownload=\\"{allowUploadDownload}\\"" "templateName=\\"{templateName}\\"" "templateVersion=\\"{templateVersion}\\"" "mgmtNIC=\\"{mgmtNIC}\\"" "hasInternet=\\"{hasInternet}\\"" "config_url=\\"{config_url}\\"" "config_path=\\"{config_path}\\"" "installationType=\\"{installationType}\\"" "enableMonitoring=\\"{enableMonitoring}\\"" "shell=\\"{shell}\\"" "computed_sic_key=\\"{computed_sic_key}\\"" "sicKey=\\"{sicKey}\\"" "managementGUIClientNetwork=\\"{managementGUIClientNetwork}\\"" "primary_cluster_address_name=\\"{primary_cluster_address_name}\\"" "secondary_cluster_address_name=\\"{secondary_cluster_address_name}\\"" "managementNetwork=\\"{managementNetwork}\\"" "numAdditionalNICs=\\"{numAdditionalNICs}\\"" "smart1CloudToken=\\"{smart1CloudToken}\\"" "name=\\"{name}\\"" "zone=\\"{zoneConfig}\\"" "region=\\"{region}\\"" "osVersion=\\"{osVersion}\\"" "MaintenanceModePassword=\\"{maintenanceMode}\\""'
 '''
 
 
@@ -148,6 +148,7 @@ def generate_config(context):
          for Gateway development.')
     prop['templateName'] = TEMPLATE_NAME
     prop['templateVersion'] = TEMPLATE_VERSION
+    prop['osVersion'] = prop['cloudguardVersion'].replace(".", "")
     prop['allowUploadDownload'] = str(prop['allowUploadDownload']).lower()
     if not prop['managementGUIClientNetwork'] and prop['installationType'] in {
             'Gateway and Management (Standalone)', 'Management only'}:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point Cluster in a new VPC (20230830)
+Description: Deploy a Check Point Cluster in a new VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,7 @@ Metadata:
           - GatewayVersion
           - Shell
           - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
           - GatewaySICKey
       - Label:
           default: Quick connect to Smart-1 Cloud (Recommended)
@@ -80,6 +81,8 @@ Metadata:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
       GatewaySICKey:
         default: SIC key
       MemberAToken:
@@ -319,6 +322,12 @@ Parameters:
     Default: ''
     AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
     NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
   GatewaySICKey:
     Description: The Secure Internal Communication key creates trusted connections.
       between Check Point components. Choose a random string consisting of at least
@@ -420,6 +429,7 @@ Resources:
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
         GatewaySICKey: !Ref GatewaySICKey
         MemberAToken: !Ref MemberAToken
         MemberBToken: !Ref MemberBToken
@@ -446,6 +456,16 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member A portal.
     Value: !GetAtt ClusterStack.Outputs.MemberAURL
+  MemberAExternalInterface:
+    Condition: AllocateAddress
+    Description: The external interface of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAExternalInterface
+  MemberAPrivateExternalAddress:
+    Description: The private external address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateExternalAddress
+  MemberAPrivateInternalAddress:
+    Description: The private internal address of member A.
+    Value: !GetAtt ClusterStack.Outputs.MemberAPrivateInternalAddress
   MemberBPublicAddress:
     Condition: AllocateAddress
     Description: The public address of member B.
@@ -458,6 +478,18 @@ Outputs:
     Condition: AllocateAddress
     Description: URL to the member B portal.
     Value: !GetAtt ClusterStack.Outputs.MemberBURL
+  MemberBPrivateExternalAddress:
+    Description: The private external address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateExternalAddress
+  MemberBPrivateInternalAddress:
+    Description: The private internal address of member B.
+    Value: !GetAtt ClusterStack.Outputs.MemberBPrivateInternalAddress
+  ClusterPrivateAliasExternalAddress:
+    Description: The secondary external private IP address of the cluster.
+    Value: !GetAtt ClusterStack.Outputs.ClusterPrivateAliasExternalAddress
+  ClusterPrivateAliasInternalAddress:
+    Description: The secondary internal private IP address of the cluster.
+    Value: !GetAtt ClusterStack.Outputs.ClusterPrivateAliasInternalAddress
 Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']

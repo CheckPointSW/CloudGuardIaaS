@@ -12,7 +12,7 @@
           "text": "Please follow the Check Point CloudGuard IaaS High Availability Administration Guide.",
           "link": {
             "label": "Administration Guide",
-            "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_IaaS_HighAvailability_for_Azure/Default.htm"
+            "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_Azure_HA_Cluster/Default.htm"
           }
         }
       },
@@ -64,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81.10",
+            "defaultValue": "R81.20",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -1719,6 +1719,18 @@
                   "value": "Premium_LRS"
                 }
               ]
+            }
+          },
+          {
+            "name": "basics settings text block",
+            "type": "Microsoft.Common.TextBlock",
+            "visible": true,
+            "options": {
+              "text": "Please follow the Check Point referenced guide for adding disk space.",
+              "link": {
+                "label": "Additional disk space in CloudGuard",
+                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk156552"
+              }
             }
           },
           {

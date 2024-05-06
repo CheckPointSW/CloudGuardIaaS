@@ -544,69 +544,6 @@
             }
           },
           {
-            "name": "remoteAccessVpn",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Use Remote Access VPN",
-            "defaultValue": "No",
-            "toolTip": "Use Remote Access VPN functionality. Remote Access VPN is supported from R80.40 Management Server or Multi-Domain Management Server until R81.10, and from R80.40 Gateway version until R81.10.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "No",
-                  "value": "no"
-                },
-                {
-                  "label": "Yes",
-                  "value": "yes"
-                }
-              ],
-              "required": true
-            }
-          },
-          {
-            "name": "dnsZoneResourceId",
-            "type": "Microsoft.Common.TextBox",
-            "label": "DNS Zone Resource ID",
-            "toolTip": "The Azure Dns Zone ID to be used for defining a Record Set with VMSS Instances' public IPs",
-            "constraints": {
-              "required": true,
-              "regex": "^/subscriptions/.*/providers/Microsoft.Network/dnszones/",
-              "validationMessage": "DNS Zone resource ID must strat with \"/subscriptions/\" and contain \"/providers/Microsoft.Network/dnszones\".The DNS Zone resource ID can be found in the DNS Zone Properties tab"
-            },
-            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').instanceLevelPublicIP, 'no')))]"
-          },
-          {
-            "name": "remoteAccessExistingRecordSetInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').instanceLevelPublicIP, 'no')))]",
-            "options": {
-              "icon": "Warning",
-              "text": "In case an existing Record Set is used, all its records will be replaced with VMSS Instances' public IPs."
-            }
-          },
-          {
-            "name": "dnsZoneRecordSetName",
-            "type": "Microsoft.Common.TextBox",
-            "label": "New or existing DNS Zone Record Set Name (Label)",
-            "toolTip": "The DNS Zone Record Set contains VMSS Instances' public IPs. A new or an existing Record Set can be used. In case an existing Record Set is used, all its records will be replaced with VMSS Instances' public IPs.",
-            "defaultValue": "remote-access-instances",
-            "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z_\\-]{1,63}$",
-              "validationMessage": "Each Record Set must only contain letters, numbers, underscores, and/or dashes, the value must be 1-63 characters long. Each label should be separated from other labels by a period. A wildcard ('*' character) is permitted either as the single character in the name, or as the first label in the name. An empty value, or a single '@' character is permitted for record sets at the zone apex ."
-            },
-            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').instanceLevelPublicIP, 'no')))]"
-          },
-          {
-            "name": "remoteAccessCommunicationInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), equals(steps('autoprovision').instanceLevelPublicIP, 'no'))]",
-            "options": {
-              "icon": "Error",
-              "text": "For Remote Access VPN configuration it is mandatory to deploy instance level public IP addresses."
-            }
-          },
-          {
             "name": "customMetrics",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable CloudGuard metrics",
@@ -625,15 +562,6 @@
               ]
             },
             "visible": true
-          },
-          {
-            "name": "remoteAccessCustomMetricsInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('autoprovision').remoteAccessVpn, 'yes'), not(equals(steps('autoprovision').customMetrics, 'yes')))]",
-            "options": {
-              "icon": "Warning",
-              "text": "When Remote Access VPN is enabled it is recommended to use Scaling policy that is based on the \"IPsec number of VPN-1 RA peers\" CloudGuard metric. See the VMSS admin guide for more information."
-            }
           }
         ]
       },
@@ -650,7 +578,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81.10",
+            "defaultValue": "R81.20",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -2459,9 +2387,6 @@
       "appLoadDistribution": "[steps('autoprovision').appLoadDistribution]",
       "ilbLoadDistribution": "[steps('autoprovision').ilbLoadDistribution]",
       "availabilityZonesNum": "[coalesce(steps('autoprovision').availabilityZonesNum, int('0'))]",
-      "remoteAccessVpn": "[steps('autoprovision').remoteAccessVpn]",
-      "dnsZoneResourceId": "[steps('autoprovision').dnsZoneResourceId]",
-      "dnsZoneRecordSetName": "[steps('autoprovision').dnsZoneRecordSetName]",
       "customMetrics": "[steps('autoprovision').customMetrics]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
       "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiNGTP, steps('chkp').R8040vmSizeUiNGTX, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiNGTP, steps('chkp').R81vmSizeUiNGTX, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX)]",

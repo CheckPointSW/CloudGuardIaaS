@@ -141,6 +141,10 @@ variable "configuration_template" {
   type = string
   description = "A name of a gateway configuration template in the automatic provisioning configuration."
   default = "gwlb-ASG-configuration"
+  validation {
+    condition     = length(var.configuration_template) < 31
+    error_message = "The configuration_template name can not exceed 30 characters"
+  }
 }
 variable "admin_shell" {
   type = string
@@ -217,6 +221,11 @@ variable "gateway_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
 }
+variable "gateway_maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash for the gateway instances, relevant only for R81.20 and higher versions"
+  type = string
+  default = ""
+}
 variable "gateway_SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components (at least 8 alphanumeric characters)"
@@ -284,6 +293,11 @@ module "validate_management_version" {
 variable "management_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
+  default = ""
+}
+variable "management_maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash for the management instance, relevant only for R81.20 and higher versions"
+  type = string
   default = ""
 }
 variable "gateways_policy" {

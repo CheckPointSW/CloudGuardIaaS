@@ -31,6 +31,7 @@ target_groups = ["arn:aws:tg1/abc123", "arn:aws:tg2/def456"]
 gateway_version = "R81.20-BYOL"
 admin_shell = "/etc/cli.sh"
 gateway_password_hash = ""
+gateway_maintenance_mode_password_hash = "" # For R81.10 and below the gateway_password_hash is used also as maintenance-mode password.
 gateway_SICKey = "12345678"
 enable_instance_connect = false
 allow_upload_download = true

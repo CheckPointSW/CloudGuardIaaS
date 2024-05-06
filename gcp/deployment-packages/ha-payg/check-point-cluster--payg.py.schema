@@ -39,6 +39,9 @@ properties:
       gceMachineType:
         minCpu: 2
         minRamGb: 1.843000054359436
+  deployWithPublicIPs:
+    type: boolean
+    default: True
   instanceSSHKey:
     type: string
     pattern: ^([0-9a-z\-]+ +[0-9A-Za-z/\+=]+( .*)?|)$
@@ -66,7 +69,7 @@ properties:
         diskTypeProperty: diskType
   ha_version:
     type: string
-    default: R81.10 Cluster
+    default: R81.20 Cluster
     enum:
       - R80.40 Cluster
       - R81 Cluster
@@ -86,6 +89,10 @@ properties:
   generatePassword:
     type: boolean
     default: False
+  maintenanceMode:
+    type: string
+    pattern: ^([a-z0-9A-Z.]{12,300}|)$
+    default: ''
   allowUploadDownload:
     type: boolean
     default: False
