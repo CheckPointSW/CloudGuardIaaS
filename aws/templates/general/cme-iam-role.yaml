@@ -82,6 +82,7 @@ Resources:
                 - Effect: Allow
                   Action:
                     - autoscaling:DescribeAutoScalingGroups
+                    - ec2:DescribeRegions
                     - ec2:DescribeCustomerGateways
                     - ec2:DescribeInstances
                     - ec2:DescribeNetworkInterfaces
