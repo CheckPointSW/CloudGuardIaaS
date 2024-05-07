@@ -2,16 +2,16 @@
 
 # The script collects Central Licenses debug files for troubleshooting purposes.
 
-# Instructions : 
-	# If you have MDS environment and uses license in domain mode - please run the script with -d <DOMAIN_NAME>
-	# If your environment acceseses the internet using a configured proxy - please run the script with -p <IP_or_HostName:Port>
-	# Otherwise , run the script directly . 
-	
-# Written by: Check Point Software Technologies LTD. 
+# Instructions :
+        # If you have MDS environment and uses license in domain mode - please run the script with -d <DOMAIN_NAME>
+        # If your environment acceseses the internet using a configured proxy - please run the script with -p <IP_or_HostName:Port>
+        # Otherwise , run the script directly .
+
+# Written by: Check Point Software Technologies LTD.
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
 
-# Licenses_Collector - version 4
+# Licenses_Collector - version 5
 
 usage()
 {
@@ -22,21 +22,21 @@ usage()
 }
 
 while getopts "p:d:h" opt; do
-	case "$opt" in
-	    d)
-	      DOMAIN_NAME="$OPTARG"
+        case "$opt" in
+            d)
+              DOMAIN_NAME="$OPTARG"
           ;;
-		p)
-		  PROXY_PORT="$OPTARG"
-		  ;;
-		h)
-		  usage
-		  exit 0
-		  ;;
-		*)
-		  usage 
-		  exit 1
-	esac
+                p)
+                  PROXY_PORT="$OPTARG"
+                  ;;
+                h)
+                  usage
+                  exit 0
+                  ;;
+                *)
+                  usage
+                  exit 1
+        esac
 done
 
 
@@ -48,7 +48,7 @@ USERCENTER=https://usercenter.CheckPoint.com
 
 log_msg()
 {
-	echo "$(date)  $1"
+        echo "$(date)  $1"
 }
 
 log_msg "Starting"
@@ -63,26 +63,31 @@ fi
 
 # checking if there's connectivity with userCenter and if TCP port 18208 is open
 log_msg "  Checking if TCP port 18208 is open and accessible"
-printf "								Checking TCP port \n\n" >> $TMPPATH/Sync
+printf "                                                                Checking TCP port \n\n" >> $TMPPATH/Sync
 netstat -na | grep "18208" >> $TMPPATH/Sync
 printf "\n\n" >> $TMPPATH/Sync
 
 
-printf "								Checking connecitivty with userCenter\n\n" >> $TMPPATH/Sync
+printf "                                                                Checking connecitivty with userCenter\n\n" >> $TMPPATH/Sync
 
 if [ -n "$PROXY_PORT" ]; then
-	log_msg "  Checking connecitivty with userCenter using proxy"
-	$CURL_CLI --proxy $PROXY_PORT -v -k $USERCENTER &>> $TMPPATH/Sync
+        log_msg "  Checking connecitivty with userCenter using proxy"
+        $CURL_CLI --proxy $PROXY_PORT -v -k $USERCENTER &>> $TMPPATH/Sync
 else
-	log_msg "  Checking connecitivty with userCenter without using proxy"
-	$CURL_CLI -v -k $USERCENTER &>> $TMPPATH/Sync 
+        log_msg "  Checking connecitivty with userCenter without using proxy"
+        $CURL_CLI -v -k $USERCENTER &>> $TMPPATH/Sync
 fi
-	
+
 printf "the exit code is : %s\n" $? >> $TMPPATH/Sync
 
 # Collect server logs (cpm.elg*) data
 log_msg "  Copying $MDS_FWDIR/log/cpm.elg* into $TMPPATH"
 cp $MDS_FWDIR/log/cpm.elg* $TMPPATH
+
+if [ -f "$MDS_FWDIR/log/alignLicensesInDB.elg" ]; then
+        log_msg "  Copying $MDS_FWDIR/log/alignLicensesInDB.elg into $TMPPATH"
+        cp $MDS_FWDIR/log/alignLicensesInDB.elg $TMPPATH
+fi
 
 #Collect client logs (vseclic.elg*) data
 log_msg "  Copying $MDS_FWDIR/log/vseclic.elg* into $TMPPATH"
