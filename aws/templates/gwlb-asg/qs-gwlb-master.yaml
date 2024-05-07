@@ -535,9 +535,6 @@ Parameters:
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
       - R81.20-PAYG-NGTX
-      - R82-BYOL
-      - R82-PAYG-NGTP
-      - R82-PAYG-NGTX
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -711,8 +708,6 @@ Parameters:
       - R81.10-PAYG
       - R81.20-BYOL
       - R81.20-PAYG
-      - R82-BYOL
-      - R82-PAYG
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
