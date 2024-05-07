@@ -41,7 +41,7 @@
             <td width="40%">
             Deploys and configures an AWS Auto Scaling group configured for Gateway Load Balancer in a Centralized Security VPC, and Customer Web Service in Servers VPC<br/><br/>For more details, refer to <a href="https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_AWS_Centralized_Gateway_Load_Balancer/Default.htm">CloudGuard Network for AWS Centralized Gateway Load Balancer R80.40 Deployment Guide</a>.
             </td>
-            <br width="40%">Creates a new Security VPC and deploys into it a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server.</br>
+            <td width="40%">Creates a new Security VPC and deploys into it a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server.</br>
             Creates a new Servers VPC, configure subnets and endpoints and deploys into it Customer Web Service.</td>
             <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-master.yaml"><img src="../../images/launch.png"/></a></td>
         </tr>
@@ -49,7 +49,7 @@
             <td width="40%">
             Deploys and configures an AWS Auto Scaling group configured for Gateway Load Balancer in a Centralized Security VPC, and Customer Web Service in Servers VPC.<br/><br/>For more details, refer to <a href="https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_AWS_Centralized_Gateway_Load_Balancer/Default.htm">CloudGuard Network for AWS Centralized Gateway Load Balancer R80.40 Deployment Guide</a>.
             </td>
-            <br width="40%">Deploys a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server into an existing Security VPC.</br>
+            <td width="40%">Deploys a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server into an existing Security VPC.</br>
             Configure Servers endpoints and deploys into it Customer Web Service into an existing Servers VPC.</td>
             <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb.yaml"><img src="../../images/launch.png"/></a></td>
         </tr>
