@@ -52,6 +52,7 @@ data "aws_iam_policy_document" "cme_role_read_policy_doc" {
     effect = "Allow"
     actions = [
       "autoscaling:DescribeAutoScalingGroups",
+      "ec2:DescribeRegions",
       "ec2:DescribeCustomerGateways",
       "ec2:DescribeInstances",
       "ec2:DescribeNetworkInterfaces",
