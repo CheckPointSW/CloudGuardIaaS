@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Creates an IAM role for selected permissions (20230926)
+Description: Creates an IAM role for selected permissions (20240507)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -82,6 +82,7 @@ Resources:
                 - Effect: Allow
                   Action:
                     - autoscaling:DescribeAutoScalingGroups
+                    - ec2:DescribeRegions
                     - ec2:DescribeCustomerGateways
                     - ec2:DescribeInstances
                     - ec2:DescribeNetworkInterfaces
