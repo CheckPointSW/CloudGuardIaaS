@@ -48,7 +48,7 @@
             <td width="40%">
             Deploys and configures a Quick Start AWS Auto Scaling Group configured for Gateway Load Balancer in a Centralized Security VPC, and Servers in Servers VPC.<br/><br/>For more details, refer to <a href="https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_AWS_Gateway_Load_Balancer_ASG/Default.htm">CloudGuard Network for AWS Centralized Gateway Load Balancer R80.40 Deployment Guide</a>.
             </td>
-            <td width="40%">Deploys a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally a Security Management Server into an existing Security VPC, Gateway Load Balancer Endpoints (1 per Availability Zone), Application Load Balancer and Servers into an existing in Servers' VPC.</br>
+            <td width="40%">Deploys a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally a Security Management Server into an existing Security VPC, Gateway Load Balancer Endpoints (1 per Availability Zone), Application Load Balancer and Servers into an existing Servers' VPC.</br>
 			</td>
             <td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?templateURL=https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb.yaml"><img src="../../images/launch.png"/></a></td>
         </tr>
