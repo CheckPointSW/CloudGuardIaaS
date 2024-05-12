@@ -434,9 +434,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
       - R81.20-PAYG-NGTX
@@ -605,8 +602,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG
       - R81-BYOL
       - R81-PAYG
       - R81.10-BYOL
