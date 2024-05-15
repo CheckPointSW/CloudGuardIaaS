@@ -11,7 +11,7 @@ These types of Terraform resources are supported:
 * [Proxy Elastic Load Balancer](https://www.terraform.io/docs/providers/aws/r/elb.html) - conditional creation
 
 
-See the [CloudGuard Auto Scaling for AWS](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk112575) for additional information
+See the [CloudGuard Auto Scaling for AWS](https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CloudGuard_Network_for_AWS_AutoScaling_DeploymentGuide/Default.htm) for additional information
 
 This solution uses the following modules:
 - /terraform/aws/modules/amis
