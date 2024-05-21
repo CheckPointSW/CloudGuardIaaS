@@ -116,10 +116,6 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
  | **smart1-cloud-token-d** | Smart-1 Cloud token to connect automatically ***NVA instance d*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal                                                                                                                                           |  |
  |  |                                                                                                                                                                                                                                                                                                                                            |  |                                                                                                                                                                                                                        |  |
  | **smart1-cloud-token-e** | Smart-1 Cloud token to connect automatically ***NVA instance e*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal                                                                                                                                           |  |
- |  |                                                                                                                                                                                                                                                                                                                                            |  |                                                                                                                                                                                                                        |  |
- | **existing-public-ip** | Existing public IP reosurce to attach to the newly deployed NVA | string | A resource ID of the public IP resource  | n/a     |  |
- |  |                                                                                                                                                                                                                                                                                                                                            |  |                                                                                                                                                                                                                        |  |
- | **new-public-ip** | Deploy a new public IP resource as part of the managed app and attach to the NVA | string | yes; <br/>no;| yes    |  |
  |  |  
 
 ## Conditional creation
@@ -157,15 +153,12 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
     smart1-cloud-token-c            = ""
     smart1-cloud-token-d            = ""
     smart1-cloud-token-e            = ""   
-    existing-public-ip              = ""
-    new-public-ip                   = "yes"
 
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description       |
 |------------------|-------------------|
-| 20240228        | Added public IP for ingress support  |                                                              | |
 | 20231226         | First release of Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure| |
 
 

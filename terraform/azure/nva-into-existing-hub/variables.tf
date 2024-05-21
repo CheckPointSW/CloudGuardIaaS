@@ -174,24 +174,3 @@ variable "smart1-cloud-token-e" {
   type    = string
   default = ""
 }
-
-variable "existing-public-ip" {
-  type = string
-  default = ""  
-}
-
-variable "new-public-ip" {
-  type = string
-  default = "no"
-    validation {
-    condition     = contains(["yes", "no"], var.new-public-ip)
-    error_message = "Valid options are string('yes' or 'no')"
-  }
-}
-
-locals{
-  # Validate that new-public-ip is false when existing-public-ip is used
-  is_both_params_used = length(var.existing-public-ip) > 0 && var.new-public-ip == "yes"
-  validation_message_both = "Only one parameter of existing-public-ip or new-public-ip can be used"
-  _ = regex("^$", (!local.is_both_params_used ? "" : local.validation_message_both))
-}

@@ -154,36 +154,7 @@
             "metadata": {
               "description": "Managed app resource group Name"
           }
-        },
-        "publicIPIngress": {
-            "type": "string",
-            "allowedValues": [
-              "no",
-              "yes"
-            ],
-            "defaultValue": "no",
-            "metadata": {
-              "description": "Use public IP for ingress traffic"
-            }
-          },
-          "createNewIPIngress": {
-            "type": "string",
-            "allowedValues": [
-              "no",
-              "yes"
-            ],
-            "defaultValue": "no",
-            "metadata": {
-              "description": "Create new public IP"
-            }
-          },
-          "ipIngressExistingResourceId": {
-            "type": "string",
-            "metadata": {
-              "description": "The resource id of the public IP"
-            },
-            "defaultValue": ""
-          }
+        }
     },
     "variables": {
         "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]"
@@ -199,7 +170,7 @@
                 "name": "vwan-app",
                 "product": "cp-vwan-managed-app",
                 "publisher": "checkpoint",
-                "version": "1.0.11"
+                "version": "1.0.12"
             },
             "properties": {
                 "managedResourceGroupId": "[variables('managedResourceGroupId')]",
@@ -266,15 +237,6 @@
                     },
                     "smart1CloudTokenE": {
                         "value": "[parameters('smart1CloudTokenE')]"
-                    },
-                    "publicIPIngress": {
-                        "value": "[parameters('publicIPIngress')]"
-                    },
-                    "createNewIPIngress": {
-                        "value": "[parameters('createNewIPIngress')]"
-                    },
-                    "ipIngressExistingResourceId": {
-                        "value": "[parameters('ipIngressExistingResourceId')]"
                     }
                 }
             }
