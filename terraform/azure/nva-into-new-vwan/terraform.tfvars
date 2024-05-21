@@ -28,5 +28,3 @@ smart1-cloud-token-b              = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL FOR I
 smart1-cloud-token-c              = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL FOR INSTANCE C OR LEAVE EMPTY DOUBLE QUOTES" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 smart1-cloud-token-d              = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL FOR INSTANCE D OR LEAVE EMPTY DOUBLE QUOTES" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 smart1-cloud-token-e              = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL FOR INSTANCE E OR LEAVE EMPTY DOUBLE QUOTES" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-existing-public-ip                = "PLEASE ENTER THE RESOURCE ID OF A PUBLIC IP RESOURCE OR LEAVE EMPTY DOUBLE QUOTES" # "/subscription/123/resourceGroups/rg1/providers/Microsoft.Network/publicIPAddresses/pip1"
-new-public-ip                     = "PLEASE ENTER yes or no"                                                            # "no"
