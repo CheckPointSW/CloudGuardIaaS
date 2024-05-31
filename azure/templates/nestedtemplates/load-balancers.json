@@ -54,7 +54,7 @@
     "appAddressName": "[variables('appName')]",
     "appAddressId": "[resourceId(variables('resourceGroup').name, 'Microsoft.Network/publicIPAddresses/', variables('appAddressName'))]",
     "appFEName": "[variables('appName')]",
-    "elbName": "frontend-lb",
+    "elbName": "testfrontend-lb",
     "elbID": "[if(parameters('upgrading'), parameters('elBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('elbName')))]",
     "elbBEAddressPool": "[concat(variables('elbName'), '-pool')]",
     "elbBEAddressPoolName": "[if(parameters('upgrading'), parameters('elbTargetBEAddressPoolName'), variables('elbBEAddressPool'))]",
