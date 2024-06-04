@@ -105,7 +105,7 @@ resource "azurerm_managed_application" "nva" {
     name      = "vwan-app"
     product   = "cp-vwan-managed-app"
     publisher = "checkpoint"
-    version   = "1.0.11"
+    version   = "1.0.13"
   }
   parameter_values = jsonencode({
     location = {
