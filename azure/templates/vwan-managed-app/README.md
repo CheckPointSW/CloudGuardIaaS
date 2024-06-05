@@ -17,6 +17,11 @@ For Full Package (NGTX + S1C) license:
 https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSkus/checkpoint-ngtx?api-version=2023-05-01
 ```
 
+For Full Package Premium (NGTX + S1C++) license:
+```
+https://management.azure.com/subscriptions/{subscription_id}/providers/Microsoft.Network/networkVirtualApplianceSkus/checkpoint-premium?api-version=2023-05-01
+```
+
 
 ## Output example:
 ```
