@@ -115,7 +115,7 @@ resource "azurerm_managed_application" "nva" {
     name      = "vwan-app"
     product   = "cp-vwan-managed-app"
     publisher = "checkpoint"
-    version   = "1.0.12"
+    version   = "1.0.13"
   }
   parameter_values = jsonencode({
     location = {
@@ -177,6 +177,15 @@ resource "azurerm_managed_application" "nva" {
     },
     smart1CloudTokenE = {
       value = var.smart1-cloud-token-e
+    },
+    publicIPIngress = {
+      value = (var.new-public-ip == "yes" || length(var.existing-public-ip) > 0) ? "yes" : "no"
+    },
+    createNewIPIngress = {
+      value = var.new-public-ip
+    }
+    ipIngressExistingResourceId = {
+      value = var.existing-public-ip
     }
   })
 }
