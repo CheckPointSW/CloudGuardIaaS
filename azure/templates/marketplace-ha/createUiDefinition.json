@@ -2326,7 +2326,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
       "VipsNumber": "[int(steps('network').Vips_Number)]",
       "VipNames": "[concat(steps('network').VIP_Names.VIP2_Name, ',', steps('network').VIP_Names.VIP3_Name, ',', steps('network').VIP_Names.VIP4_Name, ',', steps('network').VIP_Names.VIP5_Name, ',', steps('network').VIP_Names.VIP6_Name, ',', steps('network').VIP_Names.VIP7_Name, ',', steps('network').VIP_Names.VIP8_Name, ',', steps('network').VIP_Names.VIP9_Name, ',', steps('network').VIP_Names.VIP10_Name)]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",

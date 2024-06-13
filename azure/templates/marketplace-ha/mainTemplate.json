@@ -789,7 +789,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -823,7 +823,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -952,8 +952,8 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-        "ipConfigurations":"[union(variables('DefaultIpAddresses'),variables('Vips'))]"
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "ipConfigurations": "[union(variables('DefaultIpAddresses'),variables('Vips'))]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
@@ -971,7 +971,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",

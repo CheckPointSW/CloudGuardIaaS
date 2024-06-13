@@ -478,7 +478,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -515,7 +515,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -675,7 +675,7 @@
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",

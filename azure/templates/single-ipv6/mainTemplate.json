@@ -667,8 +667,8 @@
       "properties": {
         "dhcpOptions": {
           "dnsServers": [
-            "cafe:43::",
-            "cafe:45::"
+            "cafe:43:: ",
+            "cafe:45:: "
           ]
         },
         "addressSpace": {
@@ -729,7 +729,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           }
         }
       }
@@ -744,7 +744,7 @@
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
       "properties": {
-        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
         "ipConfigurations": [

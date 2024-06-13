@@ -859,7 +859,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -897,7 +897,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -1057,7 +1057,7 @@
                   "primary": true,
                   "enableIPForwarding": true,
                   "enableAcceleratedNetworking": true,
-                  "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+                  "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
                   "ipConfigurations": [
                     {
                       "name": "ipconfig1",

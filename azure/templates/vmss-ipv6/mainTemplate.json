@@ -872,8 +872,8 @@
       "properties": {
         "dhcpOptions": {
           "dnsServers": [
-            "cafe:43::",
-            "cafe:45::"
+            "cafe:43:: ",
+            "cafe:45:: "
           ]
         },
         "addressSpace": {
@@ -956,7 +956,7 @@
           },
           "NewNsgName":
           {
-            "value":"[parameters('NewNsgName')]"
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"

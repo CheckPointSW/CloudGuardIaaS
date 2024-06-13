@@ -2448,7 +2448,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
     }
