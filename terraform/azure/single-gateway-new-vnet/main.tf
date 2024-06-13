@@ -28,6 +28,7 @@ module "common" {
   authentication_type = var.authentication_type
   serial_console_password_hash = var.serial_console_password_hash
   maintenance_mode_password_hash = var.maintenance_mode_password_hash
+  storage_account_additional_ips = var.storage_account_additional_ips
 }
 
 //********************** Networking **************************//
@@ -40,11 +41,12 @@ module "vnet" {
   address_space = var.address_space
   subnet_prefixes = [var.frontend_subnet_prefix, var.backend_subnet_prefix]
   subnet_names = ["${var.single_gateway_name}-frontend-subnet", "${var.single_gateway_name}-backend-subnet"]
-  nsg_id = module.network-security-group.network_security_group_id
+  nsg_id = var.nsg_id == "" ? module.network-security-group[0].network_security_group_id: var.nsg_id
 }
 
 module "network-security-group" {
   source = "../modules/network-security-group"
+  count = var.nsg_id == "" ? 1 : 0
   resource_group_name = module.common.resource_group_name
   security_group_name = "${module.common.resource_group_name}-nsg"
   location = module.common.resource_group_location
@@ -69,6 +71,7 @@ resource "azurerm_public_ip" "public-ip" {
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
   allocation_method = var.vnet_allocation_method
+  sku = var.sku
   idle_timeout_in_minutes = 30
   domain_name_label = join("", [
     lower(var.single_gateway_name),
@@ -77,9 +80,9 @@ resource "azurerm_public_ip" "public-ip" {
 }
 
 resource "azurerm_network_interface_security_group_association" "security_group_association" {
-  depends_on = [azurerm_network_interface.nic, module.network-security-group.network_security_group_id]
+  depends_on = [azurerm_network_interface.nic, module.network-security-group]
   network_interface_id = azurerm_network_interface.nic.id
-  network_security_group_id = module.network-security-group.network_security_group_id
+  network_security_group_id =  var.nsg_id == "" ? module.network-security-group[0].network_security_group_id: var.nsg_id
 }
 
 resource "azurerm_network_interface" "nic" {
@@ -88,7 +91,9 @@ resource "azurerm_network_interface" "nic" {
   name = "${var.single_gateway_name}-eth0"
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
-  enable_ip_forwarding = false
+  enable_ip_forwarding = true
+  enable_accelerated_networking = true
+
 
   ip_configuration {
     name = "ipconfig1"
@@ -104,7 +109,9 @@ resource "azurerm_network_interface" "nic1" {
   name = "${var.single_gateway_name}-eth1"
   location = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name
-  enable_ip_forwarding = false
+  enable_ip_forwarding = true
+  enable_accelerated_networking = true
+
 
   ip_configuration {
     name = "ipconfig2"
@@ -130,6 +137,16 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
   account_tier = module.common.storage_account_tier
   account_replication_type = module.common.account_replication_type
   account_kind = "Storage"
+  network_rules {
+    default_action = var.add_storage_account_ip_rules ? "Deny" : "Allow"
+    ip_rules = module.common.storage_account_ip_rules
+  }
+  blob_properties {
+    delete_retention_policy {
+      days = "15"
+    }
+  }
+
 }
 
 //********************** Virtual Machines **************************//

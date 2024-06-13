@@ -45,7 +45,7 @@ resource "azurerm_route_table" "frontend" {
 
   route {
     name = "Local-Subnet"
-    address_prefix = azurerm_subnet.subnet[0].address_prefix
+    address_prefix = azurerm_subnet.subnet[0].address_prefixes[0]
     next_hop_type = local.next_hop_type_allowed_values[1]
   }
   route {

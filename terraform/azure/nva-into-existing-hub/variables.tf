@@ -63,6 +63,7 @@ variable "nva-name" {
 variable "os-version" {
   description = "GAIA OS version"
   type = string
+  default = "R8120"
   validation {
     condition = contains(["R8110", "R8120"], var.os-version)
     error_message = "Allowed values for os-version are 'R8110', 'R8120'"

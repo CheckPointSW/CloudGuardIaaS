@@ -39,12 +39,12 @@ variable "location" {
 
 variable "vwan-name" {
   type    = string
-  default = "tf-vwan-demo"
+  default = "tf-vwan"
 }
 
 variable "vwan-hub-name" {
   type    = string
-  default = "tf-vwan-hub-demo"
+  default = "tf-vwan-hub"
 }
 
 variable "vwan-hub-address-prefix" {
@@ -58,12 +58,12 @@ variable "vwan-hub-address-prefix" {
 
 variable "managed-app-name" {
   type    = string
-  default = "tf-vwan-managed-app-nva-demo"
+  default = "tf-vwan-managed-app"
 }
 
 variable "nva-rg-name" {
   type    = string
-  default = "tf-vwan-managed-app-rg-demo"
+  default = "tf-vwan-nva-rg"
 }
 
 variable "nva-name" {
@@ -74,6 +74,7 @@ variable "nva-name" {
 variable "os-version" {
   description = "GAIA OS version"
   type = string
+  default = "R8120"
   validation {
     condition = contains(["R8110", "R8120"], var.os-version)
     error_message = "Allowed values for os-version are 'R8110', 'R8120'"

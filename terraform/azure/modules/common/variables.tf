@@ -17,7 +17,7 @@ variable "location" {
 //************** Virtual machine instance variables **************
 variable "admin_username" {
   description = "Administrator username of deployed VM. Due to Azure limitations 'notused' name can be used"
-  type = string
+  type        = string
   default     = "notused"
 }
 
@@ -48,6 +48,65 @@ variable "boot_diagnostics" {
   default     = true
 }
 
+variable "storage_account_additional_ips" {
+  type = list(string)
+  description = "IPs/CIDRs that are allowed access to the Storage Account"
+  default = []
+  validation {
+      condition = !contains(var.storage_account_additional_ips, "0.0.0.0") && can([for ip in var.storage_account_additional_ips: regex("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip)])
+      error_message = "Invalid IPv4 address."
+  }
+}
+locals {
+  serial_console_ips_per_location = {
+    "eastasia" : ["20.205.69.28", "20.195.85.180"],
+    "southeastasia" : ["20.205.69.28", "20.195.85.180"],
+    "australiacentral" : ["20.53.53.224", "20.70.222.112"],
+    "australiacentral2" : ["20.53.53.224", "20.70.222.112"],
+    "australiaeast" : ["20.53.53.224", "20.70.222.112"],
+    "australiasoutheast" : ["20.53.53.224", "20.70.222.112"],
+    "brazilsouth" : ["91.234.136.63", "20.206.0.194"],
+    "brazilsoutheast" : ["91.234.136.63", "20.206.0.194"],
+    "canadacentral" : ["52.228.86.177", "52.242.40.90"],
+    "canadaeast" : ["52.228.86.177", "52.242.40.90"],
+    "northeurope" : ["52.146.139.220", "20.105.209.72"],
+    "westeurope" : ["52.146.139.220", "20.105.209.72"],
+    "francecentral" : ["20.111.0.244", "52.136.191.10"],
+    "francesouth" : ["20.111.0.244", "52.136.191.10"],
+    "germanynorth" : ["51.116.75.88", "20.52.95.48"],
+    "germanywestcentral" : ["51.116.75.88", "20.52.95.48"],
+    "centralindia" : ["20.192.168.150", "20.192.153.104"],
+    "southindia" : ["20.192.168.150", "20.192.153.104"],
+    "westindia" : ["20.192.168.150", "20.192.153.104"],
+    "japaneast" : ["20.43.70.205", "20.189.228.222"],
+    "japanwest" : ["20.43.70.205", "20.189.228.222"],
+    "koreacentral" : ["20.200.196.96", "52.147.119.29"],
+    "koreasouth" : ["20.200.196.96", "52.147.119.29"],
+    "norwaywest" : ["20.100.1.184", "51.13.138.76"],
+    "norwayeast" : ["20.100.1.184", "51.13.138.76"],
+    "switzerlandnorth" : ["20.208.4.98", "51.107.251.190"],
+    "switzerlandwest" : ["20.208.4.98", "51.107.251.190"],
+    "uaecentral" : ["20.45.95.66", "20.38.141.5"],
+    "uaenorth" : ["20.45.95.66", "20.38.141.5"],
+    "uksouth" : ["20.90.132.144", "20.58.68.62"],
+    "ukwest" : ["20.90.132.144", "20.58.68.62"],
+    "swedencentral" : ["51.12.72.223", "51.12.22.174"],
+    "swedensouth" : ["51.12.72.223", "51.12.22.174"],
+    "centralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "eastus2" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "eastus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "northcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "southcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "westus2" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "westus3" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "westcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "westus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
+    "eastus2euap" : ["20.45.242.18", "20.51.21.252"],
+    "centraluseuap" : ["20.45.242.18", "20.51.21.252"]
+  }
+  serial_console_ips = contains(keys(local.serial_console_ips_per_location),var.location) ? local.serial_console_ips_per_location[var.location] : []
+  storage_account_ip_rules = concat(local.serial_console_ips, var.storage_account_additional_ips)
+}
 variable "vm_instance_identity_type" {
   description = "Managed Service Identity type"
   type = string
@@ -171,6 +230,7 @@ locals { // locals for 'vm_os_offer' allowed values
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
+  validate_os_version_match = regex(split("-", var.vm_os_offer)[3], lower(var.os_version))
 }
 
 variable "vm_os_sku" {
@@ -251,7 +311,7 @@ locals { // locals for 'account_replication_type' allowed values
 }
 
 variable "disk_size" {
-  description = "Storage data disk size size(GB).Select a number between 100 and 3995"
+  description = "Storage data disk size size(GB). Select a number between 100 and 3995"
   type = string
 }
 

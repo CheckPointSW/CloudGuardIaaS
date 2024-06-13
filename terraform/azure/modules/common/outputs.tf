@@ -122,6 +122,9 @@ output "boot_diagnostics" {
   value = var.boot_diagnostics
 }
 
+output "storage_account_ip_rules" {
+  value = local.storage_account_ip_rules
+}
 output "role_definition" {
   value = var.role_definition
 }

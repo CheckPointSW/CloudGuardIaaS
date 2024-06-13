@@ -28,6 +28,7 @@ module "common" {
   authentication_type = var.authentication_type
   serial_console_password_hash = var.serial_console_password_hash
   maintenance_mode_password_hash = var.maintenance_mode_password_hash
+  storage_account_additional_ips = var.storage_account_additional_ips
 }
 
 //********************** Networking **************************//
@@ -36,13 +37,14 @@ module "vnet" {
   vnet_name = var.vnet_name
   resource_group_name = module.common.resource_group_name
   location = module.common.resource_group_location
-  nsg_id = module.network-security-group.network_security_group_id
+  nsg_id = var.nsg_id == "" ? module.network-security-group[0].network_security_group_id: var.nsg_id
   address_space = var.address_space
   subnet_prefixes = var.subnet_prefixes
 }
 
 module "network-security-group" {
   source = "../modules/network-security-group"
+  count = var.nsg_id == "" ? 1 : 0
   resource_group_name = module.common.resource_group_name
   security_group_name = "${module.common.resource_group_name}_nsg"
   location = module.common.resource_group_location
@@ -96,7 +98,6 @@ resource "azurerm_public_ip" "cluster-vip" {
   sku = var.sku
   domain_name_label = "${lower(var.cluster_name)}-vip-${random_id.random_id.hex}"
   public_ip_prefix_id = var.use_public_ip_prefix ? (var.create_public_ip_prefix ? azurerm_public_ip_prefix.public_ip_prefix[0].id : var.existing_public_ip_prefix_id) : null
-
 }
 
 resource "azurerm_network_interface" "nic_vip" {
@@ -136,8 +137,8 @@ resource "azurerm_network_interface" "nic_vip" {
 
 resource "azurerm_network_interface_backend_address_pool_association" "nic_vip_lb_association" {
   depends_on = [azurerm_network_interface.nic_vip, azurerm_lb_backend_address_pool.frontend-lb-pool]
-  network_interface_id    = azurerm_network_interface.nic_vip.id
-  ip_configuration_name   = "ipconfig1"
+  network_interface_id   = azurerm_network_interface.nic_vip.id
+  ip_configuration_name  = "ipconfig1"
   backend_address_pool_id = azurerm_lb_backend_address_pool.frontend-lb-pool.id
 }
 
@@ -227,7 +228,6 @@ resource "azurerm_lb" "frontend-lb" {
 }
 
 resource "azurerm_lb_backend_address_pool" "frontend-lb-pool" {
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = azurerm_lb.frontend-lb.id
   name = "frontend-lb-pool"
 }
@@ -248,12 +248,10 @@ resource "azurerm_lb" "backend-lb" {
 resource "azurerm_lb_backend_address_pool" "backend-lb-pool" {
   name = "backend-lb-pool"
   loadbalancer_id = azurerm_lb.backend-lb.id
-  resource_group_name = module.common.resource_group_name
 }
 
 resource "azurerm_lb_probe" "azure_lb_healprob" {
   count = 2
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
   name = var.lb_probe_name
   protocol = var.lb_probe_protocol
@@ -263,7 +261,6 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
 }
 
 resource "azurerm_lb_rule" "backend_lb_rules" {
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = azurerm_lb.backend-lb.id
   name = "backend-lb"
   protocol = "All"
@@ -271,7 +268,7 @@ resource "azurerm_lb_rule" "backend_lb_rules" {
   backend_port = 0
   frontend_ip_configuration_name = "backend-lb"
   load_distribution = "Default"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool.id
+  backend_address_pool_ids = [azurerm_lb_backend_address_pool.backend-lb-pool.id]
   probe_id = azurerm_lb_probe.azure_lb_healprob[1].id
   enable_floating_ip = var.enable_floating_ip
 }
@@ -306,6 +303,15 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
   location = module.common.resource_group_location
   account_tier = module.common.storage_account_tier
   account_replication_type = module.common.account_replication_type
+  network_rules {
+    default_action = var.add_storage_account_ip_rules ? "Deny" : "Allow"
+    ip_rules = module.common.storage_account_ip_rules
+  }
+  blob_properties {
+    delete_retention_policy {
+      days = "15"
+    }
+  }
 }
 
 //********************** Virtual Machines **************************//
@@ -320,12 +326,11 @@ resource "azurerm_image" "custom-image" {
   resource_group_name = module.common.resource_group_name
 
   os_disk {
-    os_type  = "Linux"
+    os_type = "Linux"
     os_state = "Generalized"
     blob_uri = var.source_image_vhd_uri
   }
 }
-
 resource "azurerm_virtual_machine" "vm-instance-availability-set" {
   depends_on = [
     azurerm_network_interface.nic,
@@ -347,7 +352,6 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
   identity {
     type = module.common.vm_instance_identity
   }
-
   storage_image_reference {
     id = local.custom_image_condition ? azurerm_image.custom-image[0].id : null
     publisher = local.custom_image_condition ? null : module.common.publisher
@@ -514,12 +518,15 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
   }
 }
 //********************** Role Assigments **************************//
-data "azurerm_role_definition" "role_definition" {
-  name = module.common.role_definition
+data "azurerm_role_definition" "virtual_machine_contributor_role_definition" {
+  name = "Virtual Machine Contributor"
+}
+data "azurerm_role_definition" "reader_role_definition" {
+  name = "Reader"
 }
 data "azurerm_client_config" "client_config" {
 }
-resource "azurerm_role_assignment" "cluster_assigment" {
+resource "azurerm_role_assignment" "cluster_virtual_machine_contributor_assignment" {
   count = 2
   lifecycle {
     ignore_changes = [
@@ -527,6 +534,17 @@ resource "azurerm_role_assignment" "cluster_assigment" {
     ]
   }
   scope = module.common.resource_group_id
-  role_definition_id = data.azurerm_role_definition.role_definition.id
+  role_definition_id = data.azurerm_role_definition.virtual_machine_contributor_role_definition.id
+  principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
+}
+resource "azurerm_role_assignment" "cluster_reader_assigment" {
+  count = 2
+  lifecycle {
+    ignore_changes = [
+      role_definition_id, principal_id
+    ]
+  }
+  scope = module.common.resource_group_id
+  role_definition_id = data.azurerm_role_definition.reader_role_definition.id
   principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
 }
