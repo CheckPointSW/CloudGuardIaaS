@@ -43,7 +43,7 @@ resource "aws_network_interface" "member_a_external_eni" {
   source_dest_check = false
   private_ips_count = 1
   tags = {
-    Name = format("%s-Member_A_ExternalInterface", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name) }
+    x-chkp-interface-type = "external" }
 }
 
 resource "aws_network_interface" "member_b_external_eni" {
@@ -53,7 +53,7 @@ resource "aws_network_interface" "member_b_external_eni" {
   source_dest_check = false
   private_ips_count = 1
   tags = {
-    Name = format("%s-Member_B_ExternalInterface", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name) }
+    x-chkp-interface-type = "external" }
 }
 
 resource "aws_network_interface" "member_a_internal_eni" {
@@ -62,7 +62,7 @@ resource "aws_network_interface" "member_a_internal_eni" {
   description = "Member A internal"
   source_dest_check = false
   tags = {
-    Name = format("%s-Member_A_InternalInterface", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name) }
+    x-chkp-interface-type = "internal" }
 }
 
 resource "aws_network_interface" "member_b_internal_eni" {
@@ -71,7 +71,7 @@ resource "aws_network_interface" "member_b_internal_eni" {
   description = "Member B internal"
   source_dest_check = false
   tags = {
-    Name = format("%s-Member_B_InternalInterface", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name) }
+    x-chkp-interface-type = "internal" }
 }
 
 resource "aws_route" "internal_default_route" {
@@ -95,20 +95,73 @@ resource "aws_route_table_association" "private_rtb_b" {
   subnet_id = var.private_subnet_ids[1]
 }
 
-resource "aws_instance" "member-a-instance" {
+resource "aws_launch_template" "member_a_launch_template" {
   depends_on = [
     aws_network_interface.member_a_external_eni,
     aws_network_interface.member_a_internal_eni
   ]
+  instance_type = var.gateway_instance_type
+  key_name = var.key_name
+  image_id = module.amis.ami_id
+  description = "Initial launch template version"
 
-  network_interface {
+  iam_instance_profile {
+    name = aws_iam_instance_profile.cluster_instance_profile.id
+  }
+
+  metadata_options {
+    http_tokens = var.metadata_imdsv2_required ? "required" : "optional"
+  }
+
+  network_interfaces {
     network_interface_id = aws_network_interface.member_a_external_eni.id
     device_index = 0
   }
-  network_interface {
+  network_interfaces {
     network_interface_id = aws_network_interface.member_a_internal_eni.id
     device_index = 1
   }
+}
+
+resource "aws_launch_template" "member_b_launch_template" {
+  depends_on = [
+    aws_network_interface.member_b_external_eni,
+    aws_network_interface.member_b_internal_eni
+  ]
+  instance_type = var.gateway_instance_type
+  key_name = var.key_name
+  image_id = module.amis.ami_id
+  description = "Initial launch template version"
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.cluster_instance_profile.id
+  }
+
+  metadata_options {
+    http_tokens = var.metadata_imdsv2_required ? "required" : "optional"
+  }
+
+  network_interfaces {
+    network_interface_id = aws_network_interface.member_b_external_eni.id
+    device_index = 0
+  }
+  network_interfaces {
+    network_interface_id = aws_network_interface.member_b_internal_eni.id
+    device_index = 1
+  }
+}
+
+resource "aws_instance" "member-a-instance" {
+  depends_on = [
+    aws_launch_template.member_a_launch_template
+  ]
+
+  launch_template {
+    id = aws_launch_template.member_a_launch_template.id
+    version = "$Latest"
+  }
+
+  disable_api_termination = var.disable_instance_termination
 
   tags = merge({
     Name = format("%s-Member-A",var.gateway_name),
@@ -125,16 +178,11 @@ resource "aws_instance" "member-a-instance" {
     encrypted = local.volume_encryption_condition
     kms_key_id = local.volume_encryption_condition ? var.volume_encryption : ""
   }
+
   lifecycle {
     ignore_changes = [ebs_block_device,]
   }
-  instance_type = var.gateway_instance_type
-  key_name = var.key_name
-  iam_instance_profile = aws_iam_instance_profile.cluster_instance_profile.id
 
-  disable_api_termination = var.disable_instance_termination
-
-  ami = module.amis.ami_id
   user_data = templatefile("${path.module}/cluster_member_a_userdata.yaml", {
     // script's arguments
     Hostname = var.gateway_hostname,
@@ -161,18 +209,15 @@ resource "aws_instance" "member-a-instance" {
 
 resource "aws_instance" "member-b-instance" {
   depends_on = [
-    aws_network_interface.member_b_external_eni,
-    aws_network_interface.member_b_internal_eni
+    aws_launch_template.member_b_launch_template
   ]
 
-  network_interface {
-    network_interface_id = aws_network_interface.member_b_external_eni.id
-    device_index = 0
+  launch_template {
+    id = aws_launch_template.member_b_launch_template.id
+    version = "$Latest"
   }
-  network_interface {
-    network_interface_id = aws_network_interface.member_b_internal_eni.id
-    device_index = 1
-  }
+
+  disable_api_termination = var.disable_instance_termination
 
   tags = merge({
     Name = format("%s-Member-B",var.gateway_name),
@@ -192,13 +237,7 @@ resource "aws_instance" "member-b-instance" {
   lifecycle {
     ignore_changes = [ebs_block_device,]
   }
-  instance_type = var.gateway_instance_type
-  key_name = var.key_name
-  iam_instance_profile = aws_iam_instance_profile.cluster_instance_profile.id
 
-  disable_api_termination = var.disable_instance_termination
-
-  ami = module.amis.ami_id
   user_data = templatefile("${path.module}/cluster_member_b_userdata.yaml", {
     // script's arguments
     Hostname = var.gateway_hostname,

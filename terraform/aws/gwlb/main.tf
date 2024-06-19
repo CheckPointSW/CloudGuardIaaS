@@ -1,7 +1,7 @@
 provider "aws" {
-   region = var.region
-   access_key = var.access_key
-   secret_key = var.secret_key
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 module "gateway_load_balancer" {
   source = "../modules/common/load_balancer"
@@ -48,6 +48,7 @@ module "autoscale_gwlb" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   minimum_group_size = var.minimum_group_size
   maximum_group_size = var.maximum_group_size
   gateway_version = var.gateway_version
@@ -83,6 +84,7 @@ module "management" {
   volume_encryption = var.enable_volume_encryption ? "alias/aws/ebs" : ""
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   management_version = var.management_version
   management_password_hash = var.management_password_hash
   management_maintenance_mode_password_hash = var.management_maintenance_mode_password_hash

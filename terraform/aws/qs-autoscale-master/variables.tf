@@ -69,6 +69,11 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"

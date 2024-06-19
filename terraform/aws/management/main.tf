@@ -123,16 +123,42 @@ resource "aws_iam_instance_profile" "management_instance_profile" {
   role = var.predefined_role
 }
 
-resource "aws_instance" "management-instance" {
+resource "aws_launch_template" "management_launch_template" {
   depends_on = [
     aws_network_interface.external-eni,
     aws_eip.eip
   ]
 
-  network_interface {
+  instance_type = var.management_instance_type
+  key_name = var.key_name
+  image_id = module.amis.ami_id
+  description = "Initial launch template version"
+
+  iam_instance_profile {
+    name = local.use_role == 1 ? (local.pre_role == 1 ? aws_iam_instance_profile.management_instance_profile[0].id : join("", (var.is_gwlb_iam == true ? module.cme_iam_role_gwlb.*.cme_iam_profile_name : module.cme_iam_role.*.cme_iam_profile_name))): ""
+  }
+
+  metadata_options {
+    http_tokens = var.metadata_imdsv2_required ? "required" : "optional"
+  }
+
+  network_interfaces {
     network_interface_id = aws_network_interface.external-eni.id
     device_index = 0
   }
+}
+
+resource "aws_instance" "management-instance" {
+  depends_on = [
+    aws_launch_template.management_launch_template
+  ]
+
+  launch_template {
+    id = aws_launch_template.management_launch_template.id
+    version = "$Latest"
+  }
+
+  disable_api_termination = var.disable_instance_termination
 
   tags = merge({
     Name = var.management_name
@@ -145,17 +171,11 @@ resource "aws_instance" "management-instance" {
     encrypted = local.volume_encryption_condition
     kms_key_id = local.volume_encryption_condition ? var.volume_encryption : ""
   }
+
   lifecycle {
     ignore_changes = [ebs_block_device,]
   }
-  instance_type = var.management_instance_type
-  key_name = var.key_name
 
-  iam_instance_profile = local.use_role == 1 ? (local.pre_role == 1 ? aws_iam_instance_profile.management_instance_profile[0].id : join("", (var.is_gwlb_iam == true ? module.cme_iam_role_gwlb.*.cme_iam_profile_name : module.cme_iam_role.*.cme_iam_profile_name))): ""
-
-  disable_api_termination = var.disable_instance_termination
-
-  ami = module.amis.ami_id
   user_data = templatefile("${path.module}/management_userdata.yaml", {
     // script's arguments
     Hostname = var.management_hostname,

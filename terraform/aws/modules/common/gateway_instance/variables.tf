@@ -22,7 +22,7 @@ variable "configuration_template" {
   default = ""
   validation {
     condition     = length(var.configuration_template) < 31
-    error_message = "The configuration_template name can not exceed 30 characters"
+    error_message = "The configuration_template name can not exceed 30 characters."
   }
 }
 variable "control_gateway_over_public_or_private_address" {
@@ -139,4 +139,9 @@ variable "disable_instance_termination" {
   type = bool
   description = "Prevents an instance from accidental termination"
   default = false
+}
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
 }

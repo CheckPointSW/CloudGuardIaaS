@@ -21,6 +21,7 @@ instances_tags = {
   key1 = "value1"
   key2 = "value2"
 }
+metadata_imdsv2_required = true
 
 // --- Auto Scaling Configuration ---
 minimum_group_size = 2

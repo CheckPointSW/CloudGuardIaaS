@@ -41,6 +41,10 @@ resource "aws_launch_template" "asg_launch_template" {
     security_groups = [aws_security_group.permissive_sg.id]
   }
 
+  metadata_options {
+    http_tokens = var.metadata_imdsv2_required ? "required" : "optional"
+  }
+
   iam_instance_profile {
     name = ( var.enable_cloudwatch ? aws_iam_instance_profile.instance_profile[0].name : "")
   }

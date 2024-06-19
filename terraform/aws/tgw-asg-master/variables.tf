@@ -54,6 +54,11 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
@@ -103,6 +108,11 @@ variable "gateway_password_hash" {
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
   default = ""
 }
+variable "gateway_maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash for the gateway instances, relevant only for R81.20 and higher versions"
+  type = string
+  default = ""
+}
 variable "gateway_SICKey" {
   type = string
   description = "The Secure Internal Communication key for trusted connection between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters"
@@ -149,6 +159,11 @@ module "validate_management_version" {
 variable "management_password_hash" {
   type = string
   description = "(Optional) Admin user's password hash (use command 'openssl passwd -6 PASSWORD' to get the PASSWORD's hash)"
+  default = ""
+}
+variable "management_maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash for the management instance, relevant only for R81.20 and higher versions"
+  type = string
   default = ""
 }
 variable "management_permissions" {

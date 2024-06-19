@@ -1,7 +1,7 @@
 provider "aws" {
-    region = var.region
-    access_key = var.access_key
-    secret_key = var.secret_key
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 module "amis" {
@@ -115,4 +115,5 @@ module "common_gateway_instance" {
   secondary_ntp = var.secondary_ntp
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
 }
