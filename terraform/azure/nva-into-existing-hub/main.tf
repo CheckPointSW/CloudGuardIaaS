@@ -13,7 +13,7 @@ data "azurerm_virtual_hub" "vwan-hub" {
 
 data "external" "az_access_token" {
   count = var.authentication_method == "Azure CLI" ? 1 : 0
-  program = ["az", "account", "get-access-token", "--resource=https://management.azure.com", "--output=json"]
+  program = ["az", "account", "get-access-token", "--resource=https://management.azure.com", "--query={accessToken: accessToken}", "--output=json"]
 }
 
 data "http" "azure_auth" {
