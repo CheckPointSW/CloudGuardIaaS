@@ -394,3 +394,8 @@ variable "enable_floating_ip" {
   type = bool
   default = false
 }
+
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
+}

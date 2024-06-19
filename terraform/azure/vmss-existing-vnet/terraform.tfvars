@@ -40,3 +40,4 @@ serial_console_password_hash    = "PLEASE ENTER SERIAL CONSOLE PASSWORD HASH"   
 maintenance_mode_password_hash  = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                          # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 add_storage_account_ip_rules    = "PLEASE ENTER true or false"                                           # false
 storage_account_additional_ips  = "PLEASE ENTER A LIST OF VALID IPS/CIDRS"                               # []
+nsg_id                          = "PLEASE ENTER NETWORK SECURITY GROUP ID"                               # ""

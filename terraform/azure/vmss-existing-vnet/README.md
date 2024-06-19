@@ -151,6 +151,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **maintenance_mode_password_hash** | Maintenance mode password hash, relevant only for R81.20 and higher versions, to generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here  | string | | n/a 
  |  |  |  |  |  |
+ | **nsg_id** | Optional ID for a Network Security Group that already exists in Azure, if not provided, will create a default NSG | string | Existing NSG resource ID | ""
+ |  |  |  |  |  |
  | **add_storage_account_ip_rules** | Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, if false then accses will be allowed from all networks | boolean | true; <br/>false; |  false
  |  |  |  |  |  |
  | **storage_account_additional_ips** | IPs/CIDRs that are allowed access to the Storage Account | list(string) | A list of valid IPs and CIDRs | []
@@ -201,6 +203,7 @@ enable_custom_metrics = true
     admin_shell                     = "/etc/cli.sh"
     serial_console_password_hash    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 	maintenance_mode_password_hash  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    nsg_id                          = ""
     add_storage_account_ip_rules    = false
     storage_account_additional_ips  = []
     
