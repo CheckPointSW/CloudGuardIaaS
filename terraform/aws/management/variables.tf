@@ -76,6 +76,11 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
+}
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Management EC2 Instance"

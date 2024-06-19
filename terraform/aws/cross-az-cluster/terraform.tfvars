@@ -14,6 +14,7 @@ volume_size = 100
 volume_encryption = "alias/aws/ebs"
 enable_instance_connect = false
 disable_instance_termination = false
+metadata_imdsv2_required = true
 instance_tags = {
   key1 = "value1"
   key2 = "value2"

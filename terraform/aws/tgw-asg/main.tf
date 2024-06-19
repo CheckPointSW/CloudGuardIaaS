@@ -17,6 +17,7 @@ module "autoscale" {
   key_name = var.key_name
   enable_volume_encryption = var.enable_volume_encryption
   enable_instance_connect = var.enable_instance_connect
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   minimum_group_size = var.gateways_min_group_size
   maximum_group_size = var.gateways_max_group_size
   gateway_version = var.gateway_version
@@ -49,6 +50,7 @@ module "management" {
   volume_encryption = var.enable_volume_encryption ? "alias/aws/ebs" : ""
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   iam_permissions = var.management_permissions
   predefined_role = var.management_predefined_role
   management_version = var.management_version

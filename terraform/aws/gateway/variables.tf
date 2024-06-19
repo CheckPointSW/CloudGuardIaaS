@@ -85,6 +85,11 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
+}
 variable "instance_tags" {
   type = map(string)
   description = "(Optional) A map of tags as key=value pairs. All tags will be added to the Security Gateway EC2 Instance"
@@ -182,6 +187,6 @@ variable "configuration_template" {
   default = ""
   validation {
     condition     = length(var.configuration_template) < 31
-    error_message = "The configuration_template name can not exceed 30 characters"
+    error_message = "The configuration_template name can not exceed 30 characters."
   }
 }

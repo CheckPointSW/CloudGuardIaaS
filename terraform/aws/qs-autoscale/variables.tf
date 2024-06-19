@@ -52,6 +52,11 @@ variable "disable_instance_termination" {
   description = "Prevents an instance from accidental termination"
   default = false
 }
+variable "metadata_imdsv2_required" {
+  type = bool
+  description = "Set true to deploy the instance with metadata v2 token required"
+  default = true
+}
 variable "allow_upload_download" {
   type = bool
   description = "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point"
@@ -176,7 +181,7 @@ variable "management_password_hash" {
   default = ""
 }
 variable "management_maintenance_mode_password_hash" {
-  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
+  description = "(optional) Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here)."
   type = string
   default = ""
 }

@@ -1,7 +1,7 @@
 provider "aws" {
-    region = var.region
-    access_key = var.access_key
-    secret_key = var.secret_key
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 // --- VPC ---
@@ -46,6 +46,7 @@ module "launch_gateway_into_vpc" {
   volume_encryption = var.volume_encryption
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   instance_tags = var.instance_tags
   gateway_version = var.gateway_version
   admin_shell = var.admin_shell

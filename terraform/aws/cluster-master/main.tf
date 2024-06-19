@@ -44,6 +44,7 @@ module "launch_cluster_into_vpc" {
   volume_encryption = var.volume_encryption
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   instance_tags = var.instance_tags
   predefined_role = var.predefined_role
   gateway_version = var.gateway_version

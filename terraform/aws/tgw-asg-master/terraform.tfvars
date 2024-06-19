@@ -13,6 +13,7 @@ key_name = "publickey"
 enable_volume_encryption = true
 enable_instance_connect = false
 disable_instance_termination = false
+metadata_imdsv2_required = true
 allow_upload_download = true
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
@@ -22,6 +23,7 @@ gateways_min_group_size = 2
 gateways_max_group_size = 8
 gateway_version = "R81.20-BYOL"
 gateway_password_hash = ""
+gateway_maintenance_mode_password_hash = "" # For R81.10 and below the gateway_password_hash is used also as maintenance-mode password.
 gateway_SICKey = "12345678"
 enable_cloudwatch = true
 asn = "6500"
@@ -31,6 +33,7 @@ management_deploy = true
 management_instance_type = "m5.xlarge"
 management_version = "R81.20-BYOL"
 management_password_hash = ""
+management_maintenance_mode_password_hash = "" # For R81.10 and below the management_password_hash is used also as maintenance-mode password.
 management_permissions = "Create with read-write permissions"
 management_predefined_role = ""
 gateways_blades = true

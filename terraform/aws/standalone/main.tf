@@ -1,7 +1,7 @@
 provider "aws" {
-    region = var.region
-    access_key = var.access_key
-    secret_key = var.secret_key
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 module "amis" {
@@ -81,15 +81,38 @@ module "common_internal_default_route" {
   internal_eni_id = aws_network_interface.private_eni.id
 }
 
-resource "aws_instance" "standalone-instance" {
-  network_interface {
+resource "aws_launch_template" "standalone_launch_template" {
+  instance_type = var.standalone_instance_type
+  key_name = var.key_name
+  image_id = module.amis.ami_id
+  description = "Initial launch template version"
+
+  iam_instance_profile {
+    name = (local.enable_cloudwatch_policy == 1 ? aws_iam_instance_profile.standalone_instance_profile[0].id : "")
+  }
+
+  network_interfaces {
     network_interface_id = aws_network_interface.public_eni.id
     device_index = 0
   }
-  network_interface {
+
+  metadata_options {
+    http_tokens = var.metadata_imdsv2_required ? "required" : "optional"
+  }
+
+  network_interfaces {
     network_interface_id = aws_network_interface.private_eni.id
     device_index = 1
   }
+}
+
+resource "aws_instance" "standalone-instance" {
+  launch_template {
+    id = aws_launch_template.standalone_launch_template.id
+    version = "$Latest"
+  }
+
+  disable_api_termination = var.disable_instance_termination
 
   tags = merge({
     Name = var.standalone_name
@@ -102,13 +125,7 @@ resource "aws_instance" "standalone-instance" {
     encrypted = local.volume_encryption_condition
     kms_key_id = local.volume_encryption_condition ? var.volume_encryption : ""
   }
-  instance_type = var.standalone_instance_type
-  key_name = var.key_name
-  iam_instance_profile = (local.enable_cloudwatch_policy == 1 ? aws_iam_instance_profile.standalone_instance_profile[0].id : "")
 
-  disable_api_termination = var.disable_instance_termination
-
-  ami = module.amis.ami_id
   user_data = templatefile("${path.module}/standalone_userdata.yaml", {
     // script's arguments
     Hostname = var.standalone_hostname,

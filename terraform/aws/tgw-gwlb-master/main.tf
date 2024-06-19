@@ -1,7 +1,7 @@
 provider "aws" {
-   region = var.region
-   access_key = var.access_key
-   secret_key = var.secret_key
+  region = var.region
+  access_key = var.access_key
+  secret_key = var.secret_key
 }
 
 module "launch_vpc" {
@@ -45,6 +45,7 @@ module "tgw-gwlb"{
   volume_size = var.volume_size
   enable_instance_connect = var.enable_instance_connect
   disable_instance_termination = var.disable_instance_termination
+  metadata_imdsv2_required = var.metadata_imdsv2_required
   allow_upload_download = var.allow_upload_download
   management_server = var.management_server
   configuration_template = var.configuration_template
