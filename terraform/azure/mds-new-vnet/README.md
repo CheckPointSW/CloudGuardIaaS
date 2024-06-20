@@ -175,6 +175,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description                                                                                 |
 |------------------|---------------------------------------------------------------------------------------------|
+| 20240613 | - Updated Azure Terraform provider version <br> - Cosmetic fixes & default values <br> - Added option to limit storage account access by specify allowed sourcess <br> - Updated Public IP sku to Standard <br> - Added validation for os_version & os_offer |
+| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20230629         | First release of Check Point CloudGuard Network Security MDS Terraform deployment for Azure |
