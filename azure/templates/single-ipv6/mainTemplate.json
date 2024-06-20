@@ -667,8 +667,8 @@
       "properties": {
         "dhcpOptions": {
           "dnsServers": [
-            "cafe:43:: ",
-            "cafe:45:: "
+            "cafe:43::",
+            "cafe:45::"
           ]
         },
         "addressSpace": {
