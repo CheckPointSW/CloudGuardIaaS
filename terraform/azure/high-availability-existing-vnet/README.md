@@ -214,22 +214,24 @@ availability_type = "Availability Zone"
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description   |
-| ---------------- | ------------- |
-| 20230910 | - R81.20 is the default version |
-| | | |
-| 20230212 | - Added Smart-1 Cloud support  |
-| | | |
-| 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |
-| | | |
-| 20220111 | - Added support to select different shells. |
-| | | |
-| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image |
-| | | |
-| 20210111 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure. |
-| | | |
-|  | Addition of "templateType" parameter to "cloud-version" files. |
-| | | |
+| Template Version | Description                                                                                                                                                                                                                                                    |
+| ---------------- |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 20240613 | - Updated Azure Terraform provider version <br> - Updated managed identity permissions <br> - Cosmetic fixes & default values <br> - Added option to limit storage account access by specify allowed sourcess <br> - Added validation for os_version & os_offer |
+| |                                                                                                                                                                                                                                                                | |
+| 20230910 | - R81.20 is the default version                                                                                                                                                                                                                                |
+| |                                                                                                                                                                                                                                                                | |
+| 20230212 | - Added Smart-1 Cloud support                                                                                                                                                                                                                                  |
+| |                                                                                                                                                                                                                                                                | |
+| 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider                                                                                                                                                                                                     |
+| |                                                                                                                                                                                                                                                                | |
+| 20220111 | - Added support to select different shells.                                                                                                                                                                                                                    |
+| |                                                                                                                                                                                                                                                                | |
+| 20210309 | - Add "source_image_vhd_uri" variable for using a custom development image                                                                                                                                                                                     |
+| |                                                                                                                                                                                                                                                                | |
+| 20210111 | First release of Check Point CloudGuard IaaS High Availability Terraform deployment into an existing Vnet in Azure.                                                                                                                                            |
+| |                                                                                                                                                                                                                                                                | |
+|  | Addition of "templateType" parameter to "cloud-version" files.                                                                                                                                                                                                 |
+| |                                                                                                                                                                                                                                                                | |
 
 ## License
 
