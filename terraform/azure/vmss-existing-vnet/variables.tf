@@ -76,7 +76,7 @@ variable "template_name"{
 variable "template_version"{
   description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20210111"
+  default = "20230910"
 }
 
 variable "installation_type"{
@@ -106,10 +106,6 @@ variable "vm_size" {
   type = string
 }
 
-variable "disk_size" {
-  description = "Storage data disk size size(GB).Select a number between 100 and 3995"
-  type = string
-}
 
 variable "os_version" {
   description = "GAIA OS version"
@@ -126,7 +122,15 @@ locals { // locals for 'vm_os_offer' allowed values
   // will fail if [var.os_version] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
 }
-
+variable "disk_size" {
+  description = "Storage data disk size size(GB). Select a number between 100 and 3995, if you are using R81.20 or below, the disk size must be 100"
+  type = string
+  default = 100
+}
+resource "null_resource" "disk_size_validation" {
+  // Will fail if var.disk_size is not 100 and the version is R81.20 or below
+  count = tonumber(var.disk_size) != 100 && contains(["R8040", "R81", "R8110", "R8120"], var.os_version) ? "variable disk_size can not be changed for R81.20 and below" : 0
+}
 variable "vm_os_sku" {
   description = "The sku of the image to be deployed."
   type = string
@@ -188,6 +192,7 @@ variable "configuration_template_name" {
 variable "admin_shell" {
   description = "The admin shell to configure on machine or the first time"
   type = string
+  default = "/etc/cli.sh"
 }
 
 locals {
@@ -228,7 +233,20 @@ variable "vnet_allocation_method" {
   default = "Static"
 }
 
+variable "add_storage_account_ip_rules" {
+  type = bool
+  default = false
+  description = "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location"
+}
+
+variable "storage_account_additional_ips" {
+  type = list(string)
+  description = "IPs/CIDRs that are allowed access to the Storage Account"
+  default = []
+}
+
 //********************* Load Balancers Variables **********************//
+
 variable "deployment_mode" {
   description = "The type of the deployment, can be 'Standard' for both load balancers or 'External' for external load balancer or 'Internal for internal load balancer"
   type = string
@@ -257,7 +275,7 @@ variable "lb_probe_port" {
 
 variable "lb_probe_protocol" {
   description = "Protocols to be used for load balancer health probes and rules"
-  default = "tcp"
+  default = "Tcp"
 }
 
 variable "lb_probe_unhealthy_threshold" {
@@ -378,4 +396,9 @@ variable "enable_floating_ip" {
   description = "Indicates whether the load balancers will be deployed with floating IP."
   type = bool
   default = false
+}
+
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
 }

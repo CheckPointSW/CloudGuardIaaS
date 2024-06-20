@@ -69,7 +69,7 @@ variable "template_name" {
 variable "template_version" {
   description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20230629"
+  default = "20230910"
 }
 
 variable "installation_type" {
@@ -91,7 +91,7 @@ variable "vm_size" {
 }
 
 variable "disk_size" {
-  description = "Storage data disk size size(GB).Select a number between 100 and 3995"
+  description = "Storage data disk size size(GB). Select a number between 100 and 3995"
   type = string
 }
 
@@ -228,6 +228,23 @@ variable "bootstrap_script" {
   #"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
 }
 
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
+}
+
+variable "add_storage_account_ip_rules" {
+  type = bool
+  default = false
+  description = "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location"
+}
+
+variable "storage_account_additional_ips" {
+  type = list(string)
+  description = "IPs/CIDRs that are allowed access to the Storage Account"
+  default = []
+}
+
 //********************** Credentials **************************//
 variable "tenant_id" {
   description = "Tenant ID"
@@ -255,4 +272,10 @@ variable "sic_key" {
 
 resource "null_resource" "sic_key_invalid" {
   count = length(var.sic_key) >= 12 ? 0 : "SIC key must be at least 12 characters long"
+}
+
+variable "sku" {
+  description = "SKU"
+  type = string
+  default = "Standard"
 }

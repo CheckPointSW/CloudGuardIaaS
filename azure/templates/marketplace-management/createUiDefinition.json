@@ -608,7 +608,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "Additional disk space (GB)",
             "defaultValue": "0",
-            "toolTip": "Additional disk space (in GB), Initial disk size is 100 GB.",
+            "toolTip": "Additional disk space (in GB), initial disk size is 100 GB.",
             "constraints": {
               "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
               "validationMessage": "Select a number between 0 and 3995"
@@ -745,6 +745,27 @@
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
             "visible": "[steps('network').NSG]"
+          },
+          {
+            "name": "addStorageAccountIpRules",
+            "type": "Microsoft.Common.OptionsGroup",
+            "defaultValue": "Network access from all networks",
+            "label": "Storage Account Network Access",
+            "toolTip": "Select your preferred network access to the Storage Account, for more information - https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#serial-console-security",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Network access from all networks",
+                  "value": false
+                },
+                {
+                  "label": "Network access only from Serial Console",
+                  "value": true
+                }
+              ],
+              "required": true
+            },
+            "visible": true
           }
         ]
       },
@@ -797,6 +818,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
+      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
     }

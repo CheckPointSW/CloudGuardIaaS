@@ -31,6 +31,11 @@ variable "admin_password" {
   type = string
 }
 
+variable "smart_1_cloud_token" {
+  description = "Smart-1 Cloud Token"
+  type = string
+}
+
 variable "serial_console_password_hash" {
   description = "Optional parameter, used to enable serial console connection in case of SSH key as authentication type"
   type = string
@@ -38,11 +43,6 @@ variable "serial_console_password_hash" {
 
 variable "maintenance_mode_password_hash" {
   description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
-  type = string
-}
-
-variable "smart_1_cloud_token" {
-  description = "Smart-1 Cloud Token"
   type = string
 }
 
@@ -68,7 +68,7 @@ variable "template_name" {
 variable "template_version" {
   description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20230629"
+  default = "20230910"
 }
 
 variable "installation_type" {
@@ -90,7 +90,7 @@ variable "vm_size" {
 }
 
 variable "disk_size" {
-  description = "Storage data disk size size(GB).Select a number between 100 and 3995"
+  description = "Storage data disk size size(GB). Select a number between 100 and 3995"
   type = string
 }
 
@@ -205,7 +205,22 @@ variable "management_GUI_client_network" {
   type = string
 }
 
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
+}
 
+variable "add_storage_account_ip_rules" {
+  type = bool
+  default = false
+  description = "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location"
+}
+
+variable "storage_account_additional_ips" {
+  type = list(string)
+  description = "IPs/CIDRs that are allowed access to the Storage Account"
+  default = []
+}
 locals {
   regex_valid_management_GUI_client_network = "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(/(3[0-2]|2[0-9]|1[0-9]|[0-9]))$"
   // Will fail if var.management_GUI_client_network is invalid
@@ -256,4 +271,10 @@ variable "sic_key" {
 
 resource "null_resource" "sic_key_invalid" {
   count = length(var.sic_key) >= 12 ? 0 : "SIC key must be at least 12 characters long"
+}
+
+variable "sku" {
+  description = "SKU"
+  type = string
+  default = "Standard"
 }

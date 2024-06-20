@@ -1632,7 +1632,7 @@
             "label": "Availability options",
             "defaultValue": "Availability Set",
             "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -1738,7 +1738,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "Additional disk space (GB)",
             "defaultValue": "0",
-            "toolTip": "Additional disk space (in GB), Initial disk size is 100 GB.",
+            "toolTip": "Additional disk space (in GB), initial disk size is 100 GB.",
             "constraints": {
               "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
               "validationMessage": "Select a number between 0 and 3995"
@@ -2241,6 +2241,27 @@
               "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
             },
             "visible": "[steps('network').NSG]"
+          },
+          {
+            "name": "addStorageAccountIpRules",
+            "type": "Microsoft.Common.OptionsGroup",
+            "defaultValue": "Network access from all networks",
+            "label": "Storage Account Network Access",
+            "toolTip": "Select your preferred network access to the Storage Account, for more information - https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#serial-console-security",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Network access from all networks",
+                  "value": false
+                },
+                {
+                  "label": "Network access only from Serial Console",
+                  "value": true
+                }
+              ],
+              "required": true
+            },
+            "visible": true
           }
         ]
       },
@@ -2305,6 +2326,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
+      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
       "VipsNumber": "[int(steps('network').Vips_Number)]",
       "VipNames": "[concat(steps('network').VIP_Names.VIP2_Name, ',', steps('network').VIP_Names.VIP3_Name, ',', steps('network').VIP_Names.VIP4_Name, ',', steps('network').VIP_Names.VIP5_Name, ',', steps('network').VIP_Names.VIP6_Name, ',', steps('network').VIP_Names.VIP7_Name, ',', steps('network').VIP_Names.VIP8_Name, ',', steps('network').VIP_Names.VIP9_Name, ',', steps('network').VIP_Names.VIP10_Name)]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",

@@ -28,7 +28,8 @@ module "common" {
   vm_os_offer = var.vm_os_offer
   authentication_type = var.authentication_type
   serial_console_password_hash = var.serial_console_password_hash
-   maintenance_mode_password_hash = var.maintenance_mode_password_hash
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
+  storage_account_additional_ips = var.storage_account_additional_ips
 }
 
 //********************** Networking **************************//
@@ -95,7 +96,7 @@ resource "azurerm_network_interface" "nic_vip" {
     primary = true
     subnet_id = data.azurerm_subnet.frontend.id
     private_ip_address_allocation = var.vnet_allocation_method
-    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefix, var.frontend_IP_addresses[0])
+    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefixes[0], var.frontend_IP_addresses[0])
     public_ip_address_id = azurerm_public_ip.public-ip.0.id
   }
   ip_configuration {
@@ -103,7 +104,7 @@ resource "azurerm_network_interface" "nic_vip" {
     subnet_id = data.azurerm_subnet.frontend.id
     primary = false
     private_ip_address_allocation = var.vnet_allocation_method
-    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefix, var.frontend_IP_addresses[2])
+    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefixes[0], var.frontend_IP_addresses[2])
     public_ip_address_id = azurerm_public_ip.cluster-vip.id
   }
   lifecycle {
@@ -137,7 +138,7 @@ resource "azurerm_network_interface" "nic" {
     primary = true
     subnet_id = data.azurerm_subnet.frontend.id
     private_ip_address_allocation = var.vnet_allocation_method
-    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefix, var.frontend_IP_addresses[1])
+    private_ip_address = cidrhost(data.azurerm_subnet.frontend.address_prefixes[0], var.frontend_IP_addresses[1])
     public_ip_address_id = azurerm_public_ip.public-ip.1.id
   }
   lifecycle {
@@ -170,7 +171,7 @@ resource "azurerm_network_interface" "nic1" {
     name = "ipconfig2"
     subnet_id = data.azurerm_subnet.backend.id
     private_ip_address_allocation = var.vnet_allocation_method
-    private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefix, var.backend_IP_addresses[count.index+1])
+    private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefixes[0], var.backend_IP_addresses[count.index+1])
   }
 }
 
@@ -208,7 +209,6 @@ resource "azurerm_lb" "frontend-lb" {
 }
 
 resource "azurerm_lb_backend_address_pool" "frontend-lb-pool" {
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = azurerm_lb.frontend-lb.id
   name = "frontend-lb-pool"
 }
@@ -222,19 +222,17 @@ resource "azurerm_lb" "backend-lb" {
     name = "backend-lb"
     subnet_id = data.azurerm_subnet.backend.id
     private_ip_address_allocation = var.vnet_allocation_method
-    private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefix, var.backend_IP_addresses[0])
+    private_ip_address = cidrhost(data.azurerm_subnet.backend.address_prefixes[0], var.backend_IP_addresses[0])
   }
 }
 
 resource "azurerm_lb_backend_address_pool" "backend-lb-pool" {
   name = "backend-lb-pool"
   loadbalancer_id = azurerm_lb.backend-lb.id
-  resource_group_name = module.common.resource_group_name
 }
 
 resource "azurerm_lb_probe" "azure_lb_healprob" {
   count = 2
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = count.index == 0 ? azurerm_lb.frontend-lb.id : azurerm_lb.backend-lb.id
   name = var.lb_probe_name
   protocol = var.lb_probe_protocol
@@ -244,7 +242,6 @@ resource "azurerm_lb_probe" "azure_lb_healprob" {
 }
 
 resource "azurerm_lb_rule" "backend_lb_rules" {
-  resource_group_name = module.common.resource_group_name
   loadbalancer_id = azurerm_lb.backend-lb.id
   name = "backend-lb"
   protocol = "All"
@@ -252,7 +249,7 @@ resource "azurerm_lb_rule" "backend_lb_rules" {
   backend_port = 0
   frontend_ip_configuration_name = "backend-lb"
   load_distribution = "Default"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.backend-lb-pool.id
+  backend_address_pool_ids = [azurerm_lb_backend_address_pool.backend-lb-pool.id]
   probe_id = azurerm_lb_probe.azure_lb_healprob[1].id
   enable_floating_ip = var.enable_floating_ip
 }
@@ -287,6 +284,15 @@ resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
   location = module.common.resource_group_location
   account_tier = module.common.storage_account_tier
   account_replication_type = module.common.account_replication_type
+  network_rules {
+    default_action = var.add_storage_account_ip_rules ? "Deny" : "Allow"
+    ip_rules = module.common.storage_account_ip_rules
+  }
+  blob_properties {
+    delete_retention_policy {
+      days = "15"
+    }
+  }
 }
 
 //********************** Virtual Machines **************************//
@@ -493,12 +499,15 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
   }
 }
 //********************** Role Assigments **************************//
-data "azurerm_role_definition" "role_definition" {
-  name = module.common.role_definition
+data "azurerm_role_definition" "virtual_machine_contributor_role_definition" {
+  name = "Virtual Machine Contributor"
+}
+data "azurerm_role_definition" "reader_role_definition" {
+  name = "Reader"
 }
 data "azurerm_client_config" "client_config" {
 }
-resource "azurerm_role_assignment" "cluster_assigment" {
+resource "azurerm_role_assignment" "cluster_virtual_machine_contributor_assignment" {
   count = 2
   lifecycle {
     ignore_changes = [
@@ -506,6 +515,17 @@ resource "azurerm_role_assignment" "cluster_assigment" {
     ]
   }
   scope = module.common.resource_group_id
-  role_definition_id = data.azurerm_role_definition.role_definition.id
+  role_definition_id = data.azurerm_role_definition.virtual_machine_contributor_role_definition.id
+  principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
+}
+resource "azurerm_role_assignment" "cluster_reader_assigment" {
+  count = 2
+  lifecycle {
+    ignore_changes = [
+      role_definition_id, principal_id
+    ]
+  }
+  scope = module.common.resource_group_id
+  role_definition_id = data.azurerm_role_definition.reader_role_definition.id
   principal_id = local.availability_set_condition ? lookup(azurerm_virtual_machine.vm-instance-availability-set[count.index].identity[0], "principal_id") : lookup(azurerm_virtual_machine.vm-instance-availability-zone[count.index].identity[0], "principal_id")
 }

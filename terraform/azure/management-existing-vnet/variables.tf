@@ -63,7 +63,7 @@ variable "template_name" {
 variable "template_version" {
   description = "Template version. It is recommended to always use the latest template version"
   type = string
-  default = "20210111"
+  default = "20230910"
 }
 
 variable "installation_type" {
@@ -78,7 +78,7 @@ variable "vm_size" {
 }
 
 variable "disk_size" {
-  description = "Storage data disk size size(GB).Select a number between 100 and 3995"
+  description = "Storage data disk size size(GB). Select a number between 100 and 3995"
   type = string
 }
 
@@ -127,6 +127,7 @@ variable "allow_upload_download" {
 variable "admin_shell" {
   description = "The admin shell to configure on machine or the first time"
   type = string
+  default = "/etc/cli.sh"
 }
 
 locals {
@@ -205,7 +206,24 @@ variable "bootstrap_script" {
   #"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt"
 }
 
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
+}
+
+variable "add_storage_account_ip_rules" {
+  type = bool
+  default = false
+  description = "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location"
+}
+
+variable "storage_account_additional_ips" {
+  type = list(string)
+  description = "IPs/CIDRs that are allowed access to the Storage Account"
+  default = []
+}
 //********************** Credentials **************************//
+
 variable "tenant_id" {
   description = "Tenant ID"
   type = string
@@ -224,4 +242,10 @@ variable "client_id" {
 variable "client_secret" {
   description = "A secret string that the application uses to prove its identity when requesting a token. Also can be referred to as application password."
   type = string
+}
+
+variable "sku" {
+  description = "SKU"
+  type = string
+  default = "Standard"
 }
