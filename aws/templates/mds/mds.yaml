@@ -115,7 +115,7 @@ Parameters:
   MDSInstanceType:
     Description: The instance type of the Multi-Domain Server.
     Type: String
-    Default: m5.12xlarge
+    Default: m5.2xlarge
     AllowedValues:
       - c5.large
       - c5.xlarge

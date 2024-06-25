@@ -35,7 +35,7 @@ variable "mds_name" {
 variable "mds_instance_type" {
   type = string
   description = "The instance type of the Multi-Domain Server"
-  default = "m5.12xlarge"
+  default = "m5.2xlarge"
 }
 module "validate_instance_type" {
   source = "../modules/common/instance_type"
