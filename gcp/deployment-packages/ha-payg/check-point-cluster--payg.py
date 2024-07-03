@@ -16,14 +16,12 @@ LICENSE = 'payg'
 LICENCE_TYPE = 'cluster'
 
 VERSIONS = {
-    'R80.40': 'r8040-gw',
-    'R81': 'r81-gw',
     'R81.10': 'r8110-gw',
     'R81.20': 'r8120-gw'
 }
 
 TEMPLATE_NAME = 'cluster'
-TEMPLATE_VERSION = '20231221'
+TEMPLATE_VERSION = '20240714'
 
 CLUSTER_NET_FIELD = 'cluster-network'
 MGMT_NET_FIELD = 'mgmt-network'
@@ -367,7 +365,7 @@ def validate_same_region(zone_a, zone_b):
 
 def validate_both_tokens(token_a, token_b):
     if (not token_a and token_b) or (not token_b and token_a) or \
-                    (token_a and token_a == token_b):
+            (token_a and token_a == token_b):
         raise common.Error('To connect to Smart-1 Cloud, \
          you must provide two tokens (one per member)')
 
