@@ -51,7 +51,7 @@ properties:
     default: ''
   smart1CloudTokenB:
     type: string
-    default: ''  
+    default: ''
   diskType:
     type: string
     default: pd-ssd
