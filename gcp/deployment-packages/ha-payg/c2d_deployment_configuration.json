@@ -1,6 +1,6 @@
 {
   "defaultDeploymentType": "MULTI_VM",
-  "imageName": "check-point-r8120-gw-payg-cluster-631-991001475-v20231221",
+  "imageName": "check-point-r8120-gw-payg-cluster-634-991001611-v20240613",
   "projectId": "checkpoint-public",
   "templateName": "nonexistent_template",
   "useSolutionPackage": "true"

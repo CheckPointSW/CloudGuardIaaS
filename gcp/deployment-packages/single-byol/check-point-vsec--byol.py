@@ -12,10 +12,6 @@ LICENSE = 'byol'
 LICENCE_TYPE = 'single'
 
 VERSIONS = {
-    'R80.40': 'r8040',
-    'R80.40-GW': 'r8040-gw',
-    'R81': 'r81',
-    'R81-GW': 'r81-gw',
     'R81.10': 'r8110',
     'R81.10-GW': 'r8110-gw',
     'R81.20': 'r8120',
@@ -28,7 +24,7 @@ ADDITIONAL_EXTERNAL_IP = 'externalIP{}'
 MAX_NICS = 8
 
 TEMPLATE_NAME = 'single'
-TEMPLATE_VERSION = '20231221'
+TEMPLATE_VERSION = '20240714'
 
 ATTRIBUTES = {
     'Gateway and Management (Standalone)': {
@@ -356,7 +352,7 @@ def generate_config(context):
             firewall_rules = create_firewall_rules(
                 prop, network, fw_rule_name_prefix)
             resources.extend(firewall_rules)
-    elif MANAGEMENT in tags:
+    else:
         for i in range(len(netlist)):
             network = netlist[i]
             source_ranges = prop['network_tcpSourceRanges']

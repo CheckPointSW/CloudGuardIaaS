@@ -11,14 +11,12 @@ LICENSE = 'byol'
 LICENCE_TYPE = 'mig'
 
 VERSIONS = {
-    'R80.40-GW': 'r8040-gw',
-    'R81-GW': 'r81-gw',
     'R81.10-GW': 'r8110-gw',
     'R81.20-GW': 'r8120-gw'
 }
 
 TEMPLATE_NAME = 'autoscale'
-TEMPLATE_VERSION = '20231221'
+TEMPLATE_VERSION = '20240714'
 
 startup_script = '''
 #cloud-config

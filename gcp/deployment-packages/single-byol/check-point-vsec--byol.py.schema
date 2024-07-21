@@ -146,14 +146,6 @@ properties:
     type: string
     default: R81.20 Gateway only
     enum:
-      - R80.40 Gateway only
-      - R80.40 Management only
-      - R80.40 Manual Configuration
-      - R80.40 Gateway and Management (Standalone)
-      - R81 Gateway only
-      - R81 Management only
-      - R81 Manual Configuration
-      - R81 Gateway and Management (Standalone)
       - R81.10 Gateway only
       - R81.10 Management only
       - R81.10 Manual Configuration

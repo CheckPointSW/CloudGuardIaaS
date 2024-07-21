@@ -169,8 +169,6 @@ properties:
     type: string
     default: R81.20 Autoscaling
     enum:
-      - R80.40 Autoscaling
-      - R81 Autoscaling
       - R81.10 Autoscaling
       - R81.20 Autoscaling
   managementName:
