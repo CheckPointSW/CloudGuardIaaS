@@ -64,7 +64,7 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Check Point CloudGuard version",
-            "defaultValue": "R81.20",
+            "defaultValue": "R81",
             "toolTip": "The version of Check Point CloudGuard.",
             "constraints": {
               "allowedValues": [
@@ -75,14 +75,6 @@
                 {
                   "label": "R81",
                   "value": "R81"
-                },
-                {
-                  "label": "R81.10",
-                  "value": "R81.10"
-                },
-                {
-                  "label": "R81.20",
-                  "value": "R81.20"
                 }
               ]
             }
@@ -224,122 +216,6 @@
             "count": 1
           },
           {
-            "name": "R8110vmSizeUiBYOL",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.10'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8110",
-              "sku": "mgmt-byol"
-            },
-            "count": 1
-          },
-          {
-            "name": "R8110vmSizeUiMGMT25",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.10'), contains(steps('chkp').R80Offer, '(MGMT25)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D3_v2",
-              "Standard_DS3_v2"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8110",
-              "sku": "mgmt-25"
-            },
-            "count": 1
-          },
-          {
-            "name": "R8120vmSizeUiBYOL",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D4ds_v5",
-              "Standard_D4d_v5"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8120",
-              "sku": "mgmt-byol"
-            },
-            "count": 1
-          },
-          {
-            "name": "R8120vmSizeUiMGMT25",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, '(MGMT25)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Management",
-            "recommendedSizes": [
-              "Standard_D4ds_v5",
-              "Standard_D4d_v5"
-            ],
-            "constraints": {
-              "excludedSizes": [
-                "Standard_A1_v2",
-                "Standard_D1_v2",
-                "Standard_DS1_v2",
-                "Standard_F1",
-                "Standard_F1s",
-                "Standard_G1",
-                "Standard_GS1"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "checkpoint",
-              "offer": "check-point-cg-r8120",
-              "sku": "mgmt-25"
-            },
-            "count": 1
-          },
-          {
             "name": "SerialPasswordInfoBox",
             "type": "Microsoft.Common.InfoBox",
             "visible": "[bool(basics('auth').sshPublicKey)]",
@@ -380,53 +256,6 @@
             "constraints": {
               "required": true,
               "regex": "^.{12,300}$",
-              "validationMessage": "The value must be the output of the hash command."
-            },
-            "options": {
-              "hideConfirmation": false
-            }
-          },
-          {
-            "name": "MaintenanceModeInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(bool(basics('auth').password), not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion)))]",
-            "options": {
-              "icon": "Info",
-              "text": "Check Point recommends setting a maintenance-mode password for recovery purposes."
-            }
-          },
-          {
-            "visible": "[not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion))]",
-            "name": "EnableMaintenanceMode",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Enable Maintenance Mode",
-            "defaultValue": "Yes",
-            "toolTip": "A unique password hash to enable VM maintenance mode.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Yes",
-                  "value": true
-                },
-                {
-                  "label": "No",
-                  "value": false
-                }
-              ]
-            }
-          },
-          {
-            "visible": "[and(not(contains('R80.40 R81 R81.10', steps('chkp').cloudGuardVersion)), steps('chkp').EnableMaintenanceMode)]",
-            "name": "MaintenanceModePassword",
-            "type": "Microsoft.Common.PasswordBox",
-            "defaultValue": "",
-            "toolTip": "To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here.",
-            "label": {
-              "password": "Maintenance Mode password hash",
-              "confirmPassword": "Confirm Password"
-            },
-            "constraints": {
-              "required": true,
               "validationMessage": "The value must be the output of the hash command."
             },
             "options": {
@@ -512,7 +341,7 @@
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
             "toolTip": "Type of CloudGuard disk.",
-            "visible": "[not(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion))]",
+            "visible": "[not(contains('R80.40 R81' , steps('chkp').cloudGuardVersion))]",
             "defaultValue": "Premium",
             "constraints": {
               "allowedValues": [
@@ -532,7 +361,7 @@
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
             "toolTip": "Type of CloudGuard disk.",
-            "visible": "[contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion)]",
+            "visible": "[contains('R80.40 R81' , steps('chkp').cloudGuardVersion)]",
             "defaultValue": "Standard",
             "constraints": {
               "allowedValues": [
@@ -797,7 +626,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25, steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiMGMT25, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiMGMT25)]",
+      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiMGMT25, steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiMGMT25)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
@@ -810,7 +639,7 @@
       "bootstrapScript": "[steps('chkp').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
       "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
-      "diskType": "[if(contains('R80.40 R81 R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
+      "diskType": "[if(contains('R80.40 R81' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
       "enableApi": "[steps('chkp').enableApi]",
       "adminShell": "[steps('chkp').adminShell]",
@@ -818,9 +647,8 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
-      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]"
     }
   }
 }

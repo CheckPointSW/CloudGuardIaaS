@@ -17,13 +17,7 @@
         "R80.40 - Pay As You Go (NGTX)",
         "R81 - Bring Your Own License",
         "R81 - Pay As You Go (NGTP)",
-        "R81 - Pay As You Go (NGTX)",
-        "R81.10 - Bring Your Own License",
-        "R81.10 - Pay As You Go (NGTP)",
-        "R81.10 - Pay As You Go (NGTX)",
-        "R81.20 - Bring Your Own License",
-        "R81.20 - Pay As You Go (NGTP)",
-        "R81.20 - Pay As You Go (NGTX)"
+        "R81 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
@@ -313,13 +307,7 @@
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
       "R81 - Bring Your Own License": "BYOL",
       "R81 - Pay As You Go (NGTP)": "NGTP",
-      "R81 - Pay As You Go (NGTX)": "NGTX",
-      "R81.10 - Bring Your Own License": "BYOL",
-      "R81.10 - Pay As You Go (NGTP)": "NGTP",
-      "R81.10 - Pay As You Go (NGTX)": "NGTX",
-      "R81.20 - Bring Your Own License": "BYOL",
-      "R81.20 - Pay As You Go (NGTP)": "NGTP",
-      "R81.20 - Pay As You Go (NGTX)": "NGTX"
+      "R81 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -328,13 +316,7 @@
       "R80.40 - Pay As You Go (NGTX)": "R8040",
       "R81 - Bring Your Own License": "R81",
       "R81 - Pay As You Go (NGTP)": "R81",
-      "R81 - Pay As You Go (NGTX)": "R81",
-      "R81.10 - Bring Your Own License": "R8110",
-      "R81.10 - Pay As You Go (NGTP)": "R8110",
-      "R81.10 - Pay As You Go (NGTX)": "R8110",
-      "R81.20 - Bring Your Own License": "R8120",
-      "R81.20 - Pay As You Go (NGTP)": "R8120",
-      "R81.20 - Pay As You Go (NGTX)": "R8120"
+      "R81 - Pay As You Go (NGTX)": "R81"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "SerialConsoleGeographies": {
@@ -729,7 +711,7 @@
           },
           "NewNsgName":
           {
-            "value": "[parameters('NewNsgName')]"
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }
@@ -744,7 +726,7 @@
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
       "properties": {
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
         "ipConfigurations": [

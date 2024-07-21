@@ -18,14 +18,8 @@
         "R81 - Bring Your Own License",
         "R81 - Pay As You Go (NGTP)",
         "R81 - Pay As You Go (NGTX)",
-        "R81.10 - Bring Your Own License",
-        "R81.10 - Pay As You Go (NGTP)",
-        "R81.10 - Pay As You Go (NGTX)",
-        "R81.20 - Bring Your Own License",
-        "R81.20 - Pay As You Go (NGTP)",
-        "R81.20 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.20 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Check Point CloudGuard version"
       }
@@ -54,13 +48,6 @@
         "description": "Administrator password"
       },
       "defaultValue": ""
-    },
-    "MaintenanceModePasswordHash": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": {
-        "Description": "Maintenance mode password hash, relevant only for R81.20 and higher versions"
-      }
     },
     "SerialConsolePasswordHash": {
       "type": "securestring",
@@ -375,12 +362,6 @@
       "R81 - Bring Your Own License": "BYOL",
       "R81 - Pay As You Go (NGTP)": "NGTP",
       "R81 - Pay As You Go (NGTX)": "NGTX",
-      "R81.10 - Bring Your Own License": "BYOL",
-      "R81.10 - Pay As You Go (NGTP)": "NGTP",
-      "R81.10 - Pay As You Go (NGTX)": "NGTX",
-      "R81.20 - Bring Your Own License": "BYOL",
-      "R81.20 - Pay As You Go (NGTP)": "NGTP",
-      "R81.20 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -390,12 +371,6 @@
       "R81 - Bring Your Own License": "R81",
       "R81 - Pay As You Go (NGTP)": "R81",
       "R81 - Pay As You Go (NGTX)": "R81",
-      "R81.10 - Bring Your Own License": "R8110",
-      "R81.10 - Pay As You Go (NGTP)": "R8110",
-      "R81.10 - Pay As You Go (NGTX)": "R8110",
-      "R81.20 - Bring Your Own License": "R8120",
-      "R81.20 - Pay As You Go (NGTP)": "R8120",
-      "R81.20 - Pay As You Go (NGTX)": "R8120"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "SerialConsoleGeographies": {
@@ -688,7 +663,7 @@
       {
         "name": "customData",
         "count": "[variables('count')]",
-        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', '\n','smart1CloudToken=\"', variables('tokens')[copyIndex('customData')], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]"
+        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', '\n','smart1CloudToken=\"', variables('tokens')[copyIndex('customData')], '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]"
       }
     ],
     "DefaultVipInformation": [
@@ -789,7 +764,7 @@
           },
           "NewNsgName":
           {
-            "value": "[parameters('NewNsgName')]"
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -823,7 +798,7 @@
           },
           "NewNsgName":
           {
-            "value": "[parameters('NewNsgName')]"
+            "value":"[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -952,8 +927,8 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-        "ipConfigurations": "[union(variables('DefaultIpAddresses'),variables('Vips'))]"
+        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "ipConfigurations":"[union(variables('DefaultIpAddresses'),variables('Vips'))]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
@@ -971,7 +946,7 @@
         "primary": true,
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "member-ip",

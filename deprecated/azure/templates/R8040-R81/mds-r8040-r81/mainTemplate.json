@@ -14,8 +14,6 @@
       "allowedValues": [
         "R80.40 - Bring Your Own License",
         "R81 - Bring Your Own License",
-        "R81.10 - Bring Your Own License",
-        "R81.20 - Bring Your Own License"
       ],
       "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
@@ -46,13 +44,6 @@
         "description": "Administrator password"
       },
       "defaultValue": ""
-    },
-    "MaintenanceModePasswordHash": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": {
-        "Description": "Maintenance mode password hash, relevant only for R81.20 and higher versions"
-      }
     },
     "SerialConsolePasswordHash": {
       "type": "securestring",
@@ -269,16 +260,12 @@
     "location": "[parameters('location')]",
     "offers": {
       "R80.40 - Bring Your Own License": "BYOL",
-      "R81 - Bring Your Own License": "BYOL",
-      "R81.10 - Bring Your Own License": "BYOL",
-      "R81.20 - Bring Your Own License": "BYOL"
+      "R81 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R80.40 - Bring Your Own License": "R8040",
-      "R81 - Bring Your Own License": "R81",
-      "R81.10 - Bring Your Own License": "R8110",
-      "R81.20 - Bring Your Own License": "R8120"
+      "R81 - Bring Your Own License": "R81"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "serialConsoleGeographies": {
@@ -338,7 +325,7 @@
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "diskSizeGB": "[add(parameters('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]",
+    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', parameters('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'sicKey=\"', parameters('sicKey'), '\"', '\n', 'primary=\"', variables('primary'), '\"', '\n', 'secondary=\"', variables('secondary'), '\"', '\n', 'logserver=\"', variables('logserver'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]",
     "customData64": "[base64(variables('customData'))]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
@@ -458,7 +445,7 @@
           },
           "NewNsgName":
           {
-            "value": "[parameters('NewNsgName')]"
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }
@@ -495,7 +482,7 @@
           },
           "NewNsgName":
           {
-            "value": "[parameters('NewNsgName')]"
+            "value":"[parameters('NewNsgName')]"
           }
         }
       }
@@ -652,7 +639,7 @@
       "name": "[variables('nic1Name')]",
       "properties": {
         "enableIPForwarding": false,
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "networkSecurityGroup":"[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
         "ipConfigurations": [
           {
             "name": "ipconfig1",
