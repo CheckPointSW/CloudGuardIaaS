@@ -19,12 +19,6 @@
     "cloudGuardVersion": {
       "type": "string",
       "allowedValues": [
-        "R80.40 - Bring Your Own License",
-        "R80.40 - Pay As You Go (NGTP)",
-        "R80.40 - Pay As You Go (NGTX)",
-        "R81 - Bring Your Own License",
-        "R81 - Pay As You Go (NGTP)",
-        "R81 - Pay As You Go (NGTX)",
         "R81.10 - Bring Your Own License",
         "R81.10 - Pay As You Go (NGTP)",
         "R81.10 - Pay As You Go (NGTX)",
@@ -300,27 +294,21 @@
       "metadata": {
         "description": "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled"
       },
-      "defaultValue" : false
+      "defaultValue": false
     },
-    "storageAccountAdditionalIps":{
+    "storageAccountAdditionalIps": {
       "type": "array",
       "metadata": {
         "description": "IPs/CIDRs that are allowed access to the Storage Account"
       },
-      "defaultValue" : []
+      "defaultValue": []
     }
   },
   "variables": {
     "templateName": "single",
-    "templateVersion": "20230910",
+    "templateVersion": "20240716",
     "location": "[parameters('location')]",
     "offers": {
-      "R80.40 - Bring Your Own License": "BYOL",
-      "R80.40 - Pay As You Go (NGTP)": "NGTP",
-      "R80.40 - Pay As You Go (NGTX)": "NGTX",
-      "R81 - Bring Your Own License": "BYOL",
-      "R81 - Pay As You Go (NGTP)": "NGTP",
-      "R81 - Pay As You Go (NGTX)": "NGTX",
       "R81.10 - Bring Your Own License": "BYOL",
       "R81.10 - Pay As You Go (NGTP)": "NGTP",
       "R81.10 - Pay As You Go (NGTX)": "NGTX",
@@ -330,12 +318,6 @@
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
-      "R80.40 - Bring Your Own License": "R8040",
-      "R80.40 - Pay As You Go (NGTP)": "R8040",
-      "R80.40 - Pay As You Go (NGTX)": "R8040",
-      "R81 - Bring Your Own License": "R81",
-      "R81 - Pay As You Go (NGTP)": "R81",
-      "R81 - Pay As You Go (NGTX)": "R81",
       "R81.10 - Bring Your Own License": "R8110",
       "R81.10 - Pay As You Go (NGTP)": "R8110",
       "R81.10 - Pay As You Go (NGTX)": "R8110",
@@ -345,55 +327,211 @@
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "serialConsoleGeographies": {
-      "eastasia" : ["20.205.69.28", "20.195.85.180"],
-      "southeastasia" : ["20.205.69.28", "20.195.85.180"],
-      "australiacentral" : ["20.53.53.224", "20.70.222.112"],
-      "australiacentral2" : ["20.53.53.224", "20.70.222.112"],
-      "australiaeast" : ["20.53.53.224", "20.70.222.112"],
-      "australiasoutheast" : ["20.53.53.224", "20.70.222.112"],
-      "brazilsouth" : ["91.234.136.63", "20.206.0.194"],
-      "brazilsoutheast" : ["91.234.136.63", "20.206.0.194"],
-      "canadacentral" : ["52.228.86.177", "52.242.40.90"],
-      "canadaeast" : ["52.228.86.177", "52.242.40.90"],
-      "northeurope" : ["52.146.139.220", "20.105.209.72"],
-      "westeurope" : ["52.146.139.220", "20.105.209.72"],
-      "francecentral" : ["20.111.0.244", "52.136.191.10"],
-      "francesouth" : ["20.111.0.244", "52.136.191.10"],
-      "germanynorth" : ["51.116.75.88", "20.52.95.48"],
-      "germanywestcentral" : ["51.116.75.88", "20.52.95.48"],
-      "centralindia" : ["20.192.168.150", "20.192.153.104"],
-      "southindia" : ["20.192.168.150", "20.192.153.104"],
-      "westindia" : ["20.192.168.150", "20.192.153.104"],
-      "japaneast" : ["20.43.70.205", "20.189.228.222"],
-      "japanwest" : ["20.43.70.205", "20.189.228.222"],
-      "koreacentral" : ["20.200.196.96", "52.147.119.29"],
-      "koreasouth" : ["20.200.196.96", "52.147.119.29"],
-      "norwaywest" : ["20.100.1.184", "51.13.138.76"],
-      "norwayeast" : ["20.100.1.184", "51.13.138.76"],
-      "switzerlandnorth" : ["20.208.4.98", "51.107.251.190"],
-      "switzerlandwest" : ["20.208.4.98", "51.107.251.190"],
-      "uaecentral" : ["20.45.95.66", "20.38.141.5"],
-      "uaenorth" : ["20.45.95.66", "20.38.141.5"],
-      "uksouth" : ["20.90.132.144", "20.58.68.62"],
-      "ukwest" : ["20.90.132.144", "20.58.68.62"],
-      "swedencentral" : ["51.12.72.223", "51.12.22.174"],
-      "swedensouth" : ["51.12.72.223", "51.12.22.174"],
-      "centralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "eastus2" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "eastus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "northcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "southcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "westus2" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "westus3" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "westcentralus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "westus" : ["20.98.146.84", "20.98.194.64", "20.69.5.162", "20.83.222.102"],
-      "eastus2euap" : ["20.45.242.18", "20.51.21.252"],
-      "centraluseuap" : ["20.45.242.18", "20.51.21.252"],
-      "usgovarizona" : ["20.141.10.130", "52.127.55.131"],
-      "usgovvirginia" : ["20.141.10.130", "52.127.55.131"]
+      "eastasia": [
+        "20.205.69.28",
+        "20.195.85.180"
+      ],
+      "southeastasia": [
+        "20.205.69.28",
+        "20.195.85.180"
+      ],
+      "australiacentral": [
+        "20.53.53.224",
+        "20.70.222.112"
+      ],
+      "australiacentral2": [
+        "20.53.53.224",
+        "20.70.222.112"
+      ],
+      "australiaeast": [
+        "20.53.53.224",
+        "20.70.222.112"
+      ],
+      "australiasoutheast": [
+        "20.53.53.224",
+        "20.70.222.112"
+      ],
+      "brazilsouth": [
+        "91.234.136.63",
+        "20.206.0.194"
+      ],
+      "brazilsoutheast": [
+        "91.234.136.63",
+        "20.206.0.194"
+      ],
+      "canadacentral": [
+        "52.228.86.177",
+        "52.242.40.90"
+      ],
+      "canadaeast": [
+        "52.228.86.177",
+        "52.242.40.90"
+      ],
+      "northeurope": [
+        "52.146.139.220",
+        "20.105.209.72"
+      ],
+      "westeurope": [
+        "52.146.139.220",
+        "20.105.209.72"
+      ],
+      "francecentral": [
+        "20.111.0.244",
+        "52.136.191.10"
+      ],
+      "francesouth": [
+        "20.111.0.244",
+        "52.136.191.10"
+      ],
+      "germanynorth": [
+        "51.116.75.88",
+        "20.52.95.48"
+      ],
+      "germanywestcentral": [
+        "51.116.75.88",
+        "20.52.95.48"
+      ],
+      "centralindia": [
+        "20.192.168.150",
+        "20.192.153.104"
+      ],
+      "southindia": [
+        "20.192.168.150",
+        "20.192.153.104"
+      ],
+      "westindia": [
+        "20.192.168.150",
+        "20.192.153.104"
+      ],
+      "japaneast": [
+        "20.43.70.205",
+        "20.189.228.222"
+      ],
+      "japanwest": [
+        "20.43.70.205",
+        "20.189.228.222"
+      ],
+      "koreacentral": [
+        "20.200.196.96",
+        "52.147.119.29"
+      ],
+      "koreasouth": [
+        "20.200.196.96",
+        "52.147.119.29"
+      ],
+      "norwaywest": [
+        "20.100.1.184",
+        "51.13.138.76"
+      ],
+      "norwayeast": [
+        "20.100.1.184",
+        "51.13.138.76"
+      ],
+      "switzerlandnorth": [
+        "20.208.4.98",
+        "51.107.251.190"
+      ],
+      "switzerlandwest": [
+        "20.208.4.98",
+        "51.107.251.190"
+      ],
+      "uaecentral": [
+        "20.45.95.66",
+        "20.38.141.5"
+      ],
+      "uaenorth": [
+        "20.45.95.66",
+        "20.38.141.5"
+      ],
+      "uksouth": [
+        "20.90.132.144",
+        "20.58.68.62"
+      ],
+      "ukwest": [
+        "20.90.132.144",
+        "20.58.68.62"
+      ],
+      "swedencentral": [
+        "51.12.72.223",
+        "51.12.22.174"
+      ],
+      "swedensouth": [
+        "51.12.72.223",
+        "51.12.22.174"
+      ],
+      "centralus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "eastus2": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "eastus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "northcentralus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "southcentralus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "westus2": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "westus3": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "westcentralus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "westus": [
+        "20.98.146.84",
+        "20.98.194.64",
+        "20.69.5.162",
+        "20.83.222.102"
+      ],
+      "eastus2euap": [
+        "20.45.242.18",
+        "20.51.21.252"
+      ],
+      "centraluseuap": [
+        "20.45.242.18",
+        "20.51.21.252"
+      ],
+      "usgovarizona": [
+        "20.141.10.130",
+        "52.127.55.131"
+      ],
+      "usgovvirginia": [
+        "20.141.10.130",
+        "52.127.55.131"
+      ]
     },
     "serialConsoleIps": "[if(contains(variables('serialConsoleGeographies'),variables('location')),variables('serialConsoleGeographies')[variables('location')],createArray())]",
-    "storageAccountIps" : "[concat(variables('SerialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
+    "storageAccountIps": "[concat(variables('SerialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
     "installationType": "[parameters('installationType')]",
     "isBlink": "[equals(variables('installationType'), 'gateway')]",
     "storageAccountName": "[concat('bootdiag', uniqueString(resourceGroup().id, deployment().name))]",
@@ -403,7 +541,7 @@
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'smart1CloudToken=\"', parameters('smart1CloudToken'), '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
-    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8040'), equals(variables('osVersion'),'R81'), equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'))), 'mgmt-byol', 'sg-byol')]",
+    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'))), 'mgmt-byol', 'sg-byol')]",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
@@ -497,7 +635,9 @@
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
-    "NewNsgReference": {"id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"}
+    "NewNsgReference": {
+      "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+    }
   },
   "resources": [
     {
@@ -579,8 +719,7 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName":
-          {
+          "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
           }
         }
@@ -613,8 +752,7 @@
           "deployNsg": {
             "value": "[parameters('deployNewNSG')]"
           },
-          "NewNsgName":
-          {
+          "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
           }
         }
