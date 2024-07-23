@@ -798,7 +798,7 @@
   "resources": [
     {
       "apiVersion": "2020-06-01",
-      "name": "pid-6f13b00a-7546-4ab2-be9f-c66815cc6c8b-partnercenter",
+      "name": "pid-5432b4df-d783-57a2-b65f-39f4bca4974a",
       "type": "Microsoft.Resources/deployments",
       "properties": {
         "mode": "Incremental",
