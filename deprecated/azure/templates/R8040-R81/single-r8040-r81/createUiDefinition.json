@@ -1,0 +1,1305 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "basics settings text block",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "Please follow the Check Point Reference Architecture for Azure.",
+          "link": {
+            "label": "Reference Architecture Guide",
+            "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk109360"
+          }
+        }
+      },
+      {
+        "name": "gatewayNameUi",
+        "type": "Microsoft.Common.TextBox",
+        "label": "VM Name",
+        "toolTip": "The name of the Check Point CloudGuard.",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9A-Z]{1,30}$",
+          "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+        }
+      },
+      {
+        "name": "auth",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "authenticationType": "Authentication type",
+          "password": "Password",
+          "confirmPassword": "Confirm password",
+          "sshPublicKey": "SSH public key"
+        },
+        "toolTip": {
+          "password": "The user 'admin' password",
+          "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
+        },
+        "constraints": {
+          "required": true
+        },
+        "options": {
+          "hideConfirmation": false,
+          "hidePassword": false
+        },
+        "osPlatform": "Linux"
+      }
+    ],
+    "steps": [
+      {
+        "name": "chkp",
+        "label": "Check Point CloudGuard settings",
+        "subLabel": {
+          "preValidation": "Configure CloudGuard settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "CloudGuard settings",
+        "elements": [
+          {
+            "name": "cloudGuardVersion",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Check Point CloudGuard version",
+            "defaultValue": "R81",
+            "toolTip": "The version of Check Point CloudGuard.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "R80.40",
+                  "value": "R80.40"
+                },
+                {
+                  "label": "R81",
+                  "value": "R81"
+                }
+              ]
+            }
+          },
+          {
+            "name": "R80Offer",
+            "type": "Microsoft.Common.DropDown",
+            "label": "License type",
+            "toolTip": "The type of license.",
+            "defaultValue": "Bring Your Own License",
+            "visible": true,
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Bring Your Own License",
+                  "value": "Bring Your Own License"
+                },
+                {
+                  "label": "Pay As You Go (NGTP)",
+                  "value": "Pay As You Go (NGTP)"
+                },
+                {
+                  "label": "Pay As You Go (NGTX)",
+                  "value": "Pay As You Go (NGTX)"
+                }
+              ]
+            }
+          },
+          {
+            "name": "R8040vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.40'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8040",
+              "sku": "sg-byol"
+            },
+            "count": 1
+          },
+          {
+            "name": "R8040vmSizeUiNGTP",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.40'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8040",
+              "sku": "sg-ngtp"
+            },
+            "count": 1
+          },
+          {
+            "name": "R8040vmSizeUiNGTX",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R80.40'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r8040",
+              "sku": "sg-ngtx"
+            },
+            "count": 1
+          },
+          {
+            "name": "R81vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r81",
+              "sku": "sg-byol"
+            },
+            "count": 1
+          },
+          {
+            "name": "R81vmSizeUiNGTP",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r81",
+              "sku": "sg-ngtp"
+            },
+            "count": 1
+          },
+          {
+            "name": "R81vmSizeUiNGTX",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_D3_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_D4_v4",
+                "Standard_D8_v4",
+                "Standard_D16_v4",
+                "Standard_D32_v4",
+                "Standard_D48_v4",
+                "Standard_D64_v4",
+                "Standard_D4s_v4",
+                "Standard_D8s_v4",
+                "Standard_D16s_v4",
+                "Standard_D32s_v4",
+                "Standard_D48s_v4",
+                "Standard_D64s_v4",
+                "Standard_D2_v5",
+                "Standard_D4_v5",
+                "Standard_D8_v5",
+                "Standard_D16_v5",
+                "Standard_D32_v5",
+                "Standard_D2s_v5",
+                "Standard_D4s_v5",
+                "Standard_D8s_v5",
+                "Standard_D16s_v5",
+                "Standard_D2d_v5",
+                "Standard_D4d_v5",
+                "Standard_D8d_v5",
+                "Standard_D16d_v5",
+                "Standard_D32d_v5",
+                "Standard_D2ds_v5",
+                "Standard_D4ds_v5",
+                "Standard_D8ds_v5",
+                "Standard_D16ds_v5",
+                "Standard_D32ds_v5",
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r81",
+              "sku": "sg-ngtx"
+            },
+            "count": 1
+          },
+          {
+            "name": "installationType",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Installation type",
+            "visible": "[or(equals(steps('chkp').cloudGuardVersion, 'R80.40'), equals(steps('chkp').cloudGuardVersion, 'R81'))]",
+            "defaultValue": "Gateway only",
+            "toolTip": "Select the type of deployment",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Gateway only",
+                  "value": "gateway"
+                },
+                {
+                  "label": "Standalone",
+                  "value": "standalone"
+                }
+              ]
+            }
+          },
+          {
+            "name": "adminShell",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Default shell for the admin user",
+            "defaultValue": "/etc/cli.sh",
+            "toolTip": "The default shell for the admin user",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "/etc/cli.sh",
+                  "value": "/etc/cli.sh"
+                },
+                {
+                  "label": "/bin/bash",
+                  "value": "/bin/bash"
+                },
+                {
+                  "label": "/bin/csh",
+                  "value": "/bin/csh"
+                },
+                {
+                  "label": "/bin/tcsh",
+                  "value": "/bin/tcsh"
+                }
+              ]
+            }
+          },
+          {
+            "name": "standaloneValidation",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(steps('chkp').cloudGuardVersion, 'R80.40'), equals(steps('chkp').cloudGuardVersion, 'R81')))))]",
+            "options": {
+              "icon": "Error",
+              "text": "Standalone deployment is ONLY supported for CloudGuard versions R80.40, R81 Bring Your Own License."
+            }
+          },
+          {
+            "name": "managementGUIClientNetwork",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Allowed GUI clients",
+            "toolTip": "GUI clients network CIDR",
+            "constraints": {
+              "required": true,
+              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+              "validationMessage": "Enter a valid IPv4 network CIDR"
+            },
+            "visible": "[and(or(equals(steps('chkp').cloudGuardVersion, 'R80.40'), equals(steps('chkp').cloudGuardVersion, 'R81')), equals(steps('chkp').installationType, 'standalone'))]"
+          },
+          {
+            "name": "sicKeyUi",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "SIC key",
+              "confirmPassword": "Confirm SIC key"
+            },
+            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{12,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[not(equals(steps('chkp').installationType, 'standalone'))]"
+          },
+          {
+            "name": "SerialPasswordInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[bool(basics('auth').sshPublicKey)]",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends setting serial console password and maintenance-mode password for recovery purposes.      For R81.10 and below the serial console password is used also as maintenance-mode password"
+            }
+          },
+          {
+             "visible": "[bool(basics('auth').sshPublicKey)]",
+            "name": "EnableSerialConsolePassword",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable Serial console password",
+            "defaultValue": "Yes",
+            "toolTip": "A unique password hash to enable VM connection via serial console.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "AdditionalPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "toolTip": "Serial console password hash, used to enable password authentication (using serial console). To generate password hash use the command 'openssl passwd -6 PASSWORD'",
+            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp').EnableSerialConsolePassword)]",
+            "label": {
+              "password": "Password hash",
+              "confirmPassword": "Confirm password"
+            },
+            "constraints": {
+              "required": true,
+              "regex": "^.{12,300}$",
+              "validationMessage": "The value must be the output of the hash command."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
+          },
+          {
+            "name": "bootstrapScript",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "Bootstrap script",
+            "toolTip": "An optional script to run on the initial boot",
+            "constraints": {
+              "required": false,
+              "accept": ".sh,text/plain"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "text",
+              "encoding": "UTF-8"
+            }
+          },
+          {
+            "visible": "[or(not(equals(steps('chkp').cloudGuardVersion, 'R80.10')), not(equals(steps('chkp').installationType, 'custom')))]",
+            "name": "allowUploadDownload",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Automatically download updates and share statistical data for product improvement purpose",
+            "defaultValue": "Yes",
+            "toolTip": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "true"
+                },
+                {
+                  "label": "No",
+                  "value": "false"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskType",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[not(contains('R80.40 R81' , steps('chkp').cloudGuardVersion))]",
+            "defaultValue": "Premium",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "VMDiskTypeOldVersions",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VM disk type",
+            "toolTip": "Type of CloudGuard disk.",
+            "visible": "[contains('R80.40 R81' , steps('chkp').cloudGuardVersion)]",
+            "defaultValue": "Standard",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Standard",
+                  "value": "Standard_LRS"
+                },
+                {
+                  "label": "Premium",
+                  "value": "Premium_LRS"
+                }
+              ]
+            }
+          },
+          {
+            "name": "basics settings text block",
+            "type": "Microsoft.Common.TextBlock",
+            "visible": true,
+            "options": {
+              "text": "Please follow the Check Point referenced guide for adding disk space.",
+              "link": {
+                "label": "Additional disk space in CloudGuard",
+                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk156552"
+              }
+            }
+          },
+          {
+            "name": "additionalDiskSizeGB",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Additional disk space (GB)",
+            "defaultValue": "0",
+            "toolTip": "Additional disk space (in GB), initial disk size is 100 GB.",
+            "constraints": {
+              "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
+              "validationMessage": "Select a number between 0 and 3995"
+            }
+          },
+          {
+            "name": "useCustomImageUri",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Use development image uri",
+            "defaultValue": "No",
+            "toolTip": "Use custom image URI.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "Yes"
+                },
+                {
+                  "label": "No",
+                  "value": "No"
+                }
+              ],
+              "required": true
+            },
+            "visible": false
+          },
+          {
+            "name": "sourceImageVhdUri",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Development Image URI",
+            "toolTip": "The URI of the blob containing the development image",
+            "constraints": {
+              "required": "[equals(steps('chkp').useCustomImageUri, 'Yes')]",
+              "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
+              "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
+            },
+            "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+          },
+          {
+            "name": "customMetrics",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable CloudGuard metrics",
+            "defaultValue": "Yes",
+            "toolTip": "Enable CloudGuard metrics in order to send statuses and statistics collected from Gateway or Standalone to the Azure Monitor service.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "allowSmart1CloudConnection",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Quick connect to Smart-1 Cloud",
+            "defaultValue": "Yes",
+            "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
+             "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ]
+            },
+            "visible": "[equals(steps('chkp').installationType, 'gateway')]"
+          },
+          {
+            "name": "smart1CloudTokenTxt",
+            "type": "Microsoft.Common.TextBlock",
+            "options": {
+              "text": "Follow these instructions to quickly connect this single gateway to Smart-1 Cloud",
+              "link": {
+                "label": "SK180501 - Connecting CloudGuard Network Security Public Cloud Gateways to Smart-1 Cloud",
+                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501"
+              }
+            },
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+          },
+          {
+            "name": "Smart1CloudToken",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Smart-1 Cloud Token",
+            "toolTip": "Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal",
+            "constraints": {
+              "required": true,
+              "regex": "[\\S\\s]{5,}",
+              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+            },
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+            }
+        ]
+      },
+      {
+        "name": "network",
+        "label": "Network settings",
+        "subLabel": {
+          "preValidation": "Configure network settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Network settings",
+        "elements": [
+          {
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "Virtual Network Name",
+              "subnets": "List of subnets to deploy into"
+            },
+            "defaultValue": {
+              "name": "vnet01",
+              "addressPrefixSize": "/16"
+            },
+            "constraints": {
+              "minAddressPrefixSize": "/28"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "Frontend subnet",
+                "defaultValue": {
+                  "name": "Frontend",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": 1,
+                  "requireContiguousAddresses": true
+                }
+              },
+              "subnet2": {
+                "label": "Backend subnet",
+                "defaultValue": {
+                  "name": "Backend",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": 1,
+                  "requireContiguousAddresses": true
+                }
+              }
+            }
+          },
+          {
+            "name": "NSG",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Network Security Group",
+            "toolTip": "Choose between using an existing NSG or using a new NSG",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Create new",
+                  "value": true
+                },
+                {
+                  "label": "Existing NSG",
+                  "value": false
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "nsgSelector",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Network Security Group",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing NSG",
+            "resourceType": "Microsoft.Network/NetworkSecurityGroups",
+            "options": {
+              "filter": {
+                "subscription": "onBasics",
+                "location": "onBasics"
+              }
+            },
+            "constraints": {
+              "required": true
+            },
+            "visible": "[equals(steps('network').NSG, false)]"
+          },
+          {
+            "name": "NSGName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Name",
+            "defaultValue": "[concat(basics('gatewayNameUi') , '-nsg')]",
+            "toolTip": "Insert Name for the new NSG",
+            "multiLine": false,
+            "constraints": {
+              "required": "[steps('network').NSG]",
+              "regex": "^[a-z0-9A-Z-]{1,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+            },
+            "visible": "[steps('network').NSG]"
+          },
+          {
+            "name": "addStorageAccountIpRules",
+            "type": "Microsoft.Common.OptionsGroup",
+            "defaultValue": "Network access from all networks",
+            "label": "Storage Account Network Access",
+            "toolTip": "Select your preferred network access to the Storage Account, for more information - https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#serial-console-security",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Network access from all networks",
+                  "value": false
+                },
+                {
+                  "label": "Network access only from Serial Console",
+                  "value": true
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          }
+        ]
+      },
+      {
+        "name": "tags",
+        "label": "Tags",
+        "elements": [
+          {
+            "name": "tagsByResource",
+            "type": "Microsoft.Common.TagsByResource",
+            "toolTip": "Create Azure tags for the new resources",
+            "resources": [
+              "Microsoft.Storage/storageAccounts",
+              "Microsoft.Network/publicIPAddresses",
+              "Microsoft.Network/networkInterfaces",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Network/routeTables",
+              "Microsoft.Network/virtualNetworks"
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "location": "[location()]",
+      "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+      "adminPassword": "[basics('auth').password]",
+      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
+      "authenticationType": "[basics('auth').authenticationType]",
+      "sshPublicKey": "[basics('auth').sshPublicKey]",
+      "vmName": "[basics('gatewayNameUi')]",
+      "vmSize": "[coalesce(steps('chkp').R8040vmSizeUiBYOL, steps('chkp').R8040vmSizeUiNGTP, steps('chkp').R8040vmSizeUiNGTX,steps('chkp').R81vmSizeUiBYOL, steps('chkp').R81vmSizeUiNGTP, steps('chkp').R81vmSizeUiNGTX)]",
+      "sicKey": "[coalesce(steps('chkp').sicKeyUi, 'notused')]",
+      "virtualNetworkName": "[steps('network').virtualNetwork.name]",
+      "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
+      "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
+      "Subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
+      "Subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
+      "Subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
+      "Subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
+      "Subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+      "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
+      "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
+      "managementGUIClientNetwork": "[steps('chkp').managementGUIClientNetwork]",
+      "installationType": "[steps('chkp').installationType]",
+      "bootstrapScript": "[steps('chkp').bootstrapScript]",
+      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
+      "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
+      "diskType": "[if(contains('R80.40 R81' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
+      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
+      "customMetrics": "[steps('chkp').customMetrics]",
+      "adminShell": "[steps('chkp').adminShell]",
+      "smart1CloudToken": "[steps('chkp').Smart1CloudToken]",
+      "tagsByResource": "[steps('tags').tagsByResource]",
+      "deployNewNSG": "[steps('network').NSG]",
+      "ExistingNSG": "[steps('network').nsgSelector]",
+      "NewNsgName": "[steps('network').NSGName]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]"
+    }
+  }
+}

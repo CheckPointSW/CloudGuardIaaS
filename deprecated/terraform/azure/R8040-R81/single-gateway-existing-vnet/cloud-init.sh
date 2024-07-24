@@ -1,0 +1,18 @@
+#!/usr/bin/python3 /etc/cloud_config.py
+
+installationType="${installation_type}"
+allowUploadDownload="${allow_upload_download}"
+osVersion="${os_version}"
+templateName="${template_name}"
+templateVersion="${template_version}"
+templateType="${template_type}"
+isBlink="${is_blink}"
+bootstrapScript64="${bootstrap_script64}"
+location="${location}"
+adminShell="${admin_shell}"
+sicKey="${sic_key}"
+managementGUIClientNetwork="${management_GUI_client_network}"
+smart1CloudToken="${smart_1_cloud_token}"
+customMetrics="${enable_custom_metrics}"
+passwordHash="${serial_console_password_hash}"
+MaintenanceModePassword="${maintenance_mode_password_hash}"
