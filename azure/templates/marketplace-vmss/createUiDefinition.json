@@ -405,20 +405,11 @@
             }
           },
           {
-            "name": "elbInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ILBOnly')))]",
-            "options": {
-              "icon": "Info",
-              "text": "Make sure you have created a new backend address pool for the target external load balancer."
-            }
-          },
-          {
             "name": "elbBEAddressPoolName",
             "type": "Microsoft.Common.TextBox",
             "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ILBOnly')))]",
-            "label": "External load balancer's new backend pool name",
-            "toolTip": "The name of the new Target External Load Balancer's Backend Pool.",
+            "label": "Target external load balancer's backend pool name",
+            "toolTip": "The name of the target external load Balancer's Backend Pool.",
             "constraints": {
               "required": true,
               "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
@@ -439,20 +430,11 @@
             }
           },
           {
-            "name": "ilbInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ELBOnly')))]",
-            "options": {
-              "icon": "Info",
-              "text": "Make sure you have created a new backend address pool for the target internal load balancer."
-            }
-          },
-          {
             "name": "ilbBEAddressPoolName",
             "type": "Microsoft.Common.TextBox",
             "visible": "[and(equals(steps('autoprovision').upgrading, 'yes'), not(equals(steps('autoprovision').deploymentMode, 'ELBOnly')))]",
-            "label": "Internal load balancer's new backend pool name",
-            "toolTip": "The name of the new target internal load balancer's backend pool.",
+            "label": "Target internal load balancer's backend pool name",
+            "toolTip": "The name of the target internal load balancer's backend pool.",
             "constraints": {
               "required": true,
               "regex": "^[a-z0-9A-Z_\\-\\.\\/\\(\\)]",
