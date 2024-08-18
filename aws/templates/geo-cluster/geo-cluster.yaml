@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point cross AZ Cluster into an existing VPC (20240204)
+Description: Deploys a Check Point cross AZ Cluster into an existing VPC (20240704)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -308,12 +308,6 @@ Parameters:
     Type: String
     Default: R81.10-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX

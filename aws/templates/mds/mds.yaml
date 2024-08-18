@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server (20240417)
+Description: Deploys a Check Point Multi-Domain Server (20240704)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -286,8 +286,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R81-BYOL
       - R81.10-BYOL
       - R81.20-BYOL
   Shell:
