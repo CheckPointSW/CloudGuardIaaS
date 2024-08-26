@@ -33,9 +33,9 @@ locals {
   // Will fail if var.admin_shell is invalid
   validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
   disk_type_allowed_values = [
-    "SSD Persistent Disk",
-    "Balanced Persistent Disk",
-    "Standard Persistent Disk"]
+    "pd-ssd",
+    "pd-balanced",
+    "pd-standard"]
   // Will fail if var.disk_type is invalid
   validate_disk_type = index(local.disk_type_allowed_values, var.diskType)
   adminPasswordSourceMetadata = var.generatePassword ?random_string.generated_password.result : ""
