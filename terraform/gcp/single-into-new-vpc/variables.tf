@@ -112,7 +112,7 @@ variable "network_espSourceRanges" {
 variable "diskType" {
   type = string
   description ="Disk type"
-  default = "pd-ssd"
+  default = "SSD Persistent Disk"
 }
 variable "bootDiskSizeGb" {
   type = number
