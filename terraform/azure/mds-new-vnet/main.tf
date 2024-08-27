@@ -265,7 +265,7 @@ resource "azurerm_virtual_machine" "mds-vm-instance" {
   }
 
   os_profile {
-    computer_name = var.mds_name
+    computer_name = lower(var.mds_name)
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/cloud-init.sh", {
