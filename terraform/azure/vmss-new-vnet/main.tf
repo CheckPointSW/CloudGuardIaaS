@@ -270,7 +270,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "vmss" {
     }
   }
 
-  computer_name_prefix = var.vmss_name
+  computer_name_prefix = lower(var.vmss_name)
   admin_username = module.common.admin_username
   admin_password = module.common.admin_password
   custom_data = base64encode(templatefile("${path.module}/cloud-init.sh", {

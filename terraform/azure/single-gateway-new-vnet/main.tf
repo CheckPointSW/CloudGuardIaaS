@@ -202,7 +202,7 @@ resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
   }
 
   os_profile {
-    computer_name = var.single_gateway_name
+    computer_name = lower(var.single_gateway_name)
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/cloud-init.sh", {
