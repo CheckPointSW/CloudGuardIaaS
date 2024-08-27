@@ -22,6 +22,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -87,6 +88,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       ManagementServer:
@@ -220,6 +223,13 @@ Parameters:
     Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
     AllowedValues:
       - true
       - false
@@ -657,6 +667,7 @@ Resources:
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         AllowUploadDownload: !Ref AllowUploadDownload
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate

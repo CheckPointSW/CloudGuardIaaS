@@ -23,6 +23,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -69,6 +70,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       StandaloneVersion:
         default: License
       Shell:
@@ -154,6 +157,13 @@ Parameters:
     Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
     AllowedValues:
       - true
       - false
@@ -406,6 +416,7 @@ Resources:
         VolumeEncryption: !Ref VolumeEncryption
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         StandaloneVersion: !Ref StandaloneVersion
         Shell: !Ref Shell
         StandalonePasswordHash: !Ref StandalonePasswordHash

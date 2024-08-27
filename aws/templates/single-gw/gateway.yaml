@@ -22,6 +22,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -77,6 +78,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Gateway Version & license
       Shell:
@@ -285,6 +288,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.20-BYOL
@@ -392,6 +402,7 @@ Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   ProvidedManagementParameters: !And [!Not [!Equals [!Ref ManagementServer, '']], !Not [!Equals [!Ref ConfigurationTemplate, '']]]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -490,7 +501,12 @@ Resources:
       RouteTableId: !Ref InternalRouteTable
   GatewayInstance:
     Type: AWS::EC2::Instance
+    DependsOn: GatewayLaunchTemplate
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Ref GatewayName
@@ -504,78 +520,85 @@ Resources:
                 - !Join ['=', [template,!Ref ConfigurationTemplate]]
                 - !Join ['=',[ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
           - !Ref 'AWS::NoValue'
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      IamInstanceProfile: !If [EnableCloudWatch, !Ref   GatewayInstanceProfile, !Ref 'AWS::NoValue']
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ExternalNetworkInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref InternalNetworkInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [ EnableMetaDataToken, required, optional ]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [ EncryptedVolume, true, false ]
+              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [ EnableCloudWatch, !Ref GatewayInstanceProfile, !Ref 'AWS::NoValue' ]
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; token=''${GatewayToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref ExternalNetworkInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref InternalNetworkInterface
-  PublicAddress:
-    Type: AWS::EC2::EIP
-    Condition: AllocateAddress
-    Properties:
-      Domain: vpc
-  AddressAssoc:
-    Type: AWS::EC2::EIPAssociation
-    Condition: AllocateAddress
-    DependsOn: GatewayInstance
-    Properties:
-      NetworkInterfaceId: !Ref ExternalNetworkInterface
-      AllocationId: !GetAtt PublicAddress.AllocationId
-      PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
-Outputs:
-  PublicAddress:
-    Description: The public address of the Check Point instance.
-    Value: !Ref PublicAddress
-    Condition: AllocateAddress
-  PrivateExternalAddress:
-    Description: The private external address of the Check Point instance.
-    Value: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
-  PrivateInternalAddress:
-    Description: The private internal address of the Check Point instance.
-    Value: !GetAtt InternalNetworkInterface.PrimaryPrivateIpAddress
-  SSH:
-    Description: SSH command to the Check Point instance.
-    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
-    Condition: AllocateAddress
-  URL:
-    Description: URL to the portal.
-    Value: !Join ['', ['https://', !Ref PublicAddress]]
-    Condition: AllocateAddress
-  ManagementName:
-    Description: The name that represents the Security Management Server.
-    Value: !Ref ManagementServer
-  ConfigurationTemplateName:
-    Description: The name that represents the configuration template. Configurations
-      required to automatically provision the Gateways in the Auto Scaling Group,
-      such as what Security Policy to install and which Blades to enable, will be
-      placed under this template name.
-    Value: !Ref ConfigurationTemplate
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; token=''${GatewayToken}'''
+              - !If [ AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue' ]
+              - !Join [ '', [ '    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"' ] ]
+              - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"' ] ]
+              - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
+              - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"' ] ]
+              - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref GatewayVersion ] ] } ]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240704\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+    PublicAddress:
+      Type: AWS::EC2::EIP
+      Condition: AllocateAddress
+      Properties:
+        Domain: vpc
+    AddressAssoc:
+      Type: AWS::EC2::EIPAssociation
+      Condition: AllocateAddress
+      DependsOn: GatewayInstance
+      Properties:
+        NetworkInterfaceId: !Ref ExternalNetworkInterface
+        AllocationId: !GetAtt PublicAddress.AllocationId
+        PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+  Outputs:
+    PublicAddress:
+      Description: The public address of the Check Point instance.
+      Value: !Ref PublicAddress
+      Condition: AllocateAddress
+    PrivateExternalAddress:
+      Description: The private external address of the Check Point instance.
+      Value: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+    PrivateInternalAddress:
+      Description: The private internal address of the Check Point instance.
+      Value: !GetAtt InternalNetworkInterface.PrimaryPrivateIpAddress
+    SSH:
+      Description: SSH command to the Check Point instance.
+      Value: !Join [ '', [ 'ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress ] ]
+      Condition: AllocateAddress
+    URL:
+      Description: URL to the portal.
+      Value: !Join [ '', [ 'https://', !Ref PublicAddress ] ]
+      Condition: AllocateAddress
+    ManagementName:
+      Description: The name that represents the Security Management Server.
+      Value: !Ref ManagementServer
+    ConfigurationTemplateName:
+      Description: The name that represents the configuration template. Configurations
+        required to automatically provision the Gateways in the Auto Scaling Group,
+        such as what Security Policy to install and which Blades to enable, will be
+        placed under this template name.
+      Value: !Ref ConfigurationTemplate

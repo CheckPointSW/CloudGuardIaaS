@@ -17,6 +17,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
@@ -69,6 +70,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       GatewayName:
@@ -165,6 +168,13 @@ Parameters:
     Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
     AllowedValues:
       - true
       - false
@@ -569,6 +579,7 @@ Resources:
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         ManagementPermissions: !Ref ManagementPermissions
         ManagementPredefinedRole: !Ref ManagementPredefinedRole
         ManagementVersion: !Ref ManagementVersion
@@ -620,6 +631,7 @@ Resources:
         VolumeType: !Ref VolumeType
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
+        MetaDataToken: !Ref MetaDataToken
         GatewaysMinSize: !Ref GatewaysMinSize
         GatewaysMaxSize: !Ref GatewaysMaxSize
         AdminEmail: !Ref AdminEmail

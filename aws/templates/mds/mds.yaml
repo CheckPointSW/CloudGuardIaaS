@@ -19,6 +19,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: IAM Permissions (ignored when the installation type is not Primary
             Multi-Domain Server)
@@ -66,6 +67,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       MDSPermissions:
         default: IAM role
       MDSPredefinedRole:
@@ -260,6 +263,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   MDSPermissions:
     Description: IAM role to attach to the instance profile.
     Type: String
@@ -383,6 +393,7 @@ Conditions:
   PrimaryMDS: !Equals [!Ref MDSInstallationType, Primary Multi-Domain Server]
   SecondaryMDS: !Equals [!Ref MDSInstallationType, Secondary Multi-Domain Server]
   PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   AMI:
     Type: AWS::CloudFormation::Stack
@@ -465,15 +476,15 @@ Resources:
         - !Ref MDSPredefinedRole
   MDSInstance:
     Type: AWS::EC2::Instance
-    DependsOn: MDSSecurityGroup
+    DependsOn: [MDSSecurityGroup, MDSLaunchTemplate]
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MDSLaunchTemplate
+        Version: !GetAtt MDSLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Ref MDSName
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref MDSInstanceType
-      IamInstanceProfile: !If [UseRole, !If [PreRole, !Ref InstanceProfile, !GetAtt MDSRoleStack.Outputs.CMEIAMRole], !Ref 'AWS::NoValue']
-      KeyName: !Ref KeyName
       NetworkInterfaces:
         - DeviceIndex: 0
           AssociatePublicIpAddress: false
@@ -482,27 +493,38 @@ Resources:
             - !Ref MDSSecurityGroup
           DeleteOnTermination: true
           SubnetId: !Ref MDSSubnet
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      DisableApiTermination: !Ref TerminationProtection
-      UserData: !Base64
-        Fn::Join:
-          - |+
+  MDSLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref MDSInstanceType
+        MetadataOptions:
+          HttpTokens: !If [ EnableMetaDataToken, required, optional ]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [ EncryptedVolume, true, false ]
+              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt MDSRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
+        UserData: !Base64
+          Fn::Join:
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${MDSHostname} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; admin_subnet=${AdminCIDR}'
-            - !If [PrimaryMDS, '    primary=true ; secondary=false', !If [SecondaryMDS, '    primary=false ; secondary=true', '    primary=false ; secondary=false']]
-            - !If [PrimaryMDS, '    sic=notused', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref MDSSICKey, ')"']]]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref MDSBootstrapScript, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
-            - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${MDSHostname} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; admin_subnet=${AdminCIDR}'
+              - !If [ PrimaryMDS, '    primary=true ; secondary=false', !If [ SecondaryMDS, '    primary=false ; secondary=true', '    primary=false ; secondary=false' ] ]
+              - !If [ PrimaryMDS, '    sic=notused', !Join [ '', [ '    sic="$(echo ', 'Fn::Base64': !Ref MDSSICKey, ')"' ] ] ]
+              - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref MDSBootstrapScript, ')"' ] ]
+              - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"' ] ]
+              - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"' ] ]
+              - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref MDSVersion ] ] } ]
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240704\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
