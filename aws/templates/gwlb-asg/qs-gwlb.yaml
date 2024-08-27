@@ -29,6 +29,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -243,6 +244,13 @@ Parameters:
     Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
     AllowedValues:
       - true
       - false
@@ -604,8 +612,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R81-BYOL
-      - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
       - R81.20-BYOL

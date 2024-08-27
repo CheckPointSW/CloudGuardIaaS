@@ -32,6 +32,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -51,6 +52,7 @@ Metadata:
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
+          - GatewayBootstrapScript
       - Label:
           default: Gateway Load Balancer Configuration
         Parameters:
@@ -150,6 +152,8 @@ Metadata:
         default: Allocate Public IPs
       CloudWatch:
         default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
       GWLBName:
         default: Gateway Load Balancer Name
       TargetGroupName:
@@ -226,6 +230,7 @@ Parameters:
     Type: String
     Default: 10.0.23.0/24
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
   NatGwSubnet3CIDR:
     Description: CIDR block for NAT subnet 3 located in the 3rd Availability Zone.
     Type: String
@@ -237,6 +242,7 @@ Parameters:
     Type: String
     Default: 10.0.43.0/24
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
   GWLBeSubnet1CIDR:
     Description: CIDR block for GWLBe subnet 1 located in the 1st Availability Zone.
     Type: String
@@ -248,6 +254,7 @@ Parameters:
     Type: String
     Default: 10.0.24.0/24
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
   GWLBeSubnet3CIDR:
     Description: CIDR block for GWLBe subnet 3 located in the 3rd Availability Zone.
     Type: String
@@ -259,6 +266,7 @@ Parameters:
     Type: String
     Default: 10.0.44.0/24
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
     Type: AWS::EC2::KeyPair::KeyName
@@ -512,6 +520,11 @@ Parameters:
     AllowedValues:
       - true
       - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
   GWLBName:
     Description: Gateway Load Balancer name. This name must be unique within your AWS account and can have a maximum of 32 alphanumeric characters and hyphens. A name cannot begin or end with a hyphen.
     Type: String
@@ -995,6 +1008,7 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
         CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
         ManagementDeploy: !Ref ManagementDeploy
         ManagementInstanceType: !Ref ManagementInstanceType
         ManagementVersion: !Ref ManagementVersion

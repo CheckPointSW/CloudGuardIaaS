@@ -60,6 +60,7 @@ Metadata:
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
+          - GatewayBootstrapScript
       - Label:
           default: Check Point CloudGuard IaaS Security Management Server Configuration
         Parameters:
@@ -163,6 +164,8 @@ Metadata:
         default: Allocate Public IPs
       CloudWatch:
         default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
       ManagementDeploy:
         default: Deploy Management Server
       ManagementInstanceType:
@@ -562,6 +565,11 @@ Parameters:
     AllowedValues:
       - true
       - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
   ManagementDeploy:
     Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
     Type: String
@@ -798,6 +806,7 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
         CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
         GWLBName: !Ref GWLBName
         TargetGroupName: !Ref TargetGroupName
         CrossZoneLoadBalancing: !Ref CrossZoneLoadBalancing
