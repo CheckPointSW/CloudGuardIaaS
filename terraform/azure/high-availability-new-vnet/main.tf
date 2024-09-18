@@ -379,7 +379,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-set" {
   }
 
   os_profile {
-    computer_name = "${var.cluster_name}${count.index+1}"
+    computer_name = "${lower(var.cluster_name)}${count.index+1}"
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/cloud-init.sh", {
@@ -473,7 +473,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
   }
 
   os_profile {
-    computer_name = "${var.cluster_name}${count.index+1}"
+    computer_name = "${lower(var.cluster_name)}${count.index+1}"
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/cloud-init.sh", {
