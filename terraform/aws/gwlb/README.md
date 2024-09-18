@@ -208,7 +208,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                                           |
 |------------------|---------------------------------------------------------------------------------------|
-| 20240704         | R80.40 version deprecation                                                            |
+| 20240704         | - R80.40 version deprecation.<br/>- R81 version  deprecation                          |
 | 20240515         | Add support for requiring use instance metadata service version 2 (IMDSv2) only       |
 | 20240310         | Add support for requiring use instance metadata service version 2 (IMDSv2) only       |
 | 20231022         | Fixed template to populate x-chkp-tags correctly                                      |
