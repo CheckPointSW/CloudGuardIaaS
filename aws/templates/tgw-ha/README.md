@@ -24,3 +24,17 @@
 </table>
 <br/>
 <br/>
+
+## Revision History
+In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
+
+| Template Version | Description                                                                                                      |
+|------------------|------------------------------------------------------------------------------------------------------------------|
+| 20240519         | Add support for requiring use instance metadata service version 2 (IMDSv2) only                                  |
+| 20230923         | Add support for C5d instance type.                                                                               |
+| 20230521         | - Change default shell for the admin user to /etc/cli.sh<br/>- Add description for reserved words in hostname    |
+| 20230503         | Template version 20230503 and above supports Smart-1 Cloud token validation.                                     |
+| 20230411         | Improved deployment experience for gateways and clusters managed by Smart-1 Cloud.                               |
+| 20221123         | Templates version 20221120 and above support R81.20                                                              |
+| 20220606         | New instance type support                                                                                        |
+| 20210309         | First release of Check Point Security Management Server & Security Gateway (Standalone) Terraform module for AWS |

@@ -25,6 +25,7 @@ Metadata:
           - EnableInstanceConnect
           - GatewayPredefinedRole
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -81,6 +82,8 @@ Metadata:
         default: Existing IAM role name
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Version & license
       Shell:
@@ -303,6 +306,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.20-BYOL
@@ -398,6 +408,7 @@ Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   EmptyHostName: !Equals [!Ref GatewayHostname, '']
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ClusterReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -571,8 +582,12 @@ Resources:
       PrivateIpAddress: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
   MemberAInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, ClusterPublicAddress, MemberBInternalInterface, MemberBExternalInterface]
+    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, ClusterPublicAddress, MemberBInternalInterface, MemberBExternalInterface, MemberAGatewayLaunchTemplate]
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberAGatewayLaunchTemplate
+        Version: !GetAtt MemberAGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-A]]
@@ -587,50 +602,14 @@ Resources:
             - ':'
             - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref MemberAExternalInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref MemberAInternalInterface
-      IamInstanceProfile: !Ref ClusterInstanceProfile
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
-
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
-            - !Join ['', ['    other_member_ip="', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress, '"']]
-            - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
-            - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
-            - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
-            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface, MemberAExternalInterface]
+    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface, MemberBGatewayLaunchTemplate]
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberBGatewayLaunchTemplate
+        Version: !GetAtt MemberBGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-B]]
@@ -645,46 +624,100 @@ Resources:
             - ':'
             - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses ] ] ]
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref MemberBExternalInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref MemberBInternalInterface
-      IamInstanceProfile: !Ref ClusterInstanceProfile
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+  MemberAGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberAExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberAInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+              !Join
+              - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
-            - !Join ['', ['    other_member_ip="', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress, '"']]
-            - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
-            - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
-            - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
-            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+              - - '#cloud-config'
+                - 'runcmd:'
+                - '  - |'
+                - '    set -e'
+                - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
+                - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+                - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
+                - !Join ['', ['    other_member_ip="', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress, '"']]
+                - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
+                - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
+                - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
+                - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
+                - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+                - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+                - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+                - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+                - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+                - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240704\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  MemberBGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberBExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberBInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
+              - !Join ['', ['    other_member_ip="', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress, '"']]
+              - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
+              - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
+              - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join [ '', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240704\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
 Outputs:
   ClusterPublicAddress:
     Description: The public address of the cluster.
@@ -739,12 +772,12 @@ Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
     RuleCondition: !Equals [ !Ref MemberBToken, '' ]
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
         Assert: !Equals [ !Ref MemberAToken, '' ]
   MembersTokenValueEquals:
     RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]

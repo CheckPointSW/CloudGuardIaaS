@@ -1,11 +1,5 @@
 locals {
   gw_versions = [
-    "R80.40-BYOL",
-    "R80.40-PAYG-NGTP",
-    "R80.40-PAYG-NGTX",
-    "R81-BYOL",
-    "R81-PAYG-NGTP",
-    "R81-PAYG-NGTX",
     "R81.10-BYOL",
     "R81.10-PAYG-NGTP",
     "R81.10-PAYG-NGTX",
@@ -14,35 +8,22 @@ locals {
     "R81.20-PAYG-NGTX"
   ]
   mgmt_versions = [
-    "R80.40-BYOL",
-    "R80.40-PAYG",
-    "R81-BYOL",
-    "R81-PAYG",
     "R81.10-BYOL",
     "R81.10-PAYG",
     "R81.20-BYOL",
     "R81.20-PAYG"
   ]
   mds_versions = [
-    "R80.40-BYOL",
-    "R81-BYOL",
     "R81.10-BYOL",
     "R81.20-BYOL"
   ]
   standalone_versions = [
-    "R80.40-BYOL",
-    "R80.40-PAYG-NGTP",
-    "R81-BYOL",
-    "R81-PAYG-NGTP",
     "R81.10-BYOL",
     "R81.10-PAYG-NGTP",
     "R81.20-BYOL",
     "R81.20-PAYG-NGTP"
   ]
   gwlb_gw_versions = [
-    "R80.40-BYOL",
-    "R80.40-PAYG-NGTP",
-    "R80.40-PAYG-NGTX",
 	"R81.20-BYOL",
 	"R81.20-PAYG-NGTP",
     "R81.20-PAYG-NGTX"

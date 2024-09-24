@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways (20240417)
+Description: Create an Auto Scaling group of Check Point gateways (20240704)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -18,6 +18,7 @@ Metadata:
           - VolumeType
           - EnableVolumeEncryption
           - EnableInstanceConnect
+          - MetaDataToken
       - Label:
           default: Auto Scaling Configuration
         Parameters:
@@ -67,6 +68,8 @@ Metadata:
         default: Enable volume encryption
       EnableInstanceConnect:
         default: Enable AWS Instance Connect
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewaysMinSize:
         default: Minimum Gateway group size
       GatewaysMaxSize:
@@ -262,6 +265,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewaysMinSize:
     Description: The minimal number of gateways in the Auto Scaling group.
     Type: Number
@@ -287,12 +297,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -386,6 +390,7 @@ Conditions:
   ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
   CreateELB: !Not [!Equals [!Ref ELBType, none]]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ChkpGatewayRole:
     Type: AWS::IAM::Role
@@ -515,6 +520,8 @@ Resources:
         KeyName: !Ref KeyName
         ImageId: !GetAtt AMI.Outputs.ImageId
         InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [ EnableMetaDataToken, required, optional ]
         BlockDeviceMappings:
           - DeviceName: '/dev/xvda'
             Ebs:

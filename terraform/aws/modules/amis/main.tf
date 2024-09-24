@@ -4,10 +4,11 @@ locals {
 
 
   //  Variables example:
-  //  version_license = "R80.40-PAYG-NGTX"
+  //  version_license = "R81.10-PAYG-NGTX"
   //  RESULT:
-  //  version_license_key = "R80.40-PAYG-NGTX-GW"
-  //  version_license_value = "R8040PAYGNGTXGW"
+  //  version_license_key = "R81.10-PAYG-NGTX-GW"
+
+  //  version_license_value = "R8110PAYGNGTXGW"
 
   version_license_key_mgmt_gw = format("%s%s", var.version_license, var.chkp_type == "gateway" ? "-GW" : var.chkp_type == "management" ? "-MGMT" : var.chkp_type == "mds" ? "-MGMT" : "")
   version_license_key = var.chkp_type == "standalone" ? format("%s%s", var.version_license, element(split("-", var.version_license), 1) == "BYOL" ? "-MGMT" : "") : local.version_license_key_mgmt_gw
