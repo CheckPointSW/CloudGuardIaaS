@@ -1,0 +1,96 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "vnet"
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the virtual network"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 1st subnet"
+      },
+      "defaultValue": "Frontend"
+    },
+    "Subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 1st subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "apiVersion": {
+      "type": "string"
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('virtualNetworkName')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('virtualNetworkAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1Prefix')]"
+            }
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+      "type": "string"
+    }
+  }
+}

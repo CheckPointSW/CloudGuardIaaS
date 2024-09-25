@@ -1,0 +1,361 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy Check Point Gateways for a transit VPC hub (20211212)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: General Settings
+      Parameters:
+      - VPC
+      - PublicSubnetA
+      - PublicSubnetB
+      - PrivateSubnetA
+      - PrivateSubnetB
+      - KeyPairName
+      - Tag
+      - AllowUploadDownload
+    - Label:
+        default: Check Point CloudGuard IaaS Transit Security Gateways Configuration
+      Parameters:
+      - GatewaysInstanceType
+      - ASN
+      - GatewaysLicense
+      - GatewaysPasswordHash
+      - GatewaysSIC
+    - Label:
+        default: Check Point CloudGuard IaaS Security Management Server Configuration
+      Parameters:
+      - ManagementDeploy
+      - ManagementAction
+      - ManagementInstanceType
+      - ManagementLicense
+      - EnableInstanceConnect
+      - ManagementPermissions
+      - PredefinedRole
+      - ManagementPasswordHash
+      - GatewaysBlades
+      - AdminAddressCIDR
+      - GatewaysAddresses
+    ParameterLabels:
+      PublicSubnetA:
+        default: Public subnet 1 
+      PublicSubnetB:
+        default: Public subnet 2
+      PrivateSubnetA:
+        default: Private subnet 1
+      PrivateSubnetB:
+        default: Private subnet 2
+      KeyPairName:
+        default: Key name
+      Tag:
+        default: Transit tag
+      AllowUploadDownload:
+        default: Allow upload & download
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      GatewaysInstanceType:
+        default: Instance type
+      ASN:
+        default: BGP ASN
+      GatewaysLicense:
+        default: Version & license
+      GatewaysPasswordHash:
+        default: Password hash
+      GatewaysSIC:
+        default: SIC key
+      ManagementDeploy:
+        default: Deploy Management Server
+      ManagementAction:
+        default: Default VPN access
+      ManagementInstanceType:
+        default: Instance type
+      ManagementLicense:
+        default: Version & license
+      ManagementPermissions:
+        default: IAM role
+      PredefinedRole:
+        default: Existing IAM role name
+      ManagementPasswordHash:
+        default: Password hash
+      GatewaysBlades:
+        default: Default Blades
+      AdminAddressCIDR:
+        default: Administrator addresses
+      GatewaysAddresses:
+        default: Gateways addresses
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: you must select a VPC.
+  PublicSubnetA:
+    Description: Select a public subnet for the first Security Gateway. If you choose to deploy a Security Management Server it will be deployed in this subnet
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the first Security Gateway
+  PublicSubnetB:
+    Description: Select a public subnet for the second Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the second Security Gateway
+  PrivateSubnetA:
+    Description: Select a private subnet for the first Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the first Security Gateway
+  PrivateSubnetB:
+    Description: Select a private subnet for the second Security Gateway
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the second Security Gateway
+  KeyPairName:
+    Description: The EC2 Key Pair to allow SSH access to the instances created by this stack
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: '1'
+  Tag:
+    Description: The tag is used by the Security Management Server to automatically provision the Security Gateways. Must be up to 12 alphanumeric characters and unique for each environment
+    Type: String
+    Default: Transit
+    AllowedPattern: "^[a-zA-Z0-9-]*$"
+    MinLength: 1
+    MaxLength: 12
+    ConstraintDescription: The tag must be up to 12 alphanumeric character
+  AllowUploadDownload:
+    Description: Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point
+    Type: String
+    Default: 'true'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  GatewaysInstanceType:
+    Description: c4 and t2 instance types are supported only with version R80.10 and c5 are supported only with R80.20 and R80.30
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+    - c4.large
+    - c4.xlarge
+    - c4.2xlarge
+    - c4.4xlarge
+    - c4.8xlarge
+    - c5.large
+    - c5.xlarge
+    - c5.2xlarge
+    - c5.4xlarge
+    - c5.9xlarge
+    - c5.18xlarge
+    - t2.xlarge
+    - t2.2xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  ASN:
+    Description: The organization Autonomous System Number (ASN) that identifies the routing domain for the Security Gateways
+    Type: String
+    AllowedPattern: '[0-9]*'
+    Default: 65000
+  GatewaysLicense:
+    Description: The license to install on the Security Gateways
+    Type: String
+    Default: R80.30-PAYG-NGTP
+    AllowedValues:
+    - R80.10-BYOL
+    - R80.10-PAYG-NGTP
+    - R80.10-PAYG-NGTX
+    - R80.20-BYOL
+    - R80.20-PAYG-NGTP
+    - R80.20-PAYG-NGTX
+    - R80.30-BYOL
+    - R80.30-PAYG-NGTP
+    - R80.30-PAYG-NGTX
+  GatewaysPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -1 PASSWORD" to get the PASSWORD's hash) (optional)
+    Default: ''
+    Type: String
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  EnableInstanceConnect:
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'true'
+    - 'false'
+  GatewaysSIC:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters
+    NoEcho: 'true'
+    MinLength: '8'
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: Secure Internal Communication activation key should contain only alpha numeric characters and be at least 8 characters long
+  ManagementDeploy:
+    Description: Select 'No' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section
+    Type: String
+    Default: 'Yes'
+    AllowedValues:
+    - 'Yes'
+    - 'No'
+  ManagementAction:
+    Description: If the Spoke VPCs are trusted, select 'accept' to allow all traffic between the Spoke VPCs
+    Type: String
+    Default: 'accept'
+    AllowedValues:
+    - 'drop'
+    - 'accept'
+  ManagementInstanceType:
+    Description: m4 and t2 instance types are supported only with version R80.10 and m5 are supported only with R80.20 and above
+    Type: String
+    Default: m5.xlarge
+    AllowedValues:
+    - m4.large
+    - m4.xlarge
+    - m4.2xlarge
+    - m4.4xlarge
+    - m4.10xlarge
+    - m4.16xlarge
+    - m5.large
+    - m5.xlarge
+    - m5.2xlarge
+    - m5.4xlarge
+    - m5.12xlarge
+    - m5.24xlarge
+    - t2.xlarge
+    - t2.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  ManagementLicense:
+    Type: String
+    Default: R80.30-PAYG-MGMT
+    AllowedValues:
+    - R80.10-BYOL
+    - R80.10-PAYG-MGMT
+    - R80.20-BYOL
+    - R80.20-PAYG-MGMT
+    - R80.30-BYOL
+    - R80.30-PAYG-MGMT
+    - R80.40-BYOL
+    - R80.40-PAYG-MGMT
+  ManagementPermissions:
+    Type: String
+    Default: Create with read permissions
+    AllowedValues:
+    - None (configure later)
+    - Use existing (specify an existing IAM role name)
+    - Create with assume role permissions (specify an STS role ARN)
+    - Create with read permissions
+    - Create with read-write permissions
+  PredefinedRole:
+    Type: String
+    Default: ""
+    Description: A predefined IAM role to attach to the instance profile. Ignored if IAM role is not set to 'Use existing'
+  ManagementPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -1 PASSWORD" to get the PASSWORD's hash) (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: "[\\$\\./a-zA-Z0-9]*"
+    NoEcho: true
+  GatewaysBlades:
+    Description: Turn on/off the Intrusion Prevention System, URL filtering, Application Control, Anti-Virus and Anti-Bot Blades (these and additional Blades can be manually turned on or off later)
+    Type: String
+    AllowedValues:
+    - 'On'
+    - 'Off'
+    Default: 'On'
+  AdminAddressCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Security Management Server
+    Type: String
+    AllowedPattern: "^(([0-9]{1,3}\\.){3}[0-9]{1,3}/([0-9]|[1-2][0-9]|3[0-2]))?$"
+    Default: 0.0.0.0/0
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Security Management Server
+    Type: String
+    Default: 10.0.0.0/16
+Conditions:
+  DeployManagement: !Equals [!Ref ManagementDeploy, 'Yes']
+  EnableBlades: !Equals [!Ref GatewaysBlades, 'On']
+  UseCME: !Or [!Equals [!Select [0, !Split [-, !Ref ManagementLicense]], R80.30], !Equals [!Select [0, !Split [-, !Ref ManagementLicense]], R80.40]]
+Resources:
+  Transit:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/deprecated/cluster/transit.yaml
+      Parameters:
+        GatewayName: !Sub ${Tag}-transit-gateway
+        InstanceType: !Ref GatewaysInstanceType
+        KeyPairName: !Ref KeyPairName
+        VPC: !Ref VPC
+        PublicSubnetA: !Ref PublicSubnetA
+        PrivateSubnetA: !Ref PrivateSubnetA
+        PublicSubnetB: !Ref PublicSubnetB
+        PrivateSubnetB: !Ref PrivateSubnetB
+        License: !Ref GatewaysLicense
+        ASN: !Ref ASN
+        ControlGatewayOverPrivateOrPublicAddress: private
+        ManagementServer: !Sub ${Tag}-management
+        ConfigurationTemplate: !Sub ${Tag}-template
+        PasswordHash: !Ref GatewaysPasswordHash
+        SICKey: !Ref GatewaysSIC
+        AllowUploadDownload: !Ref AllowUploadDownload
+  ManagementStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: DeployManagement
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/deprecated/management/management.json
+      Parameters:
+        VPC: !Ref VPC
+        Subnet: !Ref PublicSubnetA
+        Version: !Ref ManagementLicense
+        InstanceType: !Ref ManagementInstanceType
+        Name: !Sub ${Tag}-Management
+        Permissions: !Ref ManagementPermissions
+        PredefinedRole: !Ref PredefinedRole
+        Hostname: !Sub ${Tag}-Management
+        KeyName: !Ref KeyPairName
+        PasswordHash: !Ref ManagementPasswordHash
+        AllowUploadDownload: !Ref AllowUploadDownload
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        BootstrapScript: !Join
+        - ','
+        - - "sed -i '/template_name/c\template_name: transit-management' /etc/cloud-version"
+          - !If
+            - UseCME
+            - !Sub '/opt/CPcme/menu/additions/config-community.sh ${Tag}-community'
+            - !Sub '/etc/fw/scripts/autoprovision/config-community.sh ${Tag}-community'
+          - !Sub 'mgmt_cli -r true add access-rule layer "Network" position 1 name "${Tag}-community VPN Traffic Rule" vpn.directional.1.from ${Tag}-community vpn.directional.1.to ${Tag}-community vpn.directional.2.from ${Tag}-community vpn.directional.2.to Internal_clear vpn.directional.3.from Internal_clear vpn.directional.3.to ${Tag}-community action ${ManagementAction}'
+          - !Sub
+            - 'autoprov_cfg -f init AWS -mn ${Tag}-management -tn ${Tag}-template -cn ${Tag}-controller -po Standard -otp ${GatewaysSIC} -r ${AWS::Region} -ver ${version} -iam'
+            - version: !Select
+              - 0
+              - !Split
+                - '-'
+                - !Ref GatewaysLicense
+          - !Sub 'autoprov_cfg -f set controller AWS -cn ${Tag}-controller -sg -sv -com ${Tag}-community'
+          - !Sub 'autoprov_cfg -f set template -tn ${Tag}-template -vpn -vd "" -con ${Tag}-community'
+          - !If
+            - EnableBlades
+            - !Sub autoprov-cfg -f set template -tn ${Tag}-template -ips -appi -av -ab
+            - !Ref AWS::NoValue
+        AdminSubnet: !Ref AdminAddressCIDR
+        GatewaysAddresses: !Ref GatewaysAddresses
+Outputs:
+  PublicAddressA:
+    Description: The public address of the 1st gateway
+    Value: !GetAtt Transit.Outputs.PublicAddressA
+  PublicAddressB:
+    Description: The public address of the 2nd gateway
+    Value: !GetAtt Transit.Outputs.PublicAddressB
+  ManagementPublicAddress:
+    Description: The public address of the management servers
+    Value: !GetAtt ManagementStack.Outputs.PublicAddress
+    Condition: DeployManagement
+  SpokeTag:
+    Description: The tag to put on the spoke VPC
+    Value: !Sub 'Key: x-chkp-vpn | value: ${Tag}-management/${Tag}-community'
+  ManagementName:
+    Description: The name that represents the Security Management Server
+    Value: !Sub ${Tag}-management
+  ConfigurationTemplateName:
+    Description: The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name
+    Value: !Sub ${Tag}-template
+  ControllerName:
+    Description: The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name
+    Value: !Sub ${Tag}-controller
+  CommunityName:
+    Description: The name of the VPN community created in the Security Management Server
+    Value: !Sub ${Tag}-community

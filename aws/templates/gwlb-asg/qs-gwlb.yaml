@@ -1,0 +1,915 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (05072024)"
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Network Configuration
+        Parameters:
+          - NumberOfAZs
+      - Label:
+          default: Security Network Configuration
+        Parameters:
+          - SecurityVPC
+          - GatewaysSubnets
+      - Label:
+          default: Servers Network Configuration
+        Parameters:
+          - ServersVPC
+          - ServersSubnets
+          - ServersCIDRs
+          - GWLBeSubnets
+          - ServerIGW
+      - Label:
+          default: General Settings
+        Parameters:
+          - KeyName
+          - EnableVolumeEncryption
+          - VolumeSize
+          - VolumeType
+          - EnableInstanceConnect
+          - TerminationProtection
+          - AllowUploadDownload
+          - ManagementServer
+          - ConfigurationTemplate
+          - AdminEmail
+          - Shell
+      - Label:
+          default: Gateway Load Balancer Configuration
+        Parameters:
+          - GWLBName
+          - TargetGroupName
+          - AcceptConnectionRequired
+          - CrossZoneLoadBalancing
+      - Label:
+          default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
+        Parameters:
+          - GatewayName
+          - GatewayInstanceType
+          - GatewaysMinSize
+          - GatewaysMaxSize
+          - GatewayVersion
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - GatewaySICKey
+          - ControlGatewayOverPrivateOrPublicAddress
+          - AllocatePublicAddress
+          - CloudWatch
+      - Label:
+          default: Check Point CloudGuard IaaS Security Management Server Configuration
+        Parameters:
+          - ManagementDeploy
+          - ManagementInstanceType
+          - ManagementVersion
+          - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
+          - GatewaysPolicy
+          - GatewaysBlades
+          - AdminCIDR
+          - GatewayManagement
+          - GatewaysAddresses
+      - Label:
+          default: Web Servers Auto Scaling Group Configuration
+        Parameters:
+          - ServerInstanceType
+          - ServerAMI
+          - ALBProtocol
+          - ServicePort
+          - ResourcesTagName
+    ParameterLabels:
+      NumberOfAZs:
+        default: Number of AZs
+      SecurityVPC:
+        default: SecurityVPC
+      GatewaysSubnets:
+        default: Gateways subnets
+      ServersVPC:
+        default: ServersVPC
+      ServersSubnets:
+        default: Servers subnets
+      ServersCIDRs:
+        default: ServersCIDRs
+      GWLBeSubnets:
+        default: GWLBe subnets
+      ServerIGW:
+        default: Server VPC IGW
+      KeyName:
+        default: Key name
+      EnableVolumeEncryption:
+        default: Enable environment volume encryption
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      AllowUploadDownload:
+        default: Allow upload & download
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+      AdminEmail:
+        default: Email address
+      Shell:
+        default: Admin shell
+      GWLBName:
+        default: Gateway Load Balancer Name
+      TargetGroupName:
+        default: Target Group Name
+      AcceptConnectionRequired:
+        default:  Connection Acceptance Required
+      CrossZoneLoadBalancing:
+        default:  Enable Cross Zone Load Balancing
+      GatewayName:
+        default: Gateways instance name
+      GatewayInstanceType:
+        default: Gateways instance type
+      GatewaysMinSize:
+        default: Minimum group size
+      GatewaysMaxSize:
+        default: Maximum group size
+      GatewayVersion:
+        default: Gateways version & license
+      GatewayPasswordHash:
+        default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      GatewaySICKey:
+        default: Gateways SIC key
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      AllocatePublicAddress:
+        default: Allocate Public IPs
+      CloudWatch:
+        default: CloudWatch metrics
+      ManagementDeploy:
+        default: Deploy Management Server
+      ManagementInstanceType:
+        default: Management instance type
+      ManagementVersion:
+        default: Management version & license
+      ManagementPasswordHash:
+        default: Management password hash
+      ManagementMaintenancePasswordHash:
+        default:  Management Maintenance Password hash
+      GatewaysPolicy:
+        default: Security Policy
+      GatewaysBlades:
+        default: Default Blades
+      AdminCIDR:
+        default: Administrator addresses
+      GatewayManagement:
+        default: Manage Gateways
+      GatewaysAddresses:
+        default: Gateways addresses
+      ServerInstanceType:
+        default: Servers instance type
+      ServerAMI:
+        default: AMI ID
+      ALBProtocol:
+        default: ALB Protocol
+      ServicePort:
+        default: Custom service port
+      ResourcesTagName:
+        default: Resources tag name
+Parameters:
+  NumberOfAZs:
+    Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
+    Type: Number
+    Default: 2
+    MinValue: 2
+    MaxValue: 4
+  SecurityVPC:
+    Description: Select an existing Security VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: You must select a VPC.
+  GatewaysSubnets:
+    Description: Select at least 2 public subnets in the Security VPC.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  ServersVPC:
+    Description: Select an existing VPC for Serevrs deployment.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: You must select a VPC.
+  ServersSubnets:
+    Description: Select at least 2 private subnets in the VPC for Servers deployment.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  GWLBeSubnets:
+    Description: Select at least 2 public subnets in the VPC for GWLBe deployment.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  ServerIGW:
+    Description: Internet gateway It that attached to Servers VPC
+    Type: String
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  EnableVolumeEncryption:
+    Description: Encrypt Environment instances volume with default AWS KMS key.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
+    Type: String
+    Default: gwlb-management-server
+    MinLength: 1
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
+    Type: String
+    Default: gwlb-ASG-configuration
+    MinLength: 1
+    MaxLength: 30
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration. Applies for Security Gateways and Security Management Server if deployed.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  GWLBName:
+    Description: Gateway Load Balancer name. This name must be unique within your AWS account and can have a maximum of 32 alphanumeric characters and hyphens. A name cannot begin or end with a hyphen.
+    Type: String
+    Default: gwlb1
+    ConstraintDescription: Must be a valid GWLB Name.
+  TargetGroupName:
+    Description: Target Group Name. This name must be unique within your AWS account and can have a maximum of 32 alphanumeric characters and hyphens. A name cannot begin or end with a hyphen.
+    Type: String
+    Default: tg1
+    ConstraintDescription: Must be a valid target group name.
+  AcceptConnectionRequired:
+    Description: Indicate whether requests from service consumers to create an endpoint to your service must be accepted. Default is set to false(acceptance not required).
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Type: String
+    ConstraintDescription: Must be true or false.
+  CrossZoneLoadBalancing:
+    Description: Select 'true' to enable cross-az load balancing. NOTE! this may cause a spike in cross-az charges.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewayName:
+    Description: The name tag of the Security Gateway instances. (optional)
+    Type: String
+    Default: Check-Point-Gateway
+  GatewayInstanceType:
+    Description: The EC2 instance type for the Security Gateways.
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  GatewaysMinSize:
+    Description: The minimal number of Security Gateways.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GatewaysMaxSize:
+    Description: The maximal number of Security Gateways.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  GatewayVersion:
+    Description: The version and license to install on the Security Gateways.
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '^[a-zA-Z0-9]{8,}$'
+    ConstraintDescription: Secure Internal Communication acti.vation key should contain only alpha numeric characters and be at least 8 characters long.
+    NoEcho: true
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  AllocatePublicAddress:
+    Description: Allocate a Public IP for gateway members.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ManagementDeploy:
+    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementInstanceType:
+    Description: The EC2 instance type of the Security Management Server.
+    Type: String
+    Default: m5.xlarge
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  ManagementVersion:
+    Description: The license to install on the Security Management Server.
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81-BYOL
+      - R81-PAYG
+      - R81.10-BYOL
+      - R81.10-PAYG
+      - R81.20-BYOL
+      - R81.20-PAYG
+  ManagementPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaysPolicy:
+    Description: The name of the Security Policy package to be installed on the gateways in the Security Gateways Auto Scaling group.
+    Type: String
+    Default: Standard
+    MinLength: 1
+  GatewaysBlades:
+    Description: Turn on the Intrusion Prevention System, Application Control, Anti-Virus and Anti-Bot Blades (these and additional Blades can be manually turned on or off later).
+    Type: String
+    Default: true
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  GatewayManagement:
+    Description: Select 'Over the internet' if any of the gateways you wish to manage are not directly accessed via their private IP address.
+    Type: String
+    Default: Locally managed
+    AllowedValues:
+      - Locally managed
+      - Over the internet
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  ALBProtocol:
+    Description: The protocol to use on the Application Load Balancer.
+    Type: String
+    Default: HTTP
+    AllowedValues:
+      - HTTP
+      - HTTPS
+  ServicePort:
+    Description: 'The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS.'
+    Type: String
+    AllowedPattern: '^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?$'
+    ConstraintDescription: Custom service port must be a number between 0 and 65535.
+  ResourcesTagName:
+    Description: The name tag of the resources. (optional)
+    Type: String
+    Default: ''
+  ServerInstanceType:
+    Description: The EC2 instance type for the web servers.
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type.
+  ServerAMI:
+    Description: The Amazon Machine Image ID of a preconfigured web server (e.g. ami-0dc7dc63).
+    Type: String
+    AllowedPattern: '^(ami-(([0-9a-f]{8})|([0-9a-f]{17})))$'
+    ConstraintDescription: Amazon Machine Image ID must be in the form ami-xxxxxxxx or ami-xxxxxxxxxxxxxxxxx.
+  ServersCIDRs:
+    Description: CIDR's block of each Servers private subnet(divided by coma, without spaces)
+    Type: CommaDelimitedList
+    Default: "192.168.0.10/24, 192.168.0.20/24"
+Conditions:
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
+  2AZs: !Or [!Equals [!Ref NumberOfAZs, 2], !Condition 3AZs]
+  DeployManagement: !Equals [!Ref ManagementDeploy, true]
+  VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
+  ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
+Resources:
+  GatewayLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: gateway
+      Name: !Ref GWLBName
+      LoadBalancerAttributes:
+        - Key: load_balancing.cross_zone.enabled
+          Value: !Ref CrossZoneLoadBalancing
+      Subnets: !Ref GatewaysSubnets
+      Tags:
+        - Key: x-chkp-management
+          Value: !Ref ManagementServer
+        - Key: x-chkp-template
+          Value: !Ref ConfigurationTemplate
+  VpcEndpointService:
+    Type: AWS::EC2::VPCEndpointService
+    Properties:
+      AcceptanceRequired: !Ref AcceptConnectionRequired
+      GatewayLoadBalancerArns:
+        - !Ref GatewayLoadBalancer
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Ref TargetGroupName
+      Port: 6081
+      Protocol: GENEVE
+      HealthCheckPort: 8117
+      HealthCheckProtocol: TCP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 20
+      VpcId: !Ref SecurityVPC
+      TargetType: instance
+      Tags:
+        - Key: Name
+          Value: !Join
+            - ""
+            - - !Ref AWS::StackName
+              - "-tg1"
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref GatewayLoadBalancer
+  SecurityGatewaysStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/autoscale-gwlb.yaml
+      Parameters:
+        VPC: !Ref SecurityVPC
+        GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
+        GatewayName: !Ref GatewayName
+        GatewayInstanceType: !Ref GatewayInstanceType
+        KeyName: !Ref KeyName
+        Shell: !Ref Shell
+        EnableVolumeEncryption: !Ref EnableVolumeEncryption
+        VolumeType: !Ref VolumeType
+        VolumeSize: !Ref VolumeSize
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        GatewaysMinSize: !Ref GatewaysMinSize
+        GatewaysMaxSize: !Ref GatewaysMaxSize
+        AdminEmail: !Ref AdminEmail
+        GatewaysTargetGroups: !Ref TargetGroup
+        GatewayVersion: !Ref GatewayVersion
+        GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
+        GatewaySICKey: !Ref GatewaySICKey
+        AllowUploadDownload: !Ref AllowUploadDownload
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        AllocatePublicAddress: !Ref AllocatePublicAddress
+        CloudWatch: !Ref CloudWatch
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+        GatewayBootstrapScript: !Join
+          - ';'
+          - - 'echo -e "\nStarting Bootstrap script\n"'
+            - 'echo "Adding quickstart identifier to cloud-version"'
+            - 'cv_template="gwlb_qs"'
+            - 'cv_path="/etc/cloud-version"'
+            - 'if test -f ${cv_path}; then sed -i ''/template_name/c\template_name: ''"${cv_template}"'''' /etc/cloud-version; fi'
+            - 'cv_json_path="/etc/cloud-version.json"'
+            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
+            - 'if test -f ${cv_json_path}; then cat ${cv_json_path} | jq ''.template_name = "''"${cv_template}"''"'' > ${cv_json_path_tmp}; mv ${cv_json_path_tmp} ${cv_json_path}; fi'
+            - 'echo -e "\nFinished Bootstrap script\n"'
+  ManagementStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: DeployManagement
+    DependsOn: GWLBeEndpointStack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/management-gwlb.yaml
+      Parameters:
+        VPC: !Ref SecurityVPC
+        ManagementSubnet: !Select [0, !Ref GatewaysSubnets]
+        ManagementName: !Ref ManagementServer
+        ManagementInstanceType: !Ref ManagementInstanceType
+        KeyName: !Ref KeyName
+        Shell: !Ref Shell
+        VolumeEncryption: !If [VolumeEncryption, alias/aws/ebs, '']
+        VolumeType: !Ref VolumeType
+        VolumeSize: !Ref VolumeSize
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        ManagementPermissions: Create with read-write permissions
+        ManagementVersion: !Ref ManagementVersion
+        ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
+        AllowUploadDownload: !Ref AllowUploadDownload
+        AdminCIDR: !Ref AdminCIDR
+        GatewayManagement: !Ref GatewayManagement
+        GatewaysAddresses: !Ref GatewaysAddresses
+        TerminationProtection: !Ref TerminationProtection
+        ManagementBootstrapScript: !Join
+          - ';'
+          - - 'echo -e "\nStarting Bootstrap script\n"'
+            - !Sub 'policy=${GatewaysPolicy} ; region=${AWS::Region} ; conf_template=${ConfigurationTemplate} ; mgmt=${ManagementServer} ; blades=${GatewaysBlades}'
+            - !Sub ['version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+            - !Join ['', ['sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ' | base64 -d)"']]
+            - 'controller="gwlb-controller"'
+            - 'echo "Adding quickstart identifier to cloud-version"'
+            - 'cv_template="management_gwlb_qs"'
+            - 'cv_path="/etc/cloud-version"'
+            - 'if test -f ${cv_path}; then sed -i ''/template_name/c\template_name: ''"${cv_template}"'''' /etc/cloud-version; fi'
+            - 'cv_json_path="/etc/cloud-version.json"'
+            - 'cv_json_path_tmp="/etc/cloud-version-tmp.json"'
+            - 'if test -f ${cv_json_path}; then cat ${cv_json_path} | jq ''.template_name = "''"${cv_template}"''"'' > ${cv_json_path_tmp}; mv ${cv_json_path_tmp} ${cv_json_path}; fi'
+            - 'echo "Creating CME configuration"'
+            - 'autoprov_cfg -f init AWS -mn "${mgmt}" -tn "${conf_template}" -cn "${controller}" -po "${policy}" -otp "${sic}" -r "${region}" -ver "${version}" -iam -ss'
+            - 'autoprov_cfg -f set controller AWS -cn "${controller}" -ct "${conf_template}"'
+            - '${blades} && autoprov_cfg -f set template -tn "${conf_template}" -ips -appi -av -ab'
+            - 'echo "Set Scan GWLB Load Balancer parameter"'
+            - 'autoprovision_file="${FWDIR}/conf/autoprovision.json"'
+            - 'autoprovision_file_tmp="${FWDIR}/conf/autoprovision.json.tmp"'
+            - 'if test -f ${autoprovision_file}; then jq ".controllers.\"${controller}\".sync |= . + {\"lb\": false}" "${autoprovision_file}" > "${autoprovision_file_tmp}"; mv "${autoprovision_file_tmp}" "${autoprovision_file}"; fi'
+            - 'echo -e "\nFinished Bootstrap script\n"'
+  GWLBeEndpointStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VpcEndpointService
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-endpoints.yaml
+      Parameters:
+        NumberOfAZs: !Ref NumberOfAZs
+        GWLBeVPC: !Ref ServersVPC
+        GWLBeSubnets: !Join [',', !Ref GWLBeSubnets]
+        GWLBServiceName: !Sub ["com.amazonaws.vpce.${AWS::Region}.${Service}", {Service: !Ref VpcEndpointService}]
+        ServersSubnets: !Join [',', !Ref ServersSubnets]
+        ServersCIDRs: !Join [',', !Ref ServersCIDRs]
+        ServerIGW: !Ref ServerIGW
+  ServersStacks:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: GWLBeEndpointStack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-servers-autoscale.yaml
+      Parameters:
+        VPC: !Ref ServersVPC
+        Subnets: !Join [',', !Ref ServersSubnets]
+        ResourcesTagName: !Ref ResourcesTagName
+        ALBProtocol: !Ref ALBProtocol
+        ServicePort: !If [ProvidedPort, !Ref ServicePort, !If [EncryptedProtocol, 443, 80]]
+        AdminEmail: !Ref AdminEmail
+        ServerInstanceType: !Ref ServerInstanceType
+        ServerAMI: !Ref ServerAMI
+        KeyName: !Ref KeyName
+        AllocateServerPublicAddress: true
+        ServersMinSize: !Ref GatewaysMinSize
+        ServersMaxSize: !Ref GatewaysMaxSize
+Outputs:
+  SecurityVPCID:
+    Description: Security VPC ID.
+    Value: !Ref SecurityVPC
+  ManagementPublicAddress:
+    Description: The public address of the management server.
+    Value: !GetAtt ManagementStack.Outputs.PublicAddress
+    Condition: DeployManagement
+  ConfigurationTemplateName:
+    Description: The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name.
+    Value: !Ref ConfigurationTemplate
+  ControllerName:
+    Description: The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name.
+    Value: gwlb-controller
+  GWLBName:
+    Description: Gateway Load Balancer Name.
+    Value: !Ref GWLBName
+  GWLBServiceName:
+    Description: Gateway Load Balancer Service Name.
+    Value: !Sub ["com.amazonaws.vpce.${AWS::Region}.${Service}", {Service: !Ref VpcEndpointService}]
+  VpcEndpointService:
+    Description: Endpoint Service Name.
+    Value: !Ref VpcEndpointService
+  ServerPorts:
+    Description: The internal Load Balancer should listen to this port.
+    Value: !If [EncryptedProtocol, 443, 80]
+    Condition: DeployManagement
+  ServerLBURL:
+    Description: The URL of the Servers Application Load Balancer.
+    Value: !GetAtt ServersStacks.Outputs.ServerLBURL
+    Condition: DeployManagement
+  ServerSecurityGroupID:
+    Description: The Application Servers Security Group ID.  
+    Value: !GetAtt ServersStacks.Outputs.ServerSecurityGroupID
+    Condition: DeployManagement
+  Server1EndpointRoute:
+    Description: Server 1 GWLB EndPoint route entry
+    Value: !GetAtt GWLBeEndpointStack.Outputs.Server1EndpointRoute
+  Server2EndpointRoute:
+    Description: Server 2 GWLB EndPoint route entry
+    Value: !GetAtt GWLBeEndpointStack.Outputs.Server2EndpointRoute
+  Server3EndpointRoute:
+    Description: Server 3 GWLB EndPoint route entry
+    Value: !GetAtt GWLBeEndpointStack.Outputs.Server3EndpointRoute
+    Condition: 3AZs
+  Server4EndpointRoute:
+    Description: Server 4 GWLB EndPoint route entry
+    Value: !GetAtt GWLBeEndpointStack.Outputs.Server4EndpointRoute
+    Condition: 4AZs
+Rules:
+  GatewayAddressAllocationRule:
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
+    Assertions:  
+      - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
+        Assert: !Equals [!Ref AllocatePublicAddress, 'true']

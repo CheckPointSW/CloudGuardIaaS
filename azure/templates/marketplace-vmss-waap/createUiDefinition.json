@@ -1,0 +1,795 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+  "handler": "Microsoft.Compute.MultiVm",
+  "version": "0.1.2-preview",
+  "parameters": {
+    "basics": [
+      {
+        "name": "gatewayScaleSetNameUi",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Scale Set name",
+        "toolTip": "This will determine the hostname prefix of the VM",
+        "constraints": {
+          "required": true,
+          "regex": "^[a-z0-9A-Z]{1,30}$",
+          "validationMessage": "Only alphanumeric characters are allowed, and the name must be 1-30 characters long."
+        }
+      },
+      {
+        "name": "inboundSources",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Allow access from",
+        "defaultValue": "0.0.0.0/0",
+        "toolTip": "Specify the client IP addresses that can reach your instance. Can be IP address range in CIDR notation (e.g. for any source use 0.0.0.0/0)",
+        "constraints": {
+          "required": true,
+          "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2])){1,50}$",
+          "validationMessage": "Only CIDR notation is allowed i.e. X.X.X.X/X"
+        },
+        "visible": true
+      },
+      {
+        "name": "user",
+        "type": "Microsoft.Common.TextBlock",
+        "visible": true,
+        "options": {
+          "text": "User is set to 'admin'"
+        }
+      },
+      {
+        "name": "auth",
+        "type": "Microsoft.Compute.CredentialsCombo",
+        "label": {
+          "authenticationType": "Authentication type",
+          "password": "Password",
+          "confirmPassword": "Confirm password",
+          "sshPublicKey": "SSH public key"
+        },
+        "toolTip": {
+          "sshPublicKey": "Paste an OpenSSH public key. You can generate a key pair using ssh-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
+        },
+        "constraints": {
+          "required": true
+        },
+        "options": {
+          "hideConfirmation": false,
+          "hidePassword": false
+        },
+        "osPlatform": "Linux"
+      },
+      {
+        "name": "waapAgentToken",
+        "type": "Microsoft.Common.PasswordBox",
+        "label": {
+          "password": "Infinity Next Agent Token",
+          "confirmPassword": "Confirm Infinity Next Agent Token"
+        },
+        "toolTip": "Token can be obtained by logging in to [https://portal.checkpoint.com/](https://portal.checkpoint.com/) –> INFINITY POLICY -> CLOUD -> Profiles",
+        "constraints": {
+          "required": true,
+          "regex": "^cp-[a-z0-9A-Z-]{72,72}$",
+          "validationMessage": "Token should begin with 'cp-' and must be 75 characters long"
+        },
+        "options": {
+          "hideConfirmation": false
+        },
+        "visible": true
+      },
+      {
+        "name": "waapAgentFog",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Fog address (optional)",
+        "toolTip": "Fog address",
+        "constraints": {
+          "required": false,
+          "regex": "^https://",
+          "validationMessage": "Should begin with https://"
+        },
+        "visible": true
+      },
+      {
+        "name": "adminEmail",
+        "type": "Microsoft.Common.TextBox",
+        "label": "Administrator email address (optional)",
+        "defaultValue": "",
+        "toolTip": "An email address to notify about scaling events",
+        "constraints": {
+          "required": false,
+          "regex": "^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?){1,100}$",
+          "validationMessage": "Leave empty or enter a valid email address."
+        }
+      }
+    ],
+    "steps": [
+      {
+        "name": "autoprovision",
+        "label": "VMSS settings",
+        "subLabel": {
+          "preValidation": "Configure VMSS settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "VMSS settings",
+        "elements": [
+          {
+            "name": "availabilityZonesNum",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Number of Availability Zones to use",
+            "defaultValue": "Two zones",
+            "toolTip": "The number of availability zones to use for the scale set. The VMs will be spread equally between the zones",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralindia centralus eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia uksouth westeurope westus2 westus3 ', concat(' ', location(), ' '))]",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "One zone",
+                  "value": 1
+                },
+                {
+                  "label": "Two zones",
+                  "value": 2
+                },
+                {
+                  "label": "Three zones",
+                  "value": 3
+                }
+              ]
+            }
+          },
+          {
+            "name": "R8040vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": true,
+            "label": "Virtual machine size",
+            "toolTip": "The VM size of the Security Gateway",
+            "recommendedSizes": [
+              "Standard_DS2_v2",
+              "Standard_DS3_v2"
+            ],
+            "constraints": {
+              "allowedSizes": [
+                "Standard_DS2_v2",
+                "Standard_DS3_v2",
+                "Standard_DS4_v2",
+                "Standard_DS5_v2",
+                "Standard_F2s",
+                "Standard_F4s",
+                "Standard_F8s",
+                "Standard_F16s",
+                "Standard_D4s_v3",
+                "Standard_D8s_v3",
+                "Standard_D16s_v3",
+                "Standard_D32s_v3",
+                "Standard_D64s_v3",
+                "Standard_E4s_v3",
+                "Standard_E8s_v3",
+                "Standard_E16s_v3",
+                "Standard_E20s_v3",
+                "Standard_E32s_v3",
+                "Standard_E64s_v3",
+                "Standard_E64is_v3",
+                "Standard_F4s_v2",
+                "Standard_F8s_v2",
+                "Standard_F16s_v2",
+                "Standard_F32s_v2",
+                "Standard_F64s_v2",
+                "Standard_M8ms",
+                "Standard_M16ms",
+                "Standard_M32ms",
+                "Standard_M64ms",
+                "Standard_M64s",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D11_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2",
+                "Standard_F2",
+                "Standard_F4",
+                "Standard_F8",
+                "Standard_F16",
+                "Standard_D4_v3",
+                "Standard_D8_v3",
+                "Standard_D16_v3",
+                "Standard_D32_v3",
+                "Standard_D64_v3",
+                "Standard_E4_v3",
+                "Standard_E8_v3",
+                "Standard_E16_v3",
+                "Standard_E20_v3",
+                "Standard_E32_v3",
+                "Standard_E64_v3",
+                "Standard_E64i_v3",
+                "Standard_DS11_v2",
+                "Standard_DS12_v2",
+                "Standard_DS13_v2",
+                "Standard_DS14_v2",
+                "Standard_DS15_v2"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "infinity-gw",
+              "sku": "sg-byol"
+            },
+            "count": "[steps('autoprovision').vmCount]"
+          },
+          {
+            "name": "vmCount",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Initial number of gateways",
+            "toolTip": "Initial number of gateways",
+            "defaultValue": "2",
+            "constraints": {
+              "required": true,
+              "regex": "^[1-9][0-9]{0,1}$",
+              "validationMessage": "Please enter a number in the range 1-99."
+            }
+          },
+          {
+            "name": "maxVmCount",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Maximum number of gateways",
+            "toolTip": "Maximum number of gateways",
+            "defaultValue": "10",
+            "constraints": {
+              "required": true,
+              "regex": "^[1-9][0-9]{0,1}$",
+              "validationMessage": "Please enter a number in the range 1-99."
+            }
+          },
+          {
+            "name": "numGwsValidation",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[greater(steps('autoprovision').vmCount, steps('autoprovision').maxVmCount)]",
+            "options": {
+              "icon": "Error",
+              "text": "Maximum number of gateways is lower than initial number of gateways"
+            }
+          },
+          {
+            "name": "instanceLevelPublicIP",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Assign public IP address to each gateway",
+            "toolTip": "Each VMSS instance will have its own public IP address",
+            "defaultValue": "Yes",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                },
+                {
+                  "label": "No",
+                  "value": "no"
+                }
+              ]
+            }
+          },
+          {
+            "name": "deploymentMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Network Load Balancer deployment",
+            "defaultValue": "External",
+            "visible": true,
+            "toolTip": "Define which network load balancer will be deployed",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "External",
+                  "value": "ELBOnly"
+                },
+                {
+                  "label": "Internal",
+                  "value": "ILBOnly"
+                }
+              ]
+            }
+          },
+          {
+            "name": "appLoadDistribution",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Load Balancer session persistence",
+            "defaultValue": "Client IP",
+            "toolTip": "The load balancing distribution method",
+            "visible": true,
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Client IP",
+                  "value": "SourceIP"
+                },
+                {
+                  "label": "None",
+                  "value": "Default"
+                }
+              ]
+            }
+          },
+          {
+            "name": "bootstrapScript",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "Bootstrap script",
+            "toolTip": "Bootstrap script",
+            "constraints": {
+              "required": false,
+              "accept": ".sh,text/plain"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "text",
+              "encoding": "UTF-8"
+            }
+          },
+          {
+            "name": "useCustomImageUri",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Use development image uri",
+            "toolTip": "Use custom image URI",
+            "defaultValue": "No",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "Yes"
+                },
+                {
+                  "label": "No",
+                  "value": "No"
+                }
+              ],
+              "required": false
+            },
+            "visible": false
+          },
+          {
+            "name": "sourceImageVhdUri",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Development Image URI",
+            "toolTip": "The URI of the blob containing the development image",
+            "constraints": {
+              "required": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]",
+              "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
+              "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd"
+            },
+            "visible": "[equals(steps('autoprovision').useCustomImageUri, 'Yes')]"
+          }
+        ]
+      },
+      {
+        "name": "network",
+        "label": "Network settings",
+        "subLabel": {
+          "preValidation": "Configure network settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Network settings",
+        "elements": [
+          {
+            "name": "virtualNetwork",
+            "type": "Microsoft.Network.VirtualNetworkCombo",
+            "label": {
+              "virtualNetwork": "Virtual network",
+              "subnets": "Subnets"
+            },
+            "toolTip": {
+              "virtualNetwork": "Virtual Network Name",
+              "subnets": "The subnets to deploy into. Please note that the following CIDR range 172.16.0.0/12 is used by the Infinity Next Gateway for internal container communication"
+            },
+            "defaultValue": {
+              "name": "vnet01",
+              "addressPrefixSize": "/16"
+            },
+            "constraints": {
+              "minAddressPrefixSize": "/28"
+            },
+            "options": {
+              "hideExisting": false
+            },
+            "subnets": {
+              "subnet1": {
+                "label": "Gateway external subnet",
+                "defaultValue": {
+                  "name": "VMSS-External",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": "[steps('autoprovision').maxVmCount]",
+                  "requireContiguousAddresses": false
+                }
+              },
+              "subnet2": {
+                "label": "Gateway internal subnet",
+                "defaultValue": {
+                  "name": "VMSS-Internal",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": "[steps('autoprovision').maxVmCount]",
+                  "requireContiguousAddresses": false
+                }
+              }
+            }
+          }
+        ]
+      },
+	    {
+	    "name": "https",
+        "label": "HTTPS settings",
+        "subLabel": {
+          "preValidation": "Configure HTTPS settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "HTTPS settings",
+        "elements": [
+          {
+            "name": "chooseVault",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Certificates",
+            "toolTip": "Certificates",
+            "defaultValue": "I don't use HTTPS certificates",
+            "constraints": {
+              "allowedValues": [
+              {
+                "label": "I don't use HTTPS certificates",
+                "value": "none"
+              },
+              {
+                "label": "Create new Azure Key Vault and upload certificates",
+                "value": "newVault"
+              },
+              {
+                "label": "Choose an existing Azure Key Vault",
+                "value": "existingVault"
+              }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "existingKeyVault",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Choose Key Vault",
+            "resourceType": "Microsoft.KeyVault/vaults",
+            "options": {
+                "filter": {
+                    "subscription": "onBasics",
+                    "location": "onBasics"
+                }
+            },
+            "toolTip": "The chosen key vault should contain PFX certificates for all the relevant HTTPS based assets in the [Infinity Portal](https://portal.checkpoint.com/)",
+            "visible": "[equals(steps('https').chooseVault, 'existingVault')]"
+          },
+          {
+            "name": "keyVaultName",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Azure Key Vault name",
+            "toolTip": "Azure Key Vault name",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-zA-Z0-9-]{3,24}$",
+              "validationMessage": "A vault's name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens."
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "numberOfCerts",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Number of certificates to upload",
+            "defaultValue": "1",
+            "toolTip": "Each certificate will have two entries in the Key Vault secrets - one for certificate and one for its password",
+            "constraints": {
+              "required": true,
+              "allowedValues": [
+                {
+                  "label": "1",
+                  "value": 1
+                },
+                {
+                  "label": "2",
+                  "value": 2
+                },
+                {
+                  "label": "3",
+                  "value": 3
+                },
+                {
+                  "label": "4",
+                  "value": 4
+                },
+                {
+                  "label": "5",
+                  "value": 5
+                }
+              ]
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "firstCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": true,
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "firstCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": true,
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "firstCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
+            "constraints": {
+              "required": true
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[equals(steps('https').chooseVault, 'newVault')]"
+          },
+          {
+            "name": "secondCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "secondCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "secondCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
+            "constraints": {
+              "required": "[lessOrEquals(2, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(2, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "thirdCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "thirdCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "thirdCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
+            "constraints": {
+              "required": "[lessOrEquals(3, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(3, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fourthCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fourthCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fourthCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
+            "constraints": {
+              "required": "[lessOrEquals(4, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(4, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fifthCertificate",
+            "type": "Microsoft.Common.FileUpload",
+            "label": "PFX certificate file",
+            "toolTip": "A PKCS#12 archive containing the Certificate Authority (CA) certificate and private key",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]",
+              "accept": ".pfx,.p12"
+            },
+            "options": {
+              "multiple": false,
+              "uploadMode": "file",
+              "openMode": "binary",
+              "encoding": "UTF-8"
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fifthCertDescription",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Description",
+            "defaultValue": "",
+            "toolTip": "Please add a description because the uploaded certificate is stored as 'cert[1-5]' in vault's secrets",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]",
+              "regex": "^.{1,100}$",
+              "validationMessage": "Description must be 1-100 characters long."
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          },
+          {
+            "name": "fifthCertPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Certificate password",
+              "confirmPassword": "Confirm certificate password"
+            },
+            "toolTip": "Password used when exporting the PFX certificate. The password will be encoded to base64 format and stored in the vault",
+            "constraints": {
+              "required": "[lessOrEquals(5, steps('https').numberOfCerts)]"
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(equals(steps('https').chooseVault, 'newVault'), lessOrEquals(5, coalesce(steps('https').numberOfCerts, int('0'))))]"
+          }
+        ]
+      }
+    ],
+    "outputs": {
+      "location": "[location()]",
+      "authenticationType": "[basics('auth').authenticationType]",
+      "adminPassword": "[basics('auth').password]",
+      "sshPublicKey": "[basics('auth').sshPublicKey]",
+      "vmName": "[basics('gatewayScaleSetNameUi')]",
+      "instanceCount": "[steps('autoprovision').vmCount]",
+      "maxInstanceCount": "[steps('autoprovision').maxVmCount]",
+      "deploymentMode": "[steps('autoprovision').deploymentMode]",
+      "instanceLevelPublicIP": "[steps('autoprovision').instanceLevelPublicIP]",
+      "appLoadDistribution": "[steps('autoprovision').appLoadDistribution]",
+      "availabilityZonesNum": "[coalesce(steps('autoprovision').availabilityZonesNum, int('0'))]",
+	    "vmSize": "[steps('autoprovision').R8040vmSizeUiBYOL]",
+      "bootstrapScript": "[steps('autoprovision').bootstrapScript]",
+      "sourceImageVhdUri": "[coalesce(steps('autoprovision').sourceImageVhdUri, 'noCustomUri')]",
+      "virtualNetworkName": "[steps('network').virtualNetwork.name]",
+      "virtualNetworkAddressPrefixes": "[steps('network').virtualNetwork.addressPrefixes]",
+      "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
+      "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
+      "subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
+      "subnet1Prefix": "[steps('network').virtualNetwork.subnets.subnet1.addressPrefix]",
+      "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
+      "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
+      "inboundSources": "[basics('inboundSources')]",
+      "waapAgentToken": "[basics('waapAgentToken')]",
+      "waapAgentFog": "[basics('waapAgentFog')]",
+      "adminEmail": "[basics('adminEmail')]",
+      "chooseVault": "[steps('https').chooseVault]",
+      "existingKeyVaultRGName": "[if(empty(steps('https').existingKeyVault), resourceGroup().name, first(skip(split(steps('https').existingKeyVault.id, '/'), 4)))]",
+      "keyVaultName": "[if(equals(steps('https').chooseVault, 'none'), 'vault', if(empty(steps('https').existingKeyVault), steps('https').keyVaultName, steps('https').existingKeyVault.name))]",
+      "numberOfCerts": "[coalesce(steps('https').numberOfCerts, int('0'))]",
+      "firstCertificate": "[steps('https').firstCertificate]",
+      "firstCertDescription": "[steps('https').firstCertDescription]",
+      "firstCertPassword": "[steps('https').firstCertPassword]",
+      "secondCertificate": "[steps('https').secondCertificate]",
+      "secondCertDescription": "[steps('https').secondCertDescription]",
+      "secondCertPassword": "[steps('https').secondCertPassword]",
+      "thirdCertificate": "[steps('https').thirdCertificate]",
+      "thirdCertDescription": "[steps('https').thirdCertDescription]",
+      "thirdCertPassword": "[steps('https').thirdCertPassword]",
+      "fourthCertificate": "[steps('https').fourthCertificate]",
+      "fourthCertDescription": "[steps('https').fourthCertDescription]",
+      "fourthCertPassword": "[steps('https').fourthCertPassword]",
+      "fifthCertificate": "[steps('https').fifthCertificate]",
+      "fifthCertDescription": "[steps('https').fifthCertDescription]",
+      "fifthCertPassword": "[steps('https').fifthCertPassword]"
+    }
+  }
+}

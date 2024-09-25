@@ -1,0 +1,106 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "East US"
+        },
+        "cloudGuardVersion": {
+            "value": "R80.40 - Bring Your Own License"
+        },
+        "adminPassword": {
+            "value": ""
+        },
+        "authenticationType": {
+            "value": "password"
+        },
+        "sshPublicKey": {
+            "value": ""
+        },
+        "vmName": {
+            "value": "cloudguard"
+        },
+        "vmSize": {
+            "value": "Standard_D3_v2"
+        },
+        "sicKey": {
+            "value": ""
+        },
+        "virtualNetworkName": {
+            "value": "cloudguard-vnet"
+        },
+        "virtualNetworkAddressPrefixes": {
+            "value": [
+                "10.0.0.0/16"
+            ]
+        },
+        "subnet1Name": {
+            "value": "Frontend"
+        },
+        "subnet1Prefix": {
+            "value": "10.0.1.0/24"
+        },
+        "subnet1StartAddress": {
+            "value": "10.0.1.10"
+        },
+        "subnet2Name": {
+            "value": "Backend"
+        },
+        "subnet2Prefix": {
+            "value": "10.0.2.0/24"
+        },
+        "subnet2StartAddress": {
+            "value": "10.0.2.10"
+        },
+        "vnetNewOrExisting": {
+            "value": "new"
+        },
+        "virtualNetworkExistingRGName": {
+            "value": ""
+        },
+        "ipPrefix": {
+            "value": "yes"
+        },
+        "ipPrefixSize": {
+            "value": 28
+        },
+        "bootstrapScript": {
+            "value": ""
+        },
+        "allowDownloadFromUploadToCheckPoint": {
+            "value": "true"
+        },
+        "additionalDiskSizeGB": {
+            "value": 0
+        },
+        "diskType": {
+            "value": "Standard_LRS"
+        },
+        "role": {
+            "value": "Contributor"
+        },
+        "managedSystemAssigned": {
+            "value": "yes"
+        },
+        "sourceImageVhdUri": {
+            "value": "noCustomUri"
+        },
+        "availabilityOptions": {
+            "value": "Availability Set"
+        },
+        "_artifactsLocation": {
+            "value": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/"
+        },
+        "_artifactsLocationSasToken": {
+            "value": ""
+        },
+        "Check_PointTags": {
+            "value": {
+                "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+            }
+        },
+        "customMetrics": {
+            "value": "yes"
+        }
+    }
+}

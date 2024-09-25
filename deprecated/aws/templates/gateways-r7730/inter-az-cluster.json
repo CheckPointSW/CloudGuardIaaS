@@ -1,0 +1,505 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description" : "Deploy 2 Check Point Gateways in 2 AZs in a VPC (20180821)",
+    "Metadata" : {
+        "AWS::CloudFormation::Interface" : {
+            "ParameterGroups" : [
+                {
+                    "Label" : { "default" : "Network Configuration" },
+                    "Parameters" : [
+                        "VpcCidr",
+                        "OnPremiseNetworkCIDR"
+                    ]
+                },
+                {
+                    "Label" : { "default" : "1st Availability Zone Configuration" },
+                    "Parameters" : [
+                        "AZ1",
+                        "PublicSubnetCidr1",
+                        "ExternalAddress1",
+                        "PrivateSubnetCidr1",
+                        "PrivateAddress1"
+                    ]
+                },
+                {
+                    "Label" : { "default" : "2nd Availability Zone Configuration" },
+                    "Parameters" : [
+                        "AZ2",
+                        "PublicSubnetCidr2",
+                        "ExternalAddress2",
+                        "PrivateSubnetCidr2",
+                        "PrivateAddress2"
+                    ]
+                },
+                {
+                    "Label" : { "default" : "Gateway Settings" },
+                    "Parameters" : [
+                        "InstanceType",
+                        "KeyName",
+                        "Version",
+                        "SICKey",
+                        "Shell",
+                        "PasswordHash",
+                        "AllowUploadDownload"
+                    ]
+                }
+            ],
+            "ParameterLabels" : {
+
+                "VpcCidr" : { "default" : "VPC CIDR" },
+                "OnPremiseNetworkCIDR" : { "default" : "On premise CIDR" },
+
+                "AZ1" : { "default" : "Availability zone" },
+                "PublicSubnetCidr1" : { "default" : "Public subnet CIDR" },
+                "ExternalAddress1" : { "default" : "External address" },
+                "PrivateSubnetCidr1" : { "default" : "Private subnet CIDR" },
+                "PrivateAddress1" : { "default" : "Internal address" },
+
+                "AZ2" : { "default" : "Availability zone" },
+                "PublicSubnetCidr2" : { "default" : "Public subnet CIDR" },
+                "ExternalAddress2" : { "default" : "External address" },
+                "PrivateSubnetCidr2" : { "default" : "Private subnet CIDR" },
+                "PrivateAddress2" : { "default" : "Internal address" },
+
+                "InstanceType" : { "default" : "Instance type" },
+                "KeyName" : { "default" : "Key name" },
+                "Version" : { "default" : "Version" },
+                "SICKey" : { "default" : "SIC key" },
+                "Shell" : { "default" : "Admin shell" },
+                "PasswordHash" : { "default" : "Password hash" },
+                "AllowUploadDownload": { "default": "Allow upload and download" }
+            }
+        }
+    },
+
+    "Parameters" : {
+        "InstanceType" : {
+            "Description" : "Check Point Security Gateway instance type",
+            "Type" : "String",
+            "Default" : "c4.xlarge",
+            "AllowedValues" : [ "m3.medium","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge"],
+            "ConstraintDescription" : "must be a valid EC2 instance type."
+        },
+        "VpcCidr" : {
+            "Description" : "The CIDR block for your VPC",
+            "Type": "String",
+            "Default" : "10.0.0.0/16"
+        },
+        "AZ1" : {
+            "Description" : "The 1st availability zone in which to deploy",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "MinLength": "1"
+        },
+        "AZ2" : {
+            "Description" : "The 2nd availability zone in which to deploy",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "MinLength": "1"
+        },
+        "OnPremiseNetworkCIDR" : {
+            "Description" : "The on premise network",
+            "Type": "String",
+            "Default": "0.0.0.0/0"
+        },
+        "PublicSubnetCidr1" : {
+            "Description" : "The public subnet of the 1st AZ",
+            "Type": "String",
+            "Default": "10.0.0.0/24"
+        },
+        "PublicSubnetCidr2" : {
+            "Description" : "The public subnet of the 2nd AZ",
+            "Type": "String",
+            "Default": "10.0.1.0/24"
+        },
+        "PrivateSubnetCidr1" : {
+            "Description" : "The private subnet of the 1st AZ",
+            "Type": "String",
+            "Default": "10.0.2.0/24"
+        },
+        "PrivateSubnetCidr2" : {
+            "Description" : "The private subnet of the 2nd AZ",
+            "Type": "String",
+            "Default": "10.0.3.0/24"
+        },
+        "ExternalAddress1" : {
+            "Description" : "The external address of the 1st gateway",
+            "Type": "String", 
+            "Default": "10.0.0.10"
+        },
+        "ExternalAddress2" : {
+            "Description" : "The external address of the 2nd gateway",
+            "Type": "String", 
+            "Default": "10.0.1.10"
+        },
+        "PrivateAddress1" : {
+            "Description" : "The internal address of the 1st gateway",
+            "Type": "String", 
+            "Default": "10.0.2.10"
+        },
+        "PrivateAddress2" : {
+            "Description" : "The internal address of the 2nd gateway",
+            "Type": "String", 
+            "Default": "10.0.3.10"
+        },
+        "KeyName" : {
+            "Description" : "SSH Key Pair",
+            "Type" : "AWS::EC2::KeyPair::KeyName",
+            "MinLength": "1"
+        },
+        "Version" : {
+            "Description" : "Security Gateway version",
+            "Type" : "String",
+            "Default": "BYOL",
+            "AllowedValues" : [ "BYOL", "PAYG" ]
+        },
+        "PasswordHash" : {
+            "Description" : "(optional) The admin user password hash (hint, use \"openssl passwd -1\")",
+            "Default": "",
+            "Type" : "String",
+            "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+        },
+        "AllowUploadDownload": {
+            "Description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+            "Type": "String",
+            "Default": "true",
+            "AllowedValues": [
+                "true",
+                "false"
+            ]
+        },
+        "SICKey" : {
+            "Description" : "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+            "NoEcho" : "true",
+            "MinLength": "8",
+            "Type" : "String",
+            "AllowedPattern" : "[a-zA-Z0-9]*",
+            "ConstraintDescription": "At least 8 alpha numeric characters"
+        },
+        "Shell" : {
+            "Description" : "The user admin shell",
+            "Type" : "String",
+            "Default" : "/etc/cli.sh",
+            "AllowedValues" : [ "/etc/cli.sh", "/bin/bash", "/bin/csh", "/bin/tcsh"]
+        }
+    },
+    "Resources" : {
+        "VPC" : {
+            "Type" : "AWS::EC2::VPC",
+            "Properties" : {
+                "CidrBlock" : { "Ref" : "VpcCidr" }
+            }
+        },
+        "InternetGateway" : {
+            "Type" : "AWS::EC2::InternetGateway"
+        },
+        "AttachGateway" : {
+            "Type" : "AWS::EC2::VPCGatewayAttachment",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC" },
+                "InternetGatewayId" : { "Ref" : "InternetGateway" }
+            }
+        },
+        "PublicSubnet1" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ1" },
+                "CidrBlock" : { "Ref" : "PublicSubnetCidr1" },
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PrivateSubnet1" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ1" },
+                "CidrBlock" : { "Ref" : "PrivateSubnetCidr1" },
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PublicSubnet2" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ2" },
+                "CidrBlock" : { "Ref" : "PublicSubnetCidr2" },
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PrivateSubnet2" : {
+            "Type" : "AWS::EC2::Subnet",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ2" },
+                "CidrBlock" : { "Ref" : "PrivateSubnetCidr2" },
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PublicRoutingTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "DefaultRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "GatewayId" : { "Ref" : "InternetGateway" },
+                "RouteTableId" : { "Ref" : "PublicRoutingTable" }
+            }
+        },
+        "PublicNetworkRouteAssociation1" : {
+           "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+           "Properties" : {
+              "RouteTableId" : { "Ref" : "PublicRoutingTable" },
+              "SubnetId" : { "Ref" : "PublicSubnet1" }
+           }
+        },
+        "PublicNetworkRouteAssociation2" : {
+           "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+           "Properties" : {
+              "RouteTableId" : { "Ref" : "PublicRoutingTable" },
+              "SubnetId" : { "Ref" : "PublicSubnet2" }
+           }
+        },
+        "AMI" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/CloudFormationTemplate/amis.json",
+                "Parameters" : {
+                    "Version" : { "Ref" : "Version" }
+                }
+            }
+        },
+        "PrivateRoutingTable1" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PrivateDefaultRoute1" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : {"Ref" : "OnPremiseNetworkCIDR" },
+                "NetworkInterfaceId" : { "Ref" : "PrivateInterface1" },
+                "RouteTableId" : { "Ref" : "PrivateRoutingTable1" }
+            }
+        },
+        "PrivateNetworkRouteAssociation1" : {
+           "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+           "Properties" : {
+              "RouteTableId" : { "Ref" : "PrivateRoutingTable1" },
+              "SubnetId" : { "Ref" : "PrivateSubnet1" }
+           }
+        },
+        "PrivateRoutingTable2" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Ref" : "VPC" }
+            }
+        },
+        "PrivateDefaultRoute2" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : {"Ref" : "OnPremiseNetworkCIDR" },
+                "NetworkInterfaceId" : { "Ref" : "PrivateInterface2" },
+                "RouteTableId" : { "Ref" : "PrivateRoutingTable2" }
+            }
+        },
+        "PrivateNetworkRouteAssociation2" : {
+           "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+           "Properties" : {
+              "RouteTableId" : { "Ref" : "PrivateRoutingTable2" },
+              "SubnetId" : { "Ref" : "PrivateSubnet2" }
+           }
+        },
+        "PublicInterface1" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "PrivateIpAddresses": [
+                       { "PrivateIpAddress" : { "Ref" : "ExternalAddress1" }, "Primary" : "true" }
+                ],
+                "SourceDestCheck": "false",
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SubnetId": { "Ref" : "PublicSubnet1" }
+            }        
+        },
+        "PublicInterface2" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "PrivateIpAddresses": [
+                       { "PrivateIpAddress" : { "Ref" : "ExternalAddress2" }, "Primary" : "true" }
+                ],
+                "SourceDestCheck": "false",
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SubnetId": { "Ref" : "PublicSubnet2" }
+            }        
+        },
+        "PrivateInterface1" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "PrivateIpAddress": { "Ref" : "PrivateAddress1"},
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SourceDestCheck": "false",
+                "SubnetId": { "Ref" : "PrivateSubnet1" }
+            }        
+        },
+        "PrivateInterface2" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "PrivateIpAddress": { "Ref" : "PrivateAddress2"},
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SourceDestCheck": "false",
+                "SubnetId": { "Ref" : "PrivateSubnet2" }
+            }        
+        },
+        "InstanceSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Permissive security group",
+                "VpcId" : { "Ref" : "VPC" },
+                "SecurityGroupIngress" : [ { "IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0" } ]
+            }
+        },        
+        "Instance1" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ1" },
+                "Tags" : [
+                  { "Key" : "Name", "Value" : "Security Gateway 1" }
+                ],
+                "ImageId" : { "Fn::GetAtt" : [ "AMI", "Outputs.ImageId" ] },
+                "InstanceType" : { "Ref" : "InstanceType" },
+                "KeyName" : { "Ref" : "KeyName" },
+                "NetworkInterfaces" : [ 
+                    { "DeviceIndex" : "0", "NetworkInterfaceId" : {"Ref" : "PublicInterface1"}  },
+                    { "DeviceIndex" : "1", "NetworkInterfaceId" : {"Ref" : "PrivateInterface1"}  }
+                ],
+                "UserData" : { "Fn::Base64" :
+                    {   "Fn::Join" : [ "\n", 
+                            [   "#!/bin/bash",
+                                "echo template_name: inter-az-cluster >> /etc/cloud-version",
+                                "echo template_version: 20180821 >> /etc/cloud-version",
+                                {"Fn::Join" : [ "", ["pwd_hash='", {"Ref" : "PasswordHash"}, "'"]]},
+                                "test -z \"$pwd_hash\" || {",
+                                "   echo \"set admin password\"",
+                                "   clish -c \"set user admin password-hash $pwd_hash\" -s",
+                                "}",
+                                {"Fn::Join" : [ "", ["sic_key=$(echo '", {"Fn::Base64": {"Ref" : "SICKey"}}, "' | base64 --decode)"]]},
+                                {"Fn::Join" : [ "", ["shell='", {"Ref" : "Shell"}, "'"]]},
+                                {"Fn::Join" : [ "", ["allow_upload_download='", {"Ref" : "AllowUploadDownload"}, "'"]]},
+                                "clish -c \"set user admin shell $shell\" -s",
+                                "config_system -s \"install_security_gw=true&install_ppak=true&gateway_cluster_member=false&install_security_managment=false&ftw_sic_key=${sic_key}&upload_info=${allow_upload_download}&download_info=${allow_upload_download}\"",
+                                "shutdown -r now",
+                                ""
+                            ]
+                        ] 
+                    }
+                }
+            }
+        },
+        "Instance2" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AZ2" },
+                "Tags" : [
+                  { "Key" : "Name", "Value" : "Security Gateway 2" }
+                ],
+                "ImageId" : { "Fn::GetAtt" : [ "AMI", "Outputs.ImageId" ] },
+                "InstanceType" : { "Ref" : "InstanceType" },
+                "KeyName" : { "Ref" : "KeyName" },
+                "NetworkInterfaces" : [ 
+                    { "DeviceIndex" : "0", "NetworkInterfaceId" : {"Ref" : "PublicInterface2"}  },
+                    { "DeviceIndex" : "1", "NetworkInterfaceId" : {"Ref" : "PrivateInterface2"}  }
+                ],
+                "UserData" : { "Fn::Base64" :
+                    {   "Fn::Join" : [ "\n", 
+                            [   "#!/bin/bash",
+                                "echo template_name: inter-az-cluster >> /etc/cloud-version",
+                                "echo template_version: 20180821 >> /etc/cloud-version",
+                                {"Fn::Join" : [ "", ["pwd_hash='", {"Ref" : "PasswordHash"}, "'"]]},
+                                "test -z \"$pwd_hash\" || {",
+                                "   echo \"set admin password\"",
+                                "   clish -c \"set user admin password-hash $pwd_hash\" -s",
+                                "}",
+                                {"Fn::Join" : [ "", ["sic_key=$(echo '", {"Fn::Base64": {"Ref" : "SICKey"}}, "' | base64 --decode)"]]},
+                                {"Fn::Join" : [ "", ["shell='", {"Ref" : "Shell"}, "'"]]},
+                                {"Fn::Join" : [ "", ["allow_upload_download='", {"Ref" : "AllowUploadDownload"}, "'"]]},
+                                "clish -c \"set user admin shell $shell\" -s",
+                                "config_system -s \"install_security_gw=true&install_ppak=true&gateway_cluster_member=false&install_security_managment=false&ftw_sic_key=${sic_key}&upload_info=${allow_upload_download}&download_info=${allow_upload_download}\"",
+                                "shutdown -r now",
+                                ""
+                            ]
+                        ] 
+                    }
+                }
+            }
+        },
+        "PublicAddress1" : {
+           "Type" : "AWS::EC2::EIP",
+           "Properties" : {
+              "Domain" : "vpc"
+           }
+        },
+        "PublicAddress2" : {
+           "Type" : "AWS::EC2::EIP",
+           "Properties" : {
+              "Domain" : "vpc"
+           }
+        },
+        "AddressAssoc1" : {
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Properties" : {
+                "NetworkInterfaceId" : { "Ref" : "PublicInterface1" },
+                "AllocationId" : { "Fn::GetAtt" : [ "PublicAddress1" , "AllocationId" ] },
+                "PrivateIpAddress" : { "Fn::GetAtt" : ["PublicInterface1", "PrimaryPrivateIpAddress" ]}
+            }
+        },
+        "AddressAssoc2" : {
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Properties" : {
+                "NetworkInterfaceId" : { "Ref" : "PublicInterface2" },
+                "AllocationId" : { "Fn::GetAtt" : [ "PublicAddress2" , "AllocationId" ] },
+                "PrivateIpAddress" : { "Fn::GetAtt" : ["PublicInterface2", "PrimaryPrivateIpAddress" ]}
+            }
+        }       
+    },
+    "Outputs" : {
+        "PublicAddress1" : {
+            "Description" : "The public address of the 1st gateway",
+            "Value" : { "Ref" :  "PublicAddress1" }
+        },
+        "SSH1" : {
+            "Description" : "SSH command to the 1st gateway",
+            "Value" : { "Fn::Join" : [ "", [ "ssh admin@", { "Ref" :  "PublicAddress1" }]]}
+        },        
+        "URL1" : {
+            "Description" : "URL to the 1st gateway",
+            "Value" : { "Fn::Join" : [ "", [ "https://", { "Ref" :  "PublicAddress1" }]]}
+        },
+        "RouteTable1" : {
+            "Description" : "A routing table pointing to the 1st gateway",
+            "Value" : { "Ref" : "PrivateRoutingTable1" }
+        },
+        "Subnet1" : {
+            "Description" : "A private subnet behind the 1st gateway",
+            "Value" : { "Ref" : "PrivateSubnet1" }
+        },
+        "PublicAddress2" : {
+            "Description" : "The public address of the 2nd gateway",
+            "Value" : { "Ref" :  "PublicAddress2" }
+        },
+        "SSH2" : {
+            "Description" : "SSH command to the 2nd gateway",
+            "Value" : { "Fn::Join" : [ "", [ "ssh admin@", { "Ref" :  "PublicAddress2" }]]}
+        },        
+        "URL2" : {
+            "Description" : "URL to the 2nd gateway",
+            "Value" : { "Fn::Join" : [ "", [ "https://", { "Ref" :  "PublicAddress2" }]]}
+        },
+        "RouteTable2" : {
+            "Description" : "A routing table pointing to the 2nd gateway",
+            "Value" : { "Ref" : "PrivateRoutingTable2" }
+        },
+        "Subnet2" : {
+            "Description" : "A private subnet behind the 2nd gateway",
+            "Value" : { "Ref" : "PrivateSubnet2" }
+        }
+    }
+}

@@ -1,0 +1,124 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "vnet"
+    },
+    "virtualNetworkAddressPrefixes": {
+      "type": "array",
+      "metadata": {
+        "description": "The address prefixes of the virtual network"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 1st subnet"
+      },
+      "defaultValue": "Frontend"
+    },
+    "Subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 1st subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 2nd subnet"
+      },
+      "defaultValue": "Backend"
+    },
+    "Subnet2Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 2nd subnet"
+      },
+      "defaultValue": "10.0.2.0/24"
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "apiVersion": {
+      "type": "string"
+    },
+    "vmName": {
+      "type": "string"
+    },
+    "deployNsg": {
+      "type": "bool",
+      "defaultValue": "true"
+    },
+    "Check_PointTags": {
+      "type": "object",
+      "defaultValue": {
+        "provider": "30DE18BC-F9F6-4F22-9D30-54B8E74CFD5F"
+      }
+    }
+  },
+  "variables": {
+    "vnetId": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+    "nsgName": "[concat(parameters('vmName'), '-nsg')]",
+    "nsgProperties": {
+      "id": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "condition": "[parameters('deployNsg')]",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[variables('nsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowAllInBound",
+            "properties": {
+              "description": "Allow all inbound connections",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "100",
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "tags": {
+        "provider": "[toUpper(parameters('Check_PointTags').provider)]"
+      }
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "value": "[variables('vnetId')]",
+      "type": "string"
+    },
+    "vnetAddressPrefixes": {
+      "value": "[reference(variables('vnetId'),parameters('apiVersion')).addressSpace.addressPrefixes]",
+      "type": "array"
+    },
+    "nsgProperties": {
+      "value": "[variables('nsgProperties')]",
+      "type": "object"
+    }
+  }
+}

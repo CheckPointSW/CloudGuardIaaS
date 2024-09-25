@@ -1,0 +1,269 @@
+{
+    "Description" : "Deploy a Check Point Security Gateway in VPC",
+    "Metadata" : {
+        "AWS::CloudFormation::Interface" : {
+            "ParameterGroups" : [
+                {
+                    "Label" : { "default" : "VPC Network Configuration" },
+                    "Parameters" : [
+                        "AvailabilityZone",
+                        "VpcCidr",
+                        "ExternalSubnetCidr",
+                        "InternalSubnetCidr"
+                    ]
+                },
+                {
+                    "Label" : { "default" : "Gateway Network Configuration" },
+                    "Parameters" : [
+                        "GWExternalPrivateAddr",
+                        "GWInternalPrivateAddr",
+                        "GWExternalSecondaryPrivateAddr"
+                    ]
+                },
+                {
+                    "Label" : { "default" : "Gateway Settings" },
+                    "Parameters" : [
+                        "GWInstanceType",
+                        "KeyName",
+                        "Version",
+                        "Shell",
+                        "PasswordHash",
+                        "TagNameFirewall"
+                    ]
+                }
+            ],
+            "ParameterLabels" : {
+                "VpcCidr" : { "default" : "VPC CIDR" },
+                "AvailabilityZone" : { "default" : "Availability zone" },
+                "ExternalSubnetCidr" : { "default" : "External subnet CIDR" },
+                "InternalSubnetCidr" : { "default" : "Internal subnet CIDR" },
+
+                "GWExternalPrivateAddr" : { "default" : "Gateway external address" },
+                "GWInternalPrivateAddr" : { "default" : "Gateway internal address" },
+                "GWExternalSecondaryPrivateAddr" : { "default" : "Gateway secondary external address" },
+
+                "GWInstanceType" : { "default" : "Instance type" },
+
+                "KeyName" : { "default" : "Key name" },
+                "Version" : { "default" : "Version" },
+                
+                "Shell" : { "default" : "Admin shell" },
+                "PasswordHash" : { "default" : "Password hash" },
+                "TagNameFirewall" : { "default" : "Tag" }
+            }
+        }
+    },
+
+
+    "Parameters" : {
+        "GWInstanceType" : {
+            "Description" : "Check Point Security Gateway instance type",
+            "Type" : "String",
+            "Default" : "c4.xlarge",
+            "AllowedValues" : [ "m3.medium","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge"],
+            "ConstraintDescription" : "must be a valid EC2 instance type."
+        },
+        "VpcCidr" : {
+            "Description" : "The CIDR block for your VPC",
+            "Type": "String",
+            "Default" : "10.0.0.0/16"
+        },
+        "AvailabilityZone" : {
+            "Description" : "The availability zone in which to deploy the gateway",
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "MinLength": "1"
+        },
+        "ExternalSubnetCidr" : {
+            "Description" : "The external subnet of the security gateway",
+            "Type": "String",
+            "Default": "10.0.0.0/24"
+        },
+        "GWExternalPrivateAddr" : {
+            "Description" : "The private address of the gateway on the external subnet",
+            "Type": "String",
+            "Default": "10.0.0.10"
+        },
+        "GWExternalSecondaryPrivateAddr" : {
+            "Description" : "A secondary address of the gateway on the external subnet",
+            "Type": "String", 
+            "Default": "10.0.0.11"
+        },
+        "GWInternalPrivateAddr" : {
+            "Description" : "The private address of the gateway on the internal subnet",
+            "Type": "String",
+            "Default": "10.0.1.10"
+        },
+        "InternalSubnetCidr" : {
+            "Description" : "The internal subnet of the security gateway",
+            "Type": "String",
+            "Default": "10.0.1.0/24"
+        },
+        "KeyName" : {
+            "Description" : "SSH Key Pair",
+            "Type" : "AWS::EC2::KeyPair::KeyName",
+            "MinLength": "1"
+        },
+        "TagNameFirewall" : {
+              "Description" : "Firewall Name in Console",
+              "Type" : "String",
+              "Default" : "Firewall"
+        },
+        "Version" : {
+            "Description" : "Security Gateway version",
+            "Type" : "String",
+            "Default": "BYOL",
+            "AllowedValues" : [ "BYOL", "PAYG" ]
+        },
+        "PasswordHash" : {
+            "Description" : "(optional) The admin user password hash (hint, use \"openssl passwd -1\")",
+            "Default": "",
+            "Type" : "String",
+            "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+        },
+        "Shell" : {
+            "Description" : "The user admin shell",
+            "Type" : "String",
+            "Default" : "/etc/cli.sh",
+            "AllowedValues" : [ "/etc/cli.sh", "/bin/bash", "/bin/csh", "/bin/tcsh"]
+        }
+    },
+    "Resources" : {
+        "AMI" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/CloudFormationTemplate/amis.json",
+                "Parameters" : {
+                    "Version" : { "Ref" : "Version" }
+                }
+            }
+        },
+        "InfraStack" : {
+            "Type" : "AWS::CloudFormation::Stack",
+            "Properties" : {
+                "TemplateURL" : "https://s3.amazonaws.com/CloudFormationTemplate/infrastructure.json",
+                "Parameters" : {
+                    "VpcCidr" : { "Ref" : "VpcCidr" },
+                    "AvailabilityZone" : { "Ref" : "AvailabilityZone" },
+                    "ExternalSubnetCidr" : { "Ref" : "ExternalSubnetCidr" },
+                    "InternalSubnetCidr" : { "Ref" : "InternalSubnetCidr" },
+                    "ResourcesTagName" : { "Ref" : "AWS::StackName" }
+                }
+            }
+        },        
+        "InternalRoutingTable" : {
+            "Type" : "AWS::EC2::RouteTable",
+            "Properties" : {
+                "VpcId" : { "Fn::GetAtt" : [ "InfraStack", "Outputs.VPC" ] }
+            }
+        },
+        "InternalDefaultRoute" : {
+            "Type" : "AWS::EC2::Route",
+            "Properties" : {
+                "DestinationCidrBlock" : "0.0.0.0/0",
+                "NetworkInterfaceId" : { "Ref" : "SecurityGatewayInternalInterface" },
+                "RouteTableId" : { "Ref" : "InternalRoutingTable" }
+            }
+        },
+        "InternalNetworkRouteAssociation" : {
+           "Type" : "AWS::EC2::SubnetRouteTableAssociation",
+           "Properties" : {
+              "RouteTableId" : { "Ref" : "InternalRoutingTable" },
+              "SubnetId" : { "Fn::GetAtt" : [ "InfraStack", "Outputs.InternalSubnet" ] }
+           }
+        },
+        "SecurityGatewayExternalInterface" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "Description": "External",
+                "PrivateIpAddresses": [
+                       { "PrivateIpAddress" : { "Ref" : "GWExternalPrivateAddr" }, "Primary" : "true" },
+                       { "PrivateIpAddress" : { "Ref" : "GWExternalSecondaryPrivateAddr" }, "Primary" : "false" }
+                ],
+                "SourceDestCheck": "false",
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SubnetId": { "Fn::GetAtt" : [ "InfraStack", "Outputs.ExternalSubnet" ] }
+            }        
+        },
+        "SecurityGatewayInternalInterface" : {
+            "Type" : "AWS::EC2::NetworkInterface",
+            "Properties" : {
+                "Description": "Internal",
+                "PrivateIpAddress": { "Ref" : "GWInternalPrivateAddr"},
+                "GroupSet" : [{ "Ref" : "InstanceSecurityGroup" }],
+                "SourceDestCheck": "false",
+                "SubnetId": { "Fn::GetAtt" : [ "InfraStack", "Outputs.InternalSubnet" ] }
+            }        
+        },
+        "InstanceSecurityGroup" : {
+            "Type" : "AWS::EC2::SecurityGroup",
+            "Properties" : {
+                "GroupDescription" : "Permissive security group",
+                "VpcId" : { "Fn::GetAtt" : [ "InfraStack", "Outputs.VPC" ] },
+                "SecurityGroupIngress" : [ { "IpProtocol" : "-1", "CidrIp" : "0.0.0.0/0" } ]
+            }
+        },
+        "SecurityGatewayInstance" : {
+            "Type" : "AWS::EC2::Instance",
+            "Properties" : {
+                "AvailabilityZone" : { "Ref" : "AvailabilityZone" },
+                "Tags" : [
+                  { "Key" : "Name", "Value" : { "Ref" : "TagNameFirewall" } }
+                ],
+                "ImageId" : { "Fn::GetAtt" : [ "AMI", "Outputs.ImageId" ] },
+                "InstanceType" : { "Ref" : "GWInstanceType" },
+                "KeyName" : { "Ref" : "KeyName" },
+                "NetworkInterfaces" : [ 
+                    { "DeviceIndex" : "0", "NetworkInterfaceId" : {"Ref" : "SecurityGatewayExternalInterface"}  },
+                    { "DeviceIndex" : "1", "NetworkInterfaceId" : {"Ref" : "SecurityGatewayInternalInterface"}  }
+                ],
+                "UserData" : { "Fn::Base64" :
+                    {   "Fn::Join" : [ "\n", 
+                            [   "#!/bin/bash",
+                                "echo template_name: gwinvpc >> /etc/cloud-version",
+                                "echo template_version: 20170621 >> /etc/cloud-version",
+                                {"Fn::Join" : [ "", ["pwd_hash='", {"Ref" : "PasswordHash"}, "'"]]},
+                                "test -z \"$pwd_hash\" || {",
+                                "   echo \"set admin password\"",
+                                "   clish -c \"set user admin password-hash $pwd_hash\" -s",
+                                "}",
+                                {"Fn::Join" : [ "", ["shell='", {"Ref" : "Shell"}, "'"]]},
+                                "clish -c \"set user admin shell $shell\" -s",
+                                ""
+                            ]
+                        ] 
+                    }
+                }
+            }
+        },
+        "GatewayPublicAddress" : {
+           "Type" : "AWS::EC2::EIP",
+           "Properties" : {
+              "Domain" : "vpc"
+           }
+        },
+        "GatewayAddressAssoc" : {
+            "Type" : "AWS::EC2::EIPAssociation",
+            "Properties" : {
+                "NetworkInterfaceId" : { "Ref" : "SecurityGatewayExternalInterface" },
+                "AllocationId" : { "Fn::GetAtt" : [ "GatewayPublicAddress" , "AllocationId" ] },
+                "PrivateIpAddress" : { "Fn::GetAtt" : ["SecurityGatewayExternalInterface", "PrimaryPrivateIpAddress" ]}
+            }
+        }
+    },
+    "Outputs" : {
+        "GatewayPublicAddress" : {
+            "Description" : "The public address of your gateway",
+            "Value" : { "Ref" : "GatewayPublicAddress" }
+        },
+        
+        "SSH" : {
+            "Description" : "SSH command",
+            "Value" : { "Fn::Join" : [ "", [ "ssh admin@", { "Ref" : "GatewayPublicAddress" }]]}
+        },
+        
+        "URL" : {
+            "Description" : "URL to the Gateway portal",
+            "Value" : { "Fn::Join" : [ "", [ "https://", { "Ref" : "GatewayPublicAddress" }]]}
+        }
+    }
+}

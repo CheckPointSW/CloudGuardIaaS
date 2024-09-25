@@ -1,0 +1,322 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "vnet"
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the virtual network"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 1st subnet"
+      },
+      "defaultValue": "Frontend"
+    },
+    "Subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 1st subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "Subnet1StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 1st subnet"
+      }
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 2nd subnet"
+      },
+      "defaultValue": "Backend"
+    },
+    "Subnet2Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 2nd subnet"
+      },
+      "defaultValue": "10.0.2.0/24"
+    },
+    "Subnet2StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 2nd subnet"
+      }
+    },
+    "Subnet3Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 3rd subnet"
+      },
+      "defaultValue": "Internal2"
+    },
+    "Subnet3Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 3rd subnet"
+      },
+      "defaultValue": "10.0.3.0/24"
+    },
+    "Subnet3StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 3rd subnet"
+      }
+    },
+    "Subnet4Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 3rd subnet"
+      },
+      "defaultValue": "Internal3"
+    },
+    "Subnet4Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 4th subnet"
+      },
+      "defaultValue": "10.0.4.0/24"
+    },
+    "Subnet4StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 4th subnet"
+      }
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "apiVersion": {
+      "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('subnet1Name')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "Local-Subnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          },
+          {
+            "name": "To-Internal",
+            "properties": {
+              "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet1StartAddress')]"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('subnet2Name')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "Local-Subnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet2Prefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          },
+          {
+            "name": "Inside-Vnet",
+            "properties": {
+              "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+            }
+          },
+          {
+            "name": "To-Internet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet2StartAddress')]"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('subnet3Name')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "Local-Subnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet3Prefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          },
+          {
+            "name": "Inside-Vnet",
+            "properties": {
+              "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet3StartAddress')]"
+            }
+          },
+          {
+            "name": "To-Internet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet3StartAddress')]"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('subnet4Name')]",
+      "properties": {
+        "routes": [
+          {
+            "name": "Local-Subnet",
+            "properties": {
+              "addressPrefix": "[parameters('subnet4Prefix')]",
+              "nextHopType": "VnetLocal"
+            }
+          },
+          {
+            "name": "Inside-Vnet",
+            "properties": {
+              "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet4StartAddress')]"
+            }
+          },
+          {
+            "name": "To-Internet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "VirtualAppliance",
+              "nextHopIpAddress": "[parameters('subnet4StartAddress')]"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "name": "[parameters('virtualNetworkName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', parameters('subnet3Name'))]",
+        "[resourceId('Microsoft.Network/routeTables', parameters('subnet4Name'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('virtualNetworkAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet1Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('subnet2Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet2Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet2Name'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('subnet3Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet3Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet3Name'))]"
+              }
+            }
+          },
+          {
+            "name": "[parameters('subnet4Name')]",
+            "properties": {
+              "addressPrefix": "[parameters('subnet4Prefix')]",
+              "routeTable": {
+                "id": "[resourceId('Microsoft.Network/routeTables', parameters('subnet4Name'))]"
+              }
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "Description": "The name of the new storage account created to store the VMs disks"
+      }
+    },
+    "storageAccountType": {
+      "type": "string",
+      "metadata": {
+        "Description": "The type of the Storage Account created"
+      },
+      "defaultValue": "Premium_LRS"
+    },
+    "apiVersion": {
+      "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('storageAccountName')]",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
+    }
+  ]
+}

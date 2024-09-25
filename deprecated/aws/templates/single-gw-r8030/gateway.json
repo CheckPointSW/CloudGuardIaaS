@@ -1,0 +1,543 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys a Check Point Security Gateway into a new VPC (20211212)",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "VPC Network Configuration"
+          },
+          "Parameters": [
+            "AvailabilityZone",
+            "VpcCidr",
+            "ExternalSubnetCidr",
+            "InternalSubnetCidr",
+            "ResourcesTagName"
+          ]
+        },
+        {
+          "Label": {
+            "default": "EC2 Instance Configuration"
+          },
+          "Parameters": [
+            "Name",
+            "InstanceType",
+            "KeyName",
+            "AllocatePublicAddress",
+            "VolumeSize",
+            "VolumeEncryption",
+            "EnableInstanceConnect"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Check Point Settings"
+          },
+          "Parameters": [
+            "Version",
+            "Shell",
+            "SICKey",
+            "PasswordHash"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Advanced Settings"
+          },
+          "Parameters": [
+            "Hostname",
+            "AllowUploadDownload",
+            "NTPPrimary",
+            "NTPSecondary"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Automatic Provisioning with Security Management Server Settings (optional)"
+          },
+          "Parameters": [
+            "ControlGatewayOverPrivateOrPublicAddress",
+            "ManagementServer",
+            "ConfigurationTemplate"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "AvailabilityZone": {
+          "default": "Availability zone"
+        },
+        "VpcCidr": {
+          "default": "VPC CIDR"
+        },
+        "ExternalSubnetCidr": {
+          "default": "External subnet CIDR"
+        },
+        "InternalSubnetCidr": {
+          "default": "Internal subnet CIDR"
+        },
+        "ResourcesTagName": {
+          "default": "Resources prefix tag"
+        },
+        "Name": {
+          "default": "Name"
+        },
+        "Version": {
+          "default": "Version & license"
+        },
+        "InstanceType": {
+          "default": "Instance type"
+        },
+        "KeyName": {
+          "default": "Key name"
+        },
+        "AllocatePublicAddress": {
+          "default": "Allocate an Elastic IP"
+        },
+        "EnableInstanceConnect": {
+          "default": "Enable AWS Instance Connect"
+        },
+        "Shell": {
+          "default": "Admin shell"
+        },
+        "PasswordHash": {
+          "default": "Password hash"
+        },
+        "Hostname": {
+          "default": "Hostname"
+        },
+        "SICKey": {
+          "default": "SIC key"
+        },
+        "VolumeSize": {
+          "default": "Root volume size (GB)"
+        },
+        "VolumeEncryption": {
+          "default": "Volume encryption KMS key identifier"
+        },
+        "AllowUploadDownload": {
+          "default": "Allow upload & download"
+        },
+        "NTPPrimary": {
+          "default": "Primary NTP server"
+        },
+        "NTPSecondary": {
+          "default": "Secondary NTP server"
+        },
+        "ControlGatewayOverPrivateOrPublicAddress": {
+          "default": "Gateway address"
+        },
+        "ManagementServer": {
+          "default": "Management Server"
+        },
+        "ConfigurationTemplate": {
+          "default": "Configuration template"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "AvailabilityZone": {
+      "Description": "The availability zone in which to deploy the instance",
+      "Type": "AWS::EC2::AvailabilityZone::Name",
+      "MinLength": "1"
+    },
+    "VpcCidr": {
+      "Description": "The CIDR block for your VPC",
+      "Type": "String",
+      "Default": "10.0.0.0/16",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28"
+    },
+    "ExternalSubnetCidr": {
+      "Description": "The external subnet of the Security Gateway",
+      "Type": "String",
+      "Default": "10.0.0.0/24"
+    },
+    "InternalSubnetCidr": {
+      "Description": "The internal subnet of the Security Gateway",
+      "Type": "String",
+      "Default": "10.0.1.0/24"
+    },
+    "ResourcesTagName": {
+      "Description": "(optional)",
+      "Type": "String"
+    },
+    "Name": {
+      "Type": "String",
+      "Default": "Check-Point-Gateway"
+    },
+    "Version": {
+      "Type": "String",
+      "Default": "R80.30-PAYG-NGTP",
+      "AllowedValues": [
+        "R80.10-BYOL",
+        "R80.10-PAYG-NGTP",
+        "R80.10-PAYG-NGTX",
+        "R80.20-BYOL",
+        "R80.20-PAYG-NGTP",
+        "R80.20-PAYG-NGTX",
+        "R80.30-BYOL",
+        "R80.30-PAYG-NGTP",
+        "R80.30-PAYG-NGTX",
+        "R80.40-BYOL",
+        "R80.40-PAYG-NGTP",
+        "R80.40-PAYG-NGTX"
+      ]
+    },
+    "InstanceType": {
+      "Description": "c4 and t2 instance types are supported only with version R80.10 and c5 are supported only with R80.20 and above",
+      "Type": "String",
+      "Default": "c5.xlarge",
+      "AllowedValues": [
+        "c4.large",
+        "c4.xlarge",
+        "c4.2xlarge",
+        "c4.4xlarge",
+        "c4.8xlarge",
+        "c5.large",
+        "c5.xlarge",
+        "c5.2xlarge",
+        "c5.4xlarge",
+        "c5.9xlarge",
+        "c5.18xlarge",
+        "c5n.large",
+        "c5n.xlarge",
+        "c5n.2xlarge",
+        "c5n.4xlarge",
+        "c5n.9xlarge",
+        "c5n.18xlarge",
+        "t2.xlarge",
+        "t2.2xlarge"
+      ],
+      "ConstraintDescription": "Must be a valid EC2 instance type"
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": "1",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "AllocatePublicAddress": {
+      "Default": "true",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "EnableInstanceConnect": {
+      "Description": "Ec2 Instance Connect is not supported with versions prior to R80.40",
+      "Default": "false",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "Shell": {
+      "Description": "Change the admin shell to enable advanced command line configuration",
+      "Type": "String",
+      "Default": "/etc/cli.sh",
+      "AllowedValues": [
+        "/etc/cli.sh",
+        "/bin/bash",
+        "/bin/csh",
+        "/bin/tcsh"
+      ]
+    },
+    "PasswordHash": {
+      "Description": "Admin user's password hash (use command \"openssl passwd -1 PASSWORD\" to get the PASSWORD's hash) (optional)",
+      "NoEcho": "true",
+      "Type": "String",
+      "Default": "",
+      "AllowedPattern": "[\\$\\./a-zA-Z0-9]*"
+    },
+    "Hostname": {
+      "Description": "(optional)",
+      "Type": "String",
+      "AllowedPattern": "^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$",
+      "ConstraintDescription": "A valid hostname label or an empty string"
+    },
+    "SICKey": {
+      "Description": "The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters",
+      "NoEcho": "true",
+      "MinLength": "8",
+      "Type": "String",
+      "AllowedPattern": "[a-zA-Z0-9]*"
+    },
+    "VolumeSize": {
+      "Type": "Number",
+      "MinValue": "100",
+      "Default": "100"
+    },
+    "VolumeEncryption": {
+      "Description": "KMS or CMK key Identifier: Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs'). Will be ignored for versions lower than R80.30",
+      "Type": "String",
+      "Default": "alias/aws/ebs"
+    },
+    "AllowUploadDownload": {
+      "Description": "Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point",
+      "Type": "String",
+      "Default": "true",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "NTPPrimary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "169.254.169.123",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "NTPSecondary": {
+      "Description": "(optional)",
+      "Type": "String",
+      "Default": "0.pool.ntp.org",
+      "AllowedPattern": "[\\.a-zA-Z0-9\\-]*"
+    },
+    "ControlGatewayOverPrivateOrPublicAddress": {
+      "Description": "Determines if the Security Gateway is provisioned using its private or public address",
+      "Default": "private",
+      "Type": "String",
+      "AllowedValues": [
+        "private",
+        "public"
+      ]
+    },
+    "ManagementServer": {
+      "Description": "The name that represents the Security Management Server in the automatic provisioning configuration",
+      "Type": "String"
+    },
+    "ConfigurationTemplate": {
+      "Description": "A name of a Security Gateway configuration template in the automatic provisioning configuration",
+      "Type": "String"
+    }
+  },
+  "Conditions": {
+    "ResourcesTagNameGiven": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "ResourcesTagName"
+            },
+            ""
+          ]
+        }
+      ]
+    },
+    "AllocatePublicAddress": {
+      "Fn::Equals": [
+        {
+          "Ref": "AllocatePublicAddress"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "InfraStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/utils/infrastructure.json",
+        "Parameters": {
+          "VpcCidr": {
+            "Ref": "VpcCidr"
+          },
+          "AvailabilityZone": {
+            "Ref": "AvailabilityZone"
+          },
+          "ExternalSubnetCidr": {
+            "Ref": "ExternalSubnetCidr"
+          },
+          "InternalSubnetCidr": {
+            "Ref": "InternalSubnetCidr"
+          },
+          "ResourcesTagName": {
+            "Ref": "ResourcesTagName"
+          }
+        }
+      }
+    },
+    "InternalRoutingTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Fn::GetAtt": [
+            "InfraStack",
+            "Outputs.VPC"
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Join": [
+                "_",
+                [
+                  {
+                    "Fn::If": [
+                      "ResourcesTagNameGiven",
+                      {
+                        "Ref": "ResourcesTagName"
+                      },
+                      {
+                        "Ref": "AWS::StackName"
+                      }
+                    ]
+                  },
+                  "InternalRoutingTable"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "InternalNetworkRouteAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "InternalRoutingTable"
+        },
+        "SubnetId": {
+          "Fn::GetAtt": [
+            "InfraStack",
+            "Outputs.InternalSubnet"
+          ]
+        }
+      }
+    },
+    "ChkpProductStack": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://cgi-cfts.s3.amazonaws.com/deprecated/gateway/gateway-into-vpc.json",
+        "Parameters": {
+          "VPC": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.VPC"
+            ]
+          },
+          "ExternalSubnet": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.ExternalSubnet"
+            ]
+          },
+          "InternalSubnet": {
+            "Fn::GetAtt": [
+              "InfraStack",
+              "Outputs.InternalSubnet"
+            ]
+          },
+          "InternalRouteTable": {
+            "Ref": "InternalRoutingTable"
+          },
+          "ResourcesTagName": {
+            "Ref": "ResourcesTagName"
+          },
+          "Name": {
+            "Ref": "Name"
+          },
+          "Version": {
+            "Ref": "Version"
+          },
+          "InstanceType": {
+            "Ref": "InstanceType"
+          },
+          "KeyName": {
+            "Ref": "KeyName"
+          },
+          "AllocatePublicAddress": {
+            "Ref": "AllocatePublicAddress"
+          },
+          "EnableInstanceConnect": {
+            "Ref": "EnableInstanceConnect"
+          },
+          "Shell": {
+            "Ref": "Shell"
+          },
+          "PasswordHash": {
+            "Ref": "PasswordHash"
+          },
+          "Hostname": {
+            "Ref": "Hostname"
+          },
+          "SICKey": {
+            "Ref": "SICKey"
+          },
+          "VolumeSize": {
+            "Ref": "VolumeSize"
+          },
+          "VolumeEncryption": {
+            "Ref": "VolumeEncryption"
+          },
+          "AllowUploadDownload": {
+            "Ref": "AllowUploadDownload"
+          },
+          "NTPPrimary": {
+            "Ref": "NTPPrimary"
+          },
+          "NTPSecondary": {
+            "Ref": "NTPSecondary"
+          },
+          "ManagementServer": {
+            "Ref": "ManagementServer"
+          },
+          "ConfigurationTemplate": {
+            "Ref": "ConfigurationTemplate"
+          },
+          "ControlGatewayOverPrivateOrPublicAddress": {
+            "Ref": "ControlGatewayOverPrivateOrPublicAddress"
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "CheckPointInstancePublicAddress": {
+      "Description": "The public address of the Check Point instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "ChkpProductStack",
+          "Outputs.PublicAddress"
+        ]
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "CheckPointInstanceSSH": {
+      "Description": "SSH command to the Check Point instance",
+      "Value": {
+        "Fn::GetAtt": [
+          "ChkpProductStack",
+          "Outputs.SSH"
+        ]
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "CheckPointInstanceURL": {
+      "Description": "URL to the portal",
+      "Value": {
+        "Fn::GetAtt": [
+          "ChkpProductStack",
+          "Outputs.URL"
+        ]
+      },
+      "Condition": "AllocatePublicAddress"
+    },
+    "ManagementName": {
+      "Description": "The name that represents the Security Management Server",
+      "Value": {
+        "Ref": "ManagementServer"
+      }
+    },
+    "ConfigurationTemplateName": {
+      "Description": "The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name",
+      "Value": {
+        "Ref": "ConfigurationTemplate"
+      }
+    }
+  }
+}
