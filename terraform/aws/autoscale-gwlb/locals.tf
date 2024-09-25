@@ -42,7 +42,6 @@ locals {
   gateway_SICkey_base64 = base64encode(var.gateway_SICKey)
   gateway_password_hash_base64 = base64encode(var.gateway_password_hash)
   maintenance_mode_password_hash_base64 = base64encode(var.gateway_maintenance_mode_password_hash)
-  is_gwlb_ami = length(regexall(".*R80.40.*", var.gateway_version)) > 0
 
 }
 resource "null_resource" "tags_as_list_of_maps" {

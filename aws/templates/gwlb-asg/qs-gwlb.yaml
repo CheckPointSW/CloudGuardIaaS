@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (05072024)"
+Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (__VERSION__)"
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -29,6 +29,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -105,6 +106,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       ManagementServer:
@@ -244,6 +247,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   AllowUploadDownload:
     Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
@@ -306,7 +316,7 @@ Parameters:
   GatewayInstanceType:
     Description: The EC2 instance type for the Security Gateways.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -602,8 +612,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R81-BYOL
-      - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
       - R81.20-BYOL
@@ -741,7 +749,7 @@ Resources:
   SecurityGatewaysStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/autoscale-gwlb.yaml
+      TemplateURL: __URL__/gwlb/autoscale-gwlb.yaml
       Parameters:
         VPC: !Ref SecurityVPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
@@ -753,6 +761,7 @@ Resources:
         VolumeType: !Ref VolumeType
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
+        MetaDataToken: !Ref MetaDataToken
         GatewaysMinSize: !Ref GatewaysMinSize
         GatewaysMaxSize: !Ref GatewaysMaxSize
         AdminEmail: !Ref AdminEmail
@@ -783,7 +792,7 @@ Resources:
     Condition: DeployManagement
     DependsOn: GWLBeEndpointStack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/management-gwlb.yaml
+      TemplateURL: __URL__/gwlb/management-gwlb.yaml
       Parameters:
         VPC: !Ref SecurityVPC
         ManagementSubnet: !Select [0, !Ref GatewaysSubnets]
@@ -804,6 +813,7 @@ Resources:
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         ManagementBootstrapScript: !Join
           - ';'
           - - 'echo -e "\nStarting Bootstrap script\n"'
@@ -831,7 +841,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: VpcEndpointService
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-endpoints.yaml
+      TemplateURL: __URL__/gwlb/qs-gwlb-endpoints.yaml
       Parameters:
         NumberOfAZs: !Ref NumberOfAZs
         GWLBeVPC: !Ref ServersVPC
@@ -844,7 +854,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: GWLBeEndpointStack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-servers-autoscale.yaml
+      TemplateURL: __URL__/gwlb/qs-gwlb-servers-autoscale.yaml
       Parameters:
         VPC: !Ref ServersVPC
         Subnets: !Join [',', !Ref ServersSubnets]

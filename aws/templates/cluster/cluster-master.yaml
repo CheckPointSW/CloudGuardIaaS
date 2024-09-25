@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point Cluster in a new VPC (20240204)
+Description: Deploy a Check Point Cluster in a new VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -23,6 +23,7 @@ Metadata:
           - EnableInstanceConnect
           - GatewayPredefinedRole
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -75,6 +76,8 @@ Metadata:
         default: Existing IAM role name
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Version & license
       Shell:
@@ -133,7 +136,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -290,16 +293,17 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -391,7 +395,7 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      TemplateURL: __URL__/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Ref AvailabilityZone
         NumberOfAZs: 1
@@ -410,7 +414,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: VPCStack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/cluster.yaml
+      TemplateURL: __URL__/cluster/cluster.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
@@ -426,6 +430,7 @@ Resources:
         EnableInstanceConnect: !Ref EnableInstanceConnect
         GatewayPredefinedRole: !Ref GatewayPredefinedRole
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
@@ -494,12 +499,12 @@ Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
     RuleCondition: !Equals [ !Ref MemberBToken, '' ]
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
         Assert: !Equals [ !Ref MemberAToken, '' ]
   MembersTokenValueEquals:
     RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]

@@ -89,12 +89,11 @@ secret_key = "my-secret-key"
 ## Revision History
 In order to check the template version, please refer to [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description                                                       |
-|------------------|-------------------------------------------------------------------|
-| 20230926         | CME instance profile for IAM Role                                 |
-| 20231012         | Update AWS Terraform provider version to 5.20.1                   |
-| 20240507         | Add ec2:DescribeRegions read permission to the IAM role policy    |
-
+| Template Version | Description                                                        |
+|------------------|--------------------------------------------------------------------|
+| 20240507         | Add ec2:DescribeRegions read permission to the IAM role policy     |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                    |
+| 20230926         | CME instance profile for IAM Role                                  |
 
 ## License
 

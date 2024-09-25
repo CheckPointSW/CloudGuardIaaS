@@ -4,12 +4,14 @@ project                                     = "PLEASE ENTER PROJECT ID"         
 
 # --- Check Point Deployment---
 image_name                                  = "PLEASE ENTER IMAGE_NAME"                                                 # "check-point-r8120-gw-byol-single-631-991001335-v20230622"
+os_version                                  = "PLEASE ENTER GAIA OS VERSION"                                            # "R8120"
 installationType                            = "PLEASE ENTER INSTALLATION TYPE"                                          # "Gateway only"
 license                                     = "PLEASE ENTER LICENSE"                                                    # "BYOL"
 prefix                                      = "PLEASE ENTER PREFIX"                                                     # "chkp-single-tf-"
 management_nic                              = "PLEASE ENTER MANAGEMENT_NIC"                                             # "Ephemeral Public IP (eth0)"
 admin_shell                                 = "PLEASE ENTER ADMIN_SHELL"                                                # "/etc/cli.sh"
 admin_SSH_key                               = "PLEASE ENTER ADMIN_SSH_KEY"                                              # "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
+maintenance_mode_password_hash              = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH"                             # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 generatePassword                            = "PLEASE ENTER GENERATE PASSWORD"                                          # false
 allowUploadDownload                         = "PLEASE ENTER ALLOW UPLOAD DOWNLOAD"                                      # false
 sicKey                                      = "PLEASE ENTER SIC KEY"                                                    # ""

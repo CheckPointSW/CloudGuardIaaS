@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20240204)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -32,6 +32,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -51,6 +52,7 @@ Metadata:
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
+          - GatewayBootstrapScript
       - Label:
           default: Gateway Load Balancer Configuration
         Parameters:
@@ -116,6 +118,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       ManagementServer:
@@ -148,6 +152,8 @@ Metadata:
         default: Allocate Public IPs
       CloudWatch:
         default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
       GWLBName:
         default: Gateway Load Balancer Name
       TargetGroupName:
@@ -223,6 +229,7 @@ Parameters:
     Description: CIDR block for NAT subnet 2 located in the 2nd Availability Zone.
     Type: String
     Default: 10.0.23.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   NatGwSubnet3CIDR:
     Description: CIDR block for NAT subnet 3 located in the 3rd Availability Zone.
@@ -234,6 +241,7 @@ Parameters:
     Description: CIDR block for NAT subnet 4 located in the 4th Availability Zone.
     Type: String
     Default: 10.0.43.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   GWLBeSubnet1CIDR:
     Description: CIDR block for GWLBe subnet 1 located in the 1st Availability Zone.
@@ -245,6 +253,7 @@ Parameters:
     Description: CIDR block for GWLBe subnet 2 located in the 2nd Availability Zone.
     Type: String
     Default: 10.0.24.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   GWLBeSubnet3CIDR:
     Description: CIDR block for GWLBe subnet 3 located in the 3rd Availability Zone.
@@ -256,6 +265,7 @@ Parameters:
     Description: CIDR block for GWLBe subnet 4 located in the 4th Availability Zone.
     Type: String
     Default: 10.0.44.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
     ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
@@ -291,6 +301,13 @@ Parameters:
     Description: Prevents an instance from accidental termination.
     Type: String
     Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
     AllowedValues:
       - true
       - false
@@ -333,7 +350,7 @@ Parameters:
   GatewayInstanceType:
     Description: The EC2 instance type for the Security Gateways.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -461,9 +478,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
       - R81.20-PAYG-NGTX
@@ -506,6 +520,11 @@ Parameters:
     AllowedValues:
       - true
       - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
   GWLBName:
     Description: Gateway Load Balancer name. This name must be unique within your AWS account and can have a maximum of 32 alphanumeric characters and hyphens. A name cannot begin or end with a hyphen.
     Type: String
@@ -649,10 +668,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG
-      - R81-BYOL
-      - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
       - R81.20-BYOL
@@ -962,7 +977,7 @@ Resources:
   GWLBStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/gwlb.yaml
+      TemplateURL: __URL__/gwlb/gwlb.yaml
       Parameters:
         VPC: !Ref VPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
@@ -972,6 +987,7 @@ Resources:
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         AllowUploadDownload: !Ref AllowUploadDownload
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
@@ -992,6 +1008,7 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
         CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
         ManagementDeploy: !Ref ManagementDeploy
         ManagementInstanceType: !Ref ManagementInstanceType
         ManagementVersion: !Ref ManagementVersion

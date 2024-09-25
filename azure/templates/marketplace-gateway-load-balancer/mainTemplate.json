@@ -414,7 +414,7 @@
   "variables": {
     "resourceGroup": "[resourceGroup()]",
     "templateName": "gwlb",
-    "templateVersion": "20240716",
+    "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
@@ -639,7 +639,23 @@
     "diskSize100GB": 100,
     "additionalDiskSizeGB": "[if(contains('R8110 R8120', variables('osVersion')), 0, parameters('additionalDiskSizeGB'))]",
     "diskSizeGB": "[add(variables('additionalDiskSizeGB'), variables('diskSize100GB'))]",
-    "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]",
+    "vxlanParametersForR82": "kernel_parameters:\n  sim:\n    - sim_enable_vxlan=3\n    - sim_enable_gre=3\n  fw: \n    - fw_enable_vxlan=1\n    - fw_enable_gre=1",
+    "cloudConfigParams":[
+      "[concat('installationType=\\\"', variables('installationType'), '\\\"')]",
+      "[concat('allowUploadDownload=\\\"', variables('allowUploadDownload'), '\\\"')]",
+      "[concat('osVersion=\\\"', variables('osVersion'), '\\\"')]",
+      "[concat('templateName=\\\"', variables('templateName'), '\\\"')]",
+      "[concat('isBlink=\\\"', variables('isBlink'), '\\\"')]",
+      "[concat('templateVersion=\\\"', variables('templateVersion'), '\\\"')]",
+      "[concat('bootstrapScript64=\\\"', variables('bootstrapScript64'), '\\\"')]",
+      "[concat('location=\\\"', variables('location'), '\\\"')]",
+      "[concat('sicKey=\\\"', variables('sicKey'), '\\\"')]",
+      "[concat('customMetrics=\\\"', variables('customMetrics'), '\\\"')]",
+      "[concat('adminShell=\\\"', parameters('adminShell'), '\\\"')]",
+      "[concat('MaintenanceModePassword=\\\"', parameters('MaintenanceModePasswordHash'), '\\\"')]",
+      "[concat('passwordHash=\\\"', parameters('SerialConsolePasswordHash'), '\\\"')]"
+    ],
+    "customData": "[concat('#cloud-config','\n', if(equals(variables('osVersion'),'R82'),variables('vxlanParametersForR82'), ''),'\n', 'runcmd:\n  - python3 /etc/cloud_config.py ', join(variables('cloudConfigParams'), ' '))]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
     "imageReferenceBYOL": {
@@ -1032,7 +1048,7 @@
           "mode": "Manual"
         },
         "virtualMachineProfile": {
-          "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
+          "UserData": "[base64(concat(variables('customData'), '\n'))]",
           "storageProfile": {
             "osDisk": {
               "diskSizeGB": "[variables('diskSizeGB')]",
@@ -1048,7 +1064,6 @@
             "adminPassword": "[parameters('adminPassword')]",
             "adminUsername": "[concat('not','used')]",
             "computerNamePrefix": "[toLower(parameters('vmName'))]",
-            "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
             "linuxConfiguration": "[variables('linuxConfiguration')]"
           },
           "networkProfile": {
@@ -1079,7 +1094,7 @@
           "diagnosticsProfile": {
             "bootDiagnostics": {
               "enabled": "true",
-              "storageUri": "[reference(variables('storageAccountId'), '2019-06-01').primaryEndpoints.blob]"
+              "storageUri": "[reference(variables('storageAccountId'), '2023-01-01').primaryEndpoints.blob]"
             }
           }
         },

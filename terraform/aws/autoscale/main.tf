@@ -91,16 +91,16 @@ resource "aws_autoscaling_group" "asg" {
   health_check_type = "ELB"
 
   tag {
-      key = "Name"
-      value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.gateway_name)
-      propagate_at_launch = true
+    key = "Name"
+    value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.gateway_name)
+    propagate_at_launch = true
   }
 
   tag {
-      key = "x-chkp-tags"
-      value = format("management=%s:template=%s:ip-address=%s", var.management_server, var.configuration_template, var.gateways_provision_address_type)
-      propagate_at_launch = true
-    }
+    key = "x-chkp-tags"
+    value = format("management=%s:template=%s:ip-address=%s", var.management_server, var.configuration_template, var.gateways_provision_address_type)
+    propagate_at_launch = true
+  }
 
   dynamic "tag" {
     for_each = var.instances_tags

@@ -836,7 +836,7 @@
             }
           },
           {
-            "visible": "[bool(basics('auth').sshPublicKey)]",
+             "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
@@ -946,7 +946,7 @@
             "label": "Availability options",
             "defaultValue": "Availability Set",
             "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth \\ ', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -1199,7 +1199,7 @@
             "label": "Quick connect to Smart-1 Cloud",
             "defaultValue": "Yes",
             "toolTip": "Automatically connect this Cluster to Smart-1 Cloud - Check Point's Security Management as a Service",
-            "constraints": {
+             "constraints": {
               "allowedValues": [
                 {
                   "label": "Yes",
@@ -1238,16 +1238,16 @@
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           },
           {
-            "name": "Smart1CloudTokenB",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Smart-1 Cloud Token Member B",
-            "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
-            "constraints": {
-              "required": true,
-              "regex": "[\\S\\s]{5,}",
-              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
-            },
-            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+              "name": "Smart1CloudTokenB",
+              "type": "Microsoft.Common.TextBox",
+              "label": "Smart-1 Cloud Token Member B",
+              "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
+              "constraints": {
+                "required": true,
+                "regex": "[\\S\\s]{5,}",
+                "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+              },
+              "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }
         ]
       },
@@ -1640,7 +1640,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
       "VipsNumber": "[int(steps('network').Vips_Number)]",
       "VipNames": "[concat(steps('network').VIP_Names.VIP2_Name, ',', steps('network').VIP_Names.VIP3_Name, ',', steps('network').VIP_Names.VIP4_Name, ',', steps('network').VIP_Names.VIP5_Name, ',', steps('network').VIP_Names.VIP6_Name, ',', steps('network').VIP_Names.VIP7_Name, ',', steps('network').VIP_Names.VIP8_Name, ',', steps('network').VIP_Names.VIP9_Name, ',', steps('network').VIP_Names.VIP10_Name)]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",

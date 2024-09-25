@@ -25,9 +25,13 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
 }
-
+variable "os_version" {
+  type = string
+  description = "GAIA OS version"
+  default = "R8120"
+}
 # --- Instances Configuration ---
 data "google_compute_regions" "available_regions" {
 }
@@ -102,6 +106,11 @@ variable "admin_shell" {
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
 }
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
+  default = ""
+}
 # --- Quick connect to Smart-1 Cloud ---
 variable "smart_1_cloud_token_a" {
   type = string
@@ -120,6 +129,7 @@ resource "null_resource" "validate_both_tokens" {
 resource "null_resource" "validate_different_tokens" {
   count = var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_a == var.smart_1_cloud_token_b ? "To connect to Smart-1 Cloud, you must provide two different tokens" : 0
 }
+
 # --- Networking ---
 variable "cluster_network_cidr" {
   type = string

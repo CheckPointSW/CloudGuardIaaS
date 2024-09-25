@@ -14,7 +14,7 @@ subnets_bit_length = 8
 
 // --- EC2 Instance Configuration ---
 gateway_name = "Check-Point-Cluster-tf"
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 key_name = "publickey"
 volume_size = 100
 volume_encryption = "alias/aws/ebs"

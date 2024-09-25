@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (20240204)
+  Security Gateway & Management (Standalone) instance into an existing VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -23,6 +23,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -69,6 +70,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       StandaloneVersion:
         default: License
       Shell:
@@ -270,15 +273,18 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   StandaloneVersion:
     Description: Standalone Version & License.
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-PAYG-NGTP
-      - R80.40-BYOL
-      - R81-PAYG-NGTP
-      - R81-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-BYOL
       - R81.20-PAYG-NGTP
@@ -310,7 +316,7 @@ Parameters:
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -361,6 +367,7 @@ Conditions:
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
   IsBYOL: !Equals [!Select [1, !Split ['-', !Ref StandaloneVersion]], 'BYOL']
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -395,14 +402,14 @@ Resources:
     Condition: EnableCloudWatch
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      TemplateURL: __URL__/iam/cloudwatch-policy.yaml
       Parameters:
         PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
         PolicyRole: !Ref StandaloneIAMRole
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      TemplateURL: __URL__/utils/amis.yaml
       Parameters:
         Version: !If [IsBYOL, !Join ['-', [!Ref StandaloneVersion,MGMT]], !Ref StandaloneVersion]
   ExternalNetworkInterface:
@@ -456,43 +463,55 @@ Resources:
       RouteTableId: !Ref InternalRouteTable
   StandaloneInstance:
     Type: AWS::EC2::Instance
+    DependsOn: GatewayLaunchTemplate
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Ref StandaloneName
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref StandaloneInstanceType
-      BlockDeviceMappings:
-        - DeviceName: /dev/xvda
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      IamInstanceProfile: !If [EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue']
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ExternalNetworkInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref InternalNetworkInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref StandaloneInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [ EncryptedVolume, true, false ]
+              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [ EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue' ]
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; admin_subnet=${AdminCIDR}'
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref StandaloneVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref ExternalNetworkInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref InternalNetworkInterface
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; admin_subnet=${AdminCIDR}'
+              - !If [ AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue' ]
+              - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"' ] ]
+              - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"' ] ]
+              - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"' ] ]
+              - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref StandaloneVersion ] ] } ]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
     Condition: AllocateAddress

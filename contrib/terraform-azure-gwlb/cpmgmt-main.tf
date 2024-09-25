@@ -124,6 +124,11 @@ resource "random_id" "randomId" {
 
 # Create storage account for boot diagnostics
 resource "azurerm_storage_account" "ckp-storageaccount" {
+    blob_properties {
+      delete_retention_policy {
+        days = 7
+      }
+    }
     name                        = "diag${random_id.randomId.hex}"
     resource_group_name         = azurerm_resource_group.rg-ckpmgmt.name
     location                    = azurerm_resource_group.rg-ckpmgmt.location

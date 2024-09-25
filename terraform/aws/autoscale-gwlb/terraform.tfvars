@@ -16,7 +16,7 @@ configuration_template = "tmpl_env1"
 
 // --- EC2 Instances Configuration ---
 gateway_name = "asg_gateway"
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 key_name = "publickey"
 instances_tags = {
   key1 = "value1"

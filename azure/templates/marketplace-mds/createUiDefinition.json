@@ -186,7 +186,7 @@
             }
           },
           {
-            "visible": "[bool(basics('auth').sshPublicKey)]",
+             "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
@@ -629,7 +629,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
       "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
     }

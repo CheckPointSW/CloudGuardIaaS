@@ -35,7 +35,6 @@ conf = {}
 
 
 def set_arm_versions():
-    """#TODO fixDocstring"""
     global ARM_VERSIONS
     log('Setting api versions for "%s" solution\n' % templateName)
     if templateName == 'stack-ha':
@@ -48,17 +47,14 @@ def set_arm_versions():
 
 
 def is_azure():
-    """#TODO fixDocstring"""
     return os.path.isfile('/etc/in-azure')
 
 
 def log(msg):
-    """#TODO fixDocstring"""
     sys.stderr.write(msg)
 
 
 def test_rw(rid, allow_not_found=False, test_write=True):
-    """#TODO fixDocstring"""
     components = rid.split('/')
     log('Id            : %s\n' % rid)
     log('Subscription  : %s\n' % components[2])
@@ -85,7 +81,6 @@ def test_rw(rid, allow_not_found=False, test_write=True):
 
 
 def get_vm_primary_nic(vm):
-    """#TODO fixDocstring"""
     nis = vm['properties']['networkProfile']['networkInterfaces']
     if len(nis) == 1:
         ni = nis[0]
@@ -97,7 +92,6 @@ def get_vm_primary_nic(vm):
 
 
 def test_cluster_ip():
-    """#TODO fixDocstring"""
     def test_vip(vip_resource):
         if '/' in vip_resource:
             cluster_ip_id = vip_resource
@@ -116,7 +110,6 @@ def test_cluster_ip():
 
 
 def test_load_balancer():
-    """#TODO fixDocstring"""
     load_balancer_nm = conf.get('lbName', '')
     if not load_balancer_nm:
         log('An external load balancer name is not configured.\n')
@@ -129,7 +122,6 @@ def test_load_balancer():
 
 
 def vnet_rg():
-    """#TODO fixDocstring"""
     local_vm = azure.arm('GET', conf['baseId'] +
                          'microsoft.compute/virtualmachines/' +
                          conf['hostname'])[1]
@@ -140,7 +132,6 @@ def vnet_rg():
 
 
 def get_route_table_ids_for_vnet(vnet):
-    """#TODO fixDocstring"""
     route_table_ids = set()
     for subnet in vnet['properties'].get('subnets', []):
         if subnet['properties'].get('routeTable'):
@@ -149,7 +140,6 @@ def get_route_table_ids_for_vnet(vnet):
 
 
 def get_vnet_id():
-    """#TODO fixDocstring"""
     vnet_id = conf.get('vnetId')
     if vnet_id:
         return vnet_id
@@ -164,7 +154,6 @@ def get_vnet_id():
 
 
 def get_route_table_ids_for_peering(vnet):
-    """#TODO fixDocstring"""
     route_table_ids = set()
 
     for peering in vnet['properties'].get('virtualNetworkPeerings', []):
@@ -185,7 +174,6 @@ def get_route_table_ids_for_peering(vnet):
 
 
 def get_route_table_ids():
-    """#TODO fixDocstring"""
     route_table_ids = set()
 
     vnet_id = get_vnet_id()
@@ -198,7 +186,6 @@ def get_route_table_ids():
 
 
 def interfaces_test_rw(interface_id):
-    """#TODO fixDocstring"""
     interface = test_rw(interface_id['id'])
     if not interface['properties'].get('enableIPForwarding'):
         raise Exception(
@@ -207,7 +194,6 @@ def interfaces_test_rw(interface_id):
 
 
 def test_cluster_parameters():
-    """#TODO fixDocstring"""
     path = "/var/opt/fw.boot/modules/fwkern.conf"
     text1 = "fwha_dead_timeout_multiplier=20"
     text2 = "fwha_if_problem_tolerance=200"
@@ -248,7 +234,6 @@ def test_cluster_parameters():
 
 
 def test():
-    """#TODO fixDocstring"""
     global conf
 
     if not is_azure():
@@ -412,7 +397,6 @@ configuration
 
 
 def main():
-    """#TODO fixDocstring"""
     try:
         test()
     except Exception:

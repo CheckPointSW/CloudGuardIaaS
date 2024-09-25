@@ -48,7 +48,7 @@ enable_cross_zone_load_balancing = "true"
 
 // --- Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration ---
 gateway_name = "Check-Point-GW-tf"
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 minimum_group_size = 2
 maximum_group_size = 10
 gateway_version = "R81.20-BYOL"

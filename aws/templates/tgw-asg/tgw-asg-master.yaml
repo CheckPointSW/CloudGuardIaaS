@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server in a new VPC (20240204)
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server in a new VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -22,6 +22,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
@@ -84,6 +85,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       GatewayName:
@@ -214,6 +217,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   AllowUploadDownload:
     Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
@@ -228,7 +238,7 @@ Parameters:
   GatewayInstanceType:
     Description: The EC2 instance type for the Security Gateways.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -356,12 +366,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -530,10 +534,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG
-      - R81-BYOL
-      - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
       - R81.20-BYOL
@@ -612,7 +612,7 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      TemplateURL: __URL__/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
@@ -625,7 +625,7 @@ Resources:
   MainStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/autoscale/tgw-asg.yaml
+      TemplateURL: __URL__/autoscale/tgw-asg.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         GatewaysSubnets: !Join
@@ -640,6 +640,7 @@ Resources:
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         AllowUploadDownload: !Ref AllowUploadDownload
         GatewayName: !Ref GatewayName
         GatewayInstanceType: !Ref GatewayInstanceType
@@ -682,7 +683,7 @@ Outputs:
     Condition: DeployManagement
 Rules:
   GatewayAddressRule:
-    RuleCondition: !Equals [!Ref ManagementDeploy, 'true']
-    Assertions:
+    RuleCondition: !Equals [!Ref ManagementDeploy, 'true'] 
+    Assertions:  
       - AssertDescription: "Gateway's netowrk to communicate with the Security Management Server must be provided"
         Assert: !Not [ !Equals [!Ref GatewaysAddresses, '']]

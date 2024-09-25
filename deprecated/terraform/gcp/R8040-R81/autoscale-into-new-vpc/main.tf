@@ -15,6 +15,7 @@ resource "google_compute_network" "external_network" {
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "external_subnetwork" {
+  private_ip_google_access = true
   name = "${var.prefix}-ext-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.external_subnetwork_ip_cidr_range
   region = var.region
@@ -26,6 +27,7 @@ resource "google_compute_network" "internal_network" {
   auto_create_subnetworks = false
 }
 resource "google_compute_subnetwork" "internal_subnetwork" {
+  private_ip_google_access = true
   name = "${var.prefix}-int-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.internal_subnetwork_ip_cidr_range
   region = var.region

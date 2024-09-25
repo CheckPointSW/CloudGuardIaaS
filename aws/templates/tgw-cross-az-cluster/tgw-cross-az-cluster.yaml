@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20240204)
+Description: Deploys a Check Point TGW Cross Availabilty Zone Cluster into an
+  existing VPC
+  (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -27,6 +29,7 @@ Metadata:
           - EnableInstanceConnect
           - GatewayPredefinedRole
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -87,6 +90,8 @@ Metadata:
         default: Existing IAM role name
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Gateways version & license
       Shell:
@@ -162,7 +167,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -320,6 +325,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Description: The license to install on the Security Gateways.
     Type: String
@@ -413,7 +425,7 @@ Resources:
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/cross-az-cluster.yaml
+      TemplateURL: __URL__/cluster/cross-az-cluster.yaml
       Parameters:
         VPC: !Ref VPC
         PublicSubnetA: !Ref PublicSubnetA
@@ -431,6 +443,7 @@ Resources:
         EnableInstanceConnect: !Ref EnableInstanceConnect
         GatewayPredefinedRole: !Ref GatewayPredefinedRole
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash
@@ -503,12 +516,12 @@ Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
     RuleCondition: !Equals [ !Ref MemberBToken, '' ]
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
         Assert: !Equals [ !Ref MemberAToken, '' ]
   MembersTokenValueEquals:
     RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]

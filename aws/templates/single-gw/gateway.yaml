@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into an existing VPC (20240204)
+Description: Deploys a Check Point Security Gateway into an existing VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -22,6 +22,7 @@ Metadata:
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -77,6 +78,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Gateway Version & license
       Shell:
@@ -132,7 +135,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -285,16 +288,17 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -340,7 +344,7 @@ Parameters:
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -398,6 +402,7 @@ Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   ProvidedManagementParameters: !And [!Not [!Equals [!Ref ManagementServer, '']], !Not [!Equals [!Ref ConfigurationTemplate, '']]]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -432,14 +437,14 @@ Resources:
     Condition: EnableCloudWatch
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      TemplateURL: __URL__/iam/cloudwatch-policy.yaml
       Parameters:
         PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
         PolicyRole: !Ref GatewayIAMRole
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      TemplateURL: __URL__/utils/amis.yaml
       Parameters:
         Version: !Join ['-', [!Ref GatewayVersion,GW]]
   ExternalNetworkInterface:
@@ -496,7 +501,12 @@ Resources:
       RouteTableId: !Ref InternalRouteTable
   GatewayInstance:
     Type: AWS::EC2::Instance
+    DependsOn: GatewayLaunchTemplate
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Ref GatewayName
@@ -510,40 +520,47 @@ Resources:
                 - !Join ['=', [template,!Ref ConfigurationTemplate]]
                 - !Join ['=',[ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
           - !Ref 'AWS::NoValue'
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      IamInstanceProfile: !If [EnableCloudWatch, !Ref   GatewayInstanceProfile, !Ref 'AWS::NoValue']
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ExternalNetworkInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref InternalNetworkInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref GatewayInstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; token=''${GatewayToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref ExternalNetworkInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref InternalNetworkInterface
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; token=''${GatewayToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
     Condition: AllocateAddress

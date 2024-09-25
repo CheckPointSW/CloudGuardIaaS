@@ -79,7 +79,7 @@ resource "alicloud_instance" "member-b-instance" {
 resource "alicloud_network_interface" "member_a_mgmt_eni" {
   network_interface_name = format("%s-Member-A-management-eni", var.resources_tag_name != "" ? var.resources_tag_name : var.gateway_name)
   vswitch_id = var.mgmt_vswitch_id
-  security_group_ids  = [
+  security_group_ids = [
     module.common_permissive_sg.permissive_sg_id]
   description = "eth2"
 }

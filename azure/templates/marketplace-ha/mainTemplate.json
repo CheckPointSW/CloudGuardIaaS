@@ -357,7 +357,7 @@
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
     "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
-    "templateVersion": "20240716",
+    "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "elbPublicIPName": "frontend-lb-address",
     "haPublicIPName": "[parameters('vmName')]",
@@ -1210,7 +1210,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2022-09-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-01-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {

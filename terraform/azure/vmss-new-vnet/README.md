@@ -59,7 +59,7 @@ This solution uses the following modules:
         - sku = vm_os_sku (see accepted values in the table below);
         - version = latest<br/>
     <br>Example:<br>
-    az vm image terms accept --urn checkpoint:check-point-cg-r8040:sg-byol:latest
+    az vm image terms accept --urn checkpoint:check-point-cg-r8120:sg-byol:latest
     
     - In the terraform.tfvars file leave empty double quotes for client_secret, client_id and tenant_id variables. 
  
@@ -111,9 +111,9 @@ This solution uses the following modules:
  |  |  |  |  |         |
  | **vm_os_sku** | A sku of the image to be deployed | string |  "sg-byol" - BYOL license; <br/>"sg-ngtp" - NGTP PAYG license; <br/>"sg-ngtx" - NGTX PAYG license; | n/a
  |  |  |  |  |         |
- | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r8040"; <br/>"check-point-cg-r81"; <br/>"check-point-cg-r8110"; <br/>"check-point-cg-r8120"; | n/a
+ | **vm_os_offer** | The name of the image offer to be deployed | string | "check-point-cg-r81"; <br/>"check-point-cg-r8110"; <br/>"check-point-cg-r8120"; | n/a
  |  |  |  |  |         |
- | **os_version** | GAIA OS version | string | "R8040"; <br/>"R81"; <br/>"R8110"; <br/>"R8120"; | n/a
+ | **os_version** | GAIA OS version | string | "R81"; <br/>"R8110"; <br/>"R8120"; | n/a
  |  |  |  |  |         |
  | **bootstrap_script** | An optional script to run on the initial boot | string | Bootstrap script example: <br/>"touch /home/admin/bootstrap.txt; echo 'hello_world' > /home/admin/bootstrap.txt" <br/>The script will create bootstrap.txt file in the /home/admin/ and add 'hello word' string into it | n/a
  |  |  |  |  |         |
@@ -221,8 +221,6 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description |
 | ---------------- | --------- |
-| 20240613 | - Updated Azure Terraform provider version <br> - Cosmetic fixes & default values <br> - Added option to limit storage account access by specify allowed sourcess <br> - Updated diskSizeGB <br> - Added validation for os_version & os_offer |
-| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |

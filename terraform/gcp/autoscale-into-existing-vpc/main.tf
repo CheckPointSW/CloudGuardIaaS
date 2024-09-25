@@ -20,7 +20,10 @@ resource "random_string" "random_sic_key" {
   length = 12
   special = false
 }
-
+resource "random_string" "generated_password" {
+  length = 12
+  special = false
+}
 resource "google_compute_instance_template" "instance_template" {
   name = "${var.prefix}-tmplt-${random_string.random_string.result}"
   machine_type = var.machine_type
@@ -81,9 +84,18 @@ resource "google_compute_instance_template" "instance_template" {
     local.network_defined_by_routes_condition,
     local.network_defined_by_routes_settings_condition]
 
+  metadata = local.admin_SSH_key_condition ? {
+    serial-port-enable = "true"
+    instanceSSHKey = var.admin_SSH_key
+    adminPasswordSourceMetadata = var.generate_password ?random_string.generated_password.result : ""
+  } : {
+    serial-port-enable = "true"
+    adminPasswordSourceMetadata = var.generate_password?random_string.generated_password.result : ""
+  }
+
   metadata_startup_script = templatefile("${path.module}/../common/startup-script.sh", {
     // script's arguments
-    generatePassword = "false"
+    generatePassword = var.generate_password
     config_url = ""
     config_path = ""
     sicKey = ""
@@ -106,14 +118,9 @@ resource "google_compute_instance_template" "instance_template" {
     name = ""
     zoneConfig = ""
     region = ""
+    os_version = var.os_version
+    maintenance_mode_password_hash = var.maintenance_mode_password_hash
   })
-
-  metadata = local.admin_SSH_key_condition ? {
-    serial-port-enable = "true"
-    instanceSSHKey = var.admin_SSH_key
-  } : {
-    serial-port-enable = "true"
-  }
 }
 
 resource "google_compute_firewall" "ICMP_firewall_rules" {

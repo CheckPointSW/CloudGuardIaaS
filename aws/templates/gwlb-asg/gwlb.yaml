@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20240204)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -17,6 +17,7 @@ Metadata:
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
+          - MetaDataToken
           - AllowUploadDownload
           - ManagementServer
           - ConfigurationTemplate
@@ -43,6 +44,7 @@ Metadata:
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
+          - GatewayBootstrapScript
       - Label:
           default: Check Point CloudGuard IaaS Security Management Server Configuration
         Parameters:
@@ -72,6 +74,8 @@ Metadata:
         default: Enable AWS Instance Connect
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       AllowUploadDownload:
         default: Allow upload & download
       ManagementServer:
@@ -112,6 +116,8 @@ Metadata:
         default: Allocate Public IPs
       CloudWatch:
         default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
       ManagementDeploy:
         default: Deploy Management Server
       ManagementInstanceType:
@@ -177,6 +183,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   AllowUploadDownload:
     Description: Automatically download updates and share statistical data for product improvement purpose.
     Type: String
@@ -239,7 +252,7 @@ Parameters:
   GatewayInstanceType:
     Description: The EC2 instance type for the Security Gateways.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -367,9 +380,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
       - R81.20-PAYG-NGTX
@@ -412,6 +422,11 @@ Parameters:
     AllowedValues:
       - true
       - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
   ManagementDeploy:
     Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
     Type: String
@@ -538,10 +553,6 @@ Parameters:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG
-      - R81-BYOL
-      - R81-PAYG
       - R81.10-BYOL
       - R81.10-PAYG
       - R81.20-BYOL
@@ -631,7 +642,7 @@ Resources:
   SecurityGatewaysStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/autoscale-gwlb.yaml
+      TemplateURL: __URL__/gwlb/autoscale-gwlb.yaml
       Parameters:
         VPC: !Ref VPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
@@ -643,6 +654,7 @@ Resources:
         VolumeType: !Ref VolumeType
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
+        MetaDataToken: !Ref MetaDataToken
         GatewaysMinSize: !Ref GatewaysMinSize
         GatewaysMaxSize: !Ref GatewaysMaxSize
         AdminEmail: !Ref AdminEmail
@@ -655,13 +667,14 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         AllocatePublicAddress: !Ref AllocatePublicAddress
         CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
   ManagementStack:
     Type: AWS::CloudFormation::Stack
     Condition: DeployManagement
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/management-gwlb.yaml
+      TemplateURL: __URL__/gwlb/management-gwlb.yaml
       Parameters:
         VPC: !Ref VPC
         ManagementSubnet: !Select [0, !Ref GatewaysSubnets]
@@ -682,6 +695,7 @@ Resources:
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         ManagementBootstrapScript: !Join
           - ';'
           - - 'echo -e "\nStarting Bootstrap script\n"'
