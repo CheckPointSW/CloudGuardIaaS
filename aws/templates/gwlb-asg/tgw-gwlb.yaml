@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (__VERSION__)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -977,7 +977,7 @@ Resources:
   GWLBStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/gwlb/gwlb.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/gwlb.yaml
       Parameters:
         VPC: !Ref VPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]

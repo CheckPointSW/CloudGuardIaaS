@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (__VERSION__)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (05072024)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -800,7 +800,7 @@ Resources:
   SecurityVPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Join [',' , !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
@@ -813,7 +813,7 @@ Resources:
   ServersVPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/gwlb/qs-gwlb-servers-vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-servers-vpc.yaml
       Parameters:
         AvailabilityZones: !Join [ ',' , !Ref AvailabilityZones ]
         NumberOfAZs: !Ref NumberOfAZs
@@ -832,7 +832,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: [SecurityVPCStack, ServersVPCStack]
     Properties:
-      TemplateURL: __URL__/gwlb/qs-gwlb.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb.yaml
       Parameters:
         SecurityVPC: !GetAtt SecurityVPCStack.Outputs.VPCID
         NumberOfAZs: !Ref NumberOfAZs

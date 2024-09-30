@@ -1,7 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point TGW Cross Availabilty Zone Cluster into an
-  existing VPC
-  (__VERSION__)
+Description: Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -425,7 +423,7 @@ Resources:
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/cluster/cross-az-cluster.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/cluster/cross-az-cluster.yaml
       Parameters:
         VPC: !Ref VPC
         PublicSubnetA: !Ref PublicSubnetA
@@ -516,12 +514,12 @@ Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
     RuleCondition: !Equals [ !Ref MemberBToken, '' ]
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
         Assert: !Equals [ !Ref MemberAToken, '' ]
   MembersTokenValueEquals:
     RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]

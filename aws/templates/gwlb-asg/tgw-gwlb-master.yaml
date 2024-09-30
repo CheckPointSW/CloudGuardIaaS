@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in a new VPC for Transit Gateway (__VERSION__)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in a new VPC for Transit Gateway (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -741,7 +741,7 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
@@ -759,7 +759,7 @@ Resources:
   TgwGwlbStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/gwlb/tgw-gwlb.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/tgw-gwlb.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         IGWID: !GetAtt VPCStack.Outputs.IGWID
@@ -869,7 +869,7 @@ Outputs:
     Condition: 4AZs
 Rules:
   GatewayAddressAllocationRule:
-    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
-    Assertions:  
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
+    Assertions:
       - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
         Assert: !Equals [!Ref AllocatePublicAddress, 'true']
