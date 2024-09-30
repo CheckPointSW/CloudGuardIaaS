@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (__VERSION__)"
+Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (05072024)"
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -749,7 +749,7 @@ Resources:
   SecurityGatewaysStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/gwlb/autoscale-gwlb.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/autoscale-gwlb.yaml
       Parameters:
         VPC: !Ref SecurityVPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
@@ -792,7 +792,7 @@ Resources:
     Condition: DeployManagement
     DependsOn: GWLBeEndpointStack
     Properties:
-      TemplateURL: __URL__/gwlb/management-gwlb.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/management-gwlb.yaml
       Parameters:
         VPC: !Ref SecurityVPC
         ManagementSubnet: !Select [0, !Ref GatewaysSubnets]
@@ -841,7 +841,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: VpcEndpointService
     Properties:
-      TemplateURL: __URL__/gwlb/qs-gwlb-endpoints.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-endpoints.yaml
       Parameters:
         NumberOfAZs: !Ref NumberOfAZs
         GWLBeVPC: !Ref ServersVPC
@@ -854,7 +854,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: GWLBeEndpointStack
     Properties:
-      TemplateURL: __URL__/gwlb/qs-gwlb-servers-autoscale.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-servers-autoscale.yaml
       Parameters:
         VPC: !Ref ServersVPC
         Subnets: !Join [',', !Ref ServersSubnets]

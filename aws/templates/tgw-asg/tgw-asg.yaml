@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (__VERSION__)
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (20240204)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -566,7 +566,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: DeployManagement
     Properties:
-      TemplateURL: __URL__/management/management.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/management/management.yaml
       Parameters:
         VPC: !Ref VPC
         ManagementSubnet: !Select [0, !Ref GatewaysSubnets]
@@ -620,7 +620,7 @@ Resources:
   SecurityGatewaysStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/autoscale/autoscale.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/autoscale/autoscale.yaml
       Parameters:
         VPC: !Ref VPC
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
@@ -675,7 +675,7 @@ Outputs:
     Condition: DeployManagement
 Rules:
   GatewayAddressRule:
-    RuleCondition: !Equals [!Ref ManagementDeploy, 'true'] 
-    Assertions:  
+    RuleCondition: !Equals [!Ref ManagementDeploy, 'true']
+    Assertions:
       - AssertDescription: "Gateway's netowrk to communicate with the Security Management Server must be provided"
         Assert: !Not [ !Equals [!Ref GatewaysAddresses, '']]
