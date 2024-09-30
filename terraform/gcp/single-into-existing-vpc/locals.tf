@@ -22,6 +22,15 @@ locals {
   regex_validate_single_image_name = "check-point-r8[0-1][1-4]0-gw-(byol|payg)-single-[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}"
   // will fail if the image name is not in the right syntax
   validate_image_name = var.installationType != "Gateway only" && length(regexall(local.regex_validate_mgmt_image_name, var.image_name)) > 0 ? 0 : (var.installationType == "Gateway only" && length(regexall(local.regex_validate_single_image_name, var.image_name)) > 0 ? 0 : index(split("-", var.image_name), "INVALID IMAGE NAME"))
+  
+  version_allowed_values = [
+    "R81",
+    "R8110",
+    "R8120"
+  ]
+  // Will fail if var.os_version is invalid:
+  validate_os_version = index(local.version_allowed_values, var.os_version)
+  
   regex_valid_admin_SSH_key = "^(^$|ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3})"
   // Will fail if var.admin_SSH_key is invalid
   regex_admin_SSH_key = regex(local.regex_valid_admin_SSH_key, var.admin_SSH_key) == var.admin_SSH_key ? 0 : "Please enter a valid SSH public key or leave empty"

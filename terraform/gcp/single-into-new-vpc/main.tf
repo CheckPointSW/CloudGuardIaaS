@@ -47,12 +47,14 @@ module "single-into-existing-vpc" {
 
   # --- Check Point Deployment---
   image_name = var.image_name
+  os_version = var.os_version
   installationType = var.installationType
   license = var.license
   prefix = var.prefix
   management_nic = var.management_nic
   admin_shell = var.admin_shell
   admin_SSH_key = var.admin_SSH_key
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
   generatePassword = var.generatePassword
   allowUploadDownload = var.allowUploadDownload
   sicKey = var.sicKey

@@ -30,41 +30,30 @@ provider "google" {
 1. [Create a Service Account](https://cloud.google.com/docs/authentication/getting-started) (or use the existing one). Next, download the JSON key file. Name it something you can remember and store it somewhere secure on your machine. <br/>
 2. Select "Editor" Role or verify you have the following permissions:
    ```
+    compute.addresses.create
+    compute.addresses.delete
     compute.addresses.get
     compute.addresses.use
-    compute.addresses.create
     compute.disks.create
-    compute.disks.delete
     compute.firewalls.create
     compute.firewalls.delete
     compute.firewalls.get
-    compute.images.get
-    compute.images.useReadOnly
-    compute.images.getFromFamily
-    compute.instanceTemplates.create
-    compute.instanceTemplates.delete
-    compute.instanceTemplates.get
-    compute.instanceTemplates.useReadOnly
-    compute.instances.addAccessConfig
+    compute.firewalls.update
     compute.instances.create
     compute.instances.delete
     compute.instances.get
-    compute.instances.setMetadata
-    compute.instances.setTags
     compute.instances.setLabels
+    compute.instances.setMachineType
+    compute.instances.setMetadata
+    compute.instances.setServiceAccount
+    compute.instances.setTags
+    compute.instances.updateNetworkInterface
     compute.networks.get
     compute.networks.updatePolicy
-    compute.regions.list
-    compute.subnetworks.get
     compute.subnetworks.use
     compute.subnetworks.useExternalIp
     compute.zones.get
-    iam.serviceAccountKeys.get
-    iam.serviceAccountKeys.list
     iam.serviceAccounts.actAs
-    iam.serviceAccounts.get
-    iam.serviceAccounts.list
-    iam.serviceAccounts.set
    ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
@@ -109,13 +98,15 @@ service_account_path = "service-accounts/service-account-file-name.json"
 project = "project-id"
 
 # --- Check Point---
-image_name = "check-point-r8110-gw-byol-single-335-985-v20220126"
+image_name = "check-point-r8120-gw-byol-single-631-991001335-v20230622"
+os_version = "R8120"
 installationType = "Gateway only"
 license = "BYOL"
 prefix = "chkp-single-tf-"
 management_nic = "Ephemeral Public IP (eth0)"
 admin_shell = "/etc/cli.sh"
 admin_SSH_key = "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
+maintenance_mode_password_hash = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 generatePassword = false
 allow_upload_download = true
 sicKey = ""
@@ -178,7 +169,9 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | zone | The zone determines what computing resources are available and where your data is stored and used | string | List of allowed [Regions and Zones](https://cloud.google.com/compute/docs/regions-zones?_ga=2.31926582.-962483654.1585043745) |us-central1-a|yes|
 |  |  |  |  |  |
-| image_name |The single gateway or management image name (e.g. check-point-r8110-gw-byol-single-335-985-v20220126 for gateway or check-point-r8110-byol-335-883-v20210706 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
+| image_name |The single gateway or management image name (e.g. check-point-r8120-gw-byol-single-631-991001335-v20230622 for gateway or check-point-r8120-byol-631-991001335-v20230621 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
+|  |  |  |  |  |
+| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120 | R8120 | yes |
 |  |  |  |  |  |
 | installationType | Installation type and version | string |Gateway only;<br/> Management only;<br/> Manual Configuration<br/>Gateway and Management (Standalone) |Gateway only|yes|
 |  |  |  |  |  |
@@ -230,6 +223,8 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | admin_SSH_key | Public SSH key for the user 'admin' - The SSH public key for SSH authentication to the instances. Leave this field blank to use all project-wide pre-configured SSH keys. | string | A valid public ssh key | "" | no |
 |  |  |  |  |  |
+| maintenance_mode_password_hash | Maintenance mode password hash, relevant only for R81.20 and higher versions, to generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here. | string | | "" | no|
+|  |  |  |  |  |
 | sicKey | The Secure Internal Communication one time secret used to set up trust between the single gateway object and the management server | string | At least 8 alpha numeric characters.<br/>If SIC is not provided and needed, a key will be automatically generated |""|no|
 |  |  |  |  |  |
 | managementGUIClientNetwork | Allowed GUI clients | string | A valid IPv4 network CIDR (e.g. 0.0.0.0/0) |0.0.0.0/0|no|
@@ -258,6 +253,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230910 | - R81.20 is the default version |
+| | | |
 | 20230209 | Added Smart-1 Cloud support. |
 | | | |
 | 20230109 | Updated startup script to use cloud-config. |

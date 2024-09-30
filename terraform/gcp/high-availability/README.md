@@ -46,17 +46,20 @@ provider "google" {
     compute.firewalls.create
     compute.firewalls.delete
     compute.firewalls.get
-    compute.images.get
-    compute.images.useReadOnly
+    compute.firewalls.update
     compute.instances.create
     compute.instances.delete
     compute.instances.get
+    compute.instances.setLabels
+    compute.instances.setMachineType
     compute.instances.setMetadata
     compute.instances.setServiceAccount
     compute.instances.setTags
+    compute.instances.updateNetworkInterface
     compute.networks.create
     compute.networks.delete
     compute.networks.get
+    compute.networks.list
     compute.networks.updatePolicy
     compute.regions.list
     compute.subnetworks.create
@@ -65,11 +68,7 @@ provider "google" {
     compute.subnetworks.use
     compute.subnetworks.useExternalIp
     compute.zones.get
-    iam.serviceAccountKeys.get
-    iam.serviceAccountKeys.list
     iam.serviceAccounts.actAs
-    iam.serviceAccounts.get
-    iam.serviceAccounts.list
     ```
 3. ```credentials``` - Your service account key file is used to complete a two-legged OAuth 2.0 flow to obtain access tokens to authenticate with the GCP API as needed; Terraform will use it to reauthenticate automatically when tokens expire. <br/> 
 The provider credentials can be provided either as static credentials or as [Environment Variables](https://www.terraform.io/docs/providers/google/guides/provider_reference.html#credentials-1).
@@ -118,7 +117,8 @@ project = "project-id"
 # --- Check Point Deployment ---
 prefix = "chkp-tf-ha"
 license = "BYOL"
-image_name = "check-point-r8110-gw-byol-cluster-335-985-v20220126"
+image_name = "check-point-r8120-gw-byol-cluster-631-991001335-v20230622"
+os_version = "R8120"
 
 # --- Instances Configuration ---
 region = "us-central1"
@@ -135,7 +135,8 @@ management_network = "209.87.209.100/32"
 sic_key = "aaaaaaaa"
 generate_password = false
 allow_upload_download = false
-admin_shell = "/bin/bash"
+admin_shell = "/etc/cli.sh"
+maintenance_mode_password_hash = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 #--- Quick connect to Smart-1 Cloud ---
 smart_1_cloud_token_a = "xxxxxxxxxxxxxxxxxxxxxxxx"
@@ -226,7 +227,9 @@ internal_network1_subnetwork_name = ""
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-ha" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
-| image_name | The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
+| image_name | The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-631-991001335-v20230622). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
+|  |  |  |  |  |
+| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120 | R8120 | yes |
 |  |  |  |  |  |
 | region  | GCP region  | string  | N/A | "us-central1" | no |
 | zoneA  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
@@ -241,6 +244,7 @@ internal_network1_subnetwork_name = ""
 | generate_password  | Automatically generate an administrator password.  | bool | true/false | false | no |
 | allow_upload_download | Automatically download Blade Contracts and other important data. Improve product experience by sending data to Check Point | bool | true/false | true | no |
 | admin_shell | Change the admin shell to enable advanced command line configuration. | string | - /etc/cli.sh <br/> - /bin/bash <br/> - /bin/csh <br/> - /bin/tcsh | "/etc/cli.sh" | no |
+| maintenance_mode_password_hash | Maintenance mode password hash, relevant only for R81.20 and higher versions, to generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here. | string |  | "" | no |
 | smart_1_cloud_token_a | Smart-1 Cloud token to connect ***member A*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501) | string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 | smart_1_cloud_token_b | Smart-1 Cloud token to connect ***member B*** to Check Point's Security Management as a Service. <br/><br/> Follow these instructions to quickly connect this member to Smart-1 Cloud - [SK180501](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501)| string | A valid token copied from the Connect Gateway screen in Smart-1 Cloud portal.|
 | cluster_network_cidr  | Cluster external subnet CIDR. If the variable's value is not empty double quotes, a new network will be created. The Cluster public IP will be translated to a private address assigned to the active member in this external network.  | string  | N/A | "10.0.0.0/24" | no |
@@ -300,6 +304,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20230910 | - R81.20 is the default version |
+| | | |
 | 20230209 | Added Smart-1 Cloud support. |
 | | | |
 | 20230109 | Updated startup script to use cloud-config. |

@@ -7,4 +7,3 @@ Follow [sk170760](https://supportcenter.checkpoint.com/supportcenter/portal?even
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2Fazure%2Ftemplates%2Fsingle-ipv6%2FmainTemplate.json">
  <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 </a>
-

@@ -17,6 +17,7 @@ resource "google_compute_network" "external_network" {
 resource "google_compute_subnetwork" "external_subnetwork" {
   name = "${var.prefix}-ext-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.external_subnetwork_ip_cidr_range
+  private_ip_google_access = true
   region = var.region
   network = google_compute_network.external_network.id
 }
@@ -28,6 +29,7 @@ resource "google_compute_network" "internal_network" {
 resource "google_compute_subnetwork" "internal_subnetwork" {
   name = "${var.prefix}-int-subnet-${random_string.mig_random_string.result}"
   ip_cidr_range = var.internal_subnetwork_ip_cidr_range
+  private_ip_google_access = true
   region = var.region
   network = google_compute_network.internal_network.id
 }
@@ -42,10 +44,13 @@ module "autoscale-into-existing-vpc" {
   # --- Check Point---
   prefix = var.prefix
   image_name = var.image_name
+  os_version = var.os_version
   management_nic = var.management_nic
   management_name = var.management_name
   configuration_template_name = var.configuration_template_name
+  generate_password  = var.generate_password
   admin_SSH_key = var.admin_SSH_key
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
   network_defined_by_routes = var.network_defined_by_routes
   admin_shell = var.admin_shell
   allow_upload_download = var.allow_upload_download

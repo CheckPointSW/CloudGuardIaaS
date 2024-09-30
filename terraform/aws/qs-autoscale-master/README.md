@@ -240,18 +240,18 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                                           |
 |------------------|---------------------------------------------------------------------------------------|
-| 20210309         | First release of Check Point Quick Start Auto Scaling Master Terraform module for AWS |
-| 20220606         | New instance type support                                                             |
-| 20221123         | R81.20 version support                                                                |
-| 20221226         | Support ASG Launch Template instead of Launch Configuration                           |
-| 20230806         | Add support for c6in instance type                                                    | 
-| 20230829         | Change default Check Point version to R81.20                                          |
-| 20230914         | Add support for maintenance mode password                                             |
-| 20230923         | Add support for C5d instance type                                                     |
-| 20231012         | Update AWS Terraform provider version to 5.20.1                                       |
-| 20231127         | Add support for parameter admin shell                                                 |
 | 20240425         | Remove support for R81 and lower versions                                             |
 | 20240515         | Add support for requiring use instance metadata service version 2 (IMDSv2) only       |
+| 20231127         | Add support for parameter admin shell                                                 |
+| 20231012         | Update AWS Terraform provider version to 5.20.1                                       |
+| 20230923         | Add support for C5d instance type                                                     |
+| 20230914         | Add support for maintenance mode password                                             |
+| 20230829         | Change default Check Point version to R81.20                                          |
+| 20230806         | Add support for c6in instance type                                                    | 
+| 20221226         | Support ASG Launch Template instead of Launch Configuration                           |
+| 20221123         | R81.20 version support                                                                |
+| 20220606         | New instance type support                                                             |
+| 20210309         | First release of Check Point Quick Start Auto Scaling Master Terraform module for AWS |
 
 ## License
 

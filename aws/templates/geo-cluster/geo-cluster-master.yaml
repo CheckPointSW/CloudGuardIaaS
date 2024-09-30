@@ -25,6 +25,7 @@ Metadata:
           - EnableInstanceConnect
           - GatewayPredefinedRole
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -81,6 +82,8 @@ Metadata:
         default: Existing IAM role name
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Gateways version & license
       Shell:
@@ -151,7 +154,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -309,17 +312,18 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Description: The license to install on the Security Gateways.
     Type: String
     Default: R81.10-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -447,6 +451,7 @@ Resources:
         EnableInstanceConnect: !Ref EnableInstanceConnect
         GatewayPredefinedRole: !Ref GatewayPredefinedRole
         TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
         GatewayVersion: !Ref GatewayVersion
         Shell: !Ref Shell
         GatewayPasswordHash: !Ref GatewayPasswordHash

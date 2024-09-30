@@ -5,7 +5,8 @@ project                               = "PLEASE ENTER PROJECT ID"               
 # --- Check Point Deployment ---
 prefix                                = "PLEASE ENTER PREFIX"                         # "chkp-tf-ha"
 license                               = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8110-gw-byol-cluster-335-985-v20220126"
+image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8120-gw-byol-cluster-631-991001335-v20230622"
+os_version                            = "PLEASE ENTER GAIA OS VERSION"                # "R8120"
 
 # --- Instances Configuration ---
 region                                = "PLEASE ENTER REGION"                         # "us-central1"
@@ -23,6 +24,7 @@ sic_key                               = "PLEASE ENTER A SIC KEY"                
 generate_password                     = "PLEASE ENTER true or false"                  # false
 allow_upload_download                 = "PLEASE ENTER true OR false"                  # true
 admin_shell                           = "PLEASE ENTER ADMIN SHELL"                    # "/etc/cli.sh"
+maintenance_mode_password_hash        = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Quick connect to Smart-1 Cloud ---
 smart_1_cloud_token_a                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""

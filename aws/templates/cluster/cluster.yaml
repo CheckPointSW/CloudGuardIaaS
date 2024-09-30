@@ -23,6 +23,7 @@ Metadata:
           - EnableInstanceConnect
           - GatewayPredefinedRole
           - TerminationProtection
+          - MetaDataToken
       - Label:
           default: Check Point Settings
         Parameters:
@@ -75,6 +76,8 @@ Metadata:
         default: Existing IAM role name
       TerminationProtection:
         default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
       GatewayVersion:
         default: Version & license
       Shell:
@@ -127,7 +130,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6in.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -285,16 +288,17 @@ Parameters:
     AllowedValues:
       - true
       - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
   GatewayVersion:
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
-      - R80.40-BYOL
-      - R80.40-PAYG-NGTP
-      - R80.40-PAYG-NGTX
-      - R81-BYOL
-      - R81-PAYG-NGTP
-      - R81-PAYG-NGTX
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
@@ -390,6 +394,7 @@ Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   EmptyHostName: !Equals [!Ref GatewayHostname, '']
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   ClusterReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
@@ -520,8 +525,12 @@ Resources:
       SubnetId: !Ref PrivateSubnet
   MemberAInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberAExternalInterface, MemberAInternalInterface]
+    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, MemberAGatewayLaunchTemplate]
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberAGatewayLaunchTemplate
+        Version: !GetAtt MemberAGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-A]]
@@ -537,46 +546,14 @@ Resources:
             - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
               - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref MemberAExternalInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref MemberAInternalInterface
-      IamInstanceProfile: !Ref ClusterInstanceProfile
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
-
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
-            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberBExternalInterface, MemberBInternalInterface]
+    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, MemberBGatewayLaunchTemplate]
     Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberBGatewayLaunchTemplate
+        Version: !GetAtt MemberBGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
           Value: !Join ['-', [!Ref GatewayName, Member-B]]
@@ -592,41 +569,92 @@ Resources:
             - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
               - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
               - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
-      ImageId: !GetAtt AMI.Outputs.ImageId
-      InstanceType: !Ref GatewayInstanceType
-      BlockDeviceMappings:
-        - DeviceName: '/dev/xvda'
-          Ebs:
-            Encrypted: !If [EncryptedVolume, true, false]
-            KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
-            VolumeType: !Ref VolumeType
-            VolumeSize: !Ref VolumeSize
-      KeyName: !Ref KeyName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          NetworkInterfaceId: !Ref MemberBExternalInterface
-        - DeviceIndex: 1
-          NetworkInterfaceId: !Ref MemberBInternalInterface
-      IamInstanceProfile: !Ref ClusterInstanceProfile
-      DisableApiTermination: !Ref TerminationProtection
-      UserData:
-        'Fn::Base64':
-          !Join
-          - |+
+  MemberAGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberAExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberAInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
 
-          - - '#cloud-config'
-            - 'runcmd:'
-            - '  - |'
-            - '    set -e'
-            - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
-            - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
-            - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
-            - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
-            - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-            - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-            - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-            - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['.', !Select [0, !Split ['-', !Ref GatewayVersion]]]]}]
-            - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230923\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  MemberBGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberBExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberBInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20230923\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
   ClusterPublicAddress:
     Type: AWS::EC2::EIP
     Properties:

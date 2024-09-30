@@ -25,7 +25,12 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The autoscaling (MIG) image name (e.g. check-point-r8110-gw-byol-mig-335-985-v20220126). You can choose the desired mig image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py"
+  description = "The autoscaling (MIG) image name (e.g. check-point-r8120-gw-byol-mig-123-456-v12345678). You can choose the desired mig image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py"
+}
+variable "os_version" {
+  type = string
+  description = "GAIA OS version"
+  default = "R8120"
 }
 variable "management_nic" {
   type = string
@@ -42,9 +47,19 @@ variable "configuration_template_name" {
   description = "Specify the provisioning configuration template name (for autoprovisioning). (Please enter a valid autoprovisioing configuration template name including ascii characters only)"
   default = "tf-asg-autoprov-tmplt"
 }
+variable "generate_password" {
+  type = bool
+  description = "Automatically generate an administrator password"
+  default = false
+}
 variable "admin_SSH_key" {
   type = string
   description = "(Optional) The SSH public key for SSH authentication to the MIG instances. Leave this field blank to use all project-wide pre-configured SSH keys."
+  default = ""
+}
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
   default = ""
 }
 variable "network_defined_by_routes" {

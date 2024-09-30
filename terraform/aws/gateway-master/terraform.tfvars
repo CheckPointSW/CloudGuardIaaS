@@ -12,7 +12,7 @@ subnets_bit_length = 8
 
 // --- EC2 Instance Configuration ---
 gateway_name = "Check-Point-Gateway-tf"
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 key_name = "publickey"
 allocate_and_associate_eip = true
 volume_size = 100

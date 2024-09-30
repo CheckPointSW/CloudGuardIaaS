@@ -7,7 +7,7 @@ provider "aws" {
 module "amis" {
   source = "../modules/amis"
   version_license = var.gateway_version
-  amis_url = local.is_gwlb_ami == true ? "https://cgi-cfts.s3.amazonaws.com/gwlb/amis-gwlb.yaml" : "https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml"
+  amis_url = "https://cgi-cfts-staging.s3.amazonaws.com/utils/amis.yaml"
 
 }
 
@@ -91,28 +91,28 @@ resource "aws_autoscaling_group" "asg" {
   health_check_type = "ELB"
 
   tag {
-      key = "Name"
-      value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.gateway_name)
-      propagate_at_launch = true
+    key = "Name"
+    value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.gateway_name)
+    propagate_at_launch = true
   }
 
   tag {
-      key = "x-chkp-tags"
-      value = format("management=%s:template=%s:ip-address=%s", var.management_server, var.configuration_template, var.gateways_provision_address_type)
-      propagate_at_launch = true
+    key = "x-chkp-tags"
+    value = format("management=%s:template=%s:ip-address=%s", var.management_server, var.configuration_template, var.gateways_provision_address_type)
+    propagate_at_launch = true
   }
 
   tag {
-      key = "x-chkp-topology"
-      value = "internal"
-      propagate_at_launch = true
+    key = "x-chkp-topology"
+    value = "internal"
+    propagate_at_launch = true
   }
 
   tag {
-      key = "x-chkp-solution"
-      value = "autoscale_gwlb"
-      propagate_at_launch = true
-    }
+    key = "x-chkp-solution"
+    value = "autoscale_gwlb"
+    propagate_at_launch = true
+  }
 
   dynamic "tag" {
     for_each = var.instances_tags

@@ -785,7 +785,7 @@
             "name": "installationType",
             "type": "Microsoft.Common.DropDown",
             "label": "Installation type",
-            "visible": "[or(equals(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'))]",
+            "visible": "[or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'))]",
             "defaultValue": "Gateway only",
             "toolTip": "Select the type of deployment",
             "constraints": {
@@ -831,7 +831,7 @@
           {
             "name": "standaloneValidation",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20')))))]",
+            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20')))))]",
             "options": {
               "icon": "Error",
               "text": "Standalone deployment is ONLY supported for CloudGuard versions R81.10 and R81.20 Bring Your Own License."
@@ -877,7 +877,7 @@
             }
           },
           {
-            "visible": "[bool(basics('auth').sshPublicKey)]",
+             "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
@@ -1120,7 +1120,7 @@
             "label": "Quick connect to Smart-1 Cloud",
             "defaultValue": "Yes",
             "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
-            "constraints": {
+             "constraints": {
               "allowedValues": [
                 {
                   "label": "Yes",
@@ -1157,7 +1157,7 @@
               "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
             },
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
-          }
+            }
         ]
       },
       {
@@ -1347,7 +1347,7 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]"
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]"
     }
   }
 }
