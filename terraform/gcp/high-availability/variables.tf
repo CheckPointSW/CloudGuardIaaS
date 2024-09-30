@@ -32,6 +32,7 @@ variable "os_version" {
   description = "GAIA OS version"
   default = "R8120"
 }
+
 # --- Instances Configuration ---
 data "google_compute_regions" "available_regions" {
 }
@@ -129,7 +130,6 @@ resource "null_resource" "validate_both_tokens" {
 resource "null_resource" "validate_different_tokens" {
   count = var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_a == var.smart_1_cloud_token_b ? "To connect to Smart-1 Cloud, you must provide two different tokens" : 0
 }
-
 # --- Networking ---
 variable "cluster_network_cidr" {
   type = string

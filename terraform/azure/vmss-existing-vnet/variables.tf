@@ -242,7 +242,10 @@ variable "storage_account_additional_ips" {
   type = list(string)
   description = "IPs/CIDRs that are allowed access to the Storage Account"
   default = []
-}//********************* Load Balancers Variables **********************//
+}
+
+//********************* Load Balancers Variables **********************//
+
 variable "deployment_mode" {
   description = "The type of the deployment, can be 'Standard' for both load balancers or 'External' for external load balancer or 'Internal for internal load balancer"
   type = string
@@ -391,4 +394,9 @@ variable "enable_floating_ip" {
   description = "Indicates whether the load balancers will be deployed with floating IP."
   type = bool
   default = false
+}
+
+variable "nsg_id" {
+  description = "NSG ID - Optional - if empty use default NSG"
+  default = ""
 }

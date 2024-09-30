@@ -13,9 +13,9 @@
       "type": "string",
       "allowedValues": [
         "R80.40 - Bring Your Own License",
-        "R81 - Bring Your Own License",
+        "R81 - Bring Your Own License"
       ],
-      "defaultValue": "R81.20 - Bring Your Own License",
+      "defaultValue": "R81 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }

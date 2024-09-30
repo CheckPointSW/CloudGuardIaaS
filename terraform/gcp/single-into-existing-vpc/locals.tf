@@ -58,6 +58,7 @@ locals {
   // Will fail if management_only and payg
   is_management_only = var.installationType == "Management only"
   is_license_payg = var.license == "PAYG" 
-  validation_massage = "Cannot use 'Management only' installation type with 'Payg' license."
-  _= regex("^$",local.is_management_only && local.is_license_payg ? local.validation_massage : "") 
+  validation_message = "Cannot use 'Management only' installation type with 'PAYG' license."
+  _= regex("^$",local.is_management_only && local.is_license_payg ? local.validation_message : "") 
+
 }

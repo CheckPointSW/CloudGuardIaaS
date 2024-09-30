@@ -67,8 +67,8 @@
         "toolTip": "Token can be obtained by logging in to [https://portal.checkpoint.com/](https://portal.checkpoint.com/) –> INFINITY POLICY -> CLOUD -> Profiles",
         "constraints": {
           "required": true,
-          "regex": "^cp-(([a-z0-9A-Z-]{72,72})|([a-z0-9A-Z-]{75,75}))$",
-          "validationMessage": "Token should begin with 'cp-' and must be 75 or 78 characters long"
+          "regex": "^cp-[a-z0-9A-Z-]{72,72}$",
+          "validationMessage": "Token should begin with 'cp-' and must be 75 characters long"
         },
         "options": {
           "hideConfirmation": false
