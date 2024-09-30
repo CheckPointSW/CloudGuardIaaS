@@ -199,7 +199,6 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | enable_monitoring | Enable Stackdriver monitoring | bool | true/false | false | no |
 
 
-
 ## Outputs
 | Name  | Description |
 | ------------- | ------------- |
@@ -214,6 +213,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | UDP_firewall_rules_name  | If enable - the UDP firewall rules name, otherwise, an empty list.  |
 | SCTP_firewall_rules_name  | If enable - the SCTP firewall rules name, otherwise, an empty list.  |
 | ESP_firewall_rules_name  | If enable - the ESP firewall rules name, otherwise, an empty list.  |
+
 
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

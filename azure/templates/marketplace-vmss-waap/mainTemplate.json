@@ -51,7 +51,7 @@
     "waapAgentToken": {
       "type": "securestring",
       "minLength": 75,
-      "maxLength": 78,
+      "maxLength": 75,
       "metadata": {
         "description": "Infinity Next Agent Token"
       }
@@ -73,7 +73,6 @@
     "availabilityZonesNum": {
       "type": "int",
       "allowedValues": [
-        0,
         1,
         2,
         3
@@ -388,7 +387,7 @@
   },
   "variables": {
     "templateName": "waap_vmss",
-    "templateVersion": "20211028",
+    "templateVersion": "20210922",
     "location": "[parameters('location')]",
     "osVersion": "R8040",
     "isBlink": true,

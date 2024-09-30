@@ -72,7 +72,7 @@ This solution uses the following modules:
 
 ### terraform.tfvars variables:
  | Name          | Description   | Type          | Allowed values | Default | 
- | ------------- | ------------- | ------------- | -------------  | -------------  |
+ | ------------- |-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| ------------- | -------------  | -------------  |
  | **client_secret** | The client secret of the Service Principal used to deploy the solution | string | | n/a
  |  |  |  |  |  |
  | **client_id** | The client ID of the Service Principal used to deploy the solution | string | | n/a
@@ -97,7 +97,7 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **backend_subnet_name** | Specifies the name of the internal subnet | string | The exact name of the existing internal subnet | n/a
  |  |  |  |  |  |
- | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix| string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 | n/a
+ | **backend_lb_IP_address** | Is a whole number that can be represented as a binary integer with no more than the number of digits remaining in the address after the given prefix | string | Starting from 5-th IP address in a subnet. For example: subnet - 10.0.1.0/24, backend_lb_IP_address = 4 , the LB IP is 10.0.1.4 | n/a
  |  |  |  |  |  |
  | **admin_password** | The password associated with the local administrator account on each cluster member | string | Password must have 3 of the following: 1 lower case character, 1 upper case character, 1 number, and 1 special character | n/a
  |  |  |  |  |  |
@@ -151,6 +151,8 @@ This solution uses the following modules:
  |  |  |  |  |  |
  | **maintenance_mode_password_hash** | Maintenance mode password hash, relevant only for R81.20 and higher versions, to generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here  | string | | n/a 
  |  |  |  |  |  |
+ | **nsg_id** | Optional ID for a Network Security Group that already exists in Azure, if not provided, will create a default NSG                                                                                         | string | Existing NSG resource ID | ""
+ |  |                                                                                                                                                                                                           |  |  |  |
  | **add_storage_account_ip_rules** | Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, if false then accses will be allowed from all networks | boolean | true; <br/>false; |  false
  |  |  |  |  |  |
  | **storage_account_additional_ips** | IPs/CIDRs that are allowed access to the Storage Account | list(string) | A list of valid IPs and CIDRs | []
@@ -200,7 +202,8 @@ enable_custom_metrics = true
     deployment_mode                 = "Standard"
     admin_shell                     = "/etc/cli.sh"
     serial_console_password_hash    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-	maintenance_mode_password_hash  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    maintenance_mode_password_hash  = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    nsg_id                          = ""
     add_storage_account_ip_rules    = false
     storage_account_additional_ips  = []
     
@@ -212,15 +215,14 @@ enable_custom_metrics = true
 
 ## Known limitations
 
-1.  Deploy the VMSS with External load balancer only (Inbound inspection only) is not supported
-2.  Deploy the VMSS with Internal load balancer only (Outbound and E-W inspection only) is not supported
-
 ## Revision History
 
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20240613 | - Updated Azure Terraform provider version <br> - Cosmetic fixes & default values <br> - Added option to limit storage account access by specify allowed sourcess <br> - Updated diskSizeGB <br> - Added validation for os_version & os_offer |
+| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20221124 | - Added R81.20 support   <br/> - Upgraded azurerm provider |

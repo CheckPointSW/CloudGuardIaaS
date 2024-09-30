@@ -1,6 +1,6 @@
 # Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure
 
-This Terraform module deploys Check Point CloudGuard Network Security vWAN NVA solution into an existing vWAN Hub in Azure.
+This Terraform module deploys Check Point CloudGuard Network Security Virtual WAN NVA solution into an existing vWAN Hub in Azure.
 As part of the deployment the following resources are created:
 - Resource groups
 - Azure Managed Application:
@@ -77,7 +77,7 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
  |  |             |        |                                             |  |
  | **vwan-hub-name** | The name of the virtual WAN hub that will be created                       | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens                                                         | n/a                                                        |
  |  |             |        |                                             |  |
- | **vwan-hub-resource-group** | The vWAN hub resource group name                                           | string | | n/a                                              |
+ | **vwan-hub-resource-group** | The virtual WAN hub resource group name                                           | string | | n/a                                              |
  |  |             |        |                                             |  |
  | **managed-app-name** | The name of the managed application that will be created                   | string | The name must begin with a letter or number, end with a letter, number or underscore, and may contain only letters, numbers, underscores, periods, or hyphens | "tf-vwan-managed-app-nva"                                                        |
  |  |             |        |                                             |  |
@@ -161,6 +161,7 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description       |
 |------------------|-------------------|
+| 20240613 | Cosmetic fixes & default values |
 | 20240228        | Added public IP for ingress support  |                                                              | |
 | 20231226         | First release of Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure | |
 

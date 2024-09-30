@@ -265,7 +265,6 @@ In order to check the template version refer to the [sk116585](https://supportce
 | 20230921         | Added single-into-new-vpc template. |
 |                  |                                     |
 
-
 ## Authors
 
 
