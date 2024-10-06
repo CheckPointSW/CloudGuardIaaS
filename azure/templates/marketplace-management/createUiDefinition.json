@@ -225,7 +225,7 @@
             }
           },
           {
-             "visible": "[bool(basics('auth').sshPublicKey)]",
+            "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
