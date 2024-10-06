@@ -9,11 +9,8 @@
 # and at the beginning of the deprovisioning process.
 # Important: This is a placeholder script, and you should implement __add and __delete functions.
 
-import collections
 import os
-import subprocess
 import sys
-import traceback
 import logging
 from logging.handlers import RotatingFileHandler
 

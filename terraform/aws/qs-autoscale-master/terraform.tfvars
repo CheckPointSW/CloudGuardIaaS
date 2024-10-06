@@ -31,7 +31,7 @@ service_port = "80"
 admin_shell = "/etc/cli.sh"
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 gateways_min_group_size = 2
 gateways_max_group_size = 8
 gateway_version = "R81.20-BYOL"

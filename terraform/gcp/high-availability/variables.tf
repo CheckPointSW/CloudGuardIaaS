@@ -25,7 +25,12 @@ variable "license" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+}
+variable "os_version" {
+  type = string
+  description = "GAIA OS version"
+  default = "R8120"
 }
 
 # --- Instances Configuration ---
@@ -101,6 +106,11 @@ variable "admin_shell" {
   type = string
   description = "Change the admin shell to enable advanced command line configuration."
   default = "/etc/cli.sh"
+}
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
+  default = ""
 }
 # --- Quick connect to Smart-1 Cloud ---
 variable "smart_1_cloud_token_a" {

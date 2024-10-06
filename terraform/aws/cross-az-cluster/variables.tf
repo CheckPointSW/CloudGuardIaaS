@@ -44,7 +44,7 @@ variable "gateway_name" {
 variable "gateway_instance_type" {
   type = string
   description = "The instance type of the Security Gateways"
-  default = "c5.xlarge"
+  default = "c6in.xlarge"
 }
 module "validate_instance_type" {
   source = "../modules/common/instance_type"

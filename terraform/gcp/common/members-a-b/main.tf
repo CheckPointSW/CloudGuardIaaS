@@ -39,6 +39,8 @@ module "member_a" {
   secondary_cluster_address_name = var.secondary_cluster_address_name
   smart_1_cloud_token_a = var.smart_1_cloud_token_a
   smart_1_cloud_token_b = var.smart_1_cloud_token_b
+  os_version = var.os_version
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }
 
 module "member_b" {
@@ -82,4 +84,6 @@ module "member_b" {
   secondary_cluster_address_name = var.secondary_cluster_address_name
   smart_1_cloud_token_a = var.smart_1_cloud_token_a
   smart_1_cloud_token_b = var.smart_1_cloud_token_b
+  os_version = var.os_version
+  maintenance_mode_password_hash = var.maintenance_mode_password_hash
 }

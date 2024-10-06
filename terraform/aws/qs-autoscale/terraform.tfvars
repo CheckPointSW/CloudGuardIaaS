@@ -21,7 +21,7 @@ admin_shell = "/etc/cli.sh"
 
 // --- Check Point CloudGuard Network Security Gateways Auto Scaling Group Configuration ---
 gateways_subnets = ["subnet-123b5678", "subnet-123a4567"]
-gateway_instance_type = "c5.xlarge"
+gateway_instance_type = "c6in.xlarge"
 gateways_min_group_size = 2
 gateways_max_group_size = 8
 gateway_version = "R81.20-BYOL"

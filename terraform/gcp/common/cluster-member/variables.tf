@@ -31,7 +31,12 @@ variable "disk_type" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+}
+variable "os_version" {
+  type = string
+  description = "GAIA OS version"
+  default = "R8120"
 }
 variable "cluster_network" {
   type = list(string)
@@ -156,6 +161,11 @@ variable "smart_1_cloud_token_a" {
 variable "smart_1_cloud_token_b" {
   type = string
   description ="(Optional) Smart-1 cloud token for member B to connect this Gateway to Check Point's Security Management as a Service"
+  default = ""
+}
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
   default = ""
 }
 variable "management_network" {

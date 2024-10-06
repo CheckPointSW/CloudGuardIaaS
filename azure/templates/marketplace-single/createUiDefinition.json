@@ -785,7 +785,7 @@
             "name": "installationType",
             "type": "Microsoft.Common.DropDown",
             "label": "Installation type",
-            "visible": "[or(equals(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'))]",
+            "visible": "[or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'))]",
             "defaultValue": "Gateway only",
             "toolTip": "Select the type of deployment",
             "constraints": {
@@ -831,7 +831,7 @@
           {
             "name": "standaloneValidation",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20')))))]",
+            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20')))))]",
             "options": {
               "icon": "Error",
               "text": "Standalone deployment is ONLY supported for CloudGuard versions R81.10 and R81.20 Bring Your Own License."

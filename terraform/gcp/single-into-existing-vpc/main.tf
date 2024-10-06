@@ -192,7 +192,7 @@ resource "google_compute_instance" "gateway" {
     sicKey = ""
     allowUploadDownload = var.allowUploadDownload
     templateName = "single_tf"
-    templateVersion = "20230109"
+    templateVersion = "20230910"
     templateType = "terraform"
     hasInternet = "true"
     enableMonitoring = var.enableMonitoring
@@ -211,6 +211,8 @@ resource "google_compute_instance" "gateway" {
     name = ""
     zoneConfig = ""
     region = ""
+    os_version = var.os_version
+    maintenance_mode_password_hash = var.maintenance_mode_password_hash
   })
 }
 resource "google_compute_address" "static" {

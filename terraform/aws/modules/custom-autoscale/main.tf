@@ -43,9 +43,9 @@ resource "aws_autoscaling_group" "servers_group" {
   target_group_arns = local.provided_target_groups_condition ? [var.servers_target_groups] : []
 
   tag {
-      key = "Name"
-      value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.server_name)
-      propagate_at_launch = true 
+    key = "Name"
+    value = format("%s%s", var.prefix != "" ? format("%s-", var.prefix) : "", var.server_name)
+    propagate_at_launch = true 
   }
 }
 resource "aws_autoscaling_policy" "scale_up_policy" {

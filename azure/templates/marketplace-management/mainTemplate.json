@@ -269,7 +269,7 @@
   },
   "variables": {
     "templateName": "management",
-    "templateVersion": "20240716",
+    "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
@@ -868,7 +868,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2022-09-01').primaryEndpoints.blob]"
+            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-01-01').primaryEndpoints.blob]"
           }
         },
         "hardwareProfile": {

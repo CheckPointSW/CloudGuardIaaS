@@ -176,6 +176,11 @@ resource "random_id" "randomId" {
     byte_length = 8
 }
 resource "azurerm_storage_account" "vm-boot-diagnostics-storage" {
+    blob_properties {
+      delete_retention_policy {
+        days = 7
+      }
+    }
     name = "diag${random_id.randomId.hex}"
     resource_group_name = module.common.resource_group_name
     location = module.common.resource_group_location

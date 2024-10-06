@@ -5,11 +5,14 @@ project                           = "PLEASE ENTER PROJECT ID"                   
 # --- Check Point---
 prefix                            = "PLEASE ENTER PREFIX"                         # "chkp-tf-mig"
 license                           = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                        = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8110-gw-byol-mig-335-985-v20220126"
+image_name                        = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8120-gw-byol-mig-631-991001335-v20230622"
+os_version                        = "PLEASE ENTER GAIA OS VERSION"                # "R8120"
 management_nic                    = "PLEASE ENTER MANAGEMENT INTERFACE"           # "Ephemeral Public IP (eth0)"
 management_name                   = "PLEASE ENTER MANAGEMENT NAME"                # "tf-checkpoint-management"
 configuration_template_name       = "PLEASE ENTER CONFIGURATION TEMPLATE NAME"    # "tf-asg-autoprov-tmplt"
+generate_password                 = "PLEASE ENTER true or false"                  # false
 admin_SSH_key                     = "PLEASE ENTER ADMIN SSH KEY"                  # "ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxx imported-openssh-key"
+maintenance_mode_password_hash    = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 network_defined_by_routes         = "PLEASE ENTER true OR false"                  # true
 admin_shell                       = "PLEASE ENTER ADMIN SHELL"                    # "/etc/cli.sh"
 allow_upload_download             = "PLEASE ENTER true OR false"                  # true

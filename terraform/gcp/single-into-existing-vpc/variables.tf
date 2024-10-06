@@ -17,6 +17,11 @@ variable "image_name" {
   type = string
   description = "The single gateway and management image name.  You can choose the desired image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py"
 }
+variable "os_version" {
+  type = string
+  description = "GAIA OS version"
+  default = "R8120"
+}
 variable "installationType" {
   type = string
   description = "Installation type and version"
@@ -145,6 +150,11 @@ variable "admin_shell" {
 variable "admin_SSH_key" {
   type = string
   description = "(Optional) The SSH public key for SSH authentication to the template instances. Leave this field blank to use all project-wide pre-configured SSH keys."
+  default = ""
+}
+variable "maintenance_mode_password_hash" {
+  description = "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+  type = string
   default = ""
 }
 variable "sicKey" {
