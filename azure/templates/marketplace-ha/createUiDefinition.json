@@ -1199,7 +1199,7 @@
             "label": "Quick connect to Smart-1 Cloud",
             "defaultValue": "Yes",
             "toolTip": "Automatically connect this Cluster to Smart-1 Cloud - Check Point's Security Management as a Service",
-             "constraints": {
+            "constraints": {
               "allowedValues": [
                 {
                   "label": "Yes",
@@ -1238,16 +1238,16 @@
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           },
           {
-              "name": "Smart1CloudTokenB",
-              "type": "Microsoft.Common.TextBox",
-              "label": "Smart-1 Cloud Token Member B",
-              "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
-              "constraints": {
-                "required": true,
-                "regex": "[\\S\\s]{5,}",
-                "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
-              },
-              "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
+            "name": "Smart1CloudTokenB",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Smart-1 Cloud Token Member B",
+            "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
+            "constraints": {
+              "required": true,
+              "regex": "[\\S\\s]{5,}",
+              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+            },
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }
         ]
       },

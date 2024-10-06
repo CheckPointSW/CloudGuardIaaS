@@ -661,9 +661,6 @@
     {
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
-      "properties": {
-        "minimalTlsVersion": "TLS1_2"
-      },
       "apiVersion": "2021-04-01",
       "location": "[variables('location')]",
       "sku": {

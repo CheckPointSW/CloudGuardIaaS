@@ -238,7 +238,7 @@
       "R80.40 - Pay As You Go (NGTX)": "NGTX",
       "R81 - Bring Your Own License": "BYOL",
       "R81 - Pay As You Go (NGTP)": "NGTP",
-      "R81 - Pay As You Go (NGTX)": "NGTX",
+      "R81 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
