@@ -24,15 +24,8 @@ To deploy a specific Azure image, adjust the image version during the manual dep
 1. Determine the desired image version - 
    - Visit  [sk132192 - CloudGuard Network Security for Azure - Latest Updates](https://support.checkpoint.com/results/sk/sk132192#:~:text=CloudGuard%20for%20Azure%20Gateway%20Images%20history) >
    Images History sections.
-   - Find the version of the desired image and change it as follows:
-   	  
-	  **Examples:**
-	  
-	  The version on the SK - **R81.10-335.1498**  
-	  Converted for the Azure template -  **8110.900335.1498**
-	
-	  The version on the SK - **R81-335.883**  
-      Converted for the Azure template -  **8100.900335.0883**
+   - Find the version of the desired image under "Marketplace Image version"
+
 
 2. In the "mainTemplate.json" file, change the value of the **“version”** parameter from “latest” to the version you want to deploy. This must be done under the version type of image you want to deploy (sg-byol, sg-ngtp, etc.)
 	
