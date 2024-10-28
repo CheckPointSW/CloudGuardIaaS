@@ -75,6 +75,10 @@
                 {
                   "label": "R81.20",
                   "value": "R81.20"
+                },
+                {
+                  "label": "R82",
+                  "value": "R82"
                 }
               ]
             }
@@ -149,6 +153,35 @@
             "imageReference": {
               "publisher": "checkpoint",
               "offer": "check-point-cg-r8120",
+              "sku": "mgmt-byol"
+            },
+            "count": 1
+          },
+          {
+            "name": "R82vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size. Minimum of 16 cores and 64 GB RAM is required.",
+            "recommendedSizes": [
+              "Standard_DS15_v2",
+              "Standard_DS5_v2"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "checkpoint",
+              "offer": "check-point-cg-r82",
               "sku": "mgmt-byol"
             },
             "count": 1
@@ -608,7 +641,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8120vmSizeUiBYOL)]",
+      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R82vmSizeUiBYOL)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",

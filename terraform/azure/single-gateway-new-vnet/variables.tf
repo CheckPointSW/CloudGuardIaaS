@@ -103,7 +103,8 @@ locals { // locals for 'vm_os_offer' allowed values
   os_version_allowed_values = [
     "R81",
     "R8110",
-    "R8120"
+    "R8120",
+    "R82"
   ]
   // will fail if [var.os_version] is invalid:
   validate_os_version_value = index(local.os_version_allowed_values, var.os_version)
@@ -115,7 +116,7 @@ variable "vm_os_sku" {
 }
 
 variable "vm_os_offer" {
-  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r81, check-point-cg-r8110, check-point-cg-r8120"
+  description = "The name of the image offer to be deployed.Choose from: check-point-cg-r81, check-point-cg-r8110, check-point-cg-r8120, check-point-cg-r82"
   type = string
 }
 
@@ -123,7 +124,8 @@ locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r81",
     "check-point-cg-r8110",
-    "check-point-cg-r8120"
+    "check-point-cg-r8120",
+    "check-point-cg-r82"
   ]
   // will fail if [var.vm_os_offer] is invalid:
   validate_os_offer_value = index(local.vm_os_offer_allowed_values, var.vm_os_offer)
