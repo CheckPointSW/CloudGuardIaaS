@@ -13,7 +13,8 @@
       "type": "string",
       "allowedValues": [
         "R81.10 - Bring Your Own License",
-        "R81.20 - Bring Your Own License"
+        "R81.20 - Bring Your Own License",
+        "R82 - Bring Your Own License"
       ],
       "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
@@ -266,12 +267,14 @@
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
-      "R81.20 - Bring Your Own License": "BYOL"
+      "R81.20 - Bring Your Own License": "BYOL",
+      "R82 - Bring Your Own License": "BYOL"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R81.10 - Bring Your Own License": "R8110",
-      "R81.20 - Bring Your Own License": "R8120"
+      "R81.20 - Bring Your Own License": "R8120",
+      "R82 - Bring Your Own License": "R82"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "serialConsoleGeographies": {

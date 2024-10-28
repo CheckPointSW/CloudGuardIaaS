@@ -35,7 +35,8 @@
             "defaultValue": "R8120",
             "allowedValues": [
                 "R8110",
-                "R8120"
+                "R8120",
+                "R82"
             ],
             "type": "String",
             "metadata": {
@@ -200,7 +201,7 @@
                 "name": "vwan-app",
                 "product": "cp-vwan-managed-app",
                 "publisher": "checkpoint",
-                "version": "1.0.14"
+                "version": "1.0.15"
             },
             "properties": {
                 "managedResourceGroupId": "[variables('managedResourceGroupId')]",
