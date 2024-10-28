@@ -171,7 +171,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 |  |  |  |  |  |
 | image_name |The single gateway or management image name (e.g. check-point-r8120-gw-byol-single-631-991001335-v20230622 for gateway or check-point-r8120-byol-631-991001335-v20230621 for management). You can choose the desired gateway image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/single-byol/images.py).| string | N/A | N/A | yes |
 |  |  |  |  |  |
-| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120 | R8120 | yes |
+| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120;<br/> R82 | R8120 | yes |
 |  |  |  |  |  |
 | installationType | Installation type and version | string |Gateway only;<br/> Management only;<br/> Manual Configuration<br/>Gateway and Management (Standalone) |Gateway only|yes|
 |  |  |  |  |  |
@@ -253,6 +253,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20241027 |  Added R82 support |
+| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20230209 | Added Smart-1 Cloud support. |
