@@ -49,7 +49,7 @@ data "http" "image-versions" {
 }
 
 locals {
-      image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == substr(lower(var.os-version), 1, 4)])
+      image_versions = tolist([for version in jsondecode(data.http.image-versions.response_body).properties.availableVersions : version if substr(version, 0, 4) == substr(lower(length(var.os-version) > 3 ? var.os-version : "${var.os-version}00"), 1, 4)])
       routing_intent-internet-policy = {
         "name": "InternetTraffic",
         "destinations": [
@@ -115,7 +115,7 @@ resource "azurerm_managed_application" "nva" {
     name      = "vwan-app"
     product   = "cp-vwan-managed-app"
     publisher = "checkpoint"
-    version   = "1.0.14"
+    version   = "1.0.15"
   }
   parameter_values = jsonencode({
     location = {

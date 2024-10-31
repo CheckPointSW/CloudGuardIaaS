@@ -167,7 +167,7 @@ Please leave empty list for a protocol if you want to disable traffic for it.
 | prefix | (Optional) Resources name prefix. <br/> Note: resource name must not contain reserved words based on: sk40179.  | string | N/A | "chkp-tf-mig" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
 | image_name | The autoscaling (MIG) image name (e.g. check-point-r8120-gw-byol-mig-631-991001335-v20230622). You can choose the desired mig image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/autoscale-byol/images.py). | string | N/A | N/A | yes |
-| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120 | R8120 | yes |
+| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120;<br/> R82 | R8120 | yes |
 |  |  |  |  |  |
 | management_nic | Management Interface - Autoscaling Security Gateways in GCP can be managed by an ephemeral public IP or using the private IP of the internal interface (eth1). | string | Ephemeral Public IP (eth0) <br/> - Private IP (eth1) | "Ephemeral Public IP (eth0)" | no |
 | management_name | The name of the Security Management Server as appears in autoprovisioning configuration. (Please enter a valid Security Management name including lowercase letters, digits and hyphens only). | string | N/A | "checkpoint-management" | no |
@@ -220,6 +220,8 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
+| 20241027 |  Added R82 support |
+| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20230109 | Updated startup script to use cloud-config. |
