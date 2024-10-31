@@ -154,6 +154,10 @@ properties:
       - R81.20 Management only
       - R81.20 Manual Configuration
       - R81.20 Gateway and Management (Standalone)
+      - R82 Gateway only
+      - R82 Management only
+      - R82 Manual Configuration
+      - R82 Gateway and Management (Standalone)
   maintenanceMode:
     type: string
     pattern: ^([a-z0-9A-Z.]{12,300}|)$

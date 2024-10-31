@@ -15,7 +15,9 @@
         "R81.10 - Bring Your Own License",
         "R81.10 - Pay As You Go (MGMT25)",
         "R81.20 - Bring Your Own License",
-        "R81.20 - Pay As You Go (MGMT25)"
+        "R81.20 - Pay As You Go (MGMT25)",
+        "R82 - Bring Your Own License",
+        "R82 - Pay As You Go (MGMT25)"
       ],
       "defaultValue": "R81.20 - Bring Your Own License",
       "metadata": {
@@ -275,14 +277,18 @@
       "R81.10 - Bring Your Own License": "BYOL",
       "R81.10 - Pay As You Go (MGMT25)": "MGMT25",
       "R81.20 - Bring Your Own License": "BYOL",
-      "R81.20 - Pay As You Go (MGMT25)": "MGMT25"
+      "R81.20 - Pay As You Go (MGMT25)": "MGMT25",
+      "R82 - Bring Your Own License": "BYOL",
+      "R82 - Pay As You Go (MGMT25)": "MGMT25"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R81.10 - Bring Your Own License": "R8110",
       "R81.10 - Pay As You Go (MGMT25)": "R8110",
       "R81.20 - Bring Your Own License": "R8120",
-      "R81.20 - Pay As You Go (MGMT25)": "R8120"
+      "R81.20 - Pay As You Go (MGMT25)": "R8120",
+      "R82 - Bring Your Own License": "R82",
+      "R82 - Pay As You Go (MGMT25)": "R82"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "SerialConsoleGeographies": {

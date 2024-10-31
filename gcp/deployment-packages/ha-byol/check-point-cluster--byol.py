@@ -17,7 +17,8 @@ LICENCE_TYPE = 'cluster'
 
 VERSIONS = {
     'R81.10': 'r8110-gw',
-    'R81.20': 'r8120-gw'
+    'R81.20': 'r8120-gw',
+    'R82': 'r82-gw'
 }
 
 TEMPLATE_NAME = 'cluster'

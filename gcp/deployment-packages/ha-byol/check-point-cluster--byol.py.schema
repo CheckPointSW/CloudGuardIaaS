@@ -73,6 +73,7 @@ properties:
     enum:
       - R81.10 Cluster
       - R81.20 Cluster
+      - R82 Cluster
   enableMonitoring:
     type: boolean
     default: False

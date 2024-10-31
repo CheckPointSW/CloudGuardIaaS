@@ -90,7 +90,7 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
  |  ||        |   |  |
  | **nva-rg-name** | The name of the resource group that will contain the NVA                          | string | Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period | tf-vwan-nva-rg |
  |  ||        |   |  |
- | **os-version** | The GAIA os version| string | "R8110" <br/> "R8120" | "R8120" |
+ | **os-version** | The GAIA os version| string | "R8110" <br/> "R8120" <br/> "R82" | "R8120" |
  |  ||        | |  |
  | **license-type** | The Check Point licence type      | string | "Security Enforcement (NGTP)" <br/> "Full Package (NGTX + S1C)" <br/> "Full Package Premium (NGTX + S1C++)"  | "Security Enforcement (NGTP)" |
  |  ||        |   |  |
@@ -169,11 +169,12 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
-| Template Version | Description    |
-|------------------|-----------------------------------------------------------------------------------------------|
-| 20240613 | Cosmetic fixes & default values |
-|  20240228         | Added public IP for ingress support                |                                                                                                   | |
-|  20231226         | First release of Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure                |                                                                                                   | |
+| Template Version | Description                                                                                         |
+|------------------|-----------------------------------------------------------------------------------------------------|
+| 20241028         | Added R82 version support                                                                           |
+| 20240613 | Cosmetic fixes & default values                                                                     |
+|  20240228         | Added public IP for ingress support                                                                 |                                                                                                   | |
+|  20231226         | First release of Check Point CloudGuard Network Security Virtual WAN Terraform deployment for Azure |                                                                                                   | |
 
 
 ## License
