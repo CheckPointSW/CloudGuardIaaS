@@ -138,7 +138,7 @@ locals { // locals for 'vm_os_offer' allowed values
   vm_os_offer_allowed_values = [
     "check-point-cg-r81",
     "check-point-cg-r8110",
-    "check-point-cg-r8120"
+    "check-point-cg-r8120",
     "check-point-cg-r82"
   ]
   // will fail if [var.vm_os_offer] is invalid:
