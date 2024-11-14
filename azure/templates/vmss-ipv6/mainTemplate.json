@@ -744,8 +744,6 @@
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
     },
     "vmssTags": "[if(equals(variables('mgmtIPaddress'), ''), variables('commomTags'), union(variables('commomTags'), variables('uniqueTags')))]",
-    "dnsZoneResourceId": "[parameters('dnsZoneResourceId')]",
-    "dnsZoneRecordSetName": "[parameters('dnsZoneRecordSetName')]",
     "numberOfRecordSetEntries": "20",
     "customMetrics": "[parameters('customMetrics')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
