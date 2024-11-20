@@ -597,7 +597,7 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ public-ip, !Ref MemberAPublicAddress ] ]
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberAPublicAddress, '' ] ] ]
               - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
               - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
         - Key: x-chkp-cluster-ips
@@ -619,7 +619,7 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ public-ip, !Ref MemberBPublicAddress ] ]
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberBPublicAddress, '' ] ] ]
               - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
               - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
         - Key: x-chkp-cluster-ips
