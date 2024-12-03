@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py enableCloudWatch=\"${EnableCloudWatch}\" sicKey=\"${SICKey}\" installationType=\"autoscale\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20240704\" templateName=\"autoscale\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" passwordHash=\"${PasswordHash}\" MaintenanceModePassword=\"${MaintenanceModePassword}\" bootstrapScript64=\"${BootstrapScript}\"
