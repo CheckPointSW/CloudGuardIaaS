@@ -1,0 +1,684 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server in a new VPC (__VERSION__)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - AvailabilityZones
+          - NumberOfAZs
+          - VPCCIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PublicSubnet3CIDR
+          - PublicSubnet4CIDR
+      - Label:
+          default: General Settings
+        Parameters:
+          - KeyName
+          - EnableVolumeEncryption
+          - VolumeSize
+          - VolumeType
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+          - AllowUploadDownload
+      - Label:
+          default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
+        Parameters:
+          - GatewayName
+          - GatewayInstanceType
+          - GatewaysMinSize
+          - GatewaysMaxSize
+          - GatewayVersion
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - GatewaySICKey
+          - CloudWatch
+          - ASN
+          - AdminEmail
+      - Label:
+          default: Check Point CloudGuard IaaS Security Management Server Configuration
+        Parameters:
+          - ManagementDeploy
+          - ManagementInstanceType
+          - ManagementVersion
+          - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
+          - ManagementPermissions
+          - ManagementPredefinedRole
+          - GatewaysBlades
+          - AdminCIDR
+          - GatewayManagement
+          - GatewaysAddresses
+      - Label:
+          default: Automatic Provisioning with Security Management Server Settings
+        Parameters:
+          - ControlGatewayOverPrivateOrPublicAddress
+          - ManagementServer
+          - ConfigurationTemplate
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of AZs
+      VPCCIDR:
+        default: VPC CIDR
+      PublicSubnet1CIDR:
+        default: Public Subnet 1
+      PublicSubnet2CIDR:
+        default: Public Subnet 2
+      PublicSubnet3CIDR:
+        default: Public Subnet 3
+      PublicSubnet4CIDR:
+        default: Public Subnet 4
+      KeyName:
+        default: Key name
+      EnableVolumeEncryption:
+        default: Enable environment volume encryption
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      AllowUploadDownload:
+        default: Allow upload & download
+      GatewayName:
+        default: GatewayName
+      GatewayInstanceType:
+        default: Gateways instance type
+      GatewaysMinSize:
+        default: Minimum group size
+      GatewaysMaxSize:
+        default: Maximum group size
+      GatewayVersion:
+        default: Gateways version & license
+      GatewayPasswordHash:
+        default: Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      GatewaySICKey:
+        default: SIC key
+      CloudWatch:
+        default: CloudWatch metrics
+      ASN:
+        default: BGP ASN
+      AdminEmail:
+        default: Email address
+      ManagementDeploy:
+        default: Deploy Management Server
+      ManagementInstanceType:
+        default: Instance type
+      ManagementVersion:
+        default: Version & license
+      ManagementPasswordHash:
+        default: Password hash
+      ManagementMaintenancePasswordHash:
+        default: Management Maintenance Password hash
+      ManagementPermissions:
+        default: IAM role
+      ManagementPredefinedRole:
+        default: Existing IAM role name
+      GatewaysBlades:
+        default: Default Blades
+      AdminCIDR:
+        default: Administrator addresses
+      GatewayManagement:
+        default: Manage Gateways
+      GatewaysAddresses:
+        default: Gateways addresses
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+Parameters:
+  AvailabilityZones:
+    Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    MinLength: 2
+  NumberOfAZs:
+    Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
+    Type: Number
+    Default: 2
+    MinValue: 2
+    MaxValue: 4
+  VPCCIDR:
+    Description: CIDR block for the VPC.
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet1CIDR:
+    Description: CIDR block for public subnet 1 located in the 1st Availability Zone. If you choose to deploy a Security Management Server it will be deployed in this subnet.
+    Type: String
+    Default: 10.0.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet2CIDR:
+    Description: CIDR block for public subnet 2 located in the 2nd Availability Zone.
+    Type: String
+    Default: 10.0.20.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet3CIDR:
+    Description: CIDR block for public subnet 3 located in the 3rd Availability Zone.
+    Type: String
+    Default: 10.0.30.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet4CIDR:
+    Description: CIDR block for public subnet 4 located in the 4th Availability Zone.
+    Type: String
+    Default: 10.0.40.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  EnableVolumeEncryption:
+    Description: Encrypt Environment instances volume with default AWS KMS key.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewayName:
+    Description: The name tag of the Security Gateway instances. (optional)
+    Type: String
+    Default: Check-Point-Gateway
+  GatewayInstanceType:
+    Description: The EC2 instance type for the Security Gateways.
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  GatewaysMinSize:
+    Description: The minimal number of Security Gateways.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GatewaysMaxSize:
+    Description: The maximal number of Security Gateways.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  GatewayVersion:
+    Description: The version and license to install on the Security Gateways.
+    Type: String
+    Default: R80.40-BYOL
+    AllowedValues:
+      - R80.40-BYOL
+      - R80.40-PAYG-NGTP
+      - R80.40-PAYG-NGTX
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]{8,}'
+    ConstraintDescription: Secure Internal Communication activation key should contain only alpha numeric characters and be at least 8 characters long.
+    NoEcho: true
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ASN:
+    Description: The organization Autonomous System Number (ASN) that identifies the routing domain for the Security Gateways.
+    Type: String
+    AllowedPattern: '^[0-9]+$'
+    Default: 65000
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+    ConstraintDescription: Must be a valid email address.
+  ManagementDeploy:
+    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementInstanceType:
+    Description: The EC2 instance type of the Security Management Server.
+    Type: String
+    Default: m5.xlarge
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  ManagementVersion:
+    Description: The version and license to install on the Security Management Server.
+    Type: String
+    Default: R80.40-BYOL
+    AllowedValues:
+      - R80.40-BYOL
+      - R80.40-PAYG
+  ManagementPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  ManagementPermissions:
+    Description: IAM role to attach to the instance profile.
+    Type: String
+    Default: Create with read-write permissions
+    AllowedValues:
+      - None (configure later)
+      - Use existing (specify an existing IAM role name)
+      - Create with assume role permissions (specify an STS role ARN)
+      - Create with read permissions
+      - Create with read-write permissions
+  ManagementPredefinedRole:
+    Description: A predefined IAM role to attach to the instance profile. Ignored if IAM role is not set to 'Use existing'.
+    Type: String
+    Default: ''
+  GatewaysBlades:
+    Description: Turn on the Intrusion Prevention System, Application Control, Anti-Virus and Anti-Bot Blades (these and additional Blades can be manually turned on or off later).
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
+  GatewayManagement:
+    Description: Select 'Over the internet' if any of the gateways you wish to manage are not directly accessed via their private IP address.
+    Type: String
+    Default: Locally managed
+    AllowedValues:
+      - Locally managed
+      - Over the internet
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
+    Type: String
+    Default: management-server
+    MinLength: 1
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
+    Type: String
+    Default: TGW-ASG-configuration
+    MinLength: 1
+    MaxLength: 30
+Conditions:
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
+  DeployManagement: !Equals [!Ref ManagementDeploy, true]
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/utils/vpc.yaml
+      Parameters:
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
+        NumberOfAZs: !Ref NumberOfAZs
+        VPCCIDR: !Ref VPCCIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
+        PublicSubnet3CIDR: !Ref PublicSubnet3CIDR
+        PublicSubnet4CIDR: !Ref PublicSubnet4CIDR
+        CreatePrivateSubnets: false
+  MainStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/autoscale/tgw-asg.yaml
+      Parameters:
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        GatewaysSubnets: !Join
+          - ','
+          - - !GetAtt VPCStack.Outputs.PublicSubnet1ID
+            - !GetAtt VPCStack.Outputs.PublicSubnet2ID
+            - !If [3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
+        KeyName: !Ref KeyName
+        EnableVolumeEncryption: !Ref EnableVolumeEncryption
+        VolumeType: !Ref VolumeType
+        VolumeSize: !Ref VolumeSize
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
+        AllowUploadDownload: !Ref AllowUploadDownload
+        GatewayName: !Ref GatewayName
+        GatewayInstanceType: !Ref GatewayInstanceType
+        GatewaysMinSize: !Ref GatewaysMinSize
+        GatewaysMaxSize: !Ref GatewaysMaxSize
+        GatewayVersion: !Ref GatewayVersion
+        GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
+        GatewaySICKey: !Ref GatewaySICKey
+        CloudWatch: !Ref CloudWatch
+        ASN: !Ref ASN
+        AdminEmail: !Ref AdminEmail
+        ManagementDeploy: !Ref ManagementDeploy
+        ManagementInstanceType: !Ref ManagementInstanceType
+        ManagementVersion: !Ref ManagementVersion
+        ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
+        ManagementPermissions: !Ref ManagementPermissions
+        ManagementPredefinedRole: !Ref ManagementPredefinedRole
+        GatewaysBlades: !Ref GatewaysBlades
+        AdminCIDR: !Ref AdminCIDR
+        GatewayManagement: !Ref GatewayManagement
+        GatewaysAddresses: !Ref GatewaysAddresses
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+Outputs:
+  ManagementName:
+    Description: The name that represents the Security Management Server.
+    Value: !Ref ManagementServer
+  ConfigurationTemplateName:
+    Description: The name that represents the configuration template. Configurations required to automatically provision the Gateways in the Auto Scaling Group, such as what Security Policy to install and which Blades to enable, will be placed under this template name.
+    Value: !Ref ConfigurationTemplate
+  ControllerName:
+    Description: The name that represents the controller. Configurations required to connect to your AWS environment, such as credentials and regions, will be placed under this controller name.
+    Value: !GetAtt MainStack.Outputs.ControllerName
+  ManagementPublicAddress:
+    Description: The public address of the management servers.
+    Value: !GetAtt MainStack.Outputs.ManagementPublicAddress
+    Condition: DeployManagement
+Rules:
+  GatewayAddressRule:
+    RuleCondition: !Equals [!Ref ManagementDeploy, 'true'] 
+    Assertions:  
+      - AssertDescription: "Gateway's netowrk to communicate with the Security Management Server must be provided"
+        Assert: !Not [ !Equals [!Ref GatewaysAddresses, '']]

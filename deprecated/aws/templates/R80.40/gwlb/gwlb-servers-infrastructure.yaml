@@ -1,0 +1,324 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy GWLB application servers infrastructure, it creates a Multi-AZ, multi-subnet VPC infrastructure for application servers, and Multi-AZ, multi-subnet VPC infrastructure for GWLBe, and optionally deploy Application Autoscale(__VERSION__)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Availability Zone Configuration
+        Parameters:
+          - AvailabilityZones
+          - NumberOfAZs
+      - Label:
+          default: Server Network Configuration
+        Parameters:
+          - VPCCIDR
+      - Label:
+          default: Server Network Configuration
+        Parameters:
+          - VPCCIDR
+          - ServersSubnet1CIDR
+          - ServersSubnet2CIDR
+          - ServersSubnet3CIDR
+          - ServersSubnet4CIDR
+          - GWLBeSubnet1CIDR
+          - GWLBeSubnet2CIDR
+          - GWLBeSubnet3CIDR
+          - GWLBeSubnet4CIDR
+      - Label:
+          default: GWLB Information
+        Parameters:
+          - SubnetTagsInboundCIDR
+          - SubnetTagsOutboundCIDR
+          - GWLBServiceName
+      - Label:
+          default: Web Servers Auto Scaling Group Configuration
+        Parameters:
+          - ServersDeploy
+          - AdminEmail
+          - ServerAMI
+          - KeyName
+          - GroupMinSize
+          - GroupMaxSize
+          - ALBProtocol
+          - ServicePort
+          - ServerInstanceType
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of Availability Zones
+      VPCCIDR:
+        default: Servers VPC CIDR
+      ServersSubnet1CIDR:
+        default: Servers subnet 1 CIDR
+      ServersSubnet2CIDR:
+        default: Servers subnet 2 CIDR
+      ServersSubnet3CIDR:
+        default: Servers subnet 3 CIDR
+      ServersSubnet4CIDR:
+        default: Servers subnet 4 CIDR
+      GWLBeSubnet1CIDR:
+        default: GWLBe subnet 1 CIDR
+      GWLBeSubnet2CIDR:
+        default: GWLBe subnet 2 CIDR
+      GWLBeSubnet3CIDR:
+        default: GWLBe subnet 3 CIDR
+      GWLBeSubnet4CIDR:
+        default: GWLBe subnet 4 CIDR
+      SubnetTagsInboundCIDR:
+        default: App cidr inbound tags
+      SubnetTagsOutboundCIDR:
+        default: App cidr Outbound tags
+      GWLBServiceName:
+        defsult: GWLB Service Name
+      ALBProtocol:
+        default: ALB Protocol
+      ServicePort:
+        default: Custom service port
+      ServersDeploy:
+        default: Deploy servers
+      ServerInstanceType:
+        default: Servers instance type
+      ServerAMI:
+        default: AMI ID
+      GroupMinSize:
+        default: Minimum group size
+      GroupMaxSize:
+        default: Maximum group size
+      AdminEmail:
+        default: Email address
+      KeyName:
+        default: Key name
+Parameters:
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved.'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    MinLength: 1
+  NumberOfAZs:
+    Description: Number of Availability Zones to use in the VPC. This must match your
+      selections in the list of Availability Zones parameter.
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 4
+  VPCCIDR:
+    Description: CIDR block for the Servers VPC.
+    Type: String
+    Default: 192.168.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  ServersSubnet1CIDR:
+    Description: CIDR block for the public DMZ subnet 1 located in Availability Zone 1.
+    Type: String
+    Default: 192.168.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  ServersSubnet2CIDR:
+    Description: CIDR block for the public DMZ subnet 2 located in Availability Zone 2.
+    Type: String
+    Default: 192.168.20.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  ServersSubnet3CIDR:
+    Description: CIDR block for the public DMZ subnet 3 located in Availability Zone 3.
+    Type: String
+    Default: 192.168.30.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  ServersSubnet4CIDR:
+    Description: CIDR block for the public DMZ subnet 4 located in Availability Zone 4.
+    Type: String
+    Default: 192.168.40.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet1CIDR:
+    Description: CIDR block for the GWLBe subnet 1 located in Availability Zone 1.
+    Type: String
+    Default: 192.168.70.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet2CIDR:
+    Description: CIDR block for the GWLBe subnet 2 located in Availability Zone 2.
+    Type: String
+    Default: 192.168.80.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet3CIDR:
+    Description: CIDR block for the GWLBe subnet 3 located in Availability Zone 3.
+    Type: String
+    Default: 192.168.90.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet4CIDR:
+    Description: CIDR block for the GWLBe subnet 4 located in Availability Zone 4.
+    Type: String
+    Default: 192.168.100.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  SubnetTagsInboundCIDR:
+    Description: Inbound Subnet tagging for Inspection (Comma-delimited list of three CIDR blocks for inspection)
+    Type: CommaDelimitedList
+    Default: "0.0.0.0/0"
+  SubnetTagsOutboundCIDR:
+    Description: Outbound Subnet tagging for Inspection (Comma-delimited list of three CIDR blocks for inspection)
+    Type: CommaDelimitedList
+    Default: "0.0.0.0/0"
+  GWLBServiceName:
+    Description: GWLB service name (The value can be achieved from security VPC stack outputs)
+    Type: String
+  GroupMinSize:
+    Description: The minimal number of Application Servers.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GroupMaxSize:
+    Description: The maximal number of Application Servers.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  ALBProtocol:
+    Description: The protocol to use on the Application Load Balancer. If Network Load Balancer was selected this section will be ignored.
+    Type: String
+    Default: HTTP
+    AllowedValues:
+      - HTTP
+      - HTTPS
+  ServicePort:
+    Description: 'The external Load Balancer listens to this port. Leave this field blank to use default ports: 80 for HTTP and 443 for HTTPS.'
+    Type: String
+    AllowedPattern: '^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])?$'
+    ConstraintDescription: Custom service port must be a number between 0 and 65535.
+  ResourcesTagName:
+    Description: The name tag of the resources. (optional)
+    Type: String
+    Default: ''
+  ServersDeploy:
+    Description: Select 'true' to deploy web servers and an internal Application Load Balancer. If you select 'false' the other parameters of this section will be ignored.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ServerInstanceType:
+    Description: The EC2 instance type for the web servers.
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type.
+  ServerAMI:
+    Description: The Amazon Machine Image ID of a preconfigured web server (e.g. ami-0dc7dc63).
+    Type: String
+    AllowedPattern: '^(ami-(([0-9a-f]{8})|([0-9a-f]{17})))?$'
+    ConstraintDescription: Amazon Machine Image ID must be in the form ami-xxxxxxxx or ami-xxxxxxxxxxxxxxxxx.
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+Conditions:
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
+  2AZs: !Or [!Equals [!Ref NumberOfAZs, 2], !Condition 3AZs]
+  DeployServers: !Equals [!Ref ServersDeploy, true]
+  EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
+  ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/gwlb/qs-gwlb-servers-vpc.yaml
+      Parameters:
+        AvailabilityZones: !Join [ ',' , !Ref AvailabilityZones ]
+        NumberOfAZs: !Ref NumberOfAZs
+        VPCCIDR: !Ref VPCCIDR
+        ServersSubnet1CIDR: !Ref ServersSubnet1CIDR
+        ServersSubnet2CIDR: !Ref ServersSubnet2CIDR
+        ServersSubnet3CIDR: !Ref ServersSubnet3CIDR
+        ServersSubnet4CIDR: !Ref ServersSubnet4CIDR
+        GWLBeSubnet1CIDR: !Ref GWLBeSubnet1CIDR
+        GWLBeSubnet2CIDR: !Ref GWLBeSubnet2CIDR
+        GWLBeSubnet3CIDR: !Ref GWLBeSubnet3CIDR
+        GWLBeSubnet4CIDR: !Ref GWLBeSubnet4CIDR
+        SubnetTagsOutboundCIDR: !Join [ ',' , !Ref SubnetTagsOutboundCIDR ]
+        SubnetTagsInboundCIDR: !Join [ ',' , !Ref SubnetTagsInboundCIDR ]
+  GWLBeEndpointStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: VPCStack
+    Properties:
+      TemplateURL: __URL__/gwlb/qs-gwlb-endpoints.yaml
+      Parameters:
+        NumberOfAZs: !Ref NumberOfAZs
+        GWLBeVPC: !GetAtt VPCStack.Outputs.VPCID
+        GWLBeSubnets: !Join 
+          - ','
+          - - !GetAtt VPCStack.Outputs.GWLBeSubnet1ID
+            - !GetAtt VPCStack.Outputs.GWLBeSubnet2ID
+            - !If [ 3AZs, !GetAtt VPCStack.Outputs.GWLBeSubnet3ID, !Ref 'AWS::NoValue' ]
+            - !If [ 4AZs, !GetAtt VPCStack.Outputs.GWLBeSubnet4ID, !Ref 'AWS::NoValue' ]
+        GWLBServiceName: !Ref GWLBServiceName
+        ServersSubnets: !Join 
+          - ','
+          - - !GetAtt VPCStack.Outputs.ServersSubnet1ID
+            - !GetAtt VPCStack.Outputs.ServersSubnet2ID
+            - !If [ 3AZs, !GetAtt VPCStack.Outputs.ServersSubnet3ID, !Ref 'AWS::NoValue' ]
+            - !If [ 4AZs, !GetAtt VPCStack.Outputs.ServersSubnet4ID, !Ref 'AWS::NoValue' ]
+        ServersCIDRs: !Join
+          - ','
+          - - !Ref ServersSubnet1CIDR
+            - !Ref ServersSubnet2CIDR
+            - !If [ 3AZs, !Ref ServersSubnet3CIDR, !Ref 'AWS::NoValue' ]
+            - !If [ 4AZs, !Ref ServersSubnet4CIDR, !Ref 'AWS::NoValue' ]
+        ServerIGW: !GetAtt VPCStack.Outputs.IGWID
+  ServersStacks:
+    Type: AWS::CloudFormation::Stack
+    Condition: DeployServers
+    DependsOn: GWLBeEndpointStack
+    Properties:
+      TemplateURL: __URL__/gwlb/qs-gwlb-servers-autoscale.yaml
+      Parameters:
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        Subnets: !Join 
+          - ','
+          - - !GetAtt VPCStack.Outputs.ServersSubnet1ID
+            - !GetAtt VPCStack.Outputs.ServersSubnet2ID
+            - !If [ 3AZs, !GetAtt VPCStack.Outputs.ServersSubnet3ID, !Ref 'AWS::NoValue' ]
+            - !If [ 4AZs, !GetAtt VPCStack.Outputs.ServersSubnet4ID, !Ref 'AWS::NoValue' ]
+        ResourcesTagName: !Ref ResourcesTagName
+        ALBProtocol: !Ref ALBProtocol
+        ServicePort: !If [ProvidedPort, !Ref ServicePort, !If [EncryptedProtocol, 443, 80]]
+        AdminEmail: !Ref AdminEmail
+        ServerInstanceType: !Ref ServerInstanceType
+        ServerAMI: !Ref ServerAMI
+        KeyName: !Ref KeyName
+        AllocateServerPublicAddress: true
+        ServersMinSize: !Ref GroupMinSize
+        ServersMaxSize: !Ref GroupMaxSize
+Outputs:
+  VpcEndpointService:
+    Description: Endpoint Service Name.
+    Value: !GetAtt VPCStack.Outputs.VPCID
+  ServerPorts:
+    Description: The internal Load Balancer should listen to this port.
+    Value: !If [EncryptedProtocol, 443, 80]
+    Condition: DeployServers
+  ServerLBURL:
+    Description: The URL of the Servers Application Load Balancer.
+    Value: !GetAtt ServersStacks.Outputs.ServerLBURL
+    Condition: DeployServers
+  ServerSecurityGroupID:
+    Description: The Application Servers Security Group ID.  
+    Value: !GetAtt ServersStacks.Outputs.ServerSecurityGroupID
+    Condition: DeployServers

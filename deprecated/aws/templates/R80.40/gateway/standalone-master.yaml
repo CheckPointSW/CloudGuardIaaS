@@ -1,0 +1,443 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
+  Security Gateway & Management (Standalone) instance in a new VPC (__VERSION__)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - AvailabilityZone
+          - VPCCIDR
+          - PublicSubnetCIDR
+          - PrivateSubnetCIDR
+      - Label:
+          default: EC2 Instance Configuration
+        Parameters:
+          - StandaloneName
+          - StandaloneInstanceType
+          - KeyName
+          - AllocatePublicAddress
+          - VolumeSize
+          - VolumeType
+          - VolumeEncryption
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+      - Label:
+          default: Check Point Settings
+        Parameters:
+          - StandaloneVersion
+          - Shell
+          - StandalonePasswordHash
+          - StandaloneMaintenancePasswordHash
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - ResourcesTagName
+          - StandaloneHostname
+          - AllowUploadDownload
+          - CloudWatch
+          - StandaloneBootstrapScript
+          - NTPPrimary
+          - NTPSecondary
+          - AdminCIDR
+          - GatewaysAddresses
+    ParameterLabels:
+      AvailabilityZone:
+        default: Availability zone
+      VPCCIDR:
+        default: VPC CIDR
+      PublicSubnetCIDR:
+        default: Public subnet CIDR
+      PrivateSubnetCIDR:
+        default: Private subnet CIDR
+      StandaloneName:
+        default: Standalone Name
+      StandaloneInstanceType:
+        default: Instance type
+      KeyName:
+        default: Key name
+      AllocatePublicAddress:
+        default: Allocate an Elastic IP
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      VolumeEncryption:
+        default: Volume encryption KMS key identifier
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      StandaloneVersion:
+        default: License
+      Shell:
+        default: Admin shell
+      StandalonePasswordHash:
+        default: Standalone Password hash
+      StandaloneMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      ResourcesTagName:
+        default: Resources prefix tag
+      StandaloneHostname:
+        default: Standalone Hostname
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      StandaloneBootstrapScript:
+        default: Bootstrap Script
+      NTPPrimary:
+        default: Primary NTP server
+      NTPSecondary:
+        default: Secondary NTP server
+      AdminCIDR:
+        default: Administrator addresses
+      GatewaysAddresses:
+        default: Gateways addresses
+Parameters:
+  AvailabilityZone:
+    Description: The availability zone in which to deploy the instance.
+    Type: AWS::EC2::AvailabilityZone::Name
+    MinLength: 1
+  VPCCIDR:
+    Description: The CIDR block of the VPC.
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnetCIDR:
+    Description: The public subnet of the Security Gateway.
+    Type: String
+    Default: 10.0.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PrivateSubnetCIDR:
+    Description: The private subnet of the Security Gateway.
+    Type: String
+    Default: 10.0.11.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  StandaloneName:
+    Type: String
+    Default: Check-Point-Instance
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Default: true
+    Type: String
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  VolumeEncryption:
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
+    Type: String
+    Default: alias/aws/ebs
+  EnableInstanceConnect:
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
+    Default: false
+    Type: String
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  StandaloneVersion:
+    Description: Standalone Version & License.
+    Type: String
+    Default: R80.40-BYOL
+    AllowedValues:
+      - R80.40-PAYG-NGTP
+      - R80.40-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  StandalonePasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  StandaloneMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  StandaloneInstanceType:
+    Description: The instance type of the Security Gateway & Management (Standalone) instance.
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  ResourcesTagName:
+    Description: The name tag of the resources. (optional)
+    Type: String
+    Default: ''
+  StandaloneHostname:
+    Description: (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
+    ConstraintDescription: A valid hostname label or an empty string.
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  StandaloneBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  NTPPrimary:
+    Description: (optional)
+    Type: String
+    Default: 169.254.169.123
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  NTPSecondary:
+    Description: (optional)
+    Type: String
+    Default: 0.pool.ntp.org
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate.
+      with the Management Server
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Management.
+      Server. (optional)
+    Type: String
+    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
+Conditions:
+  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/utils/vpc.yaml
+      Parameters:
+        AvailabilityZones: !Ref AvailabilityZone
+        NumberOfAZs: 1
+        VPCCIDR: !Ref VPCCIDR
+        PublicSubnet1CIDR: !Ref PublicSubnetCIDR
+        CreatePrivateSubnets: true
+        PrivateSubnet1CIDR: !Ref PrivateSubnetCIDR
+        CreateAttachmentSubnets: false
+  InternalRoutingTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
+      Tags:
+        - Key: Name
+          Value: !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - InternalRoutingTable
+  InternalNetworkRouteAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref InternalRoutingTable
+      SubnetId: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
+  StandaloneStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/gateway/standalone.yaml
+      Parameters:
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        PublicSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        PrivateSubnet: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
+        InternalRouteTable: !Ref InternalRoutingTable
+        StandaloneName: !Ref StandaloneName
+        StandaloneInstanceType: !Ref StandaloneInstanceType
+        KeyName: !Ref KeyName
+        AllocatePublicAddress: !Ref AllocatePublicAddress
+        VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
+        VolumeEncryption: !Ref VolumeEncryption
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
+        StandaloneVersion: !Ref StandaloneVersion
+        Shell: !Ref Shell
+        StandalonePasswordHash: !Ref StandalonePasswordHash
+        StandaloneMaintenancePasswordHash: !Ref StandaloneMaintenancePasswordHash
+        ResourcesTagName: !Ref ResourcesTagName
+        StandaloneHostname: !Ref StandaloneHostname
+        AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
+        StandaloneBootstrapScript: !Ref StandaloneBootstrapScript
+        NTPPrimary: !Ref NTPPrimary
+        NTPSecondary: !Ref NTPSecondary
+        AdminCIDR: !Ref AdminCIDR
+        GatewaysAddresses: !Ref GatewaysAddresses
+Outputs:
+  CheckPointInstancePublicAddress:
+    Condition: AllocateAddress
+    Description: The public address of the Check Point instance.
+    Value: !GetAtt StandaloneStack.Outputs.PublicAddress
+  CheckPointInstanceSSH:
+    Condition: AllocateAddress
+    Description: SSH command to the Check Point instance.
+    Value: !GetAtt StandaloneStack.Outputs.SSH
+  CheckPointInstanceURL:
+    Condition: AllocateAddress
+    Description: URL to the portal.
+    Value: !GetAtt StandaloneStack.Outputs.URL
