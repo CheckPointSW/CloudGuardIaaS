@@ -3,15 +3,14 @@ variable "prefix" {
   description = "(Optional) Resources name prefix"
   default = "chkp-tf-ha"
 }
+variable "member_name" {
+  type = string
+}
 variable "region" {
   type = string
   default = "us-central1"
 }
-variable "zone_a" {
-  type = string
-  default = "us-central1-a"
-}
-variable "zone_b" {
+variable "zone" {
   type = string
   default = "us-central1-a"
 }
@@ -32,7 +31,7 @@ variable "disk_type" {
 }
 variable "image_name" {
   type = string
-  description = "The High Availability (cluster) image name (e.g. check-point-r8110-gw-byol-cluster-335-985-v20220126). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
+  description = "The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-123-456-v12345678). You can choose the desired cluster image value from: https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py"
 }
 variable "os_version" {
   type = string

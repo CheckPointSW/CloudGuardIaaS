@@ -4,7 +4,7 @@ module "member_a" {
   prefix = var.prefix
   member_name = "${var.prefix}-member-a"
   region = var.region
-  zone = var.zoneA
+  zone = var.zone_a
   machine_type = var.machine_type
   disk_size = var.disk_size
   disk_type = var.disk_type
@@ -49,7 +49,7 @@ module "member_b" {
   prefix = var.prefix
   member_name = "${var.prefix}-member-b"
   region = var.region
-  zone = var.zoneB
+  zone = var.zone_b
   machine_type = var.machine_type
   disk_size = var.disk_size
   disk_type = var.disk_type
