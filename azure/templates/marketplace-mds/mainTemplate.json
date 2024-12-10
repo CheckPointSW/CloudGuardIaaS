@@ -793,7 +793,8 @@
       "apiVersion": "2020-06-01",
       "dependsOn": [
         "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
-        "[variables('publicIPAddressId')]"
+        "[variables('publicIPAddressId')]",
+        "[coalesce(resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName')), variables('publicIPAddressId'))]"
       ],
       "location": "[variables('location')]",
       "name": "[variables('nic1Name')]",
