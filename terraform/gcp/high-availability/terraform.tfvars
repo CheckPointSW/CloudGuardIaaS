@@ -5,13 +5,13 @@ project                               = "PLEASE ENTER PROJECT ID"               
 # --- Check Point Deployment ---
 prefix                                = "PLEASE ENTER PREFIX"                         # "chkp-tf-ha"
 license                               = "PLEASE ENTER LICENSE"                        # "BYOL"
-image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8120-gw-byol-cluster-631-991001335-v20230622"
+image_name                            = "PLEASE ENTER IMAGE NAME"                     # "check-point-r8120-gw-byol-cluster-631-991001669-v20240923"
 os_version                            = "PLEASE ENTER GAIA OS VERSION"                # "R8120"
 
 # --- Instances Configuration ---
 region                                = "PLEASE ENTER REGION"                         # "us-central1"
-zoneA                                 = "PLEASE ENTER ZONE A"                         # "us-central1-a"
-zoneB                                 = "PLEASE ENTER ZONE B"                         # "us-central1-a"
+zone_a                                = "PLEASE ENTER ZONE A"                         # "us-central1-a"
+zone_b                                = "PLEASE ENTER ZONE B"                         # "us-central1-a"
 machine_type                          = "PLEASE ENTER MACHINE TYPE"                   # "n1-standard-4"
 disk_type                             = "PLEASE ENTER DISK TYPE"                      # "SSD Persistent Disk"
 disk_size                             = "PLEASE ENTER DISK SIZE"                      # 100
@@ -27,8 +27,8 @@ admin_shell                           = "PLEASE ENTER ADMIN SHELL"              
 maintenance_mode_password_hash        = "PLEASE ENTER MAINTENANCE MODE PASSWORD HASH" # "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # --- Quick connect to Smart-1 Cloud ---
-smart_1_cloud_token_a                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
-smart_1_cloud_token_b                     = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
+smart_1_cloud_token_a                 = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
+smart_1_cloud_token_b                 = "PASTE TOKEN FROM SMART-1 CLOUD PORTAL"  # ""
 
 # --- Networking ---
 cluster_network_cidr                  = "PLEASE ENTER CLUSTER NETWORK CIDR"           # "10.0.1.0/24"

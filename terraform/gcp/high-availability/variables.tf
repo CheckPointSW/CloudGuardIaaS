@@ -10,6 +10,10 @@ variable "project" {
   type = string
   description = "Personal project id. The project indicates the default GCP project all of your resources will be created in."
   default = ""
+  validation {
+    condition = can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", var.project)) && length(var.project) >= 6 && length(var.project) <= 30
+    error_message = "The project ID must be 6-30 characters long, start with a letter, and can only include lowercase letters, numbers, hyphenst and cannot end with a hyphen."
+  }
 }
 
 # --- Check Point Deployment ---
@@ -32,7 +36,6 @@ variable "os_version" {
   description = "GAIA OS version"
   default = "R8120"
 }
-
 # --- Instances Configuration ---
 data "google_compute_regions" "available_regions" {
 }
@@ -40,12 +43,12 @@ variable "region" {
   type = string
   default = "us-central1"
 }
-variable "zoneA" {
+variable "zone_a" {
   type = string
   description = "Member A Zone. The zone determines what computing resources are available and where your data is stored and used."
   default = "us-central1-a"
 }
-variable "zoneB" {
+variable "zone_b" {
   type = string
   description = "Member B Zone."
   default = "us-central1-a"
@@ -75,7 +78,6 @@ variable "enable_monitoring" {
   description = "Enable Stackdriver monitoring"
   default = false
 }
-
 # --- Check Point ---
 variable "management_network" {
   type = string
@@ -130,6 +132,7 @@ resource "null_resource" "validate_both_tokens" {
 resource "null_resource" "validate_different_tokens" {
   count = var.smart_1_cloud_token_a != "" && var.smart_1_cloud_token_a == var.smart_1_cloud_token_b ? "To connect to Smart-1 Cloud, you must provide two different tokens" : 0
 }
+
 # --- Networking ---
 variable "cluster_network_cidr" {
   type = string

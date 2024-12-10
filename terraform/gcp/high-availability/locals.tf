@@ -1,25 +1,7 @@
 locals {
-  license_allowed_values = [
-    "BYOL",
-    "PAYG"]
-  // will fail if [var.license] is invalid:
-  validate_license = index(local.license_allowed_values, upper(var.license))
 
-  regex_validate_image_name = "^check-point-${lower(var.os_version)}-gw-.*[0-9]{3}-([0-9]{3,}|[a-z]+)-v[0-9]{8,}.*"
-  // will fail if the image name is not in the right syntax
-  validate_image_name = length(regexall(local.regex_validate_image_name, var.image_name)) > 0 ? 0 : index(split("-", var.image_name), "INVALID IMAGE NAME")
-
-  version_allowed_values = [
-    "R81",
-    "R8110",
-    "R8120",
-    "R82"
-  ]
-  // Will fail if var.os_version is invalid:
-  validate_os_version = index(local.version_allowed_values, var.os_version)
-
-  split_zoneA = split("-", var.zoneA)
-  split_zoneB = split("-", var.zoneB)
+  split_zoneA = split("-", var.zone_a)
+  split_zoneB = split("-", var.zone_b)
   // will fail if the var.zoneA and var.zoneB are not at the same region:
   validate_zones = index(local.split_zoneA, local.split_zoneB[0]) == local.split_zoneA[0] && index(local.split_zoneA, local.split_zoneB[1]) == local.split_zoneA[0] ? 0 : "var.zoneA and var.zoneB are not at the same region"
 
@@ -42,13 +24,6 @@ locals {
   // Will fail if var.disk_type is invalid
   validate_disk_type = index(local.disk_type_allowed_values, var.disk_type)
 
-  admin_shell_allowed_values = [
-    "/etc/cli.sh",
-    "/bin/bash",
-    "/bin/csh",
-    "/bin/tcsh"]
-  // Will fail if var.admin_shell is invalid
-  validate_admin_shell = index(local.admin_shell_allowed_values, var.admin_shell)
 
   // Will fail if var.cluster_network_name or var.cluster_network_subnetwork_name are empty double quotes in case of use existing network.
   validate_cluster_network = var.cluster_network_cidr == "" && var.cluster_network_name == "" ? index("error:", "using existing cluster network - cluster network name is missing") : 0
@@ -83,15 +58,10 @@ locals {
   validate_internal_network6_subnet = var.num_internal_networks >= 6 && var.internal_network6_cidr == "" && var.internal_network6_subnetwork_name == "" ? index("error:", "using existing network6 - internal network6 subnet name is missing") : 0
 
 
-  regex_valid_admin_SSH_key = "^(^$|ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3})"
-  // Will fail if var.admin_SSH_key is invalid
-  regex_admin_SSH_key = regex(local.regex_valid_admin_SSH_key, var.admin_SSH_key) == var.admin_SSH_key ? 0 : "Please enter a valid SSH public key or leave empty"
-
   regex_valid_sic_key = "^([a-z0-9A-Z]{8,30})$"
   // Will fail if var.sic_key is invalid
-  regex_sic_key = regex(local.regex_valid_sic_key, var.sic_key) == var.sic_key ? 0 : "Variable [sic_key] must be at least 8 alpha numeric characters."
-
-
+  regex_sic_key = length(regexall(local.regex_valid_sic_key, var.sic_key) )> 0  ? 0 : "Variable [sicKey] must be at least 8 alphanumeric characters."
+  index_sic_key  = index(["0"], local.regex_sic_key)
 
 
   create_cluster_network_condition = var.cluster_network_cidr == "" ? false : true

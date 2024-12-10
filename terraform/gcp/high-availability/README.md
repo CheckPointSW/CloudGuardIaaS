@@ -117,13 +117,13 @@ project = "project-id"
 # --- Check Point Deployment ---
 prefix = "chkp-tf-ha"
 license = "BYOL"
-image_name = "check-point-r8120-gw-byol-cluster-631-991001335-v20230622"
+image_name = "check-point-r8120-gw-byol-cluster-631-991001669-v20240923"
 os_version = "R8120"
 
 # --- Instances Configuration ---
 region = "us-central1"
-zoneA = "us-central1-a"
-zoneB = "us-central1-a"
+zone_a = "us-central1-a"
+zone_b = "us-central1-a"
 machine_type = "n1-standard-4"
 disk_type = "SSD Persistent Disk"
 disk_size = 100
@@ -223,17 +223,17 @@ internal_network1_subnetwork_name = ""
 | Name          | Description   | Type          | Allowed values | Default       | Required      |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | service_account_path | User service account path in JSON format - From the service account key page in the Cloud Console choose an existing account or create a new one. Next, download the JSON key file. Name it something you can remember, store it somewhere secure on your machine, and supply the path to the location is stored. (e.g. "service-accounts/service-account-name.json")  | string  | N/A | "" | yes |
-| project  | Personal project id. The project indicates the default GCP project all of your resources will be created in.  | string  | N/A | "" | yes |
+| project  | Personal project ID. The project indicates the default GCP project all of your resources will be created in. The project ID must be 6-30 characters long, start with a letter, and can only include lowercase letters, numbers, hyphenst and cannot end with a hyphen.  | string  | N/A | "" | yes |
 |  |  |  |  |  |
 | prefix | (Optional) Resources name prefix. | string | N/A | "chkp-tf-ha" | no |
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
-| image_name | The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-631-991001335-v20230622). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
+| image_name | The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-631-991001669-v20240923). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
 |  |  |  |  |  |
-| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120;<br/> R82 | R8120 | yes |
+| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120;<br/> R82; | R8120 | yes |
 |  |  |  |  |  |
 | region  | GCP region  | string  | N/A | "us-central1" | no |
-| zoneA  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
-| zoneB  | Member B Zone.  | string  | N/A | "us-central1-a" | no |
+| zone_a  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
+| zone_b  | Member B Zone.  | string  | N/A | "us-central1-a" | no |
 | machine_type | Machine types determine the specifications of your machines, such as the amount of memory, virtual cores, and persistent disk limits an instance will have. | string | N/A | "n1-standard-4" | no |
 | disk_type | Storage space is much less expensive for a standard Persistent Disk. An SSD Persistent Disk is better for random IOPS or streaming throughput with low latency. | string | - SSD Persistent Disk <br/>  - Standard Persistent Disk | "SSD Persistent Disk" | no |
 | disk_size | Disk size in GB - Persistent disk performance is tied to the size of the persistent disk volume. You are charged for the actual amount of provisioned disk space. | number | number between 100 and 4096 | 100 | no |
@@ -304,9 +304,7 @@ In order to check the template version refer to the [sk116585](https://supportce
 
 | Template Version | Description   |
 | ---------------- | ------------- |
-| 20241027 |  Added R82 support |
-| | | |
-| 20230910 | - R81.20 is the default version |
+| 20230910 | R81.20 is the default version. |
 | | | |
 | 20230209 | Added Smart-1 Cloud support. |
 | | | |
