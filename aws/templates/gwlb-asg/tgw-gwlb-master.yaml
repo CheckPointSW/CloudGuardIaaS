@@ -507,6 +507,37 @@ Parameters:
       - m6a.24xlarge
       - m6a.32xlarge
       - m6a.48xlarge
+      - r7a.xlarge
+      - r7a.2xlarge
+      - r7a.4xlarge
+      - r7a.8xlarge
+      - r7a.12xlarge
+      - r7a.16xlarge
+      - r7a.24xlarge
+      - r7a.32xlarge
+      - r7a.48xlarge
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.32xlarge
+      - c7i.48xlarge
     ConstraintDescription: Must be a valid EC2 instance type
   GatewaysMinSize:
     Description: The minimal number of Security Gateways.
@@ -693,6 +724,37 @@ Parameters:
       - m6a.24xlarge
       - m6a.32xlarge
       - m6a.48xlarge
+      - r7a.xlarge
+      - r7a.2xlarge
+      - r7a.4xlarge
+      - r7a.8xlarge
+      - r7a.12xlarge
+      - r7a.16xlarge
+      - r7a.24xlarge
+      - r7a.32xlarge
+      - r7a.48xlarge
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.32xlarge
+      - c7i.48xlarge
     ConstraintDescription: Must be a valid EC2 instance type
   ManagementVersion:
     Description: The license to install on the Security Management Server.
