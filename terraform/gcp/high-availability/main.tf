@@ -4,6 +4,15 @@ provider "google" {
   region = var.region
 }
 
+module "common" {
+  source = "../common/common"
+  installation_type = "Cluster"
+  os_version = var.os_version
+  image_name = var.image_name
+  admin_shell = var.admin_shell
+  license = var.license
+  admin_SSH_key = var.admin_SSH_key
+}
 resource "random_string" "random_string" {
   length = 5
   special = false
@@ -211,8 +220,8 @@ module "members_a_b" {
 
   prefix = "${var.prefix}-${random_string.random_string.result}"
   region = var.region
-  zoneA = var.zoneA
-  zoneB = var.zoneB
+  zone_a = var.zone_a
+  zone_b = var.zone_b
   machine_type = var.machine_type
   disk_size = var.disk_size
   disk_type = var.disk_type
