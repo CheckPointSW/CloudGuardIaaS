@@ -1,13 +1,14 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server into an existing VPC (20241027)
+Description: Deploys a Check Point Management Server into a new VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: VPC Network Configuration
         Parameters:
-          - VPC
-          - ManagementSubnet
+          - AvailabilityZone
+          - VPCCIDR
+          - PublicSubnet1CIDR
       - Label:
           default: EC2 Instance Configuration
         Parameters:
@@ -49,10 +50,12 @@ Metadata:
           - NTPPrimary
           - NTPSecondary
     ParameterLabels:
-      VPC:
-        default: VPC
-      ManagementSubnet:
-        default: Management subnet
+      AvailabilityZone:
+        default: Availability zone
+      VPCCIDR:
+        default: VPC CIDR
+      PublicSubnet1CIDR:
+        default: Management subnet CIDR
       ManagementName:
         default: Management name
       ManagementInstanceType:
@@ -108,15 +111,22 @@ Metadata:
       NTPSecondary:
         default: Secondary NTP server
 Parameters:
-  VPC:
-    Description: Select an existing VPC.
-    Type: AWS::EC2::VPC::Id
+  AvailabilityZone:
+    Description: The availability zone in which to deploy the instance.
+    Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
-  ManagementSubnet:
-    Description: To access the instance from the internet, make sure the subnet has
-      a route to the internet.
-    Type: AWS::EC2::Subnet::Id
-    MinLength: 1
+  VPCCIDR:
+    Description: The CIDR block of the VPC.
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet1CIDR:
+    Description: The CIDR block of the management subnet.
+    Type: String
+    Default: 10.0.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
   ManagementName:
     Description: The Management name tag.
     Type: String
@@ -363,13 +373,13 @@ Parameters:
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ManagementMaintenancePasswordHash:
-    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ManagementHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
     Type: String
     Default: mgmt-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -447,10 +457,21 @@ Conditions:
   PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/utils/vpc.yaml
+      Parameters:
+        AvailabilityZones: !Ref AvailabilityZone
+        NumberOfAZs: 1
+        VPCCIDR: !Ref VPCCIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        CreatePrivateSubnets: false
+        CreateAttachmentSubnets: false
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      TemplateURL: __URL__/utils/amis.yaml
       Parameters:
         Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
   ManagementReadyHandle:
@@ -468,7 +489,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Management security group
-      VpcId: !Ref VPC
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
       SecurityGroupIngress:
         - CidrIp: !Ref GatewaysAddresses
           IpProtocol: tcp
@@ -526,7 +547,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Condition: CreateRole
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cme-iam-role.yaml
+      TemplateURL: __URL__/iam/cme-iam-role.yaml
       Parameters:
         Permissions: !Ref ManagementPermissions
         STSRoles: !Join [',', !Ref ManagementSTSRoles]
@@ -555,7 +576,7 @@ Resources:
           GroupSet:
             - !Ref ManagementSecurityGroup
           DeleteOnTermination: true
-          SubnetId: !Ref ManagementSubnet
+          SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1ID
   ManagementLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -591,7 +612,7 @@ Resources:
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP

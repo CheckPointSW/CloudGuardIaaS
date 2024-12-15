@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server (20241027)
+Description: Deploys a Check Point Multi-Domain Server into an existing VPC  (20241027)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
