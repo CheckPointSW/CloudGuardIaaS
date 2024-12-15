@@ -1,0 +1,4 @@
+#cloud-config
+runcmd:
+  - |
+    python3 /etc/cloud_config.py sicKey=\"${SICKey}\" installationType=\"management\" osVersion=\"${OsVersion}\" allowUploadDownload=\"${AllowUploadDownload}\" templateVersion=\"20240704\" templateName=\"management\" templateType=\"terraform\" shell=\"${Shell}\" enableInstanceConnect=\"${EnableInstanceConnect}\" hostName=\"${Hostname }\" ntpPrimary=\"${NTPPrimary}\" ntpSecondary=\"${NTPSecondary}\" passwordHash=\"${PasswordHash}\" MaintenanceModePassword=\"${MaintenanceModePassword}\" "management_installation_type=\"${ManagementInstallationType}\"" adminSubnet=\"${AdminSubnet}\" allocatePublicAddress=\"${AllocateElasticIP}\" overTheInternet=\"${PubMgmt}\" bootstrapScript64=\"${BootstrapScript}\"

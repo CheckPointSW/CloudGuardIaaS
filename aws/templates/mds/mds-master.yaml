@@ -1,20 +1,20 @@
-AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server into an existing VPC (20241027)
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploys a Check Point Multi-Domain Server into a new VPC (__VERSION__)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: VPC Network Configuration
         Parameters:
-          - VPC
-          - ManagementSubnet
+          - AvailabilityZone
+          - VPCCIDR
+          - PublicSubnet1CIDR
       - Label:
           default: EC2 Instance Configuration
         Parameters:
-          - ManagementName
-          - ManagementInstanceType
+          - MDSName
+          - MDSInstanceType
           - KeyName
-          - AllocatePublicAddress
           - VolumeSize
           - VolumeType
           - VolumeEncryption
@@ -22,45 +22,44 @@ Metadata:
           - TerminationProtection
           - MetaDataToken
       - Label:
-          default: IAM Permissions (ignored when the installation is not Primary Management
-            Server)
+          default: IAM Permissions (ignored when the installation type is not Primary
+            Multi-Domain Server)
         Parameters:
-          - ManagementPermissions
-          - ManagementPredefinedRole
-          - ManagementSTSRoles
+          - MDSPermissions
+          - MDSPredefinedRole
+          - MDSSTSRoles
       - Label:
           default: Check Point Settings
         Parameters:
-          - ManagementVersion
+          - MDSVersion
           - Shell
-          - ManagementPasswordHash
-          - ManagementMaintenancePasswordHash
+          - MDSPasswordHash
+          - MDSMaintenancePasswordHash
       - Label:
-          default: Security Management Server Settings
+          default: Multi-Domain Server Settings
         Parameters:
-          - ManagementHostname
-          - ManagementInstallationType
-          - SICKey
+          - MDSHostname
+          - MDSInstallationType
+          - MDSSICKey
           - AllowUploadDownload
           - AdminCIDR
-          - GatewayManagement
           - GatewaysAddresses
-          - ManagementBootstrapScript
+          - MDSBootstrapScript
           - NTPPrimary
           - NTPSecondary
     ParameterLabels:
-      VPC:
-        default: VPC
-      ManagementSubnet:
-        default: Management subnet
-      ManagementName:
-        default: Management name
-      ManagementInstanceType:
+      AvailabilityZone:
+        default: Availability zone
+      VPCCIDR:
+        default: VPC CIDR
+      PublicSubnet1CIDR:
+        default: MDS subnet CIDR
+      MDSName:
+        default: MDS name
+      MDSInstanceType:
         default: Instance type
       KeyName:
         default: Key name
-      AllocatePublicAddress:
-        default: Allocate an Elastic IP
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -73,60 +72,64 @@ Metadata:
         default: Termination Protection
       MetaDataToken:
         default: Metadata HTTP token
-      ManagementPermissions:
+      MDSPermissions:
         default: IAM role
-      ManagementPredefinedRole:
+      MDSPredefinedRole:
         default: Existing IAM role name
-      ManagementSTSRoles:
+      MDSSTSRoles:
         default: STS roles
-      ManagementVersion:
+      MDSVersion:
         default: Version & license
       Shell:
         default: Admin shell
-      ManagementPasswordHash:
+      MDSPasswordHash:
         default: Password hash
-      ManagementMaintenancePasswordHash:
-        default:  Management Maintenance Password hash
-      ManagementHostname:
-        default: Management hostname
-      ManagementInstallationType:
-        default: Management installation type
-      SICKey:
+      MDSMaintenancePasswordHash:
+        default: MDS Maintenance Password hash
+      MDSHostname:
+        default: MDS hostname
+      MDSInstallationType:
+        default: MDS installation type
+      MDSSICKey:
         default: SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
         default: Administrator addresses
-      GatewayManagement:
-        default: Gateways management
       GatewaysAddresses:
         default: Gateways addresses
-      ManagementBootstrapScript:
-        default: Management bootstrap script
+      MDSBootstrapScript:
+        default: MDS Bootstrap script
       NTPPrimary:
         default: Primary NTP server
       NTPSecondary:
         default: Secondary NTP server
 Parameters:
-  VPC:
-    Description: Select an existing VPC.
-    Type: AWS::EC2::VPC::Id
+  AvailabilityZone:
+    Description: The availability zone in which to deploy the instance.
+    Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
-  ManagementSubnet:
-    Description: To access the instance from the internet, make sure the subnet has
-      a route to the internet.
-    Type: AWS::EC2::Subnet::Id
-    MinLength: 1
-  ManagementName:
-    Description: The Management name tag.
+  VPCCIDR:
+    Description: The CIDR block of the VPC.
     Type: String
-    Default: Check-Point-Management
-  ManagementInstanceType:
-    Description: The instance type of the Security Management Server.
+    Default: 10.0.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet1CIDR:
+    Description: The CIDR block of the management subnet.
     Type: String
-    Default: m5.xlarge
+    Default: 10.0.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  MDSName:
+    Description: The MDS name tag.
+    Type: String
+    Default: Check-Point-MDS
+  MDSInstanceType:
+    Description: The instance type of the Multi-Domain Server.
+    Type: String
+    Default: m5.2xlarge
     AllowedValues:
-      - c5.large
       - c5.xlarge
       - c5.2xlarge
       - c5.4xlarge
@@ -134,13 +137,11 @@ Parameters:
       - c5.12xlarge
       - c5.18xlarge
       - c5.24xlarge
-      - c5n.large
       - c5n.xlarge
       - c5n.2xlarge
       - c5n.4xlarge
       - c5n.9xlarge
       - c5n.18xlarge
-      - c5d.large
       - c5d.xlarge
       - c5d.2xlarge
       - c5d.4xlarge
@@ -148,7 +149,6 @@ Parameters:
       - c5d.12xlarge
       - c5d.18xlarge
       - c5d.24xlarge
-      - m5.large
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
@@ -156,7 +156,6 @@ Parameters:
       - m5.12xlarge
       - m5.16xlarge
       - m5.24xlarge
-      - m6i.large
       - m6i.xlarge
       - m6i.2xlarge
       - m6i.4xlarge
@@ -165,7 +164,6 @@ Parameters:
       - m6i.16xlarge
       - m6i.24xlarge
       - m6i.32xlarge
-      - c6i.large
       - c6i.xlarge
       - c6i.2xlarge
       - c6i.4xlarge
@@ -174,7 +172,6 @@ Parameters:
       - c6i.16xlarge
       - c6i.24xlarge
       - c6i.32xlarge
-      - c6in.large
       - c6in.xlarge
       - c6in.2xlarge
       - c6in.4xlarge
@@ -183,7 +180,6 @@ Parameters:
       - c6in.16xlarge
       - c6in.24xlarge
       - c6in.32xlarge
-      - r5.large
       - r5.xlarge
       - r5.2xlarge
       - r5.4xlarge
@@ -191,7 +187,6 @@ Parameters:
       - r5.12xlarge
       - r5.16xlarge
       - r5.24xlarge
-      - r5a.large
       - r5a.xlarge
       - r5a.2xlarge
       - r5a.4xlarge
@@ -199,7 +194,6 @@ Parameters:
       - r5a.12xlarge
       - r5a.16xlarge
       - r5a.24xlarge
-      - r5b.large
       - r5b.xlarge
       - r5b.2xlarge
       - r5b.4xlarge
@@ -207,7 +201,6 @@ Parameters:
       - r5b.12xlarge
       - r5b.16xlarge
       - r5b.24xlarge
-      - r5n.large
       - r5n.xlarge
       - r5n.2xlarge
       - r5n.4xlarge
@@ -215,7 +208,6 @@ Parameters:
       - r5n.12xlarge
       - r5n.16xlarge
       - r5n.24xlarge
-      - r6i.large
       - r6i.xlarge
       - r6i.2xlarge
       - r6i.4xlarge
@@ -224,7 +216,6 @@ Parameters:
       - r6i.16xlarge
       - r6i.24xlarge
       - r6i.32xlarge
-      - m6a.large
       - m6a.xlarge
       - m6a.2xlarge
       - m6a.4xlarge
@@ -271,13 +262,6 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
-  AllocatePublicAddress:
-    Description: Allocate an elastic IP for the Management.
-    Type: String
-    Default: true
-    AllowedValues:
-      - true
-      - false
   VolumeSize:
     Type: Number
     MinValue: 100
@@ -314,7 +298,7 @@ Parameters:
     AllowedValues:
       - true
       - false
-  ManagementPermissions:
+  MDSPermissions:
     Description: IAM role to attach to the instance profile.
     Type: String
     Default: Create with read permissions
@@ -324,28 +308,25 @@ Parameters:
       - Create with assume role permissions (specify an STS role ARN)
       - Create with read permissions
       - Create with read-write permissions
-  ManagementPredefinedRole:
-    Description: A predefined IAM role to attach to the instance profile. Ignored.
-      if IAM role is not set to 'Use existing'
+  MDSPredefinedRole:
+    Description: A predefined IAM role to attach to the instance profile. Ignored
+      if IAM role is not set to 'Use existing'.
     Type: String
     Default: ''
-  ManagementSTSRoles:
+  MDSSTSRoles:
     Description: The IAM role will be able to assume these STS Roles (comma separated
       list of ARNs, without spaces). Ignored if IAM role is set to 'None' or 'Use
       existing'.
     Type: CommaDelimitedList
     Default: ''
-  ManagementVersion:
-    Description: The license to install on the Security Management Server.
+  MDSVersion:
+    Description: The license to install on the Multi-Domain Server.
     Type: String
     Default: R81.20-BYOL
     AllowedValues:
       - R81.10-BYOL
-      - R81.10-PAYG
       - R81.20-BYOL
-      - R81.20-PAYG
       - R82-BYOL
-      - R82-PAYG
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -355,43 +336,44 @@ Parameters:
       - /bin/bash
       - /bin/csh
       - /bin/tcsh
-  ManagementPasswordHash:
+  MDSPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
       to get the PASSWORD's hash). (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
-  ManagementMaintenancePasswordHash:
-    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+  MDSMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
-  ManagementHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+  MDSHostname:
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
     Type: String
-    Default: mgmt-aws
+    Default: mds-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
     ConstraintDescription: A valid hostname label or an empty string.
-  ManagementInstallationType:
-    Description: Determines the Management Server installation type.
+  MDSInstallationType:
+    Description: Determines the Multi-Domain Server installation type.
     Type: String
-    Default: Primary management
+    Default: Primary Multi-Domain Server
     AllowedValues:
-      - Primary management
-      - Secondary management
-      - Log Server
-  SICKey:
+      - Primary Multi-Domain Server
+      - Secondary Multi-Domain Server
+      - Multi-Domain Log Server
+  MDSSICKey:
     Description: >-
-      Mandatory only if deploying a secondary Management Server or Log Server, the Secure Internal
-      Communication key creates trusted connections between Check Point components.
-      Choose a random string consisting of at least 8 alphanumeric characters.
+      Mandatory if deploying a Secondary Multi-Domain Server or Multi-Domain Log Server,
+      the Secure Internal Communication key creates trusted connections between Check
+      Point components. Choose a random string consisting of at least 8 alphanumeric
+      characters.
     Type: String
     Default: ''
     AllowedPattern: '(|[a-zA-Z0-9]{8,})'
-    ConstraintDescription: Can be empty if this is a primary Management Server. Otherwise,
-      at least 8 alpha numeric characters.
+    ConstraintDescription: Can be empty if this is a Primary Multi-Domain Server.
+      Otherwise, at least 8 alpha numeric characters.
     NoEcho: true
   AllowUploadDownload:
     Description: Automatically download updates and share statistical data for product improvement purpose.
@@ -402,23 +384,16 @@ Parameters:
       - false
   AdminCIDR:
     Description: Allow web, SSH, and graphical clients only from this network to communicate
-      with the Management Server.
+      with the Multi-Domain Server. The address should be either 0.0.0.0/0 (any address) or <IP>/32 (specific address)
     Type: String
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    AllowedPattern: '^((0.0.0.0\/0)|)$|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/32)$'
+    ConstraintDescription: Administrator address must be either 0.0.0.0/0 or <IP>/32
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management
-      Server.
+    Description: Allow gateways only from this network to communicate with the Multi-Domain.
+      Server
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
-  GatewayManagement:
-    Description: Select 'Over the internet' if any of the gateways you wish to manage
-      are not directly accessed via their private IP address.
-    Type: String
-    Default: Locally managed
-    AllowedValues:
-      - Locally managed
-      - Over the internet
-  ManagementBootstrapScript:
+  MDSBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
     Default: ''
@@ -431,44 +406,46 @@ Parameters:
   NTPSecondary:
     Description: (optional)
     Type: String
-    Default: 0.pool.ntp.org
+    Default: '0.pool.ntp.org'
     AllowedPattern: '[\.a-zA-Z0-9\-]*'
 Conditions:
-  EIP: !Equals [!Ref AllocatePublicAddress, true]
-  ManageOverInternet: !Equals [!Ref GatewayManagement, Over the internet]
-  ManageOverInternetAndEIP: !And [!Condition EIP, !Condition ManageOverInternet]
-  CreateRole: !Or
-    - !Equals [!Ref ManagementPermissions, Create with assume role permissions (specify an STS role ARN)]
-    - !Equals [!Ref ManagementPermissions, Create with read permissions]
-    - !Equals [!Ref ManagementPermissions, Create with read-write permissions]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
-  UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
-  NoSIC: !Equals [!Ref SICKey, '']
+  CreateRole: !And
+    - !Or
+      - !Condition PrimaryMDS
+      - !Condition SecondaryMDS
+    - !Or
+      - !Equals [!Ref MDSPermissions, Create with assume role permissions (specify an STS role ARN)]
+      - !Equals [!Ref MDSPermissions, Create with read permissions]
+      - !Equals [!Ref MDSPermissions, Create with read-write permissions]
+  UseRole: !And [!Or [!Condition PrimaryMDS, !Condition SecondaryMDS], !Not [!Equals [!Ref MDSPermissions, None (configure later)]]]
+  PrimaryMDS: !Equals [!Ref MDSInstallationType, Primary Multi-Domain Server]
+  SecondaryMDS: !Equals [!Ref MDSInstallationType, Secondary Multi-Domain Server]
   PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: __URL__/utils/vpc.yaml
+      Parameters:
+        AvailabilityZones: !Ref AvailabilityZone
+        NumberOfAZs: 1
+        VPCCIDR: !Ref VPCCIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        CreatePrivateSubnets: false
+        CreateAttachmentSubnets: false
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      TemplateURL: __URL__/utils/amis.yaml
       Parameters:
-        Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
-  ManagementReadyHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: EIP
-    Properties: {}
-  ManagementReadyCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    Condition: EIP
-    DependsOn: ManagementInstance
-    Properties:
-      Handle: !Ref ManagementReadyHandle
-      Timeout: 1800
-  ManagementSecurityGroup:
+        Version: !Join ['-', [!Ref MDSVersion, MGMT]]
+  MDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Management security group
-      VpcId: !Ref VPC
+      GroupDescription: MDS security group
+      VpcId: !GetAtt VPCStack.Outputs.VPCID
       SecurityGroupIngress:
         - CidrIp: !Ref GatewaysAddresses
           IpProtocol: tcp
@@ -522,47 +499,47 @@ Resources:
           IpProtocol: tcp
           FromPort: 19009
           ToPort: 19009
-  ManagementRoleStack:
+  MDSRoleStack:
     Type: AWS::CloudFormation::Stack
     Condition: CreateRole
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cme-iam-role.yaml
+      TemplateURL: __URL__/iam/cme-iam-role.yaml
       Parameters:
-        Permissions: !Ref ManagementPermissions
-        STSRoles: !Join [',', !Ref ManagementSTSRoles]
+        Permissions: !Ref MDSPermissions
+        STSRoles: !Join [',', !Ref MDSSTSRoles]
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Condition: PreRole
     Properties:
       Path: /
       Roles:
-        - !Ref ManagementPredefinedRole
-  ManagementInstance:
+        - !Ref MDSPredefinedRole
+  MDSInstance:
     Type: AWS::EC2::Instance
-    DependsOn: ManagementLaunchTemplate
+    DependsOn: [MDSSecurityGroup, MDSLaunchTemplate]
     Properties:
       LaunchTemplate:
-        LaunchTemplateId: !Ref ManagementLaunchTemplate
-        Version: !GetAtt ManagementLaunchTemplate.LatestVersionNumber
+        LaunchTemplateId: !Ref MDSLaunchTemplate
+        Version: !GetAtt MDSLaunchTemplate.LatestVersionNumber
       DisableApiTermination: !Ref TerminationProtection
       Tags:
         - Key: Name
-          Value: !Ref ManagementName
+          Value: !Ref MDSName
       NetworkInterfaces:
         - DeviceIndex: 0
           AssociatePublicIpAddress: false
           Description: eth0
           GroupSet:
-            - !Ref ManagementSecurityGroup
+            - !Ref MDSSecurityGroup
           DeleteOnTermination: true
-          SubnetId: !Ref ManagementSubnet
-  ManagementLaunchTemplate:
+          SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+  MDSLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
         KeyName: !Ref KeyName
         ImageId: !GetAtt AMI.Outputs.ImageId
-        InstanceType: !Ref ManagementInstanceType
+        InstanceType: !Ref MDSInstanceType
         MetadataOptions:
           HttpTokens: !If [EnableMetaDataToken, required, optional]
         BlockDeviceMappings:
@@ -573,48 +550,21 @@ Resources:
               VolumeType: !Ref VolumeType
               VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
-          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
-        UserData:
-          'Fn::Base64':
-            !Join
+          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt MDSRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
+        UserData: !Base64
+          Fn::Join:
             - |+
 
             - - '#cloud-config'
               - 'runcmd:'
               - '  - |'
               - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
-              - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
-              - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
-              - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
-              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
-              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
-              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
-              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${MDSHostname} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; admin_subnet=${AdminCIDR}'
+              - !If [PrimaryMDS, '    primary=true ; secondary=false', !If [SecondaryMDS, '    primary=false ; secondary=true', '    primary=false ; secondary=false']]
+              - !If [PrimaryMDS, '    sic=notused', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref MDSSICKey, ')"']]]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref MDSBootstrapScript, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
-  PublicAddress:
-    Type: AWS::EC2::EIP
-    Condition: EIP
-    Properties:
-      Domain: vpc
-  AddressAssoc:
-    Type: AWS::EC2::EIPAssociation
-    Condition: EIP
-    DependsOn: ManagementInstance
-    Properties:
-      InstanceId: !Ref ManagementInstance
-      AllocationId: !GetAtt PublicAddress.AllocationId
-Outputs:
-  PublicAddress:
-    Condition: EIP
-    Description: The public address of the Management Server.
-    Value: !Ref PublicAddress
-  SSH:
-    Condition: EIP
-    Description: SSH command.
-    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
-  URL:
-    Condition: EIP
-    Description: URL to the portal.
-    Value: !Join ['', ['https://', !Ref PublicAddress]]

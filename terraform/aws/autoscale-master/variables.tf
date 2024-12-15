@@ -38,12 +38,23 @@ variable "asg_name" {
 }
 
 // --- VPC Network Configuration ---
-variable "vpc_id" {
+variable "vpc_cidr" {
   type = string
+  description = "The CIDR block of the VPC"
+  default = "10.0.0.0/16"
 }
-variable "subnet_ids" {
-  type = list(string)
-  description = "List of public subnet IDs to launch resources into. Recommended at least 2"
+variable "public_subnets_map" {
+  type = map(string)
+  description = "A map of pairs {availability-zone = subnet-suffix-number}. Each entry creates a subnet. Minimum 2 pairs.  (e.g. {\"us-east-1a\" = 1} ) "
+}
+variable "private_subnets_map" {
+  type = map(string)
+  description = "A map of pairs {availability-zone = subnet-suffix-number}. Each entry creates a subnet. Minimum 2 pairs.  (e.g. {\"us-east-1a\" = 2} ) "
+
+}
+variable "subnets_bit_length" {
+  type = number
+  description = "Number of additional bits with which to extend the vpc cidr. For example, if given a vpc_cidr ending in /16 and a subnets_bit_length value of 4, the resulting subnet address will have length /20"
 }
 
 // --- Automatic Provisioning with Security Management Server Settings ---
