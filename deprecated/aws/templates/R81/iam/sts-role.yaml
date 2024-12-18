@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an IAM role for cross account permissions (20190313)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Cross Account Permissions Configuration
+        Parameters:
+          - TrustedAccount
+          - Permissions
+    ParameterLabels:
+      TrustedAccount:
+        default: Trusted Account ID
+      STSPermissions:
+        default: IAM Role Permissions
+Parameters:
+  TrustedAccount:
+    Description: A 12 digits number that represents the ID of the trusted account.
+    Type: String
+    AllowedPattern: '^[0-9]{12}$'
+  STSPermissions:
+    Description: Select Read-Write if you intend to use this role with Transit VPC.
+    Type: String
+    Default: Read only
+    AllowedValues:
+      - Read only
+      - Read-Write
+Conditions:
+  AllowReadPermissions: !Or
+    - !Equals [!Ref STSPermissions, Read only]
+    - !Equals [!Ref STSPermissions, Read-Write]
+  AllowCreateVPNPermissions: !Equals [!Ref STSPermissions, Read-Write]
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref TrustedAccount
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - !If
+                - AllowReadPermissions
+                - Effect: Allow
+                  Action:
+                    - ec2:DescribeInstances
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:DescribeSubnets
+                    - ec2:DescribeVpcs
+                    - ec2:DescribeVpnGateways
+                    - ec2:DescribeVpnConnections
+                    - ec2:DescribeSecurityGroups
+                    - elasticloadbalancing:DescribeLoadBalancers
+                    - elasticloadbalancing:DescribeTags
+                    - elasticloadbalancing:DescribeListeners
+                    - elasticloadbalancing:DescribeTargetGroups
+                    - elasticloadbalancing:DescribeRules
+                    - elasticloadbalancing:DescribeTargetHealth
+                    - autoscaling:DescribeAutoScalingGroups
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowCreateVPNPermissions
+                - Effect: Allow
+                  Action:
+                    - ec2:DescribeCustomerGateways
+                    - ec2:CreateCustomerGateway
+                    - ec2:DeleteCustomerGateway
+                    - ec2:DescribeRouteTables
+                    - ec2:EnableVgwRoutePropagation
+                    - ec2:DisableVgwRoutePropagation
+                    - ec2:DescribeVpnGateways
+                    - ec2:CreateVpnGateway
+                    - ec2:AttachVpnGateway
+                    - ec2:DetachVpnGateway
+                    - ec2:DeleteVpnGateway
+                    - ec2:DescribeVpnConnections
+                    - ec2:CreateVpnConnection
+                    - ec2:DeleteVpnConnection
+                    - ec2:DescribeTransitGateways
+                    - ec2:DescribeTransitGatewayRouteTables
+                    - ec2:DescribeTransitGatewayAttachments
+                    - ec2:AssociateTransitGatewayRouteTable
+                    - ec2:DisassociateTransitGatewayRouteTable
+                    - ec2:EnableTransitGatewayRouteTablePropagation
+                    - ec2:DisableTransitGatewayRouteTablePropagation
+                    - ec2:GetTransitGatewayAttachmentPropagations
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowCreateVPNPermissions
+                - Effect: Allow
+                  Action:
+                    - cloudformation:DescribeStacks
+                    - cloudformation:DescribeStackResources
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowCreateVPNPermissions
+                - Effect: Allow
+                  Action:
+                    - cloudformation:CreateStack
+                    - cloudformation:DeleteStack
+                  Resource: arn:aws:cloudformation:*:*:stack/vpn-by-tag--*/*
+                - !Ref 'AWS::NoValue'
+Outputs:
+  Role:
+    Description: The role ARN to assume by the trusted account.
+    Value: !GetAtt Role.Arn
