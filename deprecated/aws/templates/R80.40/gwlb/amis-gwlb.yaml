@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Returns a Check Point Amazon Machine ID (__VERSION__)
+Parameters:
+  Version:
+    Description: Security Gateway version
+    Type: String
+    Default: R80.40-BYOL-GW
+    AllowedValues:
+    - R80.40-BYOL-GW
+    - R80.40-PAYG-NGTP-GW
+    - R80.40-PAYG-NGTX-GW
+Mappings:
+  ConverterMap:
+    R80.40-BYOL-GW:
+      Value: R8040BYOLGW
+    R80.40-PAYG-NGTP-GW:
+      Value: R8040PAYGNGTPGW
+    R80.40-PAYG-NGTX-GW:
+      Value: R8040PAYGNGTXGW
+  RegionMap:
+    af-south-1:
+      R8040BYOLGW: ami-0ac3de5e02318dbb9
+      R8040PAYGNGTPGW: ami-0bd5e19d8b6c2e010
+      R8040PAYGNGTXGW: ami-0daea7d32748a95b7
+    ap-east-1:
+      R8040BYOLGW: ami-03e84cc92d6d806d9
+      R8040PAYGNGTPGW: ami-0a50d8be138a39ffa
+      R8040PAYGNGTXGW: ami-07b3af199dfa93478
+    ap-northeast-1:
+      R8040BYOLGW: ami-08b50c5e55789267c
+      R8040PAYGNGTPGW: ami-07ed13ea6074c0487
+      R8040PAYGNGTXGW: ami-04691498c292bb2ca
+    ap-northeast-2:
+      R8040BYOLGW: ami-0199c1aa2899f1fc2
+      R8040PAYGNGTPGW: ami-07f249c288d5453e5
+      R8040PAYGNGTXGW: ami-0de1b8fb057fc6cb3
+    ap-northeast-3:
+      R8040BYOLGW: ami-0001e1915cbd7af1b
+      R8040PAYGNGTPGW: ami-05e34615518b20617
+      R8040PAYGNGTXGW: ami-05d2bb2f12a0bb254
+    ap-south-1:
+      R8040BYOLGW: ami-0a26838410046600b
+      R8040PAYGNGTPGW: ami-012277a3c7c028020
+      R8040PAYGNGTXGW: ami-03da4b399784399f0
+    ap-south-2: {}
+    ap-southeast-1:
+      R8040BYOLGW: ami-0af3307d70bf9d8b6
+      R8040PAYGNGTPGW: ami-0e8ed0eb9aa094877
+      R8040PAYGNGTXGW: ami-0accd2e7ebac4ed10
+    ap-southeast-2:
+      R8040BYOLGW: ami-054952950277df882
+      R8040PAYGNGTPGW: ami-0c483bfb4f071bbb3
+      R8040PAYGNGTXGW: ami-0a6030b227d947535
+    ap-southeast-3:
+      R8040BYOLGW: ami-01de813d939f37210
+      R8040PAYGNGTPGW: ami-0a69ac977555b13e4
+      R8040PAYGNGTXGW: ami-0d730e1b951919c9b
+    ca-central-1:
+      R8040BYOLGW: ami-0d71e4ca01e67dc40
+      R8040PAYGNGTPGW: ami-0c2116d978c175f8a
+      R8040PAYGNGTXGW: ami-0e53f675371e80935
+    eu-central-1:
+      R8040BYOLGW: ami-046f3dfde3055c0c2
+      R8040PAYGNGTPGW: ami-06af9b32f93c957dc
+      R8040PAYGNGTXGW: ami-09c6fee62f6bc0270
+    eu-central-2: {}
+    eu-north-1:
+      R8040BYOLGW: ami-05c9b72e460f6e230
+      R8040PAYGNGTPGW: ami-09399d091a241d03e
+      R8040PAYGNGTXGW: ami-08422e2787d7a0b86
+    eu-south-1:
+      R8040BYOLGW: ami-0021d29e6c8983ff6
+      R8040PAYGNGTPGW: ami-07c770caf8d288636
+      R8040PAYGNGTXGW: ami-0b355610d679e47bc
+    eu-south-2: {}
+    eu-west-1:
+      R8040BYOLGW: ami-00be1913a17d99fb4
+      R8040PAYGNGTPGW: ami-0b53953de2f981cc3
+      R8040PAYGNGTXGW: ami-0f9c751772234a142
+    eu-west-2:
+      R8040BYOLGW: ami-05aec4880e95365ce
+      R8040PAYGNGTPGW: ami-036cdb2393d5c1a32
+      R8040PAYGNGTXGW: ami-09891046424c314af
+    eu-west-3:
+      R8040BYOLGW: ami-02b95b5c9683bd9ac
+      R8040PAYGNGTPGW: ami-033f58324df30157a
+      R8040PAYGNGTXGW: ami-0c43d0326c68bcb48
+    me-central-1:
+      R8040BYOLGW: ami-02e8d091194949457
+      R8040PAYGNGTPGW: ami-0a8131eea457f8a71
+      R8040PAYGNGTXGW: ami-04ab9b46aa75ad99b
+    me-south-1:
+      R8040BYOLGW: ami-0b95f19ae216bdf25
+      R8040PAYGNGTPGW: ami-0328604c962b84b4c
+      R8040PAYGNGTXGW: ami-0455013fffc60b073
+    sa-east-1:
+      R8040BYOLGW: ami-0e875f613b36b6b79
+      R8040PAYGNGTPGW: ami-008379899b3dc952d
+      R8040PAYGNGTXGW: ami-07e9fc0a27d0eb659
+    us-east-1:
+      R8040BYOLGW: ami-038bddea5b07efcd2
+      R8040PAYGNGTPGW: ami-0f51f2cc69296c954
+      R8040PAYGNGTXGW: ami-056bc408f66e8057b
+    us-east-2:
+      R8040BYOLGW: ami-0c90634daf216611a
+      R8040PAYGNGTPGW: ami-04c93712f9f3c54ca
+      R8040PAYGNGTXGW: ami-0b6988dff7d7b520b
+    us-west-1:
+      R8040BYOLGW: ami-0ee766db82ecd8c06
+      R8040PAYGNGTPGW: ami-0a86fb5df6b87b3ee
+      R8040PAYGNGTXGW: ami-07b7818ac041a88a6
+    us-west-2:
+      R8040BYOLGW: ami-0271bf8fd0aae0f14
+      R8040PAYGNGTPGW: ami-0595481bb41b3ec7d
+      R8040PAYGNGTXGW: ami-0e6c6921c23256796
+Resources:
+  DummyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Properties: {}
+Outputs:
+  ImageId:
+    Description: Check Point Security Gateway AMI
+    Value: !FindInMap [RegionMap ,!Ref 'AWS::Region', !FindInMap [ConverterMap, !Ref 'Version', Value]]
