@@ -53,7 +53,7 @@
     "steps": [
       {
         "name": "chkp",
-        "label": "Check Point CloudGuard settings",
+        "label": "CloudGuard Gateway settings",
         "subLabel": {
           "preValidation": "Configure CloudGuard settings",
           "postValidation": "Done"
@@ -61,11 +61,20 @@
         "bladeTitle": "CloudGuard settings",
         "elements": [
           {
+            "name": "InfoAzureAdminGuide",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "See <a href='https://support.checkpoint.com/results/sk/sk109360' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps "
+            }
+          },
+          {
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
-            "label": "Check Point CloudGuard version",
+            "label": "Version",
             "defaultValue": "R81.20",
-            "toolTip": "The version of Check Point CloudGuard.",
+            "toolTip": "Check Point Recommended version for all deployments is R81.20",
             "constraints": {
               "allowedValues": [
                 {
@@ -88,7 +97,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "License type",
             "toolTip": "The type of license.",
-            "defaultValue": "Bring Your Own License",
+            "defaultValue": "Pay As You Go (NGTX)",
             "visible": true,
             "constraints": {
               "allowedValues": [
@@ -105,6 +114,15 @@
                   "value": "Pay As You Go (NGTX)"
                 }
               ]
+            }
+          },
+          {
+            "name": "InfoVMSize",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends a minimum of 4 vCores for optimal operation"
             }
           },
           {
@@ -1125,6 +1143,85 @@
             "count": 1
           },
           {
+            "name": "ManagementConnection",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Choose Management Option",
+            "defaultValue": "Connect the security GW to my SaaS management (Smart1-Cloud)",
+            "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Connect the security GW to my SaaS management (Smart1-Cloud)",
+                  "value": "Connect the security GW to my SaaS management (Smart1-Cloud)"
+                },
+                {
+                  "label": "Connect the security GW to my IaaS management",
+                  "value": "Connect the security GW to my IaaS management"
+                }
+              ]
+            },
+            "visible": "[equals(steps('chkp-advanced').installationType, 'gateway')]"
+          },
+          {
+            "name": "InfoS1C",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('chkp').ManagementConnection, 'Connect the security GW to my SaaS management (Smart1-Cloud)')]",
+            "options": {
+              "icon": "Info",
+              "text": "Connect the security GW to my SaaS management (Smart1-Cloud)<br><a href='https://support.checkpoint.com/results/sk/sk180501' target='_blank'>sk180501-Connecting CloudGuard Network Security Public Cloud Gateway to Smart-1 Cloud</a>."
+            }
+          },
+          {
+            "name": "Smart1CloudToken",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Smart-1 Cloud Token",
+            "toolTip": "Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal",
+            "constraints": {
+              "required": true,
+              "regex": "[\\S\\s]{5,}",
+              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+            },
+            "visible": "[equals(steps('chkp').ManagementConnection, 'Connect the security GW to my SaaS management (Smart1-Cloud)')]"
+          },
+          {
+            "name": "sicKeyUi",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "SIC key",
+              "confirmPassword": "Confirm SIC key"
+            },
+            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
+            "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{12,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+            },
+            "options": {
+              "hideConfirmation": false
+            },
+            "visible": "[and(not(equals(steps('chkp-advanced').installationType, 'standalone')),equals(steps('chkp').ManagementConnection, 'Connect the security GW to my IaaS management'))]"
+          }
+        ]
+      },
+      {
+        "name": "chkp-advanced",
+        "label": "CloudGuard Advanced settings",
+        "subLabel": {
+          "preValidation": "Configure CloudGuard Advanced settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "CloudGuard Advanced settings",
+        "elements": [
+          {
+            "name": "InfoAdvanced",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "This section includes OPTIONAL advanced configuration.\nTo proceed with Check Point default settings, click Next"
+            }
+          },
+          {
             "name": "installationType",
             "type": "Microsoft.Common.DropDown",
             "label": "Installation type",
@@ -1138,11 +1235,23 @@
                   "value": "gateway"
                 },
                 {
-                  "label": "Standalone",
+                  "label": "Gateway & Management in one server",
                   "value": "standalone"
                 }
               ]
             }
+          },
+          {
+            "name": "managementGUIClientNetwork",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Allow SmartConsole connections from these networks",
+            "toolTip": "Allow SmartConsole connections from the following CIDR networks, for example: 192.168.1.0/26",
+            "constraints": {
+              "required": true,
+              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+              "validationMessage": "Enter a valid IPv4 network CIDR"
+            },
+            "visible": "[and(or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'), equals(steps('chkp').cloudGuardVersion, 'R82')), equals(steps('chkp-advanced').installationType, 'standalone'))]"
           },
           {
             "name": "adminShell",
@@ -1174,41 +1283,11 @@
           {
             "name": "standaloneValidation",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('chkp').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'), equals(steps('chkp').cloudGuardVersion, 'R82')))))]",
+            "visible": "[and(equals(steps('chkp-advanced').installationType, 'standalone'), not(and(equals(steps('chkp').R80Offer, 'Bring Your Own License'),or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'), equals(steps('chkp').cloudGuardVersion, 'R82')))))]",
             "options": {
               "icon": "Error",
               "text": "Standalone deployment is ONLY supported for CloudGuard versions R81.10, R81.20 and R82 Bring Your Own License."
             }
-          },
-          {
-            "name": "managementGUIClientNetwork",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Allowed GUI clients",
-            "toolTip": "GUI clients network CIDR",
-            "constraints": {
-              "required": true,
-              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-              "validationMessage": "Enter a valid IPv4 network CIDR"
-            },
-            "visible": "[and(or(equals(steps('chkp').cloudGuardVersion, 'R81.10'), equals(steps('chkp').cloudGuardVersion, 'R81.20'), equals(steps('chkp').cloudGuardVersion, 'R82')), equals(steps('chkp').installationType, 'standalone'))]"
-          },
-          {
-            "name": "sicKeyUi",
-            "type": "Microsoft.Common.PasswordBox",
-            "label": {
-              "password": "SIC key",
-              "confirmPassword": "Confirm SIC key"
-            },
-            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
-            "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z]{12,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
-            },
-            "options": {
-              "hideConfirmation": false
-            },
-            "visible": "[not(equals(steps('chkp').installationType, 'standalone'))]"
           },
           {
             "name": "SerialPasswordInfoBox",
@@ -1220,11 +1299,11 @@
             }
           },
           {
-             "visible": "[bool(basics('auth').sshPublicKey)]",
+          "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
-            "defaultValue": "Yes",
+            "defaultValue": "No",
             "toolTip": "A unique password hash to enable VM connection via serial console.",
             "constraints": {
               "allowedValues": [
@@ -1243,7 +1322,7 @@
             "name": "AdditionalPassword",
             "type": "Microsoft.Common.PasswordBox",
             "toolTip": "Serial console password hash, used to enable password authentication (using serial console). To generate password hash use the command 'openssl passwd -6 PASSWORD'",
-            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp').EnableSerialConsolePassword)]",
+            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp-advanced').EnableSerialConsolePassword)]",
             "label": {
               "password": "Password hash",
               "confirmPassword": "Confirm password"
@@ -1260,34 +1339,14 @@
           {
             "name": "MaintenanceModeInfoBox",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(bool(basics('auth').password), not(contains('R81.10', steps('chkp').cloudGuardVersion)))]",
+            "visible": "true",
             "options": {
               "icon": "Info",
               "text": "Check Point recommends setting a maintenance-mode password for recovery purposes."
             }
           },
           {
-            "visible": "[not(contains('R81.10', steps('chkp').cloudGuardVersion))]",
-            "name": "EnableMaintenanceMode",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Enable Maintenance Mode",
-            "defaultValue": "Yes",
-            "toolTip": "A unique password hash to enable VM maintenance mode.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Yes",
-                  "value": true
-                },
-                {
-                  "label": "No",
-                  "value": false
-                }
-              ]
-            }
-          },
-          {
-            "visible": "[and(not(contains('R81.10', steps('chkp').cloudGuardVersion)), steps('chkp').EnableMaintenanceMode)]",
+            "visible": "true",
             "name": "MaintenanceModePassword",
             "type": "Microsoft.Common.PasswordBox",
             "defaultValue": "",
@@ -1297,7 +1356,6 @@
               "confirmPassword": "Confirm Password"
             },
             "constraints": {
-              "required": true,
               "validationMessage": "The value must be the output of the hash command."
             },
             "options": {
@@ -1321,7 +1379,7 @@
             }
           },
           {
-            "visible": "[or(not(equals(steps('chkp').cloudGuardVersion, 'R80.10')), not(equals(steps('chkp').installationType, 'custom')))]",
+            "visible": "[or(not(equals(steps('chkp').cloudGuardVersion, 'R80.10')), not(equals(steps('chkp-advanced').installationType, 'custom')))]",
             "name": "allowUploadDownload",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Automatically download updates and share statistical data for product improvement purpose",
@@ -1381,15 +1439,12 @@
             }
           },
           {
-            "name": "basics settings text block",
-            "type": "Microsoft.Common.TextBlock",
-            "visible": true,
+            "name": "InfoVMDiskSpace",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
             "options": {
-              "text": "Please follow the Check Point referenced guide for adding disk space.",
-              "link": {
-                "label": "Additional disk space in CloudGuard",
-                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk156552"
-              }
+              "icon": "Info",
+              "text": "See <a href='https://support.checkpoint.com/results/sk/sk156552' target='_blank'>Adding disk space in CloudGuard</a> for instructions on adding additional disk space "
             }
           },
           {
@@ -1430,11 +1485,11 @@
             "label": "Development Image URI",
             "toolTip": "The URI of the blob containing the development image",
             "constraints": {
-              "required": "[equals(steps('chkp').useCustomImageUri, 'Yes')]",
+              "required": "[equals(steps('chkp-advanced').useCustomImageUri, 'Yes')]",
               "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
               "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
             },
-            "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+            "visible": "[equals(steps('chkp-advanced').useCustomImageUri, 'Yes')]"
           },
           {
             "name": "customMetrics",
@@ -1452,55 +1507,10 @@
                   "label": "No",
                   "value": "no"
                 }
-              ],
-              "required": true
-            },
-            "visible": true
-          },
-          {
-            "name": "allowSmart1CloudConnection",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Quick connect to Smart-1 Cloud",
-            "defaultValue": "Yes",
-            "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
-             "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Yes",
-                  "value": "yes"
-                },
-                {
-                  "label": "No",
-                  "value": "no"
-                }
               ]
             },
-            "visible": "[equals(steps('chkp').installationType, 'gateway')]"
-          },
-          {
-            "name": "smart1CloudTokenTxt",
-            "type": "Microsoft.Common.TextBlock",
-            "options": {
-              "text": "Follow these instructions to quickly connect this single gateway to Smart-1 Cloud",
-              "link": {
-                "label": "SK180501 - Connecting CloudGuard Network Security Public Cloud Gateways to Smart-1 Cloud",
-                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk180501"
-              }
-            },
-            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
-          },
-          {
-            "name": "Smart1CloudToken",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Smart-1 Cloud Token",
-            "toolTip": "Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal",
-            "constraints": {
-              "required": true,
-              "regex": "[\\S\\s]{5,}",
-              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
-            },
-            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
-            }
+            "visible": true
+          }
         ]
       },
       {
@@ -1640,6 +1650,15 @@
         "label": "Tags",
         "elements": [
           {
+            "name": "InfoTags",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point automatically configures all tags required by the solution\nOPTIONAL: Additional tags can be added below"
+            }
+          },
+          {
             "name": "tagsByResource",
             "type": "Microsoft.Common.TagsByResource",
             "toolTip": "Create Azure tags for the new resources",
@@ -1659,8 +1678,8 @@
       "location": "[location()]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
       "adminPassword": "[basics('auth').password]",
-      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]",
+      "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
+      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]",
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
@@ -1676,15 +1695,15 @@
       "Subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
-      "managementGUIClientNetwork": "[steps('chkp').managementGUIClientNetwork]",
-      "installationType": "[steps('chkp').installationType]",
-      "bootstrapScript": "[steps('chkp').bootstrapScript]",
-      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
-      "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
-      "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
-      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "customMetrics": "[steps('chkp').customMetrics]",
-      "adminShell": "[steps('chkp').adminShell]",
+      "managementGUIClientNetwork": "[steps('chkp-advanced').managementGUIClientNetwork]",
+      "installationType": "[steps('chkp-advanced').installationType]",
+      "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
+      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
+      "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
+      "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
+      "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
+      "customMetrics": "[steps('chkp-advanced').customMetrics]",
+      "adminShell": "[steps('chkp-advanced').adminShell]",
       "smart1CloudToken": "[steps('chkp').Smart1CloudToken]",
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
@@ -1694,3 +1713,4 @@
     }
   }
 }
+

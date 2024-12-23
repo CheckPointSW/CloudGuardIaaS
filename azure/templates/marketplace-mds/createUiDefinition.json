@@ -53,7 +53,7 @@
     "steps": [
       {
         "name": "chkp",
-        "label": "Check Point Multi-Domain Server settings",
+        "label": "CloudGuard Multi-Domain Server settings",
         "subLabel": {
           "preValidation": "Configure additional settings",
           "postValidation": "Done"
@@ -61,11 +61,20 @@
         "bladeTitle": "Multi-Domain Server settings",
         "elements": [
           {
+            "name": "InfoAzureAdminGuide",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "See <a href='https://support.checkpoint.com/results/sk/sk154436' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps"
+            }
+          },
+          {
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
-            "label": "Check Point CloudGuard version",
+            "label": "Version",
             "defaultValue": "R81.20",
-            "toolTip": "The version of Check Point CloudGuard.",
+            "toolTip": "Check Point Recommended version for all deployments is R81.20",
             "constraints": {
               "allowedValues": [
                 {
@@ -97,6 +106,15 @@
                   "value": "Bring Your Own License"
                 }
               ]
+            }
+          },
+          {
+            "name": "InfoVMSize",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends a minimum of 4 vCores for optimal operation"
             }
           },
           {
@@ -187,6 +205,38 @@
             "count": 1
           },
           {
+            "name": "managementGUIClientNetwork",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Allow SmartConsole connections from these networks",
+            "toolTip": "Allow SmartConsole connections from the following CIDR networks, for example: 192.168.1.0/26",
+            "constraints": {
+              "required": true,
+              "regex": "(^0\\.0\\.0\\.0\\/0$)|(^(?!0\\.0\\.0\\.0$)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/32)?$)",
+              "validationMessage": "Enter a valid IPv4 network CIDR (only 0.0.0.0/0, X.X.X.X/32 or X.X.X.X are acceptable)"
+            },
+            "visible": true
+          }
+        ]
+      },
+      {
+        "name": "chkp-advanced",
+        "label": "CloudGuard Advanced settings",
+        "subLabel": {
+          "preValidation": "Configure additional settings",
+          "postValidation": "Done"
+        },
+        "bladeTitle": "Multi-Domain Server settings",
+        "elements": [
+          {
+            "name": "InfoAdvanced",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "This section includes OPTIONAL advanced configuration.\nTo proceed with Check Point default settings, click Next"
+            }
+          },
+          {
             "name": "installationType",
             "type": "Microsoft.Common.DropDown",
             "label": "Installation type",
@@ -207,100 +257,6 @@
                   "value": "mds-logserver"
                 }
               ]
-            }
-          },
-          {
-            "name": "SerialPasswordInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[bool(basics('auth').sshPublicKey)]",
-            "options": {
-              "icon": "Info",
-              "text": "Check Point recommends setting serial console password and maintenance-mode password for recovery purposes.      For R81.10 and below the serial console password is used also as maintenance-mode password"
-            }
-          },
-          {
-             "visible": "[bool(basics('auth').sshPublicKey)]",
-            "name": "EnableSerialConsolePassword",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Enable Serial console password",
-            "defaultValue": "Yes",
-            "toolTip": "A unique password hash to enable VM connection via serial console.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Yes",
-                  "value": true
-                },
-                {
-                  "label": "No",
-                  "value": false
-                }
-              ]
-            }
-          },
-          {
-            "name": "AdditionalPassword",
-            "type": "Microsoft.Common.PasswordBox",
-            "toolTip": "Serial console password hash, used to enable password authentication (using serial console). To generate password hash use the command 'openssl passwd -6 PASSWORD'",
-            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp').EnableSerialConsolePassword)]",
-            "label": {
-              "password": "Password hash",
-              "confirmPassword": "Confirm password"
-            },
-            "constraints": {
-              "required": true,
-              "regex": "^.{12,300}$",
-              "validationMessage": "The value must be the output of the hash command."
-            },
-            "options": {
-              "hideConfirmation": false
-            }
-          },
-          {
-            "name": "MaintenanceModeInfoBox",
-            "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(bool(basics('auth').password), not(contains('R81.10', steps('chkp').cloudGuardVersion)))]",
-            "options": {
-              "icon": "Info",
-              "text": "Check Point recommends setting a maintenance-mode password for recovery purposes."
-            }
-          },
-          {
-            "visible": "[not(contains('R81.10', steps('chkp').cloudGuardVersion))]",
-            "name": "EnableMaintenanceMode",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Enable Maintenance Mode",
-            "defaultValue": "Yes",
-            "toolTip": "A unique password hash to enable VM maintenance mode.",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Yes",
-                  "value": true
-                },
-                {
-                  "label": "No",
-                  "value": false
-                }
-              ]
-            }
-          },
-          {
-            "visible": "[and(not(contains('R81.10', steps('chkp').cloudGuardVersion)), steps('chkp').EnableMaintenanceMode)]",
-            "name": "MaintenanceModePassword",
-            "type": "Microsoft.Common.PasswordBox",
-            "defaultValue": "",
-            "toolTip": "To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here.",
-            "label": {
-              "password": "Maintenance Mode password hash",
-              "confirmPassword": "Confirm Password"
-            },
-            "constraints": {
-              "required": true,
-              "validationMessage": "The value must be the output of the hash command."
-            },
-            "options": {
-              "hideConfirmation": false
             }
           },
           {
@@ -331,16 +287,77 @@
             }
           },
           {
-            "name": "managementGUIClientNetwork",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Allowed GUI clients",
-            "toolTip": "GUI clients network CIDR",
+            "name": "SerialPasswordInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[bool(basics('auth').sshPublicKey)]",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends setting serial console password and maintenance-mode password for recovery purposes.      For R81.10 and below the serial console password is used also as maintenance-mode password"
+            }
+          },
+          {
+             "visible": "[bool(basics('auth').sshPublicKey)]",
+            "name": "EnableSerialConsolePassword",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable Serial console password",
+            "defaultValue": "No",
+            "toolTip": "A unique password hash to enable VM connection via serial console.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },
+          {
+            "name": "AdditionalPassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "toolTip": "Serial console password hash, used to enable password authentication (using serial console). To generate password hash use the command 'openssl passwd -6 PASSWORD'",
+            "visible": "[and(bool(basics('auth').sshPublicKey), steps('chkp-advanced').EnableSerialConsolePassword)]",
+            "label": {
+              "password": "Password hash",
+              "confirmPassword": "Confirm password"
+            },
             "constraints": {
               "required": true,
-              "regex": "(^0\\.0\\.0\\.0\\/0$)|(^(?!0\\.0\\.0\\.0$)(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/32)?$)",
-              "validationMessage": "Enter a valid IPv4 network CIDR (only 0.0.0.0/0, X.X.X.X/32 or X.X.X.X are acceptable)"
+              "regex": "^.{12,300}$",
+              "validationMessage": "The value must be the output of the hash command."
             },
-            "visible": true
+            "options": {
+              "hideConfirmation": false
+            }
+          },
+          {
+            "name": "MaintenanceModeInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[and(bool(basics('auth').password), not(contains('R81.10', steps('chkp').cloudGuardVersion)))]",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point recommends setting a maintenance-mode password for recovery purposes."
+            }
+          },
+          {
+            "visible": "[not(contains('R81.10', steps('chkp').cloudGuardVersion))]",
+            "name": "MaintenanceModePassword",
+            "type": "Microsoft.Common.PasswordBox",
+            "defaultValue": "",
+            "toolTip": "To generate a password hash use the command 'grub2-mkpasswd-pbkdf2' on Linux and paste it here.",
+            "label": {
+              "password": "Maintenance Mode password hash",
+              "confirmPassword": "Confirm Password"
+            },
+            "constraints": {
+              "validationMessage": "The value must be the output of the hash command."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
           },
           {
             "name": "sicKeyUi",
@@ -358,7 +375,7 @@
             "options": {
               "hideConfirmation": false
             },
-            "visible": "[not(equals(steps('chkp').installationType, 'mds-primary'))]"
+            "visible": "[not(equals(steps('chkp-advanced').installationType, 'mds-primary'))]"
           },
           {
             "name": "bootstrapScript",
@@ -396,15 +413,32 @@
             }
           },
           {
-            "name": "basics settings text block",
-            "type": "Microsoft.Common.TextBlock",
-            "visible": true,
+            "visible": "[not(equals(steps('chkp-advanced').installationType, 'mds-logserver'))]",
+            "name": "identityAccessManagement" ,
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Configure managed service identity for the VM",
+            "defaultValue": "No",
+            "toolTip": "IAM authentication can be configured to allow access to other resources who have a managed identity.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": "true"
+                },
+                {
+                  "label": "No",
+                  "value": "false"
+                }
+              ]
+            }
+          },               
+          {
+            "name": "InfoVMDiskSpace",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
             "options": {
-              "text": "Please follow the Check Point referenced guide for adding disk space.",
-              "link": {
-                "label": "Additional disk space in CloudGuard",
-                "uri": "https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk156552"
-              }
+              "icon": "Info",
+              "text": "See <a href='https://support.checkpoint.com/results/sk/sk156552' target='_blank'>Adding disk space in CloudGuard</a> for instructions on adding additional disk space "
             }
           },
           {
@@ -485,11 +519,11 @@
             "label": "Development Image URI",
             "toolTip": "The URI of the blob containing the development image",
             "constraints": {
-              "required": "[equals(steps('chkp').useCustomImageUri, 'Yes')]",
+              "required": "[equals(steps('chkp-advanced').useCustomImageUri, 'Yes')]",
               "regex": "^[a-z0-9A-Z_\\-\\.\\:\\/]{1,500}.vhd$",
               "validationMessage": "Only alphanumeric characters and '_','-','.',':','/' are allowed, the value must be 1-500 characters long and must end with .vhd. "
             },
-            "visible": "[equals(steps('chkp').useCustomImageUri, 'Yes')]"
+            "visible": "[equals(steps('chkp-advanced').useCustomImageUri, 'Yes')]"
           }
         ]
       },
@@ -618,6 +652,15 @@
         "label": "Tags",
         "elements": [
           {
+            "name": "InfoTags",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "Check Point automatically configures all tags required by the solution\nOPTIONAL: Additional tags can be added below"
+            }
+          },
+          {
             "name": "tagsByResource",
             "type": "Microsoft.Common.TagsByResource",
             "toolTip": "Create Azure tags for the new resources",
@@ -650,21 +693,21 @@
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
       "managementGUIClientNetwork": "[if(contains(steps('chkp').managementGUIClientNetwork, '/'), steps('chkp').managementGUIClientNetwork, concat(steps('chkp').managementGUIClientNetwork, '/32'))]",
-      "sicKey": "[coalesce(steps('chkp').sicKeyUi, 'notused')]",
-      "installationType": "[steps('chkp').installationType]",
-      "bootstrapScript": "[steps('chkp').bootstrapScript]",
-      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp').allowUploadDownload, 'true')]",
-      "additionalDiskSizeGB": "[int(steps('chkp').additionalDiskSizeGB)]",
-      "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp').VMDiskTypeOldVersions , steps('chkp').VMDiskType)]",
-      "sourceImageVhdUri": "[coalesce(steps('chkp').sourceImageVhdUri, 'noCustomUri')]",
-      "adminShell": "[steps('chkp').adminShell]",
+      "sicKey": "[coalesce(steps('chkp-advanced').sicKeyUi, 'notused')]",
+      "installationType": "[steps('chkp-advanced').installationType]",
+      "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
+      "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
+      "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
+      "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
+      "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
+      "adminShell": "[steps('chkp-advanced').adminShell]",
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
       "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
-      "SerialConsolePasswordHash": "[steps('chkp').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp').MaintenanceModePassword]"
+      "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
+      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]"
     }
   }
 }
