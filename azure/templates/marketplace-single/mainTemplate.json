@@ -101,6 +101,7 @@
     },
     "sicKey": {
       "type": "securestring",
+      "defaultValue": "",
       "metadata": {
         "description": "One time key for Secure Internal Communication"
       }
