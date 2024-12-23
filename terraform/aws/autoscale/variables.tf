@@ -22,11 +22,19 @@ variable "prefix" {
   type = string
   description = "(Optional) Instances name prefix"
   default = ""
+    validation {
+    condition     = length(var.prefix) <= 40
+    error_message = "Prefix can not exceed 40 characters."
+  }
 }
 variable "asg_name" {
   type = string
   description = "Autoscaling Group name"
-  default = "Check-Point-ASG-tf"
+  default = "Check-Point-Security-Gateway-AutoScaling-Group-tf"
+  validation {
+    condition     = length(var.asg_name) <= 100
+    error_message = "Autoscaling Group name can not exceed 100 characters."
+  }
 }
 
 // --- VPC Network Configuration ---
