@@ -1,0 +1,226 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create an Auto Scaling group of workload servers (__VERSION__)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - VPC
+          - ServersSubnets
+      - Label:
+          default: EC2 Instances Configuration
+        Parameters:
+          - ServerAMI
+          - ServerName
+          - ServerInstanceType
+          - KeyName
+          - AllocatePublicAddress
+      - Label:
+          default: Auto Scaling Configuration
+        Parameters:
+          - ServersMinSize
+          - ServersMaxSize
+          - AdminEmail
+          - ServersTargetGroups
+          - SourceSecurityGroup
+    ParameterLabels:
+      VPC:
+        default: VPC
+      ServersSubnets:
+        default: Servers subnets
+      ServerAMI:
+        default: Amazon Image ID
+      ServerName:
+        default: Instance Name
+      ServerInstanceType:
+        default: Instance type
+      KeyName:
+        default: Key name
+      AllocatePublicAddress:
+        default: Allocate an Elastic IP
+      ServersMinSize:
+        default: Minimum group size
+      ServerMaxSize:
+        default: Maximum group size
+      AdminEmail:
+        default: Email address
+      ServersTargetGroups:
+        default: Target Groups
+      SourceSecurityGroup:
+        default: Source Security Group
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  ServersSubnets:
+    Description: Select at least 2 subnets in the VPC.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  ServerAMI:
+    Description: AMI of the servers.
+    Type: String
+    AllowedPattern: '^(ami-(([0-9a-f]{8})|([0-9a-f]{17})))?$'
+    ConstraintDescription: Must be a valid Amazon Machine Image ID.
+  ServerName:
+    Description: The servers name tag.
+    Type: String
+    Default: Server
+  ServerInstanceType:
+    Description: The instance type of the servers.
+    Type: String
+    Default: t3.micro
+    AllowedValues:
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+      - t3.2xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Description: Allocate an elastic IP for each server.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ServersMinSize:
+    Description: The minimal number of servers in the Auto Scaling group.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  ServersMaxSize:
+    Description: The maximal number of servers in the Auto Scaling group.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address.
+      (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '(|([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))'
+    ConstraintDescription: Must be a valid email address.
+  ServersTargetGroups:
+    Description: An optional list of Target Groups to associate with the Auto Scaling group (comma separated list of ARNs, without spaces).
+    Type: String
+    Default: ''
+  SourceSecurityGroup:
+    Description: The ID of Security Group from which access will be allowed to the instances in this Auto Scaling group.
+    Type: String
+    Default: ''
+Conditions:
+  ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
+  ProvidedTargetGroups: !Not [!Equals [!Ref ServersTargetGroups, '']]
+  NotProvidedSecurityGroup: !Equals [!Ref SourceSecurityGroup, '']
+Resources:
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Condition: ProvidedAdminEmail
+    Properties:
+      Subscription:
+        - Endpoint: !Ref AdminEmail
+          Protocol: email
+  ServersSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: NotProvidedSecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ['_', [!Ref 'AWS::StackName', ServersSecurityGroup]]
+      GroupDescription: Servers security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  ServersLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: !Ref AllocatePublicAddress
+            Groups: !If [NotProvidedSecurityGroup, [!Ref ServersSecurityGroup], [!Ref SourceSecurityGroup]]
+        Monitoring:
+          Enabled: true
+        KeyName: !Ref KeyName
+        ImageId: !Ref ServerAMI
+        InstanceType: !Ref ServerInstanceType
+      VersionDescription: Initial template version
+  ServersGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: !Ref ServersSubnets
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ServersLaunchTemplate
+        Version: !GetAtt ServersLaunchTemplate.LatestVersionNumber
+      MinSize: !Ref ServersMinSize
+      MaxSize: !Ref ServersMaxSize
+      TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref ServersTargetGroups], !Ref 'AWS::NoValue']
+      NotificationConfiguration: !If
+        - ProvidedAdminEmail
+        - TopicARN: !Ref NotificationTopic
+          NotificationTypes:
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+        - !Ref 'AWS::NoValue'
+      Tags:
+        - Key: Name
+          Value: !Ref ServerName
+          PropagateAtLaunch: true
+  ScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ServersGroup
+      Cooldown: 300
+      ScalingAdjustment: 1
+  ScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref ServersGroup
+      Cooldown: 300
+      ScalingAdjustment: -1
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 80% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      AlarmActions:
+        - !Ref ScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref ServersGroup
+      ComparisonOperator: GreaterThanThreshold
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 60% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 60
+      AlarmActions:
+        - !Ref ScaleDownPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref ServersGroup
+      ComparisonOperator: LessThanThreshold
