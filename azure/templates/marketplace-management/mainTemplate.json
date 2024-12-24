@@ -212,7 +212,7 @@
     },
     "msi": {
       "type": "bool",
-      "defaultValue": false,
+      "defaultValue": true,
       "metadata": {
         "description": "Configure managed service identity for the VM"
       }

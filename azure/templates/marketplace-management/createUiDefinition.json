@@ -547,6 +547,25 @@
             }
           },
           {
+            "name": "identityAccessManagement" ,
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Create a System Assigned Identity",
+            "toolTip": "Automatically create a Service Principal for this deployment.",
+            "defaultValue": "Yes",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "Yes",
+                  "value": true
+                },
+                {
+                  "label": "No",
+                  "value": false
+                }
+              ]
+            }
+          },          
+          {
             "name": "InfoVMDiskSpace",
             "type": "Microsoft.Common.InfoBox",
             "visible": "true",
@@ -770,6 +789,7 @@
       "installationType": "[steps('chkp-advanced').installationType]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
+      "msi" : "[steps('chkp-advanced').identityAccessManagement]",      
       "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
       "diskType": "[if(contains('R81.10' , steps('chkp-advanced').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
