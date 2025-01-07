@@ -1,6 +1,6 @@
 # Check Point Terraform deployment modules for Azure
 
-This project was developed to allow Terraform deployments for Check Point CloudGuard IaaS solutions on Azure.
+This project was developed to allow Terraform deployments for Check Point CloudGuard Network Security solutions on Azure.
 
 
 These modules use Terraform's [Azurerm provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs) in order to create and provision resources on Azure.
