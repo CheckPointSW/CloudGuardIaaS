@@ -15,3 +15,8 @@ variable "network" {
   type = list(string)
   description = "The name or self_link of the network to attach this firewall to."
 }
+variable "target_tags" {
+  description = "List of target tags for the firewall rule"
+  type = list(string)
+  default = ["checkpoint-gateway"]
+}
