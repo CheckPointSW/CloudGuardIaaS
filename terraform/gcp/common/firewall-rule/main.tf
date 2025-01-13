@@ -5,6 +5,5 @@ resource "google_compute_firewall" "firewall_rules" {
     protocol = var.protocol
   }
   source_ranges = var.source_ranges
-  target_tags = [
-    "checkpoint-gateway"]
+  target_tags = var.target_tags
 }

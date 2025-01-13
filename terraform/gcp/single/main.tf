@@ -36,6 +36,7 @@ module "network_ICMP_firewall_rules" {
   source_ranges = var.ICMP_traffic
   rule_name = "${var.prefix}-${replace(replace(replace(lower(var.installation_type), "(", ""), ")", ""), " ", "-")}-icmp-${random_string.random_string.result}"
   network = local.create_network_condition ? module.network_and_subnet.new_created_network_link : module.network_and_subnet.existing_network_link
+  target_tags = var.installation_type == "Gateway only" ? ["checkpoint-gateway"] : ["checkpoint-management"]
 }
 module "network_TCP_firewall_rules" {
   count = local.TCP_traffic_condition
@@ -44,6 +45,7 @@ module "network_TCP_firewall_rules" {
   source_ranges = var.TCP_traffic
   rule_name = "${var.prefix}-${replace(replace(replace(lower(var.installation_type), "(", ""), ")", ""), " ", "-")}-tcp-${random_string.random_string.result}"
   network = local.create_network_condition ? module.network_and_subnet.new_created_network_link : module.network_and_subnet.existing_network_link
+  target_tags = var.installation_type == "Gateway only" ? ["checkpoint-gateway"] : ["checkpoint-management"]
 }
 module "network_UDP_firewall_rules" {
   count = local.UDP_traffic_condition
@@ -52,6 +54,7 @@ module "network_UDP_firewall_rules" {
   source_ranges = var.UDP_traffic
   rule_name = "${var.prefix}-${replace(replace(replace(lower(var.installation_type), "(", ""), ")", ""), " ", "-")}-udp-${random_string.random_string.result}"
   network = local.create_network_condition ? module.network_and_subnet.new_created_network_link : module.network_and_subnet.existing_network_link
+  target_tags = var.installation_type == "Gateway only" ? ["checkpoint-gateway"] : ["checkpoint-management"]
 }
 module "network_SCTP_firewall_rules" {
   count = local.SCTP_traffic_condition
@@ -60,6 +63,7 @@ module "network_SCTP_firewall_rules" {
   source_ranges = var.SCTP_traffic
   rule_name = "${var.prefix}-${replace(replace(replace(lower(var.installation_type), "(", ""), ")", ""), " ", "-")}-sctp-${random_string.random_string.result}"
   network = local.create_network_condition ? module.network_and_subnet.new_created_network_link : module.network_and_subnet.existing_network_link
+  target_tags = var.installation_type == "Gateway only" ? ["checkpoint-gateway"] : ["checkpoint-management"]
 }
 module "network_ESP_firewall_rules" {
   count = local.ESP_traffic_condition 
@@ -68,6 +72,7 @@ module "network_ESP_firewall_rules" {
   source_ranges = var.ESP_traffic
   rule_name = "${var.prefix}-${replace(replace(replace(lower(var.installation_type), "(", ""), ")", ""), " ", "-")}-esp-${random_string.random_string.result}"
   network = local.create_network_condition ? module.network_and_subnet.new_created_network_link : module.network_and_subnet.existing_network_link
+  target_tags = var.installation_type == "Gateway only" ? ["checkpoint-gateway"] : ["checkpoint-management"]
 }
 
 module "internal_network1_and_subnet" {
