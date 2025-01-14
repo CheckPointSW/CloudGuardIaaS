@@ -121,7 +121,7 @@ This solution uses the following modules:
  |  |  |  |  |         |
  | **authentication_type** | Specifies whether a password authentication or SSH Public Key authentication should be used | string | "Password"; <br/>"SSH Public Key"; | n/a
  |  |  |  |  |         |
- | **availability_zones_num** | A list of a single item of the Availability Zone which the Virtual Machine should be allocated in | string | "centralus", "eastus2", "francecentral", "northeurope", "southeastasia", "westeurope", "westus2", "eastus", "uksouth" | n/a
+ | **availability_zones_num** | The number of availability zones to use for Scale Set. Note that the load balancers and their IP addresses will be redundant in any case.  [List of Azure regions with availability zone support](https://learn.microsoft.com/en-us/azure/reliability/availability-zones-region-support) | number | 0 </br> 1</br> 2</br> 3 | n/a
  |  |  |  |  |         |
  | **minimum_number_of_vm_instances** | The minimum number of VMSS instances for this resource | number | Valid values are in the range 0 - 10 | n/a
  |  |  |  |  |         |
