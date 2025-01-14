@@ -42,21 +42,12 @@ variable "maintenance_mode_password_hash" {
 }
 
 variable "availability_zones_num" {
-  description = "The number of availability zones to use for Scale Set. Note that the load balancers and their IP addresses will be redundant in any case"
-  #Availability Zones are only supported in several regions at this time
-  #"centralus", "eastus2", "francecentral", "northeurope", "southeastasia", "westeurope", "westus2", "eastus", "uksouth"
-  #type = list(string)
-}
-
-locals { // locals for 'availability_zones_num' allowed values
-  availability_zones_num_allowed_values = [
-    "0",
-    "1",
-    "2",
-    "3"
-  ]
-  // will fail if [var.availability_zones_num] is invalid:
-  validate_availability_zones_num_value = index(local.availability_zones_num_allowed_values, var.availability_zones_num)
+  description = "The number of availability zones to use for Scale Set. Note that the load balancers and their IP addresses will be redundant in any case."
+  type = number
+  validation {
+    condition = contains([0, 1, 2, 3], var.availability_zones_num)
+    error_message = "The availability_zones_num must be one of the following values: 0, 1, 2, 3."
+  }
 }
 
 variable "sic_key" {
