@@ -14,6 +14,10 @@ output "azurerm_resource_group_id" {
   value = azurerm_resource_group.resource_group.id
 }
 
+output "resource_group_link" {
+  value = "https://portal.azure.com/#@/resource${azurerm_resource_group.resource_group.id}"
+}
+
 output "admin_username" {
   value = var.admin_username
 }
