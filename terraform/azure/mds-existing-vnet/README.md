@@ -177,11 +177,28 @@ This solution uses the following modules:
     add_storage_account_ip_rules    = false
     storage_account_additional_ips  = []
 
+
+## Outputs
+
+| Name                     | Description                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| resource_group_link      | URL to the created resource group..                    |
+| public_ip                | Public IP address of the VM. |
+| resource_group           | Name of the created resource group.                          |
+| subnets                  | IDs of the subnets.           |
+| location                 | Region where the VM is deployed.         |
+| vm_name                  | Name of the VM.          |
+| disk_size                | Disk size.           |
+| os_version               | Version of the GAIA OS.           |
+
+
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description                                                                                 |
 |------------------|---------------------------------------------------------------------------------------------|
+| 20251501 | - Added output values |
+| | | |
 | 20240613 | - Updated Azure Terraform provider version <br> - Cosmetic fixes & default values <br> - Added option to limit storage account access by specify allowed sourcess <br> - Updated Public IP sku to Standard <br> - Added validation for os_version & os_offer |
 | | | |
 | 20230910 | - R81.20 is the default version |

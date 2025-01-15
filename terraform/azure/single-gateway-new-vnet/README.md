@@ -178,11 +178,28 @@ This solution uses the following modules:
     add_storage_account_ip_rules    = false
     storage_account_additional_ips  = []
 
+## Outputs
+
+| Name                     | Description                                                                  |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| resource_group_link      | URL to the created resource group..                    |
+| public_ip                | Public IP address of the VM. |
+| resource_group           | Name of the created resource group.                          |
+| vnet                     | Name of the created vnet.          |
+| subnets                  | IDs of the created subnets.           |
+| location                 | Region where the VM is deployed.         |
+| vm_name                  | Name of the VM.          |
+| disk_size                | Disk size.           |
+| os_version               | Version of the GAIA OS.           |
+
+
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)
 
 | Template Version | Description                                                                                       |
 |------------------|---------------------------------------------------------------------------------------------------|
+ 20251501 | - Added output values |
+| | | |
 | 20230910 | - R81.20 is the default version |
 | | | |
 | 20230629         | First release of Check Point CloudGuard Network Security Single GW Terraform deployment for Azure |
