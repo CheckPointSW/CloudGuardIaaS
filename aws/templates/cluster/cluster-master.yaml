@@ -496,7 +496,6 @@ Outputs:
     Description: URL to the member A portal.
     Value: !GetAtt ClusterStack.Outputs.MemberAURL
   MemberAExternalInterface:
-    Condition: AllocateAddress
     Description: The external interface of member A.
     Value: !GetAtt ClusterStack.Outputs.MemberAExternalInterface
   MemberAPrivateExternalAddress:
