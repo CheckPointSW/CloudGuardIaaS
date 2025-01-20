@@ -769,7 +769,6 @@ Outputs:
     Description: URL to the member A portal.
     Value: !Join ['', ['https://', !Ref MemberAPublicAddress]]
   MemberAExternalInterface:
-    Condition: AllocateAddress
     Description: The external interface of member A.
     Value: !Ref MemberAExternalInterface
   MemberAPrivateExternalAddress:
