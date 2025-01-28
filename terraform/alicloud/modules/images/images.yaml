@@ -21,122 +21,122 @@ Mappings:
       Value: R8120BYOLMGMT
   RegionMap:
     cn-hongkong:
-      R8110BYOLMGMT: m-j6c23d0lquwgjvdca67a
+      R8110BYOLMGMT: m-j6c983lbqp6styx8h6kn
       R8110BYOLGW: m-j6c12a1czxk521qq3r0h
-      R8120BYOLMGMT: m-j6c7dlpczc121tw1pgwv
+      R8120BYOLMGMT: m-j6cjbk2s5jdnpk97xk28
       R8120BYOLGW: m-j6c48imttt45jqz1ugdq
     ap-southeast-1:
-      R8110BYOLMGMT: m-t4ncnu39rakjcqb16n8z
+      R8110BYOLMGMT: m-t4n3yeb7z0kld6k03khl
       R8110BYOLGW: m-t4nhadadxpdiptz8y4bf
-      R8120BYOLMGMT: m-t4n3zr522octvnm0v8pp
+      R8120BYOLMGMT: m-t4n3yeb7z0klosujz79e
       R8120BYOLGW: m-t4nj28hr12oras5j3qfa
     us-west-1:
-      R8110BYOLMGMT: m-rj9cq4aoui9faooe70gq
+      R8110BYOLMGMT: m-rj9gcm3ljxkurh3ssjli
       R8110BYOLGW: m-rj97acfsuw7nwgxe7goc
-      R8120BYOLMGMT: m-rj9itkz0m8ustnnw38qn
+      R8120BYOLMGMT: m-rj9a2mvolyvxs258wu9d
       R8120BYOLGW: m-rj948viy9sp6vl9nfwes
     us-east-1:
-      R8110BYOLMGMT: m-0xicq4aoui9faooe70gr
+      R8110BYOLMGMT: m-0xi4n169lg00buw0i8w3
       R8110BYOLGW: m-0xi2ol7w342ap21242ne
-      R8120BYOLMGMT: m-0xiabb3cesdidd607mup
+      R8120BYOLMGMT: m-0xi0jj8z7qwv0oo0ado4
       R8120BYOLGW: m-0xi34z1ftmflhslndfxq
     ap-southeast-3:
-      R8110BYOLMGMT: m-8ps5j4esf5zrhxrhg08x
+      R8110BYOLMGMT: m-8ps48ur7phhvyn85ogy9
       R8110BYOLGW: m-8psauxzwc44n0m9wxhq6
-      R8120BYOLMGMT: m-8ps5j4esf5zs0imymlwa
+      R8120BYOLMGMT: m-8ps48ur7phhwa9ipk3q9
       R8120BYOLGW: m-8psauxzwc44nj94f85d0
     ap-southeast-5:
-      R8110BYOLMGMT: m-k1a1nf5wshjdbcbw56al
+      R8110BYOLMGMT: m-k1a2is1v7z5y9acdu60z
       R8110BYOLGW: m-k1ab7m0htkluyqooamhs
-      R8120BYOLMGMT: m-k1a8orgw6du11zx3upyn
+      R8120BYOLMGMT: m-k1aio85gn0x7hh5yfvuf
       R8120BYOLGW: m-k1agjazrcspert685cwt
     ap-southeast-6:
-      R8110BYOLMGMT: m-5ts1ya4q3g6bfw3p4e0a
+      R8110BYOLMGMT: m-5tshs7qp8uwvjn1l6ksh
       R8110BYOLGW: m-5tsdfq2hrx33vzejlweh
-      R8120BYOLMGMT: m-5ts3xncm562lf7smkvuu
+      R8120BYOLMGMT: m-5tshs7qp8uwvv9c527km
       R8120BYOLGW: m-5tsffqcwel3xslf4o40b
     ap-northeast-1:
-      R8110BYOLMGMT: m-6we28apbst4uay3mzvgf
+      R8110BYOLMGMT: m-6we5ut9x4kad31ynp8p7
       R8110BYOLGW: m-6we1j6d2goyykihefl1p
-      R8120BYOLMGMT: m-6wecbiq5p3hr821omqrz
+      R8120BYOLMGMT: m-6we805tatb7bc7237l3m
       R8120BYOLGW: m-6we44gkj39fwj0khacf4
     eu-central-1:
-      R8110BYOLMGMT: m-gw87s2vo6upmo9r9je5p
+      R8110BYOLMGMT: m-gw800cvy1pbzhbikkv6r
       R8110BYOLGW: m-gw846crdt6yp3dwbg018
-      R8120BYOLMGMT: m-gw8iepy4q1ezraqrt2zd
+      R8120BYOLMGMT: m-gw883cwrnd1qf0zbxjfa
       R8120BYOLGW: m-gw80xj460pqtcu6xohoc
     eu-west-1:
-      R8110BYOLMGMT: m-d7o9jsu5byzrmwiq8slw
+      R8110BYOLMGMT: m-d7o65qsfnm7qachvxdih
       R8110BYOLGW: m-d7o9jsu5byzrmyhrcul2
-      R8120BYOLMGMT: m-d7o9jsu5byzs5he7fe91
+      R8120BYOLMGMT: m-d7o7b4c2w9mp61n2njik
       R8120BYOLGW: m-d7oeipyfzvnhi3ipnnq7
     me-east-1:
-      R8110BYOLMGMT: m-eb3apo1v6q25qic9s65b
+      R8110BYOLMGMT: m-eb33plvwz81sqb361o1h
       R8110BYOLGW: m-eb3i5pfd8awudozym6og
-      R8120BYOLMGMT: m-eb34t8djf4sshsz5jmzp
+      R8120BYOLMGMT: m-eb3ao02ismk2gkbld4et
       R8120BYOLGW: m-eb32swjvi9hoikm3gqlp
     ap-southeast-7:
-      R8110BYOLMGMT: m-0joigcd822co2wiv0fhu
+      R8110BYOLMGMT: m-0jofixd7g2si88sylgmr
       R8110BYOLGW: m-0joigcd822co2wiv0fhv
-      R8120BYOLMGMT: m-0jo60cyljt87g36ckh9e
+      R8120BYOLMGMT: m-0jofixd7g2sijv3ih3eg
       R8120BYOLGW: m-0jo3qah2swzb5qlizhc3
     ap-northeast-2:
-      R8110BYOLMGMT: m-mj7dele8qkahp9sdu366
+      R8110BYOLMGMT: m-mj716q7hw166z1cvp3ej
       R8110BYOLGW: m-mj79pu2ua2uc4ubb6468
-      R8120BYOLMGMT: m-mj7aphj9dpe30ni5eo1v
+      R8120BYOLMGMT: m-mj716q7hw167annfkq65
       R8120BYOLGW: m-mj79pu2ua2ucnh5tgrs8
     cn-qingdao:
-      R8110BYOLMGMT: m-m5e7ncdr1t4pydtjnfxw
+      R8110BYOLMGMT: m-m5e7q0b65dfyp7nt7753
       R8110BYOLGW: m-m5ecd13jdcapgsgjz04q
-      R8120BYOLMGMT: m-m5e919j0fbul07rtc69a
+      R8120BYOLMGMT: m-m5e9pz27iwjsa8qkfyts
       R8120BYOLGW: m-m5e64nju1qtfwtejbbn9
     cn-beijing:
-      R8110BYOLMGMT: m-2ze7n6kerbxpgo8mwq18
+      R8110BYOLMGMT: m-2zeau6uhv0xcpbz4ju56
       R8110BYOLGW: m-2ze1uxm4mehz30tf391y
-      R8120BYOLMGMT: m-2ze7n6kerbxpz9443bqm
+      R8120BYOLMGMT: m-2zebf7s4br24fxiqmvvc
       R8120BYOLGW: m-2ze9562a8j4qi3z0rtzx
     cn-zhangjiakou:
-      R8110BYOLMGMT: m-8vbjc7qd48qlfcb7rs8z
+      R8110BYOLMGMT: m-8vbdo8ya2dg0hxiv0rip
       R8110BYOLGW: m-8vbb4hc9r5sghdkkh8sz
-      R8120BYOLMGMT: m-8vb2l6y1b7n25m8cb7w0
+      R8120BYOLMGMT: m-8vb2eerz6mn1vx8yzsbo
       R8120BYOLGW: m-8vbcmnimjv5gkkximwz6
     cn-huhehaote:
-      R8110BYOLMGMT: m-hp37mpcic2gr71vebr7z
+      R8110BYOLMGMT: m-hp3ciw1ab97hm3dgkqa3
       R8110BYOLGW: m-hp3aw7dn91z4nf0wzvy0
-      R8120BYOLMGMT: m-hp31fvxtw0jiuae8pvh5
+      R8120BYOLMGMT: m-hp39fz6ivm2bcjqou4og
       R8120BYOLGW: m-hp35onl20ervkhos07lh
     cn-wulanchabu:
-      R8110BYOLMGMT: m-0jlghp3ewjcuiex39mgc
+      R8110BYOLMGMT: m-0jl9w5uimuv02ivbt33g
       R8110BYOLGW: m-0jlghp3ewjcuigw4dofh
-      R8120BYOLMGMT: m-0jl4ztrz0h387fgnjpds
+      R8120BYOLMGMT: m-0jl9w5uimuv0e74wsruf
       R8120BYOLGW: m-0jlesxaqm9vvbslr91sz
     cn-hangzhou:
-      R8110BYOLMGMT: m-bp1j57qexhmfgdda5tpy
+      R8110BYOLMGMT: m-bp17206rdd474w37tflk
       R8110BYOLGW: m-bp15jqwfn8u2171fbmxl
-      R8120BYOLMGMT: m-bp1g8p14fzozhgtvnk4g
+      R8120BYOLMGMT: m-bp17206rdd47gkcst4d3
       R8120BYOLGW: m-bp1h7gyi10nawa5n0428
     cn-shanghai:
-      R8110BYOLMGMT: m-uf6iqg08zqbtdiat3ddn
+      R8110BYOLMGMT: m-uf66d0riaedvdmovwt2i
       R8110BYOLGW: m-uf64akxbmgphivbf8s3z
-      R8120BYOLMGMT: m-uf65lkpw11ojgg8cuvkj
+      R8120BYOLMGMT: m-uf6icenqwtu9c69vng9u
       R8120BYOLGW: m-uf61s4zps4anov9kxmxn
     cn-shenzhen:
-      R8110BYOLMGMT: m-wz91ubv6iqncx4104szm
+      R8110BYOLMGMT: m-wz9asrvk7exz3smje3b7
       R8110BYOLGW: m-wz90ty9icx3e5nucdp1m
-      R8120BYOLMGMT: m-wz9dh4tlufbvje6gozit
+      R8120BYOLMGMT: m-wz9acuz25mp8pagmjzj1
       R8120BYOLGW: m-wz95duou24q3qcd05z1c
     cn-heyuan:
-      R8110BYOLMGMT: m-f8zbmfgvxmixhgx590w1
+      R8110BYOLMGMT: m-f8z6ug9urvrztoktvlz1
       R8110BYOLGW: m-f8zbmfgvxmixhiw6d2v6
-      R8120BYOLMGMT: m-f8zawzld8lucevff5do0
+      R8120BYOLMGMT: m-f8z92as92ugtg1ap7qas
       R8120BYOLGW: m-f8z4m0zzs3eq03lixvfj
     cn-guangzhou:
-      R8110BYOLMGMT: m-7xv34q6817dlcu6w2frw
+      R8110BYOLMGMT: m-7xv9z9xq78ihlapnjtwz
       R8110BYOLGW: m-7xvd3kjyid4r3mvb3ikp
-      R8120BYOLMGMT: m-7xvi30wcmcxkle0t9udb
+      R8120BYOLMGMT: m-7xv4voenpw1jfdlpuobf
       R8120BYOLGW: m-7xv60dch64i8jecet4vf
     cn-chengdu:
-      R8110BYOLMGMT: m-2vch0mnibcld0snuviw8
+      R8110BYOLMGMT: m-2vc7c8b73wyldnsyvoxt
       R8110BYOLGW: m-2vca0hybx3h5xgzze1i5
-      R8120BYOLMGMT: m-2vcg6kg3c1y1tk4q1iiw
+      R8120BYOLMGMT: m-2vcegja2c6idmx74hkrx
       R8120BYOLGW: m-2vc2vlztkw78ekfcaik8
