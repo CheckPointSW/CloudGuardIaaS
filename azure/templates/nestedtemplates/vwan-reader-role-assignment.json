@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hubId": {
+      "type": "string"
+    },
+    "managed_identity_name": {
+      "type": "string"
+    },
+    "managed_identity_principal_id": {
+      "type": "string"
+    },
+    "deploymentTime": {
+        "type": "string",
+        "defaultValue": "[utcNow()]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(parameters('deploymentTime'), resourceGroup().id, 'managed_app_reader_role')]",
+      "scope": "[parameters('hubId')]",
+      "properties": {
+        "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "principalType": "ServicePrincipal",
+        "principalId": "[parameters('managed_identity_principal_id')]"
+      }
+    }
+  ]
+}
