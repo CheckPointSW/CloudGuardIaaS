@@ -185,14 +185,117 @@
               "description": "The resource id of the public IP"
             },
             "defaultValue": ""
+          },
+          "deploymentTime": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
           }
     },
     "variables": {
-        "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]"
+        "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]",
+        "_artifactsLocation": "https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/",
+        "managed_identity_name": "[concat(resourceGroup().name, '-managed_app_identity')]",
+        "public_ip_resource_group":"[if(equals(parameters('publicIPIngress'), 'yes'), if(equals(parameters('createNewIPIngress'), 'yes'), resourceGroup().name, split(parameters('ipIngressExistingResourceId'), '/')[4]),'')]"
     },
     "resources": [
         {
+          "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+          "apiVersion": "2023-01-31",
+          "name": "[variables('managed_identity_name')]",
+          "location": "[resourceGroup().location]"
+        },
+        {
+          "condition": "[equals(parameters('publicIPIngress'), 'yes')]",
+          "type": "Microsoft.Authorization/roleDefinitions",
+          "apiVersion": "2022-04-01",
+          "name": "[guid(parameters('deploymentTime') , resourceGroup().name, 'PublicIPAddressJoinActionRole')]",
+          "properties": {
+            "roleName": "[guid(parameters('deploymentTime'), resourceGroup().name, 'PublicIPAddressJoinActionRole')]",
+            "description": "Custom role for allowing public IP address join action",
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Network/publicIPAddresses/join/action"
+                ],
+                "notActions": [],
+                "dataActions": [],
+                "notDataActions": []
+              }
+            ],
+            "assignableScopes": [
+              "[subscription().id]", "[resourceGroup().id]"
+            ]
+          }
+        },
+        {
+          "type": "Microsoft.Resources/deployments",
+          "dependsOn": [
+            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name'))]"
+          ],
+          "name": "reader_role_assignment",
+          "apiVersion": "2021-04-01",
+          "resourceGroup": "[split(parameters('hubId'), '/')[4]]",
+          "subscriptionId": "[subscription().subscriptionId]",
+          "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+              "uri": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vwan-reader-role-assignment', '.json'))]",
+              "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+              "managed_identity_name": {
+                "value": "[variables('managed_identity_name')]"
+              },
+              "hubId": {
+                "value": "[parameters('hubId')]"
+              },
+              "managed_identity_principal_id": {
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name')), '2023-01-31', 'full').properties.principalId]"
+              },
+              "deploymentTime": {
+                  "value": "[parameters('deploymentTime')]"
+              }
+            }
+          }
+        },
+        {
+          "condition": "[equals(parameters('publicIPIngress'), 'yes')]",
+          "type": "Microsoft.Resources/deployments",
+          "dependsOn": [
+            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name'))]",
+            "[resourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('deploymentTime'), resourceGroup().name, 'PublicIPAddressJoinActionRole'))]"
+          ],
+          "name": "public_ip_join_permission_assignment",
+          "apiVersion": "2021-04-01",
+          "resourceGroup": "[variables('public_ip_resource_group')]",
+          "subscriptionId": "[subscription().subscriptionId]",
+          "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+              "uri": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vwan-public-ip-join-permission-assignment', '.json'))]",
+              "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+              "managed_identity_name": {
+                "value": "[variables('managed_identity_name')]"
+              },
+              "managed_identity_principal_id": {
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name')), '2023-01-31', 'full').properties.principalId]"
+              },
+              "role_definition_id": {
+                  "value": "[resourceId('Microsoft.Authorization/roleDefinitions', guid(parameters('deploymentTime'), resourceGroup().name, 'PublicIPAddressJoinActionRole'))]"
+              },
+              "deploymentTime": {
+                  "value": "[parameters('deploymentTime')]"
+              }
+            }
+          }
+        },
+        {
             "type": "Microsoft.Solutions/applications",
+            "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name'))]"
+            ],
             "apiVersion": "2021-07-01",
             "name": "[parameters('applicationResourceName')]",
             "location": "[resourceGroup().location]",
@@ -201,7 +304,13 @@
                 "name": "vwan-app",
                 "product": "cp-vwan-managed-app",
                 "publisher": "checkpoint",
-                "version": "1.0.16"
+                "version": "1.0.21"
+            },
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name'))]": {}
+                }
             },
             "properties": {
                 "managedResourceGroupId": "[variables('managedResourceGroupId')]",
@@ -277,6 +386,9 @@
                     },
                     "ipIngressExistingResourceId": {
                         "value": "[parameters('ipIngressExistingResourceId')]"
+                    },
+                    "templateName": {
+                        "value": "wan_custom_template"
                     }
                 }
             }
