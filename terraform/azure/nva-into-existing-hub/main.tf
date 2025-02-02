@@ -58,6 +58,7 @@ locals {
       routing-intent-policies = var.routing-intent-internet-traffic == "yes" ? (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-private-policy]) : [])
       req_body = jsonencode({"properties": {"routingPolicies": local.routing-intent-policies}})
       req_url = "https://management.azure.com/subscriptions/${var.subscription_id}/resourceGroups/${var.vwan-hub-resource-group}/providers/Microsoft.Network/virtualHubs/${var.vwan-hub-name}/routingIntent/hubRoutingIntent?api-version=2022-01-01"
+      public_ip_resource_group = var.new-public-ip == "yes" ? azurerm_resource_group.managed-app-rg.name : "/subscriptions/${var.subscription_id}/resourceGroups/${split("/", var.existing-public-ip)[4]}"
 }
 
 //********************** Marketplace Terms & Solution Registration **************************//
@@ -91,93 +92,144 @@ resource "azurerm_resource_provider_registration" "solutions" {
   name = "Microsoft.Solutions"
 }
 
+//********************** Managed Identiy **************************//
+resource "azurerm_user_assigned_identity" "managed_app_identiy" {
+  location            = azurerm_resource_group.managed-app-rg.location
+  name                = "managed_app_identiy"
+  resource_group_name = azurerm_resource_group.managed-app-rg.name
+}
+
+resource "azurerm_role_assignment" "reader" {
+  depends_on = [azurerm_user_assigned_identity.managed_app_identiy]
+  scope                = data.azurerm_virtual_hub.vwan-hub.id
+  role_definition_name = "Reader"
+  principal_id         = azurerm_user_assigned_identity.managed_app_identiy.principal_id
+}
+
+resource "random_id" "randomId" {
+  keepers = {
+    resource_group = azurerm_resource_group.managed-app-rg.name
+  }
+  byte_length = 8
+}
+
+resource "azurerm_role_definition" "public-ip-join-role" {
+  count       = var.new-public-ip == "yes" || length(var.existing-public-ip) > 0 ? 1 : 0
+  name        = "Managed Application Public IP Join Role - ${random_id.randomId.hex}"
+  scope       = local.public_ip_resource_group
+  permissions {
+    actions     = ["Microsoft.Network/publicIPAddresses/join/action"]
+    not_actions = []
+  }
+  assignable_scopes = [local.public_ip_resource_group]
+}
+
+resource "azurerm_role_assignment" "public-ip-join-role-assignment" {
+  count    = var.new-public-ip == "yes" || length(var.existing-public-ip) > 0 ? 1 : 0
+  scope    = local.public_ip_resource_group
+  role_definition_id = azurerm_role_definition.public-ip-join-role[0].role_definition_resource_id
+  principal_id       = azurerm_user_assigned_identity.managed_app_identiy.principal_id
+}
 
 //********************** Managed Application Configuration **************************//
-resource "azurerm_managed_application" "nva" {
+resource "azapi_resource" "managed-app" {
   depends_on = [azurerm_marketplace_agreement.accept-marketplace-terms, azurerm_resource_provider_registration.solutions]
-  name                        = var.managed-app-name
-  location                    = azurerm_resource_group.managed-app-rg.location
-  resource_group_name         = azurerm_resource_group.managed-app-rg.name
-  kind                        = "MarketPlace"
-  managed_resource_group_name = var.nva-rg-name
-
-  plan {
-    name      = "vwan-app"
-    product   = "cp-vwan-managed-app"
-    publisher = "checkpoint"
-    version   = "1.0.16"
+  type      = "Microsoft.Solutions/applications@2019-07-01"
+  name      = var.managed-app-name
+  location  = azurerm_resource_group.managed-app-rg.location
+  parent_id = azurerm_resource_group.managed-app-rg.id
+  body = {
+	kind = "MarketPlace",
+	plan = {
+		name      = "vwan-app"
+		product   = "cp-vwan-managed-app"
+		publisher = "checkpoint"
+		version   = "1.0.21"
+	},
+	identity = {
+		type = "UserAssigned"
+		userAssignedIdentities = {
+        (azurerm_user_assigned_identity.managed_app_identiy.id) = {}
+      }
+	},
+	properties = {
+		parameters = {
+			location = {
+			  value = azurerm_resource_group.managed-app-rg.location
+			},
+			hubId = {
+			  value = data.azurerm_virtual_hub.vwan-hub.id
+			},
+			osVersion = {
+			  value = var.os-version
+			},
+			LicenseType = {
+			  value = var.license-type
+			},
+			imageVersion = {
+			  value = element(local.image_versions, length(local.image_versions) -1)
+			},
+			scaleUnit = {
+			  value = var.scale-unit
+			},
+			bootstrapScript = {
+			  value = var.bootstrap-script
+			},
+			adminShell = {
+			  value = var.admin-shell
+			},
+			sicKey = {
+			  value = var.sic-key
+			},
+			sshPublicKey = {
+			  value = var.ssh-public-key
+			},
+			BGP = {
+			  value = var.bgp-asn
+			},
+			NVA = {
+			  value = var.nva-name
+			},
+			customMetrics = {
+			  value = var.custom-metrics
+			},
+			hubASN = {
+			  value = data.azurerm_virtual_hub.vwan-hub.virtual_router_asn
+			},
+			hubPeers = {
+			  value = data.azurerm_virtual_hub.vwan-hub.virtual_router_ips
+			},
+			smart1CloudTokenA = {
+			  value = var.smart1-cloud-token-a
+			},
+			smart1CloudTokenB = {
+			  value = var.smart1-cloud-token-b
+			},
+			smart1CloudTokenC = {
+			  value = var.smart1-cloud-token-c
+			},
+			smart1CloudTokenD = {
+			  value = var.smart1-cloud-token-d
+			},
+			smart1CloudTokenE = {
+			  value = var.smart1-cloud-token-e
+			},
+			publicIPIngress = {
+			  value = (var.new-public-ip == "yes" || length(var.existing-public-ip) > 0) ? "yes" : "no"
+			},
+			createNewIPIngress = {
+			  value = var.new-public-ip
+			},
+			ipIngressExistingResourceId = {
+			  value = var.existing-public-ip
+			},
+			templateName = {
+			  value = "wan_terraform"
+			}
+		},
+		managedResourceGroupId = "/subscriptions/${var.subscription_id}/resourcegroups/${var.nva-rg-name}"
+	}
   }
-  parameter_values = jsonencode({
-    location = {
-      value = azurerm_resource_group.managed-app-rg.location
-    },
-    hubId = {
-      value = data.azurerm_virtual_hub.vwan-hub.id
-    },
-    osVersion = {
-      value = var.os-version
-    },
-    LicenseType = {
-      value = var.license-type
-    },
-    imageVersion = {
-      value = element(local.image_versions, length(local.image_versions) -1)
-    },
-    scaleUnit = {
-      value = var.scale-unit
-    },
-    bootstrapScript = {
-      value = var.bootstrap-script
-    },
-    adminShell = {
-      value = var.admin-shell
-    },
-    sicKey = {
-      value = var.sic-key
-    },
-    sshPublicKey = {
-      value = var.ssh-public-key
-    },
-    BGP = {
-      value = var.bgp-asn
-    },
-    NVA = {
-      value = var.nva-name
-    },
-    customMetrics = {
-      value = var.custom-metrics
-    },
-    hubASN = {
-      value = data.azurerm_virtual_hub.vwan-hub.virtual_router_asn
-    },
-    hubPeers = {
-      value = data.azurerm_virtual_hub.vwan-hub.virtual_router_ips
-    },
-    smart1CloudTokenA = {
-      value = var.smart1-cloud-token-a
-    },
-    smart1CloudTokenB = {
-      value = var.smart1-cloud-token-b
-    },
-    smart1CloudTokenC = {
-      value = var.smart1-cloud-token-c
-    },
-    smart1CloudTokenD = {
-      value = var.smart1-cloud-token-d
-    },
-    smart1CloudTokenE = {
-      value = var.smart1-cloud-token-e
-    },
-    publicIPIngress = {
-      value = (var.new-public-ip == "yes" || length(var.existing-public-ip) > 0) ? "yes" : "no"
-    },
-    createNewIPIngress = {
-      value = var.new-public-ip
-    }
-    ipIngressExistingResourceId = {
-      value = var.existing-public-ip
-    }
-  })
 }
 
 //********************** Routing Intent **************************//
@@ -185,7 +237,7 @@ resource "azurerm_managed_application" "nva" {
 
 data "external" "update-routing-intent" {
   count = length(local.routing-intent-policies) != 0 ? 1 : 0
-  depends_on = [azurerm_managed_application.nva]
+  depends_on = [azapi_resource.managed-app]
   program = ["python", "../modules/add-routing-intent.py", "${local.req_url}", "${local.req_body}", "${local.access_token}"]
 }
 

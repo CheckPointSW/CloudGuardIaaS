@@ -21,7 +21,7 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
 - Choose the preferred login method to Azure in order to deploy the solution:
     <br>1. Using Service Principal:
     - Create a [Service Principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal) (or use the existing one) 
-    - Grant the Service Principal at least "**Contributor**" permissions to the Azure subscription<br>
+    - Grant the Service Principal at least "**Contributor**" and "**User Access Administrator**" permissions to the Azure subscription<br>
     - The Service Principal credentials can be stored either in the terraform.tfvars or as [Environment Variables](https://www.terraform.io/docs/providers/azuread/guides/service_principal_client_secret.html)<br>
     
       In case the Environment Variables are used, perform modifications described below:<br>
