@@ -1143,32 +1143,49 @@
             "count": 1
           },
           {
-            "name": "ManagementConnection",
-            "type": "Microsoft.Common.OptionsGroup",
-            "label": "Choose Management Option",
-            "defaultValue": "Connect the security GW to my SaaS management (Smart1-Cloud)",
-            "toolTip": "Automatically connect this single gateway to Smart-1 Cloud - Check Point's Security Management as a Service",
+            "name": "sicKeyUi",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "SIC key",
+              "confirmPassword": "Confirm SIC key"
+            },
+            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the cluster object and the management server.",
             "constraints": {
+              "required": true,
+              "regex": "^[a-z0-9A-Z]{12,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+            },
+            "options": {
+              "hideConfirmation": false
+            }
+          },
+          {
+            "name": "allowSmart1CloudConnection",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Quick connect to Smart-1 Cloud",
+            "defaultValue": "Yes",
+            "toolTip": "Automatically connect this Cluster to Smart-1 Cloud - Check Point's Security Management as a Service",
+             "constraints": {
               "allowedValues": [
                 {
-                  "label": "Connect the security GW to my SaaS management (Smart1-Cloud)",
-                  "value": "Connect the security GW to my SaaS management (Smart1-Cloud)"
+                  "label": "Yes",
+                  "value": "yes"
                 },
                 {
-                  "label": "Connect the security GW to my IaaS management",
-                  "value": "Connect the security GW to my IaaS management"
+                  "label": "No",
+                  "value": "no"
                 }
               ]
             },
-            "visible": "[equals(steps('chkp-advanced').installationType, 'gateway')]"
+            "visible": true
           },
           {
             "name": "InfoS1C",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[equals(steps('chkp').ManagementConnection, 'Connect the security GW to my SaaS management (Smart1-Cloud)')]",
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]",
             "options": {
               "icon": "Info",
-              "text": "Connect the security GW to my SaaS management (Smart1-Cloud)<br><a href='https://support.checkpoint.com/results/sk/sk180501' target='_blank'>sk180501-Connecting CloudGuard Network Security Public Cloud Gateway to Smart-1 Cloud</a>."
+              "text": "Follow these instructions to quickly connect this Cluster to Smart-1 Cloud <br><a href='https://support.checkpoint.com/results/sk/sk180501' target='_blank'>sk180501-Connecting CloudGuard Network Security Public Cloud Gateway to Smart-1 Cloud</a>."
             }
           },
           {
@@ -1181,25 +1198,7 @@
               "regex": "[\\S\\s]{5,}",
               "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
             },
-            "visible": "[equals(steps('chkp').ManagementConnection, 'Connect the security GW to my SaaS management (Smart1-Cloud)')]"
-          },
-          {
-            "name": "sicKeyUi",
-            "type": "Microsoft.Common.PasswordBox",
-            "label": {
-              "password": "SIC key",
-              "confirmPassword": "Confirm SIC key"
-            },
-            "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
-            "constraints": {
-              "required": true,
-              "regex": "^[a-z0-9A-Z]{12,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
-            },
-            "options": {
-              "hideConfirmation": false
-            },
-            "visible": "[and(not(equals(steps('chkp-advanced').installationType, 'standalone')),equals(steps('chkp').ManagementConnection, 'Connect the security GW to my IaaS management'))]"
+            "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }
         ]
       },
