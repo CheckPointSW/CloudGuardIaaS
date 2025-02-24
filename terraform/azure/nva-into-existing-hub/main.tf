@@ -144,7 +144,7 @@ resource "azapi_resource" "managed-app" {
 		name      = "vwan-app"
 		product   = "cp-vwan-managed-app"
 		publisher = "checkpoint"
-		version   = "1.0.21"
+		version   = "1.0.22"
 	},
 	identity = {
 		type = "UserAssigned"
