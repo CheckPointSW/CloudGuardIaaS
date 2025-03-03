@@ -7,15 +7,10 @@ variable "os_version" {
   type = string
   description = "GAIA OS version"
   default = "R8120"
-}
-locals {
-    version_allowed_values = [
-    "R81",
-    "R8110",
-    "R8120",
-    "R82"]
-
-    validate_os_version = index(local.version_allowed_values, var.os_version)
+  validation {
+    condition = contains(["R8110", "R8120" , "R82"], var.os_version)
+    error_message = "Allowed values for os_version are 'R8110' , 'R8120', 'R82'"
+  }
 }
 variable "image_name" {
   type = string
