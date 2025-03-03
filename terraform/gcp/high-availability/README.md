@@ -229,7 +229,7 @@ internal_network1_subnetwork_name = ""
 | license | Checkpoint license (BYOL or PAYG). | string | - BYOL <br/> - PAYG <br/> | "BYOL" | no |
 | image_name | The High Availability (cluster) image name (e.g. check-point-r8120-gw-byol-cluster-631-991001669-v20240923). You can choose the desired cluster image value from [Github](https://github.com/CheckPointSW/CloudGuardIaaS/blob/master/gcp/deployment-packages/ha-byol/images.py). | string | N/A | N/A | yes |
 |  |  |  |  |  |
-| os_version |GAIA OS Version | string | R81;<br/> R8110;<br/> R8120;<br/> R82; | R8120 | yes |
+| os_version |GAIA OS Version | string | R8110;<br/> R8120;<br/> R82; | R8120 | yes |
 |  |  |  |  |  |
 | region  | GCP region  | string  | N/A | "us-central1" | no |
 | zone_a  | Member A Zone. The zone determines what computing resources are available and where your data is stored and used.  | string  | N/A | "us-central1-a" | no |
