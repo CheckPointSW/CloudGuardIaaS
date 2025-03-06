@@ -15,7 +15,6 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
 
 ## Configurations
 - Install and configure Terraform to provision Azure resources: [Configure Terraform for Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure).
-- In order to configure hub routing-intent policies it is **required** to have Python and 'requests' library installed.
 
 ## Usage
 - Choose the preferred login method to Azure in order to deploy the solution:
@@ -165,6 +164,9 @@ please see the [CloudGuard Network for Azure Virtual WAN Deployment Guide](https
     smart1-cloud-token-e            = ""   
     existing-public-ip              = ""
     new-public-ip                   = "yes"
+
+## Known limitations
+1. 'terraform destroy' doesn't work if routing-intent is configured. To destroy the deployment, the routing-intent should be deleted manually first. 
 
 ## Revision History
 In order to check the template version refer to the [sk116585](https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk116585)

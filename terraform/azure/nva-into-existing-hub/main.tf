@@ -56,9 +56,7 @@ locals {
         "nextHop": "/subscriptions/${var.subscription_id}/resourcegroups/${var.nva-rg-name}/providers/Microsoft.Network/networkVirtualAppliances/${var.nva-name}"
       }
       routing-intent-policies = var.routing-intent-internet-traffic == "yes" ? (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-private-policy]) : [])
-      req_body = jsonencode({"properties": {"routingPolicies": local.routing-intent-policies}})
-      req_url = "https://management.azure.com/subscriptions/${var.subscription_id}/resourceGroups/${var.vwan-hub-resource-group}/providers/Microsoft.Network/virtualHubs/${var.vwan-hub-name}/routingIntent/hubRoutingIntent?api-version=2022-01-01"
-      public_ip_resource_group = var.new-public-ip == "yes" ? azurerm_resource_group.managed-app-rg.name : "/subscriptions/${var.subscription_id}/resourceGroups/${split("/", var.existing-public-ip)[4]}"
+      public_ip_resource_group = "/subscriptions/${var.subscription_id}/resourceGroups/${var.new-public-ip == "yes" ? azurerm_resource_group.managed-app-rg.name : var.existing-public-ip != "" ? split("/", var.existing-public-ip)[4] : ""}"
 }
 
 //********************** Marketplace Terms & Solution Registration **************************//
@@ -234,14 +232,47 @@ resource "azapi_resource" "managed-app" {
 
 //********************** Routing Intent **************************//
 
+data "azapi_resource_list" "existing_routing_intent" {
+  type      = "Microsoft.Network/virtualHubs/routingIntent@2024-05-01"
+  parent_id = data.azurerm_virtual_hub.vwan-hub.id
+  response_export_values = {
+      "values" = "value[].{routingPolicies: properties.routingPolicies}"
+	}
 
-data "external" "update-routing-intent" {
-  count = length(local.routing-intent-policies) != 0 ? 1 : 0
+}
+
+locals {
+  routing_intent_exists = length([for intent in data.azapi_resource_list.existing_routing_intent.output.values : intent]) > 0
+  existing_policies = try(data.azapi_resource_list.existing_routing_intent.output.values[0].routingPolicies, [])
+  merged_policies = concat(
+    local.routing-intent-policies,
+    [for policy in local.existing_policies : policy if !contains([for p in local.routing-intent-policies : p.destinations[0]], policy.destinations[0])]
+  )
+}
+
+resource "azapi_resource" "routing_intent" {
+  count = length(local.routing-intent-policies) != 0 && !local.routing_intent_exists ? 1 : 0
   depends_on = [azapi_resource.managed-app]
-  program = ["python", "../modules/add-routing-intent.py", "${local.req_url}", "${local.req_body}", "${local.access_token}"]
+  type      = "Microsoft.Network/virtualHubs/routingIntent@2024-05-01"
+  name      = "hubRoutingIntent"
+  parent_id = data.azurerm_virtual_hub.vwan-hub.id
+
+  body = {
+    properties = {
+      routingPolicies = local.routing-intent-policies
+    }
+  }
 }
 
-output "api_request_result" {
-  value = length(local.routing-intent-policies) != 0 ? data.external.update-routing-intent[0].result : {routing-intent: "not changed"}
-}
+resource "azapi_update_resource" "update_routing_intent" {
+  count = length(local.routing-intent-policies) != 0 && local.routing_intent_exists ? 1 : 0
+  depends_on = [azapi_resource.managed-app]
+  type = "Microsoft.Network/virtualHubs/routingIntent@2024-05-01"
+  resource_id = "${data.azurerm_virtual_hub.vwan-hub.id}/routingIntent/hubRoutingIntent"
 
+  body = {
+    properties = {
+      routingPolicies = local.merged_policies
+    }
+  }
+}
