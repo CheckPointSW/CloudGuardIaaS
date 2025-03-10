@@ -91,17 +91,17 @@ resource "azurerm_resource_provider_registration" "solutions" {
 }
 
 //********************** Managed Identiy **************************//
-resource "azurerm_user_assigned_identity" "managed_app_identiy" {
+resource "azurerm_user_assigned_identity" "managed_app_identity" {
   location            = azurerm_resource_group.managed-app-rg.location
-  name                = "managed_app_identiy"
+  name                = "managed_app_identity"
   resource_group_name = azurerm_resource_group.managed-app-rg.name
 }
 
 resource "azurerm_role_assignment" "reader" {
-  depends_on = [azurerm_user_assigned_identity.managed_app_identiy]
+  depends_on = [azurerm_user_assigned_identity.managed_app_identity]
   scope                = data.azurerm_virtual_hub.vwan-hub.id
   role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.managed_app_identiy.principal_id
+  principal_id         = azurerm_user_assigned_identity.managed_app_identity.principal_id
 }
 
 resource "random_id" "randomId" {
@@ -126,7 +126,7 @@ resource "azurerm_role_assignment" "public-ip-join-role-assignment" {
   count    = var.new-public-ip == "yes" || length(var.existing-public-ip) > 0 ? 1 : 0
   scope    = local.public_ip_resource_group
   role_definition_id = azurerm_role_definition.public-ip-join-role[0].role_definition_resource_id
-  principal_id       = azurerm_user_assigned_identity.managed_app_identiy.principal_id
+  principal_id       = azurerm_user_assigned_identity.managed_app_identity.principal_id
 }
 
 //********************** Managed Application Configuration **************************//
@@ -147,7 +147,7 @@ resource "azapi_resource" "managed-app" {
 	identity = {
 		type = "UserAssigned"
 		userAssignedIdentities = {
-        (azurerm_user_assigned_identity.managed_app_identiy.id) = {}
+        (azurerm_user_assigned_identity.managed_app_identity.id) = {}
       }
 	},
 	properties = {
