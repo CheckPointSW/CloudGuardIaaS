@@ -197,9 +197,9 @@ locals {// locals for  'vm_size' allowed values
     "Standard_D32_v3", "Standard_D64_v3", "Standard_E4_v3", "Standard_E8_v3", "Standard_E16_v3",
     "Standard_E20_v3", "Standard_E32_v3", "Standard_E64_v3", "Standard_E64i_v3", "Standard_DS11_v2",
     "Standard_DS12_v2", "Standard_DS13_v2", "Standard_DS14_v2", "Standard_DS15_v2", "Standard_D2_v5", "Standard_D4_v5",
-    "Standard_D8_v5", "Standard_D16_v5","Standard_D32_v5", "Standard_D2s_v5", "Standard_D4s_v5", "Standard_D8s_v5",
-    "Standard_D16s_v5", "Standard_D2d_v5", "Standard_D4d_v5", "Standard_D8d_v5", "Standard_D16d_v5", "Standard_D32d_v5",
-    "Standard_D2ds_v5", "Standard_D4ds_v5", "Standard_D8ds_v5", "Standard_D16ds_v5", "Standard_D32ds_v5"
+    "Standard_D8_v5", "Standard_D16_v5","Standard_D32_v5", "Standard_D2s_v6", "Standard_D4s_v6", "Standard_D8s_v6",
+    "Standard_D16s_v6", "Standard_D2d_v6", "Standard_D4d_v6", "Standard_D8d_v6", "Standard_D16d_v6", "Standard_D32d_v6",
+    "Standard_D2ds_v6", "Standard_D4ds_v6", "Standard_D8ds_v6", "Standard_D16ds_v6", "Standard_D32ds_v6"
   ]
   // will fail if [var.vm_size] is invalid:
   validate_vm_size_value = index(local.allowed_vm_sizes, var.vm_size)
