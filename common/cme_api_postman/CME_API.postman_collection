@@ -6534,6 +6534,183 @@
 			]
 		},
 		{
+			"name": "v1.3",
+			"item": [
+				{
+					"name": "OCI",
+					"item": [
+						{
+							"name": "POST add OCI account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER ACCOUNT NAME\",                       //\"account_name\"\r\n    \"compartment\": \"PLEASE ENTER COMPARTMENT OCID\",            //\"ocid1.compartment.oc1..abcdefghijklmnopqrstuvwxyz\"        \r\n    \"region\": \"PLEASE ENTER OCI REGION\",                       //\"eu-frankfurt-1\"\r\n    \"realm_domain\": \"PLEASE ENTER REALM DOMAIN\",               //\"oraclecloud.com\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\",\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\"    // 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3/accounts/oci",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3",
+										"accounts",
+										"oci"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PUT set OCI account",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"compartment\": \"PLEASE ENTER COMPARTMENT OCID\",            //\"ocid1.compartment.oc1..abcdefghijklmnopqrstuvwxyz\"        \r\n    \"region\": \"PLEASE ENTER OCI REGION\",                       //\"eu-frankfurt-1\"\r\n    \"realm_domain\": \"PLEASE ENTER REALM DOMAIN\",               //\"oraclecloud.com\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\",\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\"    // 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3/accounts/oci/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3",
+										"accounts",
+										"oci",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "POST add OCI gw configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER GATEWAY CONFIGURATION NAME\",                                           //\"ociGwConfiguration\"\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"oci-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3/gwConfigurations/oci",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3",
+										"gwConfigurations",
+										"oci"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PUT set OCI gw configuration",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                         //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                      //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                          //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"oci-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3/gwConfigurations/oci/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3",
+										"gwConfigurations",
+										"oci",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
 			"name": "Get API request status",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
