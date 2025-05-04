@@ -6543,7 +6543,6 @@
 			"name": "v1.3",
 			"item": [
 				{
-
 					"name": "GCP",
 					"item": [
 						{
@@ -7819,6 +7818,1426 @@
 										"v1.8",
 										"cme-api",
 										"v1.3",
+										"api-versions"
+					]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for general CME configurations."
+				}
+			]
+		},
+		{
+			"name": "v1.3.1",
+			"item": [
+				{
+					"name": "GCP",
+					"item": [
+						{
+							"name": "Add a GCP account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER ACCOUNT NAME\",                       //\"account_name\"\r\n    \"project_id\": \"PLEASE ENTER PROJECT ID\",                   //\"gcp_project_id\"\r\n    \"credentials_file\": \"PLEASE ENTER CREDENTIALS FILE NAME\",  //\"GCP_credentials_file_name\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\",   // 3\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME (OPTIONAL IN MDS)\"     //\"myDomain\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/gcp",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"gcp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit a GCP account",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"project_id\": \"PLEASE ENTER PROJECT ID\",                   //\"gcp_project_id\"\r\n    \"credentials_file\": \"PLEASE ENTER CREDENTIALS FILE NAME\",  //\"GCP_credentials_file_name\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\",   // 3\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME (OPTIONAL IN MDS)\"     //\"myDomain\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/gcp/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"gcp",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add a GCP gw configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER GATEWAY CONFIGURATION NAME\",                                           //\"gcpGwConfiguration\"\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true,\r\n        \"identity-awareness\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"gcp-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/gcp",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"gcp"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit a GCP gw configuration",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                         //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                      //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                          //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true,\r\n        \"identity-awareness\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"gcp-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/gcp/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"gcp",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations in GCP cloud."
+				},
+				{
+					"name": "AWS",
+					"item": [
+						{
+							"name": "Add an AWS account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER ACCOUNT NAME\",                        //\"myAwsAccount\"\r\n    \"regions\": [\r\n        \"eu-west-1\",\r\n        \"us-east-2\"\r\n    ],\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME\",                       //\"myDomain\"\r\n    \"credentials_file\": \"PLEASE ENTER CREDENTIALS FILE NAME\",   //\"IAM\"\r\n    \"access_key\": \"PLEASE ENTER ACCESS KEY\",\r\n    \"secret_key\": \"PLEASE ENTER SECRET KEY\",\r\n    \"sts_role\": \"PLEASE ENTER STS ROLE\",\r\n    \"sts_external_id\": \"PLEASE ENTER STS EXTERNAL ID\",\r\n    \"scan_gateways\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_vpn\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_load_balancers\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_subnets\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"communities\": [\r\n        \"community_a\",\r\n        \"community_b\"\r\n    ],\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\",\r\n    \"sub_accounts\": [\r\n        {\r\n            \"name\": \"sub_account_a\",\r\n            \"credentials_file\": \"AWS_credentials_file_name\"\r\n        },\r\n        {\r\n            \"name\": \"sub_account_b\",\r\n            \"access_key\": \"PLEASE ENTER ACCESS KEY\",\r\n            \"secret_key\": \"PLEASE ENTER SECRET KEY\"\r\n        },\r\n        {\r\n            \"name\": \"sub_account_c\",\r\n            \"sts_role\": \"PLEASE ENTER STS ROLE\",\r\n            \"sts_external_id\": \"PLEASE ENTER STS EXTERNAL ID\"\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/aws",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"aws"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an AWS account",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"regions\": [\r\n        \"eu-west-1\",\r\n        \"us-east-2\"\r\n    ],\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME\",                       //\"myDomain\"\r\n    \"credentials_file\": \"PLEASE ENTER CREDENTIALS FILE NAME\",   //\"IAM\"\r\n    \"access_key\": \"PLEASE ENTER ACCESS KEY\",\r\n    \"secret_key\": \"PLEASE ENTER SECRET KEY\",\r\n    \"sts_role\": \"PLEASE ENTER STS ROLE\",\r\n    \"sts_external_id\": \"PLEASE ENTER STS EXTERNAL ID\",\r\n    \"scan_gateways\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_vpn\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_load_balancers\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"scan_subnets\": \"PLEASE SET TRUE OR FALSE\",\r\n    \"communities\": [\r\n        \"community_a\",\r\n        \"community_b\"\r\n    ],\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\",\r\n    \"sub_accounts\": [\r\n        {\r\n            \"name\": \"sub_account_a\",\r\n            \"credentials_file\": \"AWS_credentials_file_name\"\r\n        },\r\n        {\r\n            \"name\": \"sub_account_b\",\r\n            \"access_key\": \"PLEASE ENTER ACCESS KEY\",\r\n            \"secret_key\": \"PLEASE ENTER SECRET KEY\"\r\n        },\r\n        {\r\n            \"name\": \"sub_account_c\",\r\n            \"sts_role\": \"PLEASE ENTER STS ROLE\",\r\n            \"sts_external_id\": \"PLEASE ENTER STS EXTERNAL ID\"\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/aws/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"aws",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add an AWS gw configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER GATEWAY CONFIGURATION NAME\",                                           //\"awsGwConfiguration\"\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"ips\": true,\r\n        \"anti-bot\": true,\r\n        \"url-filtering\": true,\r\n        \"https-inspection\": true,\r\n        \"identity-awareness\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                              //\"aws-account\"\r\n    \"vpn_domain\": \"PLEASE ENTER VPN DOMAIN\",\r\n    \"vpn_community\": \"PLEASE ENTER VPN COMMUNITY\",\r\n    \"deployment_type\": \"PLEASE ENTER DEPLOYMENT TYPE\",                                            //\"TGW\"\r\n    \"tgw_static_routes\": \"PLEASE ENTER TGW STATIC ROUTES\",                                       //\"10.0.0.0/16,10.100.0.0/16\"\r\n    \"tgw_spoke_routes\": \"PLEASE ENTER TGW SPOKE ROUTES\",                                        //\"192.168.100.0/24,192.168.200.0/24\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/aws",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"aws"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an AWS gw configuration",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"ips\": true,\r\n        \"anti-bot\": true,\r\n        \"url-filtering\": true,\r\n        \"https-inspection\": true,\r\n        \"identity-awareness\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                             //\"aws-account\"\r\n    \"vpn_domain\": \"PLEASE ENTER VPN DOMAIN\",\r\n    \"vpn_community\": \"PLEASE ENTER VPN COMMUNITY\",\r\n    \"deployment_type\": \"PLEASE ENTER DEPLOYMENT TYPE\",                                            //\"TGW\"\r\n    \"tgw_static_routes\": [\r\n        \"10.0.0.0/16\",\r\n        \"10.100.0.0/16\"\r\n    ],\r\n    \"tgw_spoke_routes\": [\r\n        \"192.168.100.0/24\",\r\n        \"192.168.200.0/24\"\r\n    ],\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                        //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                 //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\" ,                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/aws/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"aws",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations in AWS cloud."
+				},
+				{
+					"name": "Azure",
+					"item": [
+						{
+							"name": "vWAN",
+			"item": [
+								{
+									"name": "Post Provision Azure vWAN NVA",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "X-chkp-sid",
+												"value": "{{session}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"base64_sic_key\":                   \"PLEASE ENTER ENCODED BASE64 SIC KEY\",          //\"MTIzNDU2Nzg=\"\r\n    \"policy\":                           \"PLEASE ENTER POLICY PACKAGE NAME\",             //\"Standard\"\r\n    \"autonomous_threat_prevention\":     \"PLEASE ENTER ATP MODE TRUE/FALSE\",             //true\r\n    \"identity_awareness\":               \"PLEASE ENTER IDA MODE TRUE/FALSE\"              //true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/azure/virtualWANs/accounts/<account_id>/resourceGroups/<nva_resource_group>/provision/<nva_name>",
+											"protocol": "https",
+											"host": [
+												"{{managementIP}}"
+											],
+											"path": [
+												"web_api",
+												"v1.8",
+												"cme-api",
+												"v1.3.1",
+												"azure",
+												"virtualWANs",
+												"accounts",
+												"<account_id>",
+												"resourceGroups",
+												"<nva_resource_group>",
+												"provision",
+												"<nva_name>"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Add Azure vWAN ingress rules",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "X-chkp-sid",
+												"value": "{{session}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"rules\": [\r\n        {\r\n        \"name\": \"PLEASE ENTER RULE NAME\",                                          //\"rule_name\"\r\n        \"original_source\": \"PLEASE ENTER ORIGINAL SOURCE\",                         //\"1.1.1.1\", \"10.0.0.0/8\"\r\n        \"lb_public_ips\": [\"PLEASE ENTER LB PUBLIC IPS\"],                           //[\"5.255.37.4\", \"4.233.37.8\"]\r\n        \"original_ports\": [\"PLEASE ENTER ORIGINAL PORTS\"],                         //[\"443\", \"80-85\"]\r\n        \"protocol\": \"PLEASE ENTER PROTOCOL\"                                        //\"TCP\", \"UDP\"\r\n        }\r\n      ]\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/azure/virtualWANs/accounts/<account_id>/resourceGroups/<nva_resource_group>/inboundRules/<nva_name>",
+											"protocol": "https",
+											"host": [
+												"{{managementIP}}"
+											],
+											"path": [
+												"web_api",
+												"v1.8",
+												"cme-api",
+												"v1.3.1",
+												"azure",
+												"virtualWANs",
+												"accounts",
+												"<account_id>",
+												"resourceGroups",
+												"<nva_resource_group>",
+												"inboundRules",
+												"<nva_name>"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Azure vWAN ingress rules",
+									"request": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "X-chkp-sid",
+												"value": "{{session}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/azure/virtualWANs/accounts/<account_id>/resourceGroups/<nva_resource_group>/inboundRules/<nva_name>",
+											"protocol": "https",
+											"host": [
+												"{{managementIP}}"
+											],
+											"path": [
+												"web_api",
+												"v1.8",
+												"cme-api",
+												"v1.3.1",
+												"azure",
+												"virtualWANs",
+												"accounts",
+												"<account_id>",
+												"resourceGroups",
+												"<nva_resource_group>",
+												"inboundRules",
+												"<nva_name>"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Get Azure vWAN ingress rules",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "X-chkp-sid",
+												"value": "{{session}}",
+												"type": "text"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/azure/virtualWANs/accounts/<account_id>/resourceGroups/<nva_resource_group>/inboundRules/<nva_name>",
+											"protocol": "https",
+											"host": [
+												"{{managementIP}}"
+											],
+											"path": [
+												"web_api",
+												"v1.8",
+												"cme-api",
+												"v1.3.1",
+												"azure",
+												"virtualWANs",
+												"accounts",
+												"<account_id>",
+												"resourceGroups",
+												"<nva_resource_group>",
+												"inboundRules",
+												"<nva_name>"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Add an Azure account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER ACCOUNT NAME\",                     //\"myAzureAccount\"\r\n    \"subscription\": \"PLEASE ENTER SUBSCRIPTION\",             //\"aaaa-aaaa-aaaa-aaaa-aaaa\"\r\n    \"directory_id\": \"PLEASE ENTER DIRECTORY ID\",             //\"bbbb-bbbb-bbbb-bbbb-bbbb\"\r\n    \"application_id\": \"PLEASE ENTER APPLICATION ID\",         //\"cccc-cccc-cccc-cccc-cccc\"\r\n    \"client_secret\": \"PLEASE ENTER CLIENT SECRET\",           //\"mySecret\"\r\n    \"iam\": \"ENABLE/DISABLE IAM AUTH\",                        //false\r\n     \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\", // 3\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME\",                    //\"myDomain\"\r\n    \"environment\": \"PLEASE ENTER THE AZURE ENVIRONMENT\"      //\"AzureCloud\",\"AzureChinaCloud\",\"AzureUSGovernment\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/azure",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"azure"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an Azure account",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"subscription\": \"PLEASE ENTER SUBSCRIPTION\",             //\"aaaa-aaaa-aaaa-aaaa-aaaa\"\r\n    \"directory_id\": \"PLEASE ENTER DIRECTORY ID\",             //\"bbbb-bbbb-bbbb-bbbb-bbbb\"\r\n    \"application_id\": \"PLEASE ENTER APPLICATION ID\",         //\"cccc-cccc-cccc-cccc-cccc\"\r\n    \"client_secret\": \"PLEASE ENTER CLIENT SECRET\",           //\"mySecret\"\r\n    \"iam\": \"ENABLE/DISABLE IAM AUTH\",                        //false   \r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\", // 3\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME\",                    //\"myDomain\"\r\n    \"environment\": \"PLEASE ENTER THE AZURE ENVIRONMENT\"      //\"AzureCloud\",\"AzureChinaCloud\",\"AzureUSGovernment\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/azure/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"azure",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add an Azure gw configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER GATEWAY CONFIGURATION NAME\",                                           //\"azureGwConfiguration\"\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"ipv6\":  \"PLEASE ENTER BOLEAN VALUE FOR IPV6\",                                               //true / false\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"identity-awareness\": true,\r\n        \"application-control\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                          //\"azure-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/azure",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"azure"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an Azure gw configuration",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"ipv6\":  \"PLEASE ENTER BOLEAN VALUE FOR IPV6\",                                               //true / false\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"identity-awareness\": true,\r\n        \"https-inspection\": true,\r\n        \"anti-virus\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                          //\"azure-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/azure/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"azure",
+										"<gwConfiguration_name>"
+									]
+								}
+											},
+							"response": []
+						}
+					],
+					"description": "Operations in Azure cloud."
+				},
+				{
+					"name": "OCI",
+					"item": [
+						{
+							"name": "Add an OCI account",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER ACCOUNT NAME\",                       //\"account_name\"\r\n    \"compartment\": \"PLEASE ENTER COMPARTMENT OCID\",            //\"ocid1.compartment.oc1..abcdefghijklmnopqrstuvwxyz\"        \r\n    \"region\": \"PLEASE ENTER OCI REGION\",                       //\"eu-frankfurt-1\"\r\n    \"realm_domain\": \"PLEASE ENTER REALM DOMAIN\",               //\"oraclecloud.com\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\",\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\"    // 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/oci",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"oci"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an OCI account",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"compartment\": \"PLEASE ENTER COMPARTMENT OCID\",            //\"ocid1.compartment.oc1..abcdefghijklmnopqrstuvwxyz\"        \r\n    \"region\": \"PLEASE ENTER OCI REGION\",                       //\"eu-frankfurt-1\"\r\n    \"realm_domain\": \"PLEASE ENTER REALM DOMAIN\",               //\"oraclecloud.com\"\r\n    \"credentials_data\": \"PLEASE ENTER CREDENTIALS DATA\",       //\"ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibXktcHJvamVj...\"\",\r\n    \"deletion_tolerance\": \"PLEASE ENTER DELETION TOLERANCE\"    // 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/oci/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"oci",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add an OCI gw configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER GATEWAY CONFIGURATION NAME\",                                           //\"ociGwConfiguration\"\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                     //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                   //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                        //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"oci-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/oci",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"oci"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit an OCI gw configuration",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"base64_sic_key\": \"PLEASE ENTER ENCODED BASE64 SIC KEY\",                                         //\"MTIzNDU2Nzg=\"\r\n    \"version\": \"PLEASE ENTER GATEWAY VERSION\",                                                      //\"R81.20\"\r\n    \"policy\": \"PLEASE ENTER POLICY NAME\",                                                          //\"Standard\"\r\n    \"section_name\": \"PLEASE ENTER SECTION NAME\",                                                 //\"sectionName\"\r\n    \"x_forwarded_for\": \"PLEASE ENTER BOOLEAN VALUE FOR X FORWARDED FOR\",                         //true / false\r\n    \"color\": \"PLEASE ENTER COLOR NAME\",                                                          //\"red\"\r\n    \"blades\": {\r\n        \"vpn\": true,\r\n        \"url-filtering\": true\r\n    },\r\n    \"identity_awareness_settings\": {\r\n        \"enable_cloudguard_controller\": \"PLEASE ENTER BOOLEAN VALUE FOR ENABLE CLOUDGUARD CONTROLLER\",       //true / false\r\n        \"receive_identities_from\": [\"PLEASE ENTER PDP GATEWAY NAMES\"]                                     // [\"PDP_GW1\", \"PDP_GW2\"]\r\n    },\r\n    \"related_account\": \"PLEASE ENTER RELATED ACCOUNT\",                                         //\"oci-account\"\r\n    \"repository_gateway_scripts\": [\r\n        {\r\n            \"name\": \"PLEASE ENTER REPOSITORY GATEWAY SCRIPT NAME\",                            //\"repo_script\"\r\n            \"parameters\": \"PLEASE ENTEAR PARAMETERS SEPARATED BY SPACE\"                      //\"param1 param2\"\r\n\r\n        }\r\n    ],\r\n    \"send_logs_to_server\": \"PLEASE ENTER PRIMARY LOG SERVERS NAMES\",                       //\"[\"PLM1\", \"PLM_2\"]\"\r\n    \"send_logs_to_backup_server\": \"PLEASE ENTER BACKUP LOG SERVERS NAMES\",                //\"[\"BLM1\", \"BLM_2\"]\"\r\n    \"send_alerts_to_server\": \"PLEASE ENTER ALERTS SERVERS NAMES\",                         //\"[\"ALM1\", \"ALM_2\"]\"\r\n    \"communication_with_servers_behind_nat\": \"PLEASE ENTER MANAGEMENT BEHIND NAT CONFIGURATION\" // \"according-to-topology | original-ip-only | translated-ip-only | use-management-settings\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/oci/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"oci",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Gw Configurations",
+					"item": [
+						{
+							"name": "Get all gw configurations",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a gw configuration",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete a gw configuration",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/gwConfigurations/<gwConfiguration_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"gwConfigurations",
+										"<gwConfiguration_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all gateways status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/status/gwConfigurations",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"status",
+										"gwConfigurations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a gateway status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/status/gwConfigurations/<gateway_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"status",
+										"gwConfigurations",
+										"<gateway_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for configuring Gw Configurations in CME <br/>(Previously known as \"templates\")."
+				},
+				{
+					"name": "Accounts",
+					"item": [
+						{
+							"name": "Get all accounts",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get an account",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete an account",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/accounts/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"accounts",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all accounts status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/status/accounts",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"status",
+										"accounts"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get an account status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/status/accounts/<account_name>",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"status",
+										"accounts",
+										"<account_name>"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for configuring Accounts in CME <br/>(Previously known as \"controllers\")."
+				},
+				{
+					"name": "Management",
+					"item": [
+						{
+							"name": "Get management",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/management",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"management"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit management",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"PLEASE ENTER MANAGEMENT NAME\",         //\"mgmt_name\"\r\n    \"domain\": \"PLEASE ENTER DOMAIN NAME\"            //\"myDomain\"\r\n}"
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/management",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"management"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Operations for configuring Management."
+				},
+				{
+					"name": "CME General Configuration",
+					"item": [
+						{
+							"name": "Get delayCycle",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/generalConfiguration/delayCycle",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"generalConfiguration",
+										"delayCycle"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Edit delayCycle",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"delay_cycle\": \"PLEASE ENTER DELAY CYCLE\"    // 20 \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/generalConfiguration/delayCycle",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"generalConfiguration",
+										"delayCycle"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get cmeVersion",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+									}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/generalConfiguration/cmeVersion",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
+										"generalConfiguration",
+										"cmeVersion"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get api-versions",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-chkp-sid",
+										"value": "{{session}}"
+						}
+								],
+								"url": {
+									"raw": "https://{{managementIP}}/web_api/v1.8/cme-api/v1.3.1/api-versions",
+									"protocol": "https",
+									"host": [
+										"{{managementIP}}"
+									],
+									"path": [
+										"web_api",
+										"v1.8",
+										"cme-api",
+										"v1.3.1",
 										"api-versions"
 					]
 								}
