@@ -45,6 +45,7 @@ Metadata:
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
         Parameters:
+          - AutoScaleGroupName
           - GatewayName
           - GatewayInstanceType
           - GatewaysMinSize
@@ -178,6 +179,8 @@ Metadata:
         default: Custom service port
       ResourcesTagName:
         default: Resources tag name
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   NumberOfAZs:
     Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
@@ -757,6 +760,11 @@ Parameters:
     Description: CIDR's block of each Servers private subnet(divided by coma, without spaces)
     Type: CommaDelimitedList
     Default: "192.168.0.10/24, 192.168.0.20/24"
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -766,6 +774,7 @@ Conditions:
   ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   GatewayLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -819,6 +828,7 @@ Resources:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/autoscale-gwlb.yaml
       Parameters:
         VPC: !Ref SecurityVPC
+        AutoScaleGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
         GatewayName: !Ref GatewayName
         GatewayInstanceType: !Ref GatewayInstanceType
