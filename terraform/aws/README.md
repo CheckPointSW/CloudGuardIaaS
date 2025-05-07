@@ -1,3 +1,16 @@
+# ⚠️ Directory Deprecated  
+This directory is now officially deprecated. All future development and maintenance will take place in a new [repository](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+.  
+
+### 📌 New Repository and Modules  
+All ongoing updates and improvements are now available in the following locations:  
+
+- [Terraform Regsitry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+- [Admin Guide](https://support.checkpoint.com/results/sk/sk183294)
+- [GitHub](https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security)
+
+___
+
 # Check Point CloudGuard Network Terraform deployment modules for AWS
 
 This project was developed to allow Terraform deployments for Check Point CloudGuard Network solutions on AWS.
