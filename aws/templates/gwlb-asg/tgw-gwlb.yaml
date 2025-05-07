@@ -41,6 +41,7 @@ Metadata:
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
         Parameters:
+          - AutoScaleGroupName
           - GatewayName
           - GatewayInstanceType
           - GatewaysMinSize
@@ -178,6 +179,8 @@ Metadata:
         default: Manage Gateways
       GatewaysAddresses:
         default: Gateways addresses
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   VPC:
     Description: Select an existing VPC.
@@ -771,11 +774,17 @@ Parameters:
     Description: Allow gateways only from this network to communicate with the Security Management Server.
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   GWLBeSubnet1:
     Type: AWS::EC2::Subnet
@@ -1047,6 +1056,7 @@ Resources:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/gwlb.yaml
       Parameters:
         VPC: !Ref VPC
+        AutoScaleGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
         GatewaysSubnets: !Join [',', !Ref GatewaysSubnets]
         KeyName: !Ref KeyName
         EnableVolumeEncryption: !Ref EnableVolumeEncryption

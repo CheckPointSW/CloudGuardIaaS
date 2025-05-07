@@ -53,6 +53,7 @@ Metadata:
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
         Parameters:
+        - AutoScaleGroupName
           - GatewayName
           - GatewayInstanceType
           - GatewaysMinSize
@@ -206,6 +207,8 @@ Metadata:
         default: AMI ID
       ResourcesTagName:
         default: Resources tag name
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -856,6 +859,11 @@ Parameters:
     Description: Outbound Subnet tagging for Inspection (Comma-delimited list of CIDR blocks for inspection), For more information, visit the documentation at CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide Admin guide.
     Type: CommaDelimitedList
     Default: "0.0.0.0/0"
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -863,6 +871,7 @@ Conditions:
   EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
   ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   SecurityVPCStack:
     Type: AWS::CloudFormation::Stack
@@ -903,6 +912,7 @@ Resources:
       Parameters:
         SecurityVPC: !GetAtt SecurityVPCStack.Outputs.VPCID
         NumberOfAZs: !Ref NumberOfAZs
+        AutoScaleGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
         GatewaysSubnets: !Join
           - ','
           - - !GetAtt SecurityVPCStack.Outputs.PublicSubnet1ID

@@ -20,6 +20,7 @@ Metadata:
       - Label:
           default: EC2 Instances Configuration
         Parameters:
+          - AutoScaleGroupName
           - GatewayName
           - GatewayInstanceType
           - KeyName
@@ -133,6 +134,8 @@ Metadata:
         default: Proxy port
       ELBClients:
         default: Allowed proxy clients
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -504,6 +507,11 @@ Parameters:
     Type: String
     Default: 0.0.0.0/0
     AllowedPattern: '^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})$'
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
   ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
@@ -512,6 +520,7 @@ Conditions:
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
   4AZs: !Equals [ !Ref NumberOfAZs, 4 ]
   3AZs: !Or [ !Equals [ !Ref NumberOfAZs, 3 ], !Condition 4AZs ]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
@@ -625,6 +634,7 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref GatewayLaunchTemplate
         Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+        AutoScalingGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
       MinSize: !Ref GatewaysMinSize
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']

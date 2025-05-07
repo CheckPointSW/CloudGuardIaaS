@@ -22,6 +22,7 @@ Metadata:
       - Label:
           default: Auto Scaling Configuration
         Parameters:
+          - AutoScaleGroupName
           - GatewaysMinSize
           - GatewaysMaxSize
           - AdminEmail
@@ -106,6 +107,8 @@ Metadata:
         default: Proxy port
       ELBClients:
         default: Allowed proxy clients
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   VPC:
     Description: Select an existing VPC.
@@ -419,12 +422,18 @@ Parameters:
     Type: String
     Default: 0.0.0.0/0
     AllowedPattern: '^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})$'
+    AutoScaleGroupName:
+      Description: The Name of the Auto Scaling Group. (optional)
+      Type: String
+      Default: ""
+      MaxLength: 100
 Conditions:
   ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
   ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
   CreateELB: !Not [!Equals [!Ref ELBType, none]]
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   ChkpGatewayRole:
     Type: AWS::IAM::Role
@@ -514,6 +523,7 @@ Resources:
       LaunchTemplate:
         LaunchTemplateId: !Ref GatewayLaunchTemplate
         Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      AutoScalingGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
       MinSize: !Ref GatewaysMinSize
       MaxSize: !Ref GatewaysMaxSize
       LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']

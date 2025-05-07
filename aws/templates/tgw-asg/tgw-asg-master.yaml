@@ -27,6 +27,7 @@ Metadata:
       - Label:
           default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
         Parameters:
+          - AutoScaleGroupName
           - GatewayName
           - GatewayInstanceType
           - GatewaysMinSize
@@ -139,6 +140,8 @@ Metadata:
         default: Management Server
       ConfigurationTemplate:
         default: Configuration template
+      AutoScaleGroupName:
+        default: Auto Scale Group name
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -671,10 +674,16 @@ Parameters:
     Default: TGW-ASG-configuration
     MinLength: 1
     MaxLength: 30
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
@@ -695,6 +704,7 @@ Resources:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/autoscale/tgw-asg.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
+        AutoScaleGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
         GatewaysSubnets: !Join
           - ','
           - - !GetAtt VPCStack.Outputs.PublicSubnet1ID
