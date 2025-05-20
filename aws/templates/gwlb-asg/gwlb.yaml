@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20241027)
+Description: |
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20250508)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -44,6 +45,7 @@ Metadata:
           - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
+          - EnableIPv6Traffic
           - CloudWatch
           - GatewayBootstrapScript
       - Label:
@@ -139,6 +141,8 @@ Metadata:
         default: Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group name
+      EnableIPv6Traffic:
+        default: Add support for IPv6 traffic inspection
 Parameters:
   VPC:
     Description: Select an existing VPC.
@@ -459,6 +463,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  EnableIPv6Traffic:
+    Description: Enables inspection of IPv6 traffic encapsulated within IPv4 Geneve tunnels, ensuring proper handling of IPv6 traffic on IPv4 autoscale gateways (supported on version R81.20 with JHF 99 and above).
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
   GatewayBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -638,12 +649,14 @@ Parameters:
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
+  EnableIPv6: !Equals [!Ref EnableIPv6Traffic, true]
 Resources:
   GatewayLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: gateway
       Name: !Ref GWLBName
+      IpAddressType: !If [EnableIPv6, dualstack, ipv4]
       LoadBalancerAttributes:
         - Key: load_balancing.cross_zone.enabled
           Value: !Ref CrossZoneLoadBalancing
@@ -656,6 +669,8 @@ Resources:
   VpcEndpointService:
     Type: AWS::EC2::VPCEndpointService
     Properties:
+      # Due to an issue in AWS CloudFormation, EndpointService deployment does not support IPv6.
+      # This issue will be resolved in the future.
       AcceptanceRequired: !Ref AcceptConnectionRequired
       GatewayLoadBalancerArns:
         - !Ref GatewayLoadBalancer
