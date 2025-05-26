@@ -5,7 +5,7 @@ This directory is now officially deprecated. All future development and maintena
 ### 📌 New Repository and Modules  
 All ongoing updates and improvements are now available in the following locations:  
 
-- [Terraform Regsitry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+- [Terraform Registry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
 - [Admin Guide](https://support.checkpoint.com/results/sk/sk183294)
 - [GitHub](https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security)
 

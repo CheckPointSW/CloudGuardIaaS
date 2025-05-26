@@ -5,8 +5,8 @@ Azure and AWS directories are now officially deprecated. All future development 
 All updates and improvements are now available in the [Admin Guide](https://support.checkpoint.com/results/sk/sk183294) and the links below:
 
 #### AWS  
-- [Terraform Regsitry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/aws/latest) 
+- [Terraform Registry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/aws/latest) 
 - [GitHub](https://github.com/CheckPointSW/terraform-aws-cloudguard-network-security)
 #### Azure 
-- [Terraform Regsitry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+- [Terraform Registry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
 - [GitHub](https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security)
