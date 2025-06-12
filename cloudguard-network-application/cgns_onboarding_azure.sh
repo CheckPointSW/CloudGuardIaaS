@@ -26,6 +26,7 @@ usage() {
   echo "  --onboarding_mode         [required] Specifies the onboard mode for CloudGuard_CGNS. Can be either 'read-only' or 'manage' [default: 'read-only']"
   echo "  --multi_tenant_app_id     [optional] Specifies CloudGuard_CGNS Azure application id - for CloudGuard_CGNS application managed"
   echo "  --single_tenant_app_mode  [optional] Specifies CloudGuard_CGNS Azure application - customer app registration handling"
+  echo "  --app_name                [required for single tenant app mode] Specifies the name of the application to be created"
   echo "  --dry_run                 [optional] Specifies whether to run the script in dry-run mode [default: 'false']"
   echo "  --clean                   [optional] Specifies whether to delete all the resources that the script created [default: 'false']"
   echo "  --quiet                   [optional] Specifies whether to quiet all the user interactions [default: 'false']"
@@ -451,7 +452,7 @@ validate_user_can_assign_role() {
 
   if validate_user_role_assignment "Owner" "$user_role_assignments"; then
     return 0
-  elif validate_user_role_assignment "Application Administrator" "$user_role_assignments"; then
+  elif validate_user_role_assignment "User Access Administrator" "$user_role_assignments"; then 
     return 0
   fi
 
