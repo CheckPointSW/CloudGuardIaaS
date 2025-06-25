@@ -204,7 +204,12 @@ validate_inputs() {
   if [ "$scope" = "$MANAGEMENT_GROUPS_SCOPE" ] && [ -z "$management_group_id" ]; then
     exit_with_error "Missing required argument: --management_group_id"
   fi
-
+  if [ "$clean" = "true" ]; then
+    if [ -z "$app_name" ]; then
+      exit_with_error "When --clean is specified, --app_name must also be provided."
+    fi
+    return 0
+  fi
   if [ -z "$onboarding_mode" ]; then
     exit_with_error "Missing required argument: --onboarding_mode"
   fi
