@@ -20,6 +20,7 @@ For customer-managed (single-tenant) onboarding, the script performs the followi
 - **Service Principal Creation:** Registers a service principal for the newly created application, enabling programmatic access to Azure resources.
 - **Role Assignment:** Assigns the necessary Azure roles (such as `Reader` or `Contributor`) to the service principal at the subscription or management group level to ensure CGNS can operate as required.
 - **Resource Cleanup (optional, using `--clean` flag):** Removes the application, service principal, and associated role assignments to fully clean up the integration if requested.  
+  > **Note:** When using the `--clean` option, you must also provide the `--app_name`, `--scope`, and the relevant `--subscription_id` or `--management_group_id` to ensure proper identification and removal of resources. 
 
 For CloudGuard-managed (multi-tenant) onboarding, the script performs the following steps:
 - **Service Principal Assignment:** Assigns a service principal for the pre-existing CloudGuard-managed Azure application to the customer’s subscription or management group.
