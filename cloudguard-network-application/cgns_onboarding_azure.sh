@@ -14,7 +14,7 @@ MANAGE="manage"
 READ_ONLY="read-only"
 # Roles required for onboarding
 ROLES=("Contributor" "User Access Administrator")
-
+CLIENT_SECRET_PRINTED_ON_FIRST_RUN="Printed on the first run"
 
 # Function to display usage information
 usage() {
@@ -24,8 +24,8 @@ usage() {
   echo "  --subscription_id         [required for '$SUBSCRIPTION_SCOPE' scope] Specifies the subscription id"
   echo "  --management_group_id     [required for '$MANAGEMENT_GROUPS_SCOPE' scope] Specifies the management group id"
   echo "  --onboarding_mode         [required] Specifies the onboard mode for CloudGuard_CGNS. Can be either 'read-only' or 'manage' [default: 'read-only']"
-  echo "  --multi_tenant_app_id     [optional] Specifies CloudGuard_CGNS Azure application id - for CloudGuard_CGNS application managed"
-  echo "  --single_tenant_app_mode  [optional] Specifies CloudGuard_CGNS Azure application - customer app registration handling"
+  echo "  --multi_tenant_app_id     [required for CloudGuard-managed (multi-tenant) mode] Specifies CloudGuard_CGNS Azure application id - for CloudGuard_CGNS application managed"
+  echo "  --single_tenant_app_mode  [required for customer-managed (single-tenant) mode] Specifies CloudGuard_CGNS Azure application - customer app registration handling"
   echo "  --app_name                [required for single tenant app mode] Specifies the name of the application to be created"
   echo "  --dry_run                 [optional] Specifies whether to run the script in dry-run mode [default: 'false']"
   echo "  --clean                   [optional] Specifies whether to delete all the resources that the script created [default: 'false']"
@@ -33,8 +33,33 @@ usage() {
   echo "  --help                    Show this help message and exit"
 }
 
+# -----------------------------------------------------------------------------
+# Color Output Functions
+#
+# This script defines several functions and variables to print colored text
+# to the terminal using ANSI escape codes. Each function prints its arguments
+# in a specific color and resets the color at the end.
+#
+# Variables:
+#   end       - ANSI code to reset text formatting.
+#   red       - ANSI code for red text.
+#   yellowb   - ANSI code for bold yellow text.
+#   yellow    - ANSI code for yellow text.
+#   green     - ANSI code for green text.
+#   lightblue - ANSI code for light blue (cyan) text.
+#
+# Functions:
+#   red        - Prints arguments in red.
+#   yellowb    - Prints arguments in bold yellow.
+#   yellow     - Prints arguments in yellow.
+#   green      - Prints arguments in green.
+#   lightblue  - Prints arguments in light blue (cyan).
+#
+# Usage:
+#   Call the desired function with the text to print in color, e.g.:
+#     red "This is an error message"
+# -----------------------------------------------------------------------------
 
-#Message Colors
 end="\033[0m"
 red="\033[0;31m"
 function red {
@@ -170,8 +195,15 @@ parse_input() {
   done
 }
 
+# az_wrapper
+# ----------------------------
+# Helper function to execute Azure CLI (az) commands with optional dry-run support.
+# If the global variable 'dry_run' is set to "true", the function will print the command instead of executing it.
+# Otherwise, it runs the az command with '--only-show-errors', capturing both output and exit code.
+# The command's output is stored in the variable 'AzOutput', and the exit code in 'AzRetVal'.
+# Errors from the az command do not cause the script to exit; they are handled by the caller.
+# ---------------------------------------------------------------------------
 
-# Wrapper function for Azure CLI commands
 az_wrapper() {
   if [ "$dry_run" = "true" ]; then
     echo "az $*"
@@ -260,6 +292,29 @@ rollback() {
   fi
 }
 
+# rollback_delete_customer_app
+# ----------------------------
+# Deletes an Azure AD application with the specified name, including its role assignments.
+#
+# Steps performed:
+#   1. Lists Azure AD applications matching the given display name ($app_name).
+#   2. Checks for errors in listing applications.
+#   3. Ensures only one application matches the name; exits with error if multiple found.
+#   4. If no application is found, logs a message and returns.
+#   5. Deletes all role assignments associated with the application.
+#   6. Deletes the Azure AD application by its App ID.
+#   7. Handles errors during deletion and logs success message upon completion.
+#
+# Globals:
+#   $app_name - The display name of the Azure AD application to delete.
+#   $AzRetVal - Return value from the last az_wrapper command.
+#   $AzOutput - Output from the last az_wrapper command.
+#   $NECESSARY_PERMISSIONS_STR - String describing necessary permissions for error messages.
+#
+# Returns:
+#   0 if the application is not found or deleted successfully.
+#   Exits with error if multiple applications are found or if any operation fails.
+# -------------------------------------------------------------------------------
 
 
 rollback_delete_customer_app() {
@@ -295,7 +350,6 @@ rollback_delete_customer_app() {
 }
 
 
-
 # Function to prompt user for confirmation
 check_if_user_would_like_to_proceed() {
   local message="$1"
@@ -325,7 +379,6 @@ check_if_user_would_like_to_proceed() {
 }
 
 
-
 # Function to delete multi-tenant service principal role assignments
 rollback_delete_multi_tenant_sp_role_assignments(){
   if service_principal_doesnt_exists "$multi_tenant_app_id"; then
@@ -335,8 +388,21 @@ rollback_delete_multi_tenant_sp_role_assignments(){
   fi
 }
 
+# rollback_delete_role_assignments
+# -------------------------------------------------------------------------
+# Deletes all Azure role assignments for a specified application within a given scope.
+#
+# Arguments:
+#   $1 - The principal name (application ID) whose role assignments should be deleted.
+#
+# Behavior:
+#   - Lists all role assignments for the specified application within the onboarding scope.
+#   - If listing fails, prints a warning message with the error details.
+#   - Extracts the IDs of the role assignments.
+#   - Deletes all role assignments by their IDs.
+#   - If deletion fails, prints a warning message with the error details.
+# --------------------------------------------------------------------------
 
-# Function to delete role assignments
 rollback_delete_role_assignments(){
   local app_to_delete=$1
   local role_assignments
@@ -399,7 +465,27 @@ set_scope() {
 
 
 
-# Function to validate user permissions
+# validate_user_permissions
+#------------------------------------------------------------------------------
+# Validates whether the currently signed-in Azure user has sufficient permissions
+# to perform role assignments within a specified Azure scope.
+#
+# Arguments:
+#   $1 - The Azure scope (e.g., subscription, resource group, or resource ID)
+#
+# Behavior:
+#   - Retrieves the signed-in user's principal name using Azure CLI.
+#   - Lists the role assignments for the user at the specified scope, including
+#     inherited and group-based assignments.
+#   - Checks if the user has permissions to assign roles by invoking
+#     validate_user_can_assign_role.
+#   - Outputs the result and exits with an error message if any Azure CLI
+#     operation fails.
+#
+# Returns:
+#   0 if the user has sufficient permissions, otherwise exits with an error.
+#------------------------------------------------------------------------------
+
 validate_user_permissions() {
   local scope_type="$1"
 
@@ -478,24 +564,107 @@ get_app_id() {
   fi
 }
 
+# check_if_app_exists
+# ---------------------
+# Validates whether an Azure AD application with the specified name already exists.
+# If the application exists, prompts the user to decide whether to proceed with the
+# existing application or exit to create new application with different app_name.
+#
+# Globals:
+#   $app_name - The display name of the Azure AD application to check for.
+#   $AzRetVal - Return value from the last az_wrapper command.
+#   $AzOutput - Output from the last az_wrapper command.
+#   $application_id - Set to the App ID if a matching application is found.
+#
+# Behavior:
+#   1. Queries Azure AD for applications matching the specified display name.
+#   2. Counts the number of matching applications returned.
+#   3. If multiple applications are found with the same name, exits with an error.
+#   4. If exactly one application is found, warns the user and prompts for confirmation
+#      to proceed with the existing application or exit to rename it.
+#   5. If no application is found, returns 1 to indicate the application doesn't exist.
+#
+# Returns:
+#   0 if an application with the specified name exists and user chooses to proceed.
+#   1 if no application with the specified name exists.
+#   Exits with error if multiple applications are found or if Azure CLI operations fail.
+# ------------------------------------------------------------------------------------
+check_if_app_exists() {
+  lightblue "\nValidating that application with the name: '$app_name', doesn't exist"
+  az_wrapper ad app list --filter "displayName eq '$app_name'" --query "[].appId" -o tsv
+  application_id="$AzOutput"
 
-# only single (non multi) tenant mode
-create_cloudguard_app_registration() {
+  local app_result_count
+  app_result_count=$(echo "$application_id" | grep -c '^')
 
-  lightblue "\nCreating a new application for '$onboarding_scope' scope, with role:'Reader', and name:'$app_name'"
-  # Create a new service principal with the Reader role
-  local sp_info
-  az_wrapper ad sp create-for-rbac -n "$app_name" --role "Reader" --scopes "$onboarding_scope" 2>/dev/null
-  sp_info="$AzOutput"
-
-  if [ $AzRetVal -ne 0 ]; then
-    exit_with_error "Failed to create app registration with role Reader. Error from Azure: \n$AzOutput"
+  if [ "$app_result_count" -gt 1 ]; then
+    exit_with_error "More than one application found with the name $app_name - Please rename the 'app_name' parameter to a different name."
   fi
 
-  lightblue "\nApplication info: $sp_info"
-  application_id=$(echo "$sp_info" | jq -r ".appId")
-  client_secret=$(echo "$sp_info" | jq -r ".password")
+  if [ -n "$application_id" ]; then
+    yellow "\nApplication with the name: '$app_name', already exist. We will proceed with the existing application."
+    check_if_user_would_like_to_proceed "Please rename the 'app_name' parameter to a different name."
+    return 0
+  fi
 
+  return 1
+}
+
+# create_cloudguard_app_registration
+# --------------------------------------
+# Creates or reuses an Azure AD application registration for CloudGuard in single tenant mode.
+# This function handles both scenarios: creating a new application or using an existing one.
+#
+# Globals:
+#   $app_name - The display name of the Azure AD application to create or reuse.
+#   $onboarding_scope - The Azure scope (subscription/management group) for the application.
+#   $application_id - Set to the App ID of the created or existing application.
+#   $client_secret - Set to the client secret (password) of the application.
+#   $sp_id - Set to the service principal ID associated with the application.
+#   $AzRetVal - Return value from the last az_wrapper command.
+#   $AzOutput - Output from the last az_wrapper command.
+#   $CLIENT_SECRET_PRINTED_ON_FIRST_RUN - Constant indicating secret was shown previously.
+#   $NECESSARY_PERMISSIONS_STR - String describing necessary permissions for error messages.
+#
+# Behavior:
+#   1. Checks if an application with the specified name already exists using check_if_app_exists.
+#   2. If application exists:
+#      - Logs a message about proceeding with existing application.
+#      - Sets client_secret to a placeholder indicating it was shown on first run.
+#   3. If application doesn't exist:
+#      - Creates a new Azure AD application with service principal using az ad sp create-for-rbac.
+#      - Assigns the "Reader" role to the application for the specified scope.
+#      - Extracts the application ID and client secret from the creation response.
+#   4. Retrieves and stores the service principal ID for the application.
+#
+# Returns:
+#   0 on success.
+#   Exits with error if application creation fails or service principal ID cannot be retrieved.
+#
+# Side Effects:
+#   - Creates a new Azure AD application and service principal if one doesn't exist.
+#   - Assigns "Reader" role to the application for the specified scope.
+#   - Sets global variables: $application_id, $client_secret, $sp_id.
+# ------------------------------------------------------------------------------------
+create_cloudguard_app_registration() {
+  if check_if_app_exists; then
+    lightblue "\nApplication with the name: '$app_name', appId: '$application_id' already exists. Proceeding with existing application."
+    client_secret="$CLIENT_SECRET_PRINTED_ON_FIRST_RUN"
+  else 
+    lightblue "\nCreating a new application for '$onboarding_scope' scope, with role:'Reader', and name:'$app_name'"
+    # Create a new service principal with the Reader role
+    local sp_info
+    az_wrapper ad sp create-for-rbac -n "$app_name" --role "Reader" --scopes "$onboarding_scope" 2>/dev/null
+    sp_info="$AzOutput"
+
+    if [ $AzRetVal -ne 0 ]; then
+      exit_with_error "Failed to create app registration with role Reader. Error from Azure: \n$AzOutput"
+    fi
+
+    lightblue "\nApplication info: $sp_info"
+    application_id=$(echo "$sp_info" | jq -r ".appId")
+    client_secret=$(echo "$sp_info" | jq -r ".password")
+  fi
 
   az_wrapper ad sp show --id "$application_id" --query id --output tsv
 
@@ -543,7 +712,42 @@ service_principal_doesnt_exists() {
 }
 
 
-# Function to create role assignments for CloudGuard app
+# create_role_assignments_for_cloudguard_app
+# ---------------------------------------------
+# Creates role assignments for a CloudGuard application based on the onboarding mode.
+# This function assigns the minimum required "Reader" role and additional roles if
+# "manage" mode is specified.
+#
+# Arguments:
+#   $1 - The application (service principal) ID to assign roles to.
+#
+# Globals:
+#   $sp_id - Service principal ID associated with the application (set if not already available).
+#   $onboarding_scope - The Azure scope (subscription/management group) for role assignments.
+#   $onboarding_mode - The onboarding mode ("read-only" or "manage").
+#   $ROLES - Array of roles required for "manage" mode ("Contributor", "User Access Administrator").
+#   $AzRetVal - Return value from the last az_wrapper command.
+#   $AzOutput - Output from the last az_wrapper command.
+#   $NECESSARY_PERMISSIONS_STR - String describing necessary permissions for error messages.
+#
+# Behavior:
+#   1. If $sp_id is not set, retrieves the service principal ID for the given application.
+#   2. Always assigns the "Reader" role to the application for the specified scope.
+#   3. If onboarding_mode is "manage":
+#      - Iterates through the ROLES array.
+#      - Assigns each role ("Contributor", "User Access Administrator") to the application.
+#   4. Uses app_add_role_assignment_if_needed to check for existing assignments before creating new ones.
+#
+# Returns:
+#   0 on success.
+#   Exits with error if service principal ID cannot be retrieved or role assignment fails.
+#
+# Side Effects:
+#   - Sets the global variable $sp_id if it was not previously set.
+#   - Creates role assignments in Azure for the specified application and scope.
+#   - May create multiple role assignments depending on the onboarding mode.
+# ------------------------------------------------------------------------------------
+
 create_role_assignments_for_cloudguard_app() {
   local app_id=$1
   if [ -z "$sp_id" ]; then
@@ -565,8 +769,22 @@ create_role_assignments_for_cloudguard_app() {
   fi
 }
 
+# app_add_role_assignment_if_needed
+# ------------------------------------------------------------------------------------
+# Adds a role assignment to an Azure application if it does not already exist.
+#
+# Arguments:
+#   $1 - The application (service principal) ID to assign the role to.
+#   $2 - The scope at which the role assignment should be applied (e.g., subscription, resource group).
+#   $3 - The name of the Azure role to assign.
+#
+# Behavior:
+#   - Checks if the specified role assignment already exists for the given application and scope.
+#   - If the assignment exists, logs a message indicating so.
+#   - If the assignment does not exist, attempts to create it.
+#   - Exits with an error message if listing or creating the role assignment fails.
+# ------------------------------------------------------------------------------------
 
-# Function to add role assignment if needed
 app_add_role_assignment_if_needed() {
   local app_id=$1
   local scope=$2
