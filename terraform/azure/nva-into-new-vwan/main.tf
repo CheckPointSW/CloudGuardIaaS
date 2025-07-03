@@ -66,7 +66,6 @@ locals {
       }
       routing-intent-policies = var.routing-intent-internet-traffic == "yes" ? (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-internet-policy, local.routing_intent-private-policy]) : tolist([local.routing_intent-internet-policy])) : (var.routing-intent-private-traffic == "yes" ? tolist([local.routing_intent-private-policy]) : [])
       public_ip_resource_group = "/subscriptions/${var.subscription_id}/resourceGroups/${var.new-public-ip == "yes" ? azurerm_resource_group.managed-app-rg.name : var.existing-public-ip != "" ? split("/", var.existing-public-ip)[4] : ""}"
-
 }
 
 //********************** Marketplace Terms & Solution Registration **************************//
