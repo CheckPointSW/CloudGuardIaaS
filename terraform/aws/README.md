@@ -1,13 +1,13 @@
 # ⚠️ Directory Deprecated  
-This directory is now officially deprecated. All future development and maintenance will take place in a new [repository](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+This directory is now officially deprecated. All future development and maintenance will take place in a new [repository](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/aws/latest) 
 .  
 
 ### 📌 New Repository and Modules  
 All ongoing updates and improvements are now available in the following locations:  
 
-- [Terraform Registry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/azure/latest) 
+- [Terraform Registry](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/aws/latest) 
 - [Admin Guide](https://support.checkpoint.com/results/sk/sk183294)
-- [GitHub](https://github.com/CheckPointSW/terraform-azure-cloudguard-network-security)
+- [GitHub](https://github.com/CheckPointSW/terraform-aws-cloudguard-network-security)
 
 ___
 
