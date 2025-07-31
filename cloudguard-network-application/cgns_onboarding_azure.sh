@@ -292,6 +292,7 @@ rollback() {
   fi
 }
 
+
 # rollback_delete_customer_app
 # ----------------------------
 # Deletes an Azure AD application with the specified name, including its role assignments.
