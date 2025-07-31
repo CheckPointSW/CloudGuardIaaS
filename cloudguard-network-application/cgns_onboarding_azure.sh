@@ -33,7 +33,6 @@ usage() {
   echo "  --help                    Show this help message and exit"
 }
 
-
 # -----------------------------------------------------------------------------
 # Color Output Functions
 #
@@ -60,6 +59,7 @@ usage() {
 #   Call the desired function with the text to print in color, e.g.:
 #     red "This is an error message"
 # -----------------------------------------------------------------------------
+
 end="\033[0m"
 red="\033[0;31m"
 function red {
@@ -203,6 +203,7 @@ parse_input() {
 # The command's output is stored in the variable 'AzOutput', and the exit code in 'AzRetVal'.
 # Errors from the az command do not cause the script to exit; they are handled by the caller.
 # ---------------------------------------------------------------------------
+
 az_wrapper() {
   if [ "$dry_run" = "true" ]; then
     echo "az $*"
@@ -292,7 +293,6 @@ rollback() {
 }
 
 
-
 # rollback_delete_customer_app
 # ----------------------------
 # Deletes an Azure AD application with the specified name, including its role assignments.
@@ -316,6 +316,8 @@ rollback() {
 #   0 if the application is not found or deleted successfully.
 #   Exits with error if multiple applications are found or if any operation fails.
 # -------------------------------------------------------------------------------
+
+
 rollback_delete_customer_app() {
   az_wrapper ad app list --filter "displayName eq '$app_name'" --query "[].appId" -o tsv
 
@@ -349,7 +351,6 @@ rollback_delete_customer_app() {
 }
 
 
-
 # Function to prompt user for confirmation
 check_if_user_would_like_to_proceed() {
   local message="$1"
@@ -379,7 +380,6 @@ check_if_user_would_like_to_proceed() {
 }
 
 
-
 # Function to delete multi-tenant service principal role assignments
 rollback_delete_multi_tenant_sp_role_assignments(){
   if service_principal_doesnt_exists "$multi_tenant_app_id"; then
@@ -403,6 +403,7 @@ rollback_delete_multi_tenant_sp_role_assignments(){
 #   - Deletes all role assignments by their IDs.
 #   - If deletion fails, prints a warning message with the error details.
 # --------------------------------------------------------------------------
+
 rollback_delete_role_assignments(){
   local app_to_delete=$1
   local role_assignments
@@ -485,6 +486,7 @@ set_scope() {
 # Returns:
 #   0 if the user has sufficient permissions, otherwise exits with an error.
 #------------------------------------------------------------------------------
+
 validate_user_permissions() {
   local scope_type="$1"
 
@@ -746,6 +748,7 @@ service_principal_doesnt_exists() {
 #   - Creates role assignments in Azure for the specified application and scope.
 #   - May create multiple role assignments depending on the onboarding mode.
 # ------------------------------------------------------------------------------------
+
 create_role_assignments_for_cloudguard_app() {
   local app_id=$1
   if [ -z "$sp_id" ]; then
@@ -782,6 +785,7 @@ create_role_assignments_for_cloudguard_app() {
 #   - If the assignment does not exist, attempts to create it.
 #   - Exits with an error message if listing or creating the role assignment fails.
 # ------------------------------------------------------------------------------------
+
 app_add_role_assignment_if_needed() {
   local app_id=$1
   local scope=$2

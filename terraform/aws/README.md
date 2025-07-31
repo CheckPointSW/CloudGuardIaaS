@@ -1,5 +1,6 @@
 # ⚠️ Directory Deprecated  
 This directory is now officially deprecated. All future development and maintenance will take place in a new [repository](https://registry.terraform.io/modules/CheckPointSW/cloudguard-network-security/aws/latest) 
+
 .  
 
 ### 📌 New Repository and Modules  
