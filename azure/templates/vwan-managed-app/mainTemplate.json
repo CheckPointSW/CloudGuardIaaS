@@ -232,7 +232,7 @@
           "dependsOn": [
             "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managed_identity_name'))]"
           ],
-          "name": "reader_role_assignment",
+          "name": "[concat('reader_role_assignment_', uniqueString(parameters('deploymentTime'), resourceGroup().name))]",
           "apiVersion": "2021-04-01",
           "resourceGroup": "[split(parameters('hubId'), '/')[4]]",
           "subscriptionId": "[subscription().subscriptionId]",
