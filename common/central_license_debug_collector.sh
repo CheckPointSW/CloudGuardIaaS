@@ -121,7 +121,7 @@ psql_client cpm postgres -c "select * from vseclicense_data;" >> $TMPPATH/vsecLi
 log_msg "  Collecting filtered vseclicense_data DB into $TMPPATH"
 psql_client cpm postgres -c "select * from vseclicense_data where not deleted and dlesession=0;" >> $TMPPATH/vsecLicenseData_filtered.txt
 
-log_msg "  Collecting number of unattached licenses into $TMPPATH (Shloud be empty)"
+log_msg "  Collecting number of unattached licenses into $TMPPATH (Should be empty)"
 psql_client cpm postgres -c "select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where (dod.fwset ilike '%not-installed%' or (dod.fwset ilike '%(installed)%' and dod.fwset ilike '%network_object ()%')) and dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;" >> $TMPPATH/number_of_unattached_licenses.txt
 
 log_msg "  Collecting number of all licenses into $TMPPATH (for cprlic debug)"
