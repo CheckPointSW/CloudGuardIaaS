@@ -16,14 +16,14 @@
             "defaultValue": "Security Enforcement (NGTP)",
             "allowedValues": [
                 "Security Enforcement (NGTP)",
-                "Full Package (NGTX + S1C)",
-                "Full Package Premium (NGTX + S1C++)"
+                "Full Package (NGTX and Smart1-Cloud)",
+                "Full Package Premium (NGTX and Smart1-Cloud Premium)"
             ],
             "type": "String",
             "metadata": {
                 "description": "License type of Check Point CloudGuard"
             }
-      },
+        },
         "imageVersion": {
             "defaultValue": "8120.900634.1641",
             "type": "String",
@@ -32,7 +32,7 @@
             }
         },
         "osVersion": {
-            "defaultValue": "R8120",
+            "defaultValue": "R82",
             "allowedValues": [
                 "R8110",
                 "R8120",
@@ -167,8 +167,8 @@
             "metadata": {
               "description": "Use public IP for ingress traffic"
             }
-          },
-          "createNewIPIngress": {
+        },
+        "createNewIPIngress": {
             "type": "string",
             "allowedValues": [
               "no",
@@ -178,18 +178,45 @@
             "metadata": {
               "description": "Create new public IP"
             }
-          },
-          "ipIngressExistingResourceId": {
+        },
+        "customLicenseType": {
+            "type": "string",
+            "defaultValue": "",
+            "allowedValues": [
+                "",
+                "ngtp",
+                "ngtx",
+                "premium"
+            ],
+            "metadata": {
+                "Description": "License type when using staged image"
+            }
+        }, 
+        "ipIngressExistingResourceId": {
             "type": "string",
             "metadata": {
               "description": "The resource id of the public IP"
             },
             "defaultValue": ""
-          },
-          "deploymentTime": {
-              "type": "string",
-              "defaultValue": "[utcNow()]"
-          }
+        },
+        "deploymentTime": {
+            "type": "string",
+            "defaultValue": "[utcNow()]"
+        },
+        "planProduct": {
+            "type": "string",
+            "defaultValue": "cp-vwan-managed-app",
+            "metadata": {
+                "description": "Use the following plan when deploying a custom template: cp-vwan-managed-app"
+            }
+        },
+        "planVersion": {
+            "type": "string",
+            "defaultValue": "1.0.22",
+            "metadata": {
+                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.22) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
+            }
+        }
     },
     "variables": {
         "managedResourceGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('managedResourceGroupName'))]",
@@ -302,9 +329,9 @@
             "kind": "MarketPlace",
             "plan": {
                 "name": "vwan-app",
-                "product": "cp-vwan-managed-app",
+                "product": "[parameters('planProduct')]",
                 "publisher": "checkpoint",
-                "version": "1.0.22"
+                "version": "[parameters('planVersion')]"
             },
             "identity": {
                 "type": "UserAssigned",
@@ -383,6 +410,9 @@
                     },
                     "createNewIPIngress": {
                         "value": "[parameters('createNewIPIngress')]"
+                    },
+                    "customLicenseType": {
+                        "value": "[parameters('customLicenseType')]"
                     },
                     "ipIngressExistingResourceId": {
                         "value": "[parameters('ipIngressExistingResourceId')]"

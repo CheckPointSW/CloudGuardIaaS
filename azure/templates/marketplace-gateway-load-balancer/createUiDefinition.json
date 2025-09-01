@@ -95,8 +95,8 @@
             "name": "cloudGuardVersion",
             "type": "Microsoft.Common.DropDown",
             "label": "Version",
-            "defaultValue": "R81.20",
-            "toolTip": "Check Point Recommended version for all deployments is R81.20",
+            "defaultValue": "R82",
+            "toolTip": "Check Point Recommended version for all deployments is R82",
             "constraints": {
               "allowedValues": [
                 {

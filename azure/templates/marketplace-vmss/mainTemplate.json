@@ -29,7 +29,7 @@
         "R82 - Pay As You Go (NGTP)",
         "R82 - Pay As You Go (NGTX)"
       ],
-      "defaultValue": "R81.20 - Bring Your Own License",
+      "defaultValue": "R82 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
