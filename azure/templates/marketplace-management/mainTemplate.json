@@ -19,7 +19,7 @@
         "R82 - Bring Your Own License",
         "R82 - Pay As You Go (MGMT25)"
       ],
-      "defaultValue": "R81.20 - Bring Your Own License",
+      "defaultValue": "R82 - Bring Your Own License",
       "metadata": {
         "description": "Version of Check Point CloudGuard"
       }
