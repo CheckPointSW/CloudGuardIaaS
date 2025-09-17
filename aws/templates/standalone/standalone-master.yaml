@@ -174,7 +174,7 @@ Parameters:
   StandaloneVersion:
     Description: Standalone Version & License.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-PAYG-NGTP
       - R81.10-BYOL

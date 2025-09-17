@@ -322,7 +322,7 @@ Parameters:
   MDSVersion:
     Description: The license to install on the Multi-Domain Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
