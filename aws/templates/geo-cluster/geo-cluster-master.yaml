@@ -353,7 +353,7 @@ Parameters:
   GatewayVersion:
     Description: The license to install on the Security Gateways.
     Type: String
-    Default: R81.10-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP

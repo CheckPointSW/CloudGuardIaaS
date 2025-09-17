@@ -352,7 +352,7 @@ Parameters:
   GatewayVersion:
     Description: The version and license to install on the Security Gateways.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
@@ -554,7 +554,7 @@ Parameters:
   ManagementVersion:
     Description: The version and license to install on the Security Management Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG
