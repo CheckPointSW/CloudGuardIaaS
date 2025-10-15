@@ -16,9 +16,9 @@
 							"script": {
 								"exec": [
 									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
+									"    var sid = pm.response.json().sid;\r",
+									"    pm.collectionVariables.set(\"sessionId\", sid);\r",
+									"    pm.test(\"login session-id = \" + sid, () => true);\r",
 									"} catch (e) {}"
 								],
 								"type": "text/javascript",
@@ -62,9 +62,9 @@
 							"script": {
 								"exec": [
 									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
+									"    var sid = pm.response.json().sid;\r",
+									"    pm.collectionVariables.set(\"sessionId\", sid);\r",
+									"    pm.test(\"login session-id = \" + sid, () => true);\r",
 									"} catch (e) {}"
 								],
 								"type": "text/javascript"
@@ -107,9 +107,9 @@
 							"script": {
 								"exec": [
 									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
+									"    var sid = pm.response.json().sid;\r",
+									"    pm.collectionVariables.set(\"sessionId\", sid);\r",
+									"    pm.test(\"login session-id = \" + sid, () => true);\r",
 									"} catch (e) {}"
 								],
 								"type": "text/javascript"
@@ -152,9 +152,9 @@
 							"script": {
 								"exec": [
 									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
+									"    var sid = pm.response.json().sid;\r",
+									"    pm.collectionVariables.set(\"sessionId\", sid);\r",
+									"    pm.test(\"login session-id = \" + sid, () => true);\r",
 									"} catch (e) {}"
 								],
 								"type": "text/javascript"
@@ -435,9 +435,9 @@
 							"script": {
 								"exec": [
 									"try {\r",
-									"    var sid = JSON.parse(responseBody).sid;\r",
-									"    postman.setEnvironmentVariable(\"session\", sid);\r",
-									"    tests[\"login session-id = \" + sid] = true;\r",
+									"    var sid = pm.response.json().sid;\r",
+									"    pm.collectionVariables.set(\"sessionId\", sid);\r",
+									"    pm.test(\"session-id = \" + sid, () => true);\r",
 									"} catch (e) {}"
 								],
 								"type": "text/javascript"
@@ -9346,7 +9346,7 @@
 				"type": "text/javascript",
 				"exec": [
 					"var response = pm.response.json();\r",
-					"if (response.result.hasOwnProperty(\"request-id\")) {\r",
+					"if (response.result && response.result.hasOwnProperty(\"request-id\")) {\r",
 					"    var request_id = response.result[\"request-id\"];\r",
 					"    pm.collectionVariables.set(\"requestId\", request_id);\r",
 					"}"
