@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways into a new VPC (__VERSION__)
+Description: |
+  Create an Auto Scaling group of Check Point gateways into a new VPC (20250821)
+  See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -513,19 +515,14 @@ Parameters:
     Default: ""
     MaxLength: 100
 Conditions:
-  ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
-  ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
-  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
-  CreateELB: !Not [!Equals [!Ref ELBType, none]]
-  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
   4AZs: !Equals [ !Ref NumberOfAZs, 4 ]
   3AZs: !Or [ !Equals [ !Ref NumberOfAZs, 3 ], !Condition 4AZs ]
-  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
+  CreateELB: !Not [!Equals [!Ref ELBType, none]]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Join [ ',' , !Ref AvailabilityZones ]
         NumberOfAZs: !Ref NumberOfAZs
@@ -538,232 +535,50 @@ Resources:
         PrivateSubnet2CIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3CIDR: !Ref PrivateSubnet3CIDR
         PrivateSubnet4CIDR: !Ref PrivateSubnet4CIDR
-  ChkpGatewayRole:
-    Type: AWS::IAM::Role
-    Condition: EnableCloudWatch
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ec2.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Path: /
-  CloudwatchPolicy:
-    Condition: EnableCloudWatch
+  AutoScaleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/iam/cloudwatch-policy.yaml
+      TemplateURL: https://cgi-cfts.s3.us-east-1.amazonaws.com/autoscale/autoscale.yaml
       Parameters:
-        PolicyName: ChkpGatewayPolicy
-        PolicyRole: !Ref ChkpGatewayRole
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Condition: EnableCloudWatch
-    Properties:
-      Path: /
-      Roles:
-        - !Ref ChkpGatewayRole
-  AMI:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: __URL__/utils/amis.yaml
-      Parameters:
-        Version: !Join ['-', [!Ref GatewayVersion, GW]]
-  NotificationTopic:
-    Type: AWS::SNS::Topic
-    Condition: ProvidedAdminEmail
-    Properties:
-      Subscription:
-        - Endpoint: !Ref AdminEmail
-          Protocol: email
-  ElasticLoadBalancer:
-    Type: AWS::ElasticLoadBalancing::LoadBalancer
-    Condition: CreateELB
-    Properties:
-      CrossZone: true
-      Listeners:
-        - LoadBalancerPort: !Ref ELBPort
-          InstancePort: !Ref ELBPort
-          Protocol: TCP
-      HealthCheck:
-        Target: !Join [':', [TCP, !Ref ELBPort]]
-        HealthyThreshold: 3
-        UnhealthyThreshold: 5
-        Interval: 30
-        Timeout: 5
-      Scheme: !Ref ELBType
-      Subnets:
-        - !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        - !GetAtt VPCStack.Outputs.PublicSubnet2ID
-        - !If [3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
-        - !If [4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
-      Policies:
-        - PolicyName: EnableProxyProtocol
-          PolicyType: ProxyProtocolPolicyType
-          Attributes:
-            - Name: ProxyProtocol
-              Value: true
-          InstancePorts:
-            - !Ref ELBPort
-      SecurityGroups:
-        - !Ref ELBSecurityGroup
-  PermissiveSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      Tags:
-        - Key: Name
-          Value: !Join ['_', [!Ref 'AWS::StackName', PermissiveSecurityGroup]]
-      GroupDescription: Permissive security group.
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-      SecurityGroupIngress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
-  GatewayGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: GatewayLaunchTemplate
-    Properties:
-      VPCZoneIdentifier:
-        - !GetAtt VPCStack.Outputs.PublicSubnet1ID
-        - !GetAtt VPCStack.Outputs.PublicSubnet2ID
-        - !If [3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
-        - !If [4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
-      LaunchTemplate:
-        LaunchTemplateId: !Ref GatewayLaunchTemplate
-        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
-        AutoScalingGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
-      MinSize: !Ref GatewaysMinSize
-      MaxSize: !Ref GatewaysMaxSize
-      LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
-      TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref GatewaysTargetGroups], !Ref 'AWS::NoValue']
-      HealthCheckType: ELB
-      HealthCheckGracePeriod: 3600
-      NotificationConfiguration: !If
-        - ProvidedAdminEmail
-        - TopicARN: !Ref NotificationTopic
-          NotificationTypes:
-            - autoscaling:EC2_INSTANCE_LAUNCH
-            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
-            - autoscaling:EC2_INSTANCE_TERMINATE
-            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
-        - !Ref 'AWS::NoValue'
-      Tags:
-        - Key: Name
-          Value: !Ref GatewayName
-          PropagateAtLaunch: true
-        - Key: x-chkp-tags
-          Value: !Join
-            - ':'
-            - - !Join ['=', [management, !Ref ManagementServer]]
-              - !Join ['=', [template, !Ref ConfigurationTemplate]]
-              - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
-          PropagateAtLaunch: true
-  GatewayLaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
-    Properties:
-      LaunchTemplateData:
-        NetworkInterfaces:
-          - DeviceIndex: 0
-            AssociatePublicIpAddress: true
-            Groups:
-              - !Ref PermissiveSecurityGroup
-        Monitoring:
-          Enabled: true
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        GatewaysSubnets: !Join
+          - ','
+          - - !GetAtt VPCStack.Outputs.PublicSubnet1ID
+            - !GetAtt VPCStack.Outputs.PublicSubnet2ID
+            - !If [3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
+        GatewayName: !Ref GatewayName
+        GatewayInstanceType: !Ref GatewayInstanceType
         KeyName: !Ref KeyName
-        ImageId: !GetAtt AMI.Outputs.ImageId
-        InstanceType: !Ref GatewayInstanceType
-        MetadataOptions:
-           HttpTokens: !If [EnableMetaDataToken, required, optional]
-        BlockDeviceMappings:
-          - DeviceName: '/dev/xvda'
-            Ebs:
-              Encrypted: !Ref EnableVolumeEncryption
-              VolumeType: !Ref VolumeType
-              VolumeSize: !Ref VolumeSize
-        IamInstanceProfile:
-          Name: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
-        UserData:
-          'Fn::Base64':
-            !Join
-            - |+
-
-            - - '#cloud-config'
-              - 'runcmd:'
-              - '  - |'
-              - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
-              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
-              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
-              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
-              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
-              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
-      VersionDescription: Initial template version
-  GatewayScaleUpPolicy:
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref GatewayGroup
-      Cooldown: 300
-      ScalingAdjustment: 1
-  GatewayScaleDownPolicy:
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AdjustmentType: ChangeInCapacity
-      AutoScalingGroupName: !Ref GatewayGroup
-      Cooldown: 300
-      ScalingAdjustment: -1
-  CPUAlarmHigh:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: Scale-up if CPU > 80% for 10 minutes.
-      MetricName: CPUUtilization
-      Namespace: AWS/EC2
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 2
-      Threshold: 80
-      AlarmActions:
-        - !Ref GatewayScaleUpPolicy
-      Dimensions:
-        - Name: AutoScalingGroupName
-          Value: !Ref GatewayGroup
-      ComparisonOperator: GreaterThanThreshold
-  CPUAlarmLow:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmDescription: Scale-down if CPU < 60% for 10 minutes.
-      MetricName: CPUUtilization
-      Namespace: AWS/EC2
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 2
-      Threshold: 60
-      AlarmActions:
-        - !Ref GatewayScaleDownPolicy
-      Dimensions:
-        - Name: AutoScalingGroupName
-          Value: !Ref GatewayGroup
-      ComparisonOperator: LessThanThreshold
-  ELBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Condition: CreateELB
-    Properties:
-      GroupDescription: ELB security group.
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          CidrIp: !Ref ELBClients
-          FromPort: !Ref ELBPort
-          ToPort: !Ref ELBPort
+        VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
+        EnableVolumeEncryption: !Ref EnableVolumeEncryption
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        MetaDataToken: !Ref MetaDataToken
+        GatewaysMinSize: !Ref GatewaysMinSize
+        GatewaysMaxSize: !Ref GatewaysMaxSize
+        AdminEmail: !Ref AdminEmail
+        GatewaysTargetGroups: !Ref GatewaysTargetGroups
+        GatewayVersion: !Ref GatewayVersion
+        Shell: !Ref Shell
+        GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
+        GatewaySICKey: !Ref GatewaySICKey
+        AllowUploadDownload: !Ref AllowUploadDownload
+        CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+        ELBType: !Ref ELBType
+        ELBPort: !Ref ELBPort
+        ELBClients: !Ref ELBClients
+        AutoScaleGroupName: !Ref AutoScaleGroupName
 Outputs:
   URL:
     Description: The URL of the Proxy.
     Condition: CreateELB
-    Value: !Join ['', ['http://', !GetAtt ElasticLoadBalancer.DNSName]]
+    Value: !GetAtt AutoScaleStack.Outputs.URL
   SecurityGroup:
     Description: The Security Group of the Auto Scaling group.
-    Value: !GetAtt PermissiveSecurityGroup.GroupId
+    Value: !GetAtt AutoScaleStack.Outputs.SecurityGroup
