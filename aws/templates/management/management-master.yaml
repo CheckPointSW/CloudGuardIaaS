@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server into a new VPC (__VERSION__)
+Description: |
+  Deploys a Check Point Management Server into a new VPC (20250821)
+  See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -445,22 +447,11 @@ Parameters:
     AllowedPattern: '[\.a-zA-Z0-9\-]*'
 Conditions:
   EIP: !Equals [!Ref AllocatePublicAddress, true]
-  ManageOverInternet: !Equals [!Ref GatewayManagement, Over the internet]
-  ManageOverInternetAndEIP: !And [!Condition EIP, !Condition ManageOverInternet]
-  CreateRole: !Or
-    - !Equals [!Ref ManagementPermissions, Create with assume role permissions (specify an STS role ARN)]
-    - !Equals [!Ref ManagementPermissions, Create with read permissions]
-    - !Equals [!Ref ManagementPermissions, Create with read-write permissions]
-  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
-  UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
-  NoSIC: !Equals [!Ref SICKey, '']
-  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
-  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/vpc.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
         AvailabilityZones: !Ref AvailabilityZone
         NumberOfAZs: 1
@@ -468,174 +459,50 @@ Resources:
         PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
         CreatePrivateSubnets: false
         CreateAttachmentSubnets: false
-  AMI:
+  ManagementStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: __URL__/utils/amis.yaml
+      TemplateURL: https://cgi-cfts.s3.us-east-1.amazonaws.com/management/management.yaml
       Parameters:
-        Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
-  ManagementReadyHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: EIP
-    Properties: {}
-  ManagementReadyCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    Condition: EIP
-    DependsOn: ManagementInstance
-    Properties:
-      Handle: !Ref ManagementReadyHandle
-      Timeout: 1800
-  ManagementSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Management security group
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-      SecurityGroupIngress:
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 257
-          ToPort: 257
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 8211
-          ToPort: 8211
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18191
-          ToPort: 18191
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18192
-          ToPort: 18192
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18208
-          ToPort: 18208
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18210
-          ToPort: 18210
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18211
-          ToPort: 18211
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18221
-          ToPort: 18221
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18264
-          ToPort: 18264
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 18190
-          ToPort: 18190
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 19009
-          ToPort: 19009
-  ManagementRoleStack:
-    Type: AWS::CloudFormation::Stack
-    Condition: CreateRole
-    Properties:
-      TemplateURL: __URL__/iam/cme-iam-role.yaml
-      Parameters:
-        Permissions: !Ref ManagementPermissions
-        STSRoles: !Join [',', !Ref ManagementSTSRoles]
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Condition: PreRole
-    Properties:
-      Path: /
-      Roles:
-        - !Ref ManagementPredefinedRole
-  ManagementInstance:
-    Type: AWS::EC2::Instance
-    DependsOn: ManagementLaunchTemplate
-    Properties:
-      LaunchTemplate:
-        LaunchTemplateId: !Ref ManagementLaunchTemplate
-        Version: !GetAtt ManagementLaunchTemplate.LatestVersionNumber
-      DisableApiTermination: !Ref TerminationProtection
-      Tags:
-        - Key: Name
-          Value: !Ref ManagementName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          AssociatePublicIpAddress: false
-          Description: eth0
-          GroupSet:
-            - !Ref ManagementSecurityGroup
-          DeleteOnTermination: true
-          SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-  ManagementLaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
-    Properties:
-      LaunchTemplateData:
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        ManagementSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        ManagementName: !Ref ManagementName
+        ManagementInstanceType: !Ref ManagementInstanceType
         KeyName: !Ref KeyName
-        ImageId: !GetAtt AMI.Outputs.ImageId
-        InstanceType: !Ref ManagementInstanceType
-        MetadataOptions:
-          HttpTokens: !If [EnableMetaDataToken, required, optional]
-        BlockDeviceMappings:
-          - DeviceName: '/dev/xvda'
-            Ebs:
-              Encrypted: !If [ EncryptedVolume, true, false ]
-              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
-              VolumeType: !Ref VolumeType
-              VolumeSize: !Ref VolumeSize
-        IamInstanceProfile:
-          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
-        UserData:
-          'Fn::Base64':
-            !Join
-            - |+
-
-            - - '#cloud-config'
-              - 'runcmd:'
-              - '  - |'
-              - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
-              - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
-              - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
-              - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
-              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
-              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
-              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
-              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"__VERSION__\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
-      VersionDescription: Initial template version
-  PublicAddress:
-    Type: AWS::EC2::EIP
-    Condition: EIP
-    Properties:
-      Domain: vpc
-  AddressAssoc:
-    Type: AWS::EC2::EIPAssociation
-    Condition: EIP
-    DependsOn: ManagementInstance
-    Properties:
-      InstanceId: !Ref ManagementInstance
-      AllocationId: !GetAtt PublicAddress.AllocationId
+        AllocatePublicAddress: !Ref AllocatePublicAddress
+        VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
+        VolumeEncryption: !Ref VolumeEncryption
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
+        ManagementPermissions: !Ref ManagementPermissions
+        ManagementPredefinedRole: !Ref ManagementPredefinedRole
+        ManagementSTSRoles: !Join [',', !Ref ManagementSTSRoles]
+        AdminCIDR: !Ref AdminCIDR
+        GatewaysAddresses: !Ref GatewaysAddresses
+        ManagementVersion: !Ref ManagementVersion
+        Shell: !Ref Shell
+        ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
+        SICKey: !Ref SICKey
+        ManagementHostname: !Ref ManagementHostname
+        ManagementInstallationType: !Ref ManagementInstallationType
+        AllowUploadDownload: !Ref AllowUploadDownload
+        GatewayManagement: !Ref GatewayManagement
+        ManagementBootstrapScript: !Ref ManagementBootstrapScript
+        NTPPrimary: !Ref NTPPrimary
+        NTPSecondary: !Ref NTPSecondary
 Outputs:
   PublicAddress:
     Condition: EIP
-    Description: The public address of the Management Server.
-    Value: !Ref PublicAddress
+    Description: The public address of the management server.
+    Value: !GetAtt ManagementStack.Outputs.PublicAddress
   SSH:
     Condition: EIP
-    Description: SSH command.
-    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
+    Description: SSH command to the management server.
+    Value: !GetAtt ManagementStack.Outputs.SSH
   URL:
     Condition: EIP
-    Description: URL to the portal.
-    Value: !Join ['', ['https://', !Ref PublicAddress]]
+    Description: URL to the management server portal.
+    Value: !GetAtt ManagementStack.Outputs.URL
