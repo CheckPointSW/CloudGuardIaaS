@@ -146,12 +146,6 @@ Parameters:
       - c5.12xlarge
       - c5.18xlarge
       - c5.24xlarge
-      - c5n.large
-      - c5n.xlarge
-      - c5n.2xlarge
-      - c5n.4xlarge
-      - c5n.9xlarge
-      - c5n.18xlarge
       - c5d.large
       - c5d.xlarge
       - c5d.2xlarge
@@ -160,23 +154,12 @@ Parameters:
       - c5d.12xlarge
       - c5d.18xlarge
       - c5d.24xlarge
-      - m5.large
-      - m5.xlarge
-      - m5.2xlarge
-      - m5.4xlarge
-      - m5.8xlarge
-      - m5.12xlarge
-      - m5.16xlarge
-      - m5.24xlarge
-      - m6i.large
-      - m6i.xlarge
-      - m6i.2xlarge
-      - m6i.4xlarge
-      - m6i.8xlarge
-      - m6i.12xlarge
-      - m6i.16xlarge
-      - m6i.24xlarge
-      - m6i.32xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
       - c6i.large
       - c6i.xlarge
       - c6i.2xlarge
@@ -195,6 +178,98 @@ Parameters:
       - c6in.16xlarge
       - c6in.24xlarge
       - c6in.32xlarge
+      - c7i.large
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.32xlarge
+      - c7i.48xlarge
+      - c7i-flex.large
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - c7i-flex.12xlarge
+      - c7i-flex.16xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - m7a.large
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - m7i.large
+      - m7i.xlarge
+      - m7i.2xlarge
+      - m7i.4xlarge
+      - m7i.8xlarge
+      - m7i.12xlarge
+      - m7i.16xlarge
+      - m7i.24xlarge
+      - m7i.48xlarge
+      - m7i.metal-24xl
+      - m7i.metal-48xl
+      - m7i-flex.large
+      - m7i-flex.xlarge
+      - m7i-flex.2xlarge
+      - m7i-flex.4xlarge
+      - m7i-flex.8xlarge
+      - m7i-flex.12xlarge
+      - m7i-flex.16xlarge
+      - m8i.large
+      - m8i.xlarge
+      - m8i.2xlarge
+      - m8i.4xlarge
+      - m8i.8xlarge
+      - m8i.12xlarge
+      - m8i.16xlarge
+      - m8i.24xlarge
+      - m8i.32xlarge
+      - m8i.48xlarge
+      - m8i.96xlarge
+      - m8i.metal-48xl
+      - m8i.metal-96xl
+      - m8i-flex.large
+      - m8i-flex.xlarge
+      - m8i-flex.2xlarge
+      - m8i-flex.4xlarge
+      - m8i-flex.8xlarge
+      - m8i-flex.12xlarge
+      - m8i-flex.16xlarge
       - r5.large
       - r5.xlarge
       - r5.2xlarge
@@ -236,16 +311,6 @@ Parameters:
       - r6i.16xlarge
       - r6i.24xlarge
       - r6i.32xlarge
-      - m6a.large
-      - m6a.xlarge
-      - m6a.2xlarge
-      - m6a.4xlarge
-      - m6a.8xlarge
-      - m6a.12xlarge
-      - m6a.16xlarge
-      - m6a.24xlarge
-      - m6a.32xlarge
-      - m6a.48xlarge
       - r7a.xlarge
       - r7a.2xlarge
       - r7a.4xlarge
@@ -255,28 +320,7 @@ Parameters:
       - r7a.24xlarge
       - r7a.32xlarge
       - r7a.48xlarge
-      - c7i-flex.xlarge
-      - c7i-flex.2xlarge
-      - c7i-flex.4xlarge
-      - c7i-flex.8xlarge
-      - m7a.xlarge
-      - m7a.2xlarge
-      - m7a.4xlarge
-      - m7a.8xlarge
-      - m7a.12xlarge
-      - m7a.16xlarge
-      - m7a.24xlarge
-      - m7a.32xlarge
-      - m7a.48xlarge
-      - c7i.xlarge
-      - c7i.2xlarge
-      - c7i.4xlarge
-      - c7i.8xlarge
-      - c7i.12xlarge
-      - c7i.16xlarge
-      - c7i.24xlarge
-      - c7i.32xlarge
-      - c7i.48xlarge
+
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance.
