@@ -1,0 +1,137 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "vnet"
+    },
+    "virtualNetworkAddressPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the virtual network"
+      }
+    },
+    "Subnet1Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 1st subnet"
+      },
+      "defaultValue": "Frontend"
+    },
+    "Subnet1Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 1st subnet"
+      },
+      "defaultValue": "10.0.1.0/24"
+    },
+    "Subnet1StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 1st subnet"
+      }
+    },
+    "Subnet2Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 2nd subnet"
+      },
+      "defaultValue": "Backend"
+    },
+    "Subnet2Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 2nd subnet"
+      },
+      "defaultValue": "10.0.2.0/24"
+    },
+    "Subnet2StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 2nd subnet"
+      }
+    },
+    "Subnet3Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 3rd subnet"
+      },
+      "defaultValue": "Internal2"
+    },
+    "Subnet3Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 3rd subnet"
+      },
+      "defaultValue": "10.0.3.0/24"
+    },
+    "Subnet3StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 3rd subnet"
+      }
+    },
+    "Subnet4Name": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the 3rd subnet"
+      },
+      "defaultValue": "Internal3"
+    },
+    "Subnet4Prefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the 4th subnet"
+      },
+      "defaultValue": "10.0.4.0/24"
+    },
+    "Subnet4StartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first avaialable address on the 4th subnet"
+      }
+    },
+    "vnetNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "allowedValues": [
+        "new",
+        "existing"
+      ],
+      "metadata": {
+        "Description": "Indicates whether the virtual network is new or existing"
+      }
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "apiVersion": {
+      "type": "string"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "variables": {
+    "vnetId": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+  },
+  "resources": [],
+  "outputs": {
+    "vnetId": {
+      "value": "[variables('vnetId')]",
+      "type": "string"
+    }
+  }
+}

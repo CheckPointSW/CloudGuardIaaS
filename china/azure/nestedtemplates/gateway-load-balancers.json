@@ -1,0 +1,153 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "vmName": {
+      "type": "string"
+    },
+    "appLoadDistribution": {
+      "type": "string"
+    },
+    "Subnet1StartAddress": {
+      "type": "string"
+    },
+    "subnet1Id": {
+      "type": "string"
+    },
+    "upgrading": {
+      "type": "bool"
+    },
+    "lbResourceId": {
+      "type": "string"
+    },
+    "lbTargetBEAddressPoolName": {
+      "type": "string"
+    },
+    "vxlanTunnelExternalPort": {
+      "type": "int"
+    },
+    "vxlanTunnelExternalIdentifier": {
+      "type": "int"
+    },
+    "vxlanTunnelInternalPort": {
+      "type": "int"
+    },
+    "vxlanTunnelInternalIdentifier": {
+      "type": "int"
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
+  },
+  "variables": {
+    "appName": "[concat(parameters('vmName'), '-app-1')]",
+    "appFEName": "[variables('appName')]",
+    "lbName": "gateway-lb",
+    "lbID": "[if(parameters('upgrading'), parameters('lBResourceId'), resourceId('Microsoft.Network/loadBalancers', variables('lbName')))]",
+    "lbBEAddressPool": "[concat(variables('lbName'), '-pool')]",
+    "lbBEAddressPoolName": "[if(parameters('upgrading'), parameters('lbTargetBEAddressPoolName'), variables('lbBEAddressPool'))]",
+    "appProbeName": "[variables('appName')]",
+    "appHealthProtocol": "tcp",
+    "lbHealthPort": 8117,
+    "GatewayLBPrivateIPAddress": "[parameters('Subnet1StartAddress')]",
+    "lbBEAddressPoolProperties": [
+      {
+        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBEAddressPoolName'))]"
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "condition": "[not(parameters('upgrading'))]",
+      "apiVersion": "2020-08-01",
+      "name": "[variables('lbName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Gateway"
+      },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('appFEName')]",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('GatewayLBPrivateIPAddress')]",
+              "subnet": {
+                "id": "[parameters('subnet1Id')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('lbBEAddressPool')]",
+            "properties": {
+              "tunnelInterfaces": [
+                {
+                  "port": "[parameters('vxlanTunnelExternalPort')]",
+                  "Identifier": "[parameters('vxlanTunnelExternalIdentifier')]",
+                  "Protocol": "VxLan",
+                  "Type": "External"
+                },
+                {
+                  "port": "[parameters('vxlanTunnelInternalPort')]",
+                  "Identifier": "[parameters('vxlanTunnelInternalIdentifier')]",
+                  "Protocol": "VxLan",
+                  "Type": "Internal"
+                }
+              ]
+            }
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('appName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('lbName'), variables('appFEName'))]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBEAddressPoolName'))]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('lbName'), variables('appProbeName'))]"
+              },
+              "protocol": "All",
+              "frontendPort": 0,
+              "backendPort": 0,
+              "enableFloatingIP": false,
+              "loadDistribution": "[parameters('appLoadDistribution')]"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('appProbeName')]",
+            "properties": {
+              "protocol": "[variables('appHealthProtocol')]",
+              "port": "[variables('lbHealthPort')]",
+              "intervalInSeconds": "5",
+              "numberOfProbes": "2"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
+    }
+  ],
+  "outputs": {
+    "lbId": {
+      "value": "[variables('lbId')]",
+      "type": "string"
+    },
+    "lbBEAddressPoolProperties": {
+      "value": "[variables('lbBEAddressPoolProperties')]",
+      "type": "array"
+    }
+  }
+}

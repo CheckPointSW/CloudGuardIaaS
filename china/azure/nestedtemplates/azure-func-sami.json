@@ -1,0 +1,240 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "type": "string",
+            "defaultValue": "[subscription().subscriptionId]",
+            "metadata": {
+                "description": "The name of the azure function."
+            }
+        },
+        "appName": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().name]",
+            "metadata": {
+                "description": "The name of the azure function."
+            }
+        },
+        "location": {
+            "type": "string"
+        },
+        "vmssResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "VMSS resource group name"
+            }
+        },
+        "vmssName": {
+            "type": "string",
+            "metadata": {
+                "description": "VMSS name"
+            }
+        },
+        "dnsZoneRecordSetName": {
+            "type": "string",
+            "metadata": {
+                "description": "DNS Zone Record Set name"
+            }
+        },
+        "numberOfRecordSetEntries": {
+            "type": "string",
+            "metadata": {
+                "description": "Number of records in the DNS Zone Record Set"
+            }
+        },
+        "dnsZoneResourceId": {
+            "type": "string",
+            "metadata": {
+                "description": "Number of records in the DNS Zone Record Set"
+            }
+        },
+      "rbacGuid": {
+          "type": "string",
+          "defaultValue": "[newGuid()]"
+      },
+      "containerName": {
+          "type": "string",
+          "defaultValue": "azure-function"
+      },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    }
+    },
+    "variables": {
+        "resourceGroup": "[resourceGroup()]",
+        "dnsZoneName": "[last(split(parameters('dnsZoneResourceId'), '/'))]",
+        "functionAppName": "[parameters('appName')]",
+        "hostingPlanName": "[concat('ASP-',parameters('appName'),'-', substring(uniqueString(variables('resourceGroup').id),0,4))]",
+        "storageAccountName": "[substring(concat('azurefunction',uniqueString(variables('resourceGroup').id)),0,21)]",
+        "applicationInsightsName": "[parameters('appName')]",
+        "Reader": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+        "functionAppId": "[resourceId('Microsoft.Web/sites', parameters('appName'))]",
+        "workspaceName": "[concat('workspace-',parameters('appName'))]",
+		"workspaceId" : "[resourceId('Microsoft.OperationalInsights/workspaces', concat('workspace-',parameters('appName')))]"
+    },
+    "resources": [
+        {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "name": "[variables('workspaceName')]",
+          "apiVersion": "2021-06-01",
+          "location": "[parameters('location')]",
+          "properties": {
+              "sku": {
+                  "name": "pergb2018"
+              },
+              "features": {
+                  "searchVersion": 1,
+                  "legacy": 0,
+                  "enableLogAccessUsingOnlyResourcePermissions": "true"
+              }
+          }
+        },
+        {
+            "apiVersion": "2021-04-01-preview",
+            "type": "Microsoft.Authorization/roleAssignments",
+            "name": "[parameters('rbacGuid')]",
+            "properties": {
+                "roleDefinitionId": "[variables('Reader')]",
+                "principalId": "[reference(variables('functionAppId'), '2021-03-01', 'Full').identity.principalId]",
+                "scope": "[resourceGroup().id]",
+                "PrincipalType": "ServicePrincipal"
+            },
+             "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-02-01",
+            "name": "[variables('functionAppName')]",
+            "type": "Microsoft.Web/sites",
+            "kind": "functionapp,linux",
+            "location": "[parameters('location')]",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                 "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~3"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "python"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-06-01').keys[0].value,';EndpointSuffix=', environment().suffixes.storage)]"
+                        },
+                        {
+                            "name": "WEBSITE_RUN_FROM_PACKAGE",
+                            "value": ""
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2020-02-02').InstrumentationKey]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[reference(resourceId('microsoft.insights/components/', variables('applicationInsightsName')), '2020-02-02').ConnectionString]"
+                        },
+                        {
+                            "name": "SUBSCRIPTION_ID",
+                            "value": "[parameters('subscriptionId')]"
+                        },
+                        {
+                            "name": "VMSS_RESOURCE_GROUP_NAME",
+                            "value": "[parameters('vmssResourceGroupName')]"
+                        },
+                        {
+                            "name": "VMSS_NAME",
+                            "value": "[parameters('vmssName')]"
+                        },
+                        {
+                            "name": "DNS_ZONE_SUBSCRIPTION_ID",
+                            "value": "[reference(parameters('dnsZoneResourceId'),'2018-05-01','Full').subscriptionId]"
+                        },
+                        {
+                            "name": "DNS_ZONE_RESOURCE_GROUP_NAME",
+                            "value": "[reference(parameters('dnsZoneResourceId'),'2018-05-01','Full').resourceGroupName]"
+                        },
+                        {
+                            "name": "DNS_ZONE_NAME",
+                            "value": "[variables('dnsZoneName')]"
+                        },
+                        {
+                            "name": "DNS_ZONE_RECORD_SET_NAME",
+                            "value": "[parameters('dnsZoneRecordSetName')]"
+                        },
+                        {
+                            "name": "NUMBER_OF_RECORD_SET_ENTRIES",
+                            "value": "[parameters('numberOfRecordSetEntries')]"
+                        }
+                    ],
+                    "linuxFxVersion": "Python|3.7"
+                },
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                "reserved": true
+            },
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Function App'), parameters('tagsByResource')['Function App'], json('{}')) ]"
+        },
+        {
+          "type": "Microsoft.Web/serverfarms",
+          "apiVersion": "2021-02-01",
+          "name": "[variables('hostingPlanName')]",
+          "location": "[parameters('location')]",
+          "sku": {
+            "name": "S1",
+            "tier": "Standard",
+            "size": "S1",
+            "family": "S",
+            "capacity": 1
+          },
+          "kind": "linux",
+          "properties": {
+              "reserved": true
+          }
+        },
+        {
+            "apiVersion": "2021-06-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "allowBlobPublicAccess": false
+            },
+            "resources": [
+                {
+                  "type": "blobServices/containers",
+                  "apiVersion": "2021-06-01",
+                  "name": "[concat('default/', parameters('containerName'))]",
+                  "dependsOn": [
+                    "[variables('storageAccountName')]"
+                  ]
+                }
+            ],
+            "tags": "[ if(contains(parameters('tagsByResource'), 'Function App'), parameters('tagsByResource')['Function App'], json('{}')) ]"
+        },
+        {
+            "apiVersion": "2020-02-02",
+            "name": "[variables('functionAppName')]",
+            "type": "microsoft.insights/components",
+            "location": "[parameters('location')]",
+            "properties": {
+                "Application_Type": "web",
+                "Request_Source": "IbizaWebAppExtensionCreate",
+                "WorkspaceResourceId": "[variables('workspaceId')]"
+            }
+        }
+    ]
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the virtual network"
+      },
+      "defaultValue": "vnet"
+    },
+    "virtualNetworkExistingRGName": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource Group of the existing virtual network"
+      },
+      "defaultValue": ""
+    },
+    "tagsByResource": {
+      "type": "object",
+      "defaultValue": {}
+    },
+    "deployNsg": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "NewNsgName": {
+      "type": "string",
+      "defaultValue": "default-nsg"
+    }
+  },
+  "variables": {
+    "vnetId": "[resourceId(parameters('virtualNetworkExistingRGName'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "condition": "[parameters('deployNSG')]",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('NewNsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowAllInBound",
+            "properties": {
+              "description": "Allow all inbound connections",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": "100",
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+      "value": "[variables('vnetId')]",
+      "type": "string"
+    },
+    "vnetAddressPrefixes": {
+      "value": "[reference(variables('vnetId'),'2018-11-01').addressSpace.addressPrefixes]",
+      "type": "array"
+    }
+  }
+}
