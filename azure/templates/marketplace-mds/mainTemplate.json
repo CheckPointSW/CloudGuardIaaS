@@ -256,7 +256,7 @@
     "storageAccountAdditionalIps": {
       "type": "array",
       "metadata": {
-        "description": "IPs/CIDRs that are allowed access to the Storage Account"
+        "description": "IPs/CIDRs that are allowed access to the Storage Account. Format should be an array of strings."
       },
       "defaultValue": []
     }
