@@ -92,6 +92,20 @@
                 "description": "Paste an OpenSSH public key. You can generate a key pair using SSH-keygen (Linux, OS X, Cygwin) or PuttyGen (Windows)"
             }
         },
+        "MaintenanceModePasswordHash": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "Description": "Maintenance mode password hash, relevant only for R81.20 and higher versions"
+            }
+        },
+        "SerialConsolePasswordHash": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "Description": "Optional parameter, used to enable serial console connection. In R81.10 and below, the serial console password is also used as the maintenance mode password."
+            }
+        },
         "BGP": {
             "defaultValue": "64512",
             "type": "String",
@@ -212,9 +226,9 @@
         },
         "planVersion": {
             "type": "string",
-            "defaultValue": "1.0.22",
+            "defaultValue": "1.0.24",
             "metadata": {
-                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.22) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
+                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.24) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
             }
         }
     },
@@ -371,6 +385,12 @@
                     },
                     "sshPublicKey": {
                         "value": "[parameters('sshPublicKey')]"
+                    },
+                    "MaintenanceModePasswordHash": {
+                        "value": "[parameters('MaintenanceModePasswordHash')]"
+                    },
+                    "SerialConsolePasswordHash": {
+                        "value": "[parameters('SerialConsolePasswordHash')]"
                     },
                     "BGP": {
                         "value": "[parameters('BGP')]"

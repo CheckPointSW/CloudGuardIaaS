@@ -935,7 +935,7 @@
             "label": "Availability options",
             "defaultValue": "Availability Set",
             "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth ', concat(' ', location(), ' '))]",
+            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth', concat(' ', location(), ' '))]",
             "constraints": {
               "allowedValues": [
                 {
@@ -1110,7 +1110,7 @@
             "name": "floatingIP",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the Load Balancers with floating IP",
-            "defaultValue": "No",
+            "defaultValue": "Yes",
             "toolTip": "Deploy the Load Balancers with floating IP.",
             "constraints": {
               "allowedValues": [
@@ -1487,6 +1487,35 @@
             "visible": "[steps('network').NSG]"
           },
           {
+            "name": "storageAccountDeployMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Storage Account Deployment Mode",
+            "toolTip": "Select your preferred Storage Account deployment mode, New to a new Storage Account, Existing to an existing Storage Account, Managed to managed Storage Account, None to deploy without a Storage Account",
+            "defaultValue": "New",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "New",
+                  "value": "New"
+                },
+                {
+                  "label": "Existing",
+                  "value": "Existing"
+                },
+                {
+                  "label": "Managed",
+                  "value": "Managed"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
             "name": "addStorageAccountIpRules",
             "type": "Microsoft.Common.OptionsGroup",
             "defaultValue": "Network access from all networks",
@@ -1503,9 +1532,48 @@
                   "value": true
                 }
               ],
-              "required": true
+              "required": "[equals(steps('network').storageAccountDeployMode, 'New')]"
             },
-            "visible": true
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'New')]"
+          },
+          {
+            "name": "existingStorageAccount",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Storage Account",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing Storage Account",
+            "resourceType": "Microsoft.Storage/storageAccounts",
+            "constraints": {
+              "required": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+            },
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+          },
+          {
+            "name": "infoExistingStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
+            "options": {
+              "icon": "Info",
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+            }
+          },
+          {
+            "name": "infoManagedStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Managed')]",
+            "options": {
+              "icon": "Info",
+              "text": "Azure will use a managed Storage Account for the deployment, no additional configuration is required."
+            }
+          },
+          {
+            "name": "warningNoneStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
+            "options": {
+              "icon": "Warning",
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+            }
           }
         ]
       },
@@ -1579,7 +1647,9 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "storageAccountDeployMode": "[steps('network').storageAccountDeployMode]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "VipsNumber": "[int(steps('network').Vips_Number)]",
       "VipNames": "[concat(steps('network').VIP_Names.VIP2_Name, ',', steps('network').VIP_Names.VIP3_Name, ',', steps('network').VIP_Names.VIP4_Name, ',', steps('network').VIP_Names.VIP5_Name, ',', steps('network').VIP_Names.VIP6_Name, ',', steps('network').VIP_Names.VIP7_Name, ',', steps('network').VIP_Names.VIP8_Name, ',', steps('network').VIP_Names.VIP9_Name, ',', steps('network').VIP_Names.VIP10_Name)]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
