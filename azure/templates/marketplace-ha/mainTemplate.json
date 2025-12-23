@@ -72,7 +72,7 @@
         "no",
         "yes"
       ],
-      "defaultValue": "no",
+      "defaultValue": "yes",
       "metadata": {
         "description": "Deploy the Load Balancers with floating IP"
       }
@@ -341,19 +341,39 @@
       "type": "string",
       "defaultValue": ""
     },
+    "storageAccountDeployMode": {
+      "type": "string",
+      "defaultValue": "New",
+      "metadata": {
+        "description": "Choose the Storage Account mode: 'New' creates a new account, 'Existing' uses one already available, 'Managed' provisions a managed account, and 'None' skips account creation."
+      },
+      "allowedValues": [
+        "New",
+        "Existing",
+        "Managed",
+        "None"
+      ]
+    },
     "addStorageAccountIpRules": {
       "type": "bool",
       "metadata": {
-        "description": "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled"
+        "description": "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled. Only relevant when 'Storage Account Deploy Mode' is set to 'New'."
       },
       "defaultValue": false
     },
     "storageAccountAdditionalIps": {
       "type": "array",
       "metadata": {
-        "description": "IPs/CIDRs that are allowed access to the Storage Account. Format should be an array of strings."
+        "description": "IPs/CIDRs that are allowed access to the Storage Account. Format should be an array of strings. Only relevant when 'Storage Account Deploy Mode' is set to 'New'."
       },
       "defaultValue": []
+    },
+    "existingStorageAccountId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the existing Storage Account. Only relevant when 'Storage Account Deploy Mode' is set to 'Existing'."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -1449,6 +1469,7 @@
       }
     },
     {
+      "condition": "[equals(parameters('storageAccountDeployMode'), 'New')]",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2022-09-01",
@@ -1466,7 +1487,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
+      "kind": "StorageV2",
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
@@ -1771,7 +1792,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2022-11-01",
+      "apiVersion": "2023-09-01",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
@@ -1792,10 +1813,7 @@
         "UserData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
         "availabilitySet": "[if(not(variables('useAZ')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": "true",
-            "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-05-01').primaryEndpoints.blob]"
-          }
+          "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-05-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -1897,7 +1915,7 @@
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionIds')[if(greater(copyIndex(1), 2), 1, 0)]]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2022-11-01', 'Full').identity.principalId]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2023-09-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
@@ -1932,10 +1950,10 @@
             "value": "[variables('roleDefinitionIds')[copyIndex()]]"
           },
           "principalId1": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2022-11-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2023-09-01', 'Full').identity.principalId]"
           },
           "principalId2": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2022-11-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2023-09-01', 'Full').identity.principalId]"
           },
           "index": {
             "value": "[copyIndex()]"

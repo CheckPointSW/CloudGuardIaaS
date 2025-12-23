@@ -158,7 +158,7 @@
     },
     "floatingIP": {
       "type": "string",
-      "defaultValue": "no",
+      "defaultValue": "yes",
       "allowedValues": [
         "no",
         "yes"
@@ -486,19 +486,39 @@
       "type": "string",
       "defaultValue": "[concat(parameters('vmName'),'-nsg')]"
     },
+    "storageAccountDeployMode": {
+      "type": "string",
+      "defaultValue": "New",
+      "metadata": {
+        "description": "Choose the Storage Account mode: 'New' creates a new account, 'Existing' uses one already available, 'Managed' provisions a managed account, and 'None' skips account creation."
+      },
+      "allowedValues": [
+        "New",
+        "Existing",
+        "Managed",
+        "None"
+      ]
+    },
     "addStorageAccountIpRules": {
       "type": "bool",
       "metadata": {
-        "description": "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled"
+        "description": "Add Storage Account IP rules that allow access to the Serial Console only for IPs based on their geographic location, based on https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/serial-console-linux#use-serial-console-with-custom-boot-diagnostics-storage-account-firewall-enabled. Only relevant when 'Storage Account Deploy Mode' is set to 'New'"
       },
       "defaultValue": false
     },
     "storageAccountAdditionalIps": {
       "type": "array",
       "metadata": {
-        "description": "IPs/CIDRs that are allowed access to the Storage Account. Format should be an array of strings."
+        "description": "IPs/CIDRs that are allowed access to the Storage Account. Format should be an array of strings. Only relevant when 'Storage Account Deploy Mode' is set to 'New'."
       },
       "defaultValue": []
+    },
+    "existingStorageAccountId": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the existing Storage Account. Only relevant when 'Storage Account Deploy Mode' is set to 'Existing'."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
@@ -1683,6 +1703,7 @@
       }
     },
     {
+      "condition": "[equals(parameters('storageAccountDeployMode'), 'New')]",
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2021-04-01",
@@ -1700,7 +1721,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
+      "kind": "StorageV2",
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
@@ -1811,10 +1832,7 @@
             ]
           },
           "diagnosticsProfile": {
-            "bootDiagnostics": {
-              "enabled": "true",
-              "storageUri": "[reference(variables('storageAccountId'), '2023-01-01').primaryEndpoints.blob]"
-            }
+            "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(variables('storageAccountId'), '2023-01-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
           }
         },
         "overprovision": false
