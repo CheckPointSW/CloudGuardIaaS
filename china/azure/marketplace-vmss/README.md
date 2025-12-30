@@ -11,13 +11,13 @@ Benefits:
 · Provides consistent security policy management, enforcement, and reporting with a single pane of glass, using Check Point Unified Security Management
 
 
-<a href="https://portal.azure.cn/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2FChina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2FChina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FcreateUiDefinition.json">
+<a href="https://portal.azure.cn/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2Fchina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FmainTemplate.json/createUIDefinitionUri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2Fchina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FcreateUiDefinition.json">
 
  <img src="https://aka.ms/deploytoazurebutton" alt="Deploy to Azure" />
 
 </a>
 
-To deploy with full control over all the template options use: [Full Control Deployment](https://portal.azure.cn/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2FChina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FmainTemplate.json)
+To deploy with full control over all the template options use: [Full Control Deployment](https://portal.azure.cn/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCheckPointSW%2FCloudGuardIaaS%2Fmaster%2Fchina%2Fazure%2ftemplates%2Fmarketplace-vmss%2FmainTemplate.json)
 
 
 

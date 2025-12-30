@@ -61,7 +61,7 @@
     "appProbeName": "[variables('appName')]",
     "appFrontEndProtocol": "tcp",
     "appFrontEndPort": 80,
-    "appBackEndPort": 8081,
+    "appBackEndPort": 80,
     "appHealthProtocol": "tcp",
     "ilbHealthProtocol": "tcp",
     "lbHealthPort": 8117,
