@@ -45,7 +45,7 @@ Metadata:
           - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
-          - EnableIPv6Traffic
+          - IPMode
           - CloudWatch
           - GatewayBootstrapScript
       - Label:
@@ -67,6 +67,8 @@ Metadata:
         default: Gateways subnets
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode  
       EnableVolumeEncryption:
         default: Enable environment volume encryption
       VolumeSize:
@@ -141,8 +143,6 @@ Metadata:
         default: Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group name
-      EnableIPv6Traffic:
-        default: Add support for IPv6 traffic inspection
 Parameters:
   VPC:
     Description: Select an existing VPC.
@@ -503,6 +503,9 @@ Parameters:
       - R82-BYOL
       - R82-PAYG-NGTP
       - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -542,13 +545,13 @@ Parameters:
     AllowedValues:
       - true
       - false
-  EnableIPv6Traffic:
-    Description: Enables inspection of IPv6 traffic encapsulated within IPv4 Geneve tunnels, ensuring proper handling of IPv6 traffic on IPv4 autoscale gateways (supported on version R81.20 with JHF 99 and above).
+  IPMode:
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide. 
     Type: String
-    Default: false
     AllowedValues:
-      - true
-      - false
+      - IPv4
+      - DualStack
+    Default: IPv4
   GatewayBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -686,6 +689,8 @@ Parameters:
       - R81.20-PAYG
       - R82-BYOL
       - R82-PAYG
+      - R82.10-BYOL
+      - R82.10-PAYG
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -718,24 +723,23 @@ Parameters:
     Description: Allow gateways only from this network to communicate with the Security Management Server.
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
-    AutoScaleGroupName:
-      Conditions:
+  AutoScaleGroupName:
       Description: The Name of the Auto Scaling Group. (optional)
       Type: String
       Default: ""
       MaxLength: 100
-    Conditions:
+Conditions:
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
-  EnableIPv6: !Equals [!Ref EnableIPv6Traffic, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
 Resources:
   GatewayLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Type: gateway
       Name: !Ref GWLBName
-      IpAddressType: !If [EnableIPv6, dualstack, ipv4]
+      IpAddressType: !If [IsIPv6Enabled, dualstack, ipv4]
       LoadBalancerAttributes:
         - Key: load_balancing.cross_zone.enabled
           Value: !Ref CrossZoneLoadBalancing
@@ -811,6 +815,7 @@ Resources:
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
+        IPMode: !Ref IPMode
   ManagementStack:
     Type: AWS::CloudFormation::Stack
     Condition: DeployManagement
