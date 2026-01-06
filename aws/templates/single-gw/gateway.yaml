@@ -418,6 +418,9 @@ Parameters:
       - R82-BYOL
       - R82-PAYG-NGTP
       - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String

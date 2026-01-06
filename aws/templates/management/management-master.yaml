@@ -402,6 +402,8 @@ Parameters:
       - R81.20-PAYG
       - R82-BYOL
       - R82-PAYG
+      - R82.10-BYOL
+      - R82.10-PAYG
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
