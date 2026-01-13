@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an IAM role for selected permissions (20250617)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Policy Attributes
+        Parameters:
+          - PolicyName
+          - PolicyRole
+    ParameterLabels:
+      PolicyName:
+        default: Policy name
+      PolicyRole:
+        default: IAM role name
+Parameters:
+  PolicyName:
+    Description: ''
+    Type: String
+    Default: 'Cloudwatch'
+    AllowedPattern: '[\w+=,.@-]+'
+  PolicyRole:
+    Description: ''
+    Type: String
+    AllowedPattern: '[\w+=,.@-]+'
+Resources:
+  IAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${PolicyName}-iam-policy"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - cloudwatch:PutMetricData
+            Resource: '*'
+      Roles:
+        - !Ref PolicyRole

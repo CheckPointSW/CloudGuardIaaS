@@ -1,0 +1,161 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Creates an IAM role for selected permissions (20250617)
+  See sk122074 administration guide for detailed deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: IAM
+        Parameters:
+          - Permissions
+      - Label:
+          default: Advanced Configuration (optional)
+        Parameters:
+          - STSRoles
+          - TrustedAccount
+    ParameterLabels:
+      Permissions:
+        default: IAM role
+      STSRoles:
+        default: STS roles
+      TrustedAccount:
+        default: Trusted Account ID
+Parameters:
+  Permissions:
+    Type: String
+    Default: Create with read permissions
+    AllowedValues:
+      - Create with read permissions
+      - Create with read-write permissions
+      - Create with assume role permissions (specify an STS role ARN)
+  STSRoles:
+    Description: The IAM role will be able to assume these STS Roles (comma separated list of ARNs, without spaces).
+    Type: String
+    Default: ''
+  TrustedAccount:
+    Description: A 12 digits number that represents the ID of a trusted account. IAM users in this account will be able assume the IAM role and receive the permissions attached to it.
+    Type: String
+    Default: ''
+    AllowedPattern: '^([0-9]{12})|$'
+Conditions:
+  AllowReadPermissions: !Or
+    - !Equals [!Ref Permissions, Create with read permissions]
+    - !Equals [!Ref Permissions, Create with read-write permissions]
+  AllowWritePermissions: !Equals [!Ref Permissions, Create with read-write permissions]
+  ProvidedSTSRoles: !Not [!Equals [!Ref STSRoles, '']]
+  NotProvidedTrustedAccount: !Equals ['', !Ref TrustedAccount]
+  ProvidedTrustedAccount: !Not [!Condition NotProvidedTrustedAccount]
+Resources:
+  CMEIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - !If
+            - ProvidedTrustedAccount
+            - Effect: Allow
+              Principal:
+                AWS: [!Ref TrustedAccount]
+              Action: ['sts:AssumeRole']
+            - !Ref 'AWS::NoValue'
+          - !If
+            - NotProvidedTrustedAccount
+            - Effect: Allow
+              Principal:
+                Service: [ec2.amazonaws.com.cn]
+              Action: ['sts:AssumeRole']
+            - !Ref 'AWS::NoValue'
+      Path: /
+      Policies:
+        - PolicyName: CMEPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - !If
+                - ProvidedSTSRoles
+                - Effect: Allow
+                  Action: ['sts:AssumeRole']
+                  Resource: !Split [',', !Ref STSRoles]
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowReadPermissions
+                - Effect: Allow
+                  Action:
+                    - autoscaling:DescribeAutoScalingGroups
+                    - ec2:DescribeRegions
+                    - ec2:DescribeCustomerGateways
+                    - ec2:DescribeInstances
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:DescribeRouteTables
+                    - ec2:DescribeSecurityGroups
+                    - ec2:DescribeSubnets
+                    - ec2:DescribeTransitGateways
+                    - ec2:DescribeTransitGatewayAttachments
+                    - ec2:DescribeTransitGatewayRouteTables
+                    - ec2:DescribeVpcs
+                    - ec2:DescribeVpnGateways
+                    - ec2:DescribeVpnConnections
+                    - ec2:GetTransitGatewayAttachmentPropagations
+                    - elasticloadbalancing:DescribeLoadBalancers
+                    - elasticloadbalancing:DescribeTags
+                    - elasticloadbalancing:DescribeListeners
+                    - elasticloadbalancing:DescribeTargetGroups
+                    - elasticloadbalancing:DescribeRules
+                    - elasticloadbalancing:DescribeTargetHealth
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowWritePermissions
+                - Effect: Allow
+                  Action:
+                    - ec2:AssociateTransitGatewayRouteTable
+                    - ec2:AttachVpnGateway
+                    - ec2:CreateCustomerGateway
+                    - ec2:CreateVpnConnection
+                    - ec2:CreateVpnGateway
+                    - ec2:DeleteCustomerGateway
+                    - ec2:DeleteVpnConnection
+                    - ec2:DeleteVpnGateway
+                    - ec2:DetachVpnGateway
+                    - ec2:DisableTransitGatewayRouteTablePropagation
+                    - ec2:DisableVgwRoutePropagation
+                    - ec2:DisassociateTransitGatewayRouteTable
+                    - ec2:EnableTransitGatewayRouteTablePropagation
+                    - ec2:EnableVgwRoutePropagation
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowWritePermissions
+                - Effect: Allow
+                  Action:
+                    - cloudformation:DescribeStacks
+                    - cloudformation:DescribeStackResources
+                    - cloudformation:ListStacks
+                  Resource: '*'
+                - !Ref 'AWS::NoValue'
+              - !If
+                - AllowWritePermissions
+                - Effect: Allow
+                  Action:
+                    - cloudformation:CreateStack
+                    - cloudformation:DeleteStack
+                  Resource: 'arn:aws-cn:cloudformation:*:*:stack/vpn-by-tag--*/*'
+                - !Ref 'AWS::NoValue'
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+        InstanceProfileName: !Ref CMEIAMRole
+        Roles:
+          - !Ref CMEIAMRole          
+Outputs:
+  CMEIAMRole:
+    Description: The IAM role.
+    Value: !Ref CMEIAMRole
+  CMEARNRole:
+    Description: The IAM role ARN.
+    Value: !GetAtt CMEIAMRole.Arn
+  InstanceProfile:
+    Description: The Instance Profile ARN.
+    Value: !GetAtt InstanceProfile.Arn

@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy a traffic-mirror-filter and traffic-mirror-target (20250617)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: General Settings
+      Parameters:
+      - MirroringNetworkInterfaceId
+      - EnvironmentPrefix
+    ParameterLabels:
+      MirroringNetworkInterfaceId:
+        default: Mirroring target network interface id
+      EnvironmentPrefix:
+        default: Environment prefix for created resources
+Parameters:
+  MirroringNetworkInterfaceId:
+    Description: The network interface ID to which all the traffic will be mirrored.
+    Type: String
+    AllowedPattern: '^eni-[a-z0-9]+$'
+  EnvironmentPrefix:
+    Description: The environment prefix for created resources. (optional)
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9-_]*'
+    Default: cp-tap
+Resources:
+  TrafficMirrorFilter:
+    Type: AWS::EC2::TrafficMirrorFilter
+    Properties:
+      Description: Traffic mirror filter.
+      Tags:
+        - Key: Name
+          Value: !Join ['-', [!Ref EnvironmentPrefix, traffic-filter]]
+  TrafficMirrorFilterRuleIngress:
+    Type: AWS::EC2::TrafficMirrorFilterRule
+    Properties:
+      Description: Traffic mirror filter rule - ingress.
+      DestinationCidrBlock: 0.0.0.0/0
+      RuleAction: accept
+      RuleNumber: 100
+      SourceCidrBlock: 0.0.0.0/0
+      TrafficDirection: ingress
+      TrafficMirrorFilterId: !Ref TrafficMirrorFilter
+  TrafficMirrorFilterRuleEgress:
+    Type: AWS::EC2::TrafficMirrorFilterRule
+    Properties:
+      Description: Traffic mirror filter rule - egress.
+      DestinationCidrBlock: 0.0.0.0/0
+      RuleAction: accept
+      RuleNumber: 100
+      SourceCidrBlock: 0.0.0.0/0
+      TrafficDirection: egress
+      TrafficMirrorFilterId: !Ref TrafficMirrorFilter
+  TrafficMirrorTarget:
+    Type: AWS::EC2::TrafficMirrorTarget
+    Properties:
+      Description: Traffic mirror target.
+      NetworkInterfaceId: !Ref MirroringNetworkInterfaceId
+      Tags:
+        - Key: Name
+          Value: !Join ['-', [!Ref EnvironmentPrefix, traffic-target]]
+Outputs:
+  TrafficMirrorTargetId:
+    Description: Traffic mirror target id.
+    Value: !Ref TrafficMirrorTarget
+  TrafficMirrorFilterId:
+    Description: Traffic mirror filter id.
+    Value: !Ref TrafficMirrorFilter

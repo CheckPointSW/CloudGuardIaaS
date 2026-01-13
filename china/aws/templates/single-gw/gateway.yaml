@@ -1,0 +1,595 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Deploys a Check Point Security Gateway into an existing VPC (20250617)
+  See sk175207 for Gateway administration guide deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - VPC
+          - PublicSubnet
+          - PrivateSubnet
+          - InternalRouteTable
+      - Label:
+          default: EC2 Instance Configuration
+        Parameters:
+          - GatewayName
+          - GatewayInstanceType
+          - KeyName
+          - AllocatePublicAddress
+          - VolumeSize
+          - VolumeType
+          - VolumeEncryption
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+      - Label:
+          default: Check Point Settings
+        Parameters:
+          - GatewayVersion
+          - Shell
+          - GatewaySICKey
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+      - Label:
+          default: Quick connect to Smart-1 Cloud (Recommended)
+        Parameters:
+          - GatewayToken
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - ResourcesTagName
+          - GatewayHostname
+          - AllowUploadDownload
+          - CloudWatch
+          - GatewayBootstrapScript
+          - NTPPrimary
+          - NTPSecondary
+      - Label:
+          default: Automatic Provisioning with Security Management Server Settings (optional)
+        Parameters:
+          - ControlGatewayOverPrivateOrPublicAddress
+          - ManagementServer
+          - ConfigurationTemplate
+    ParameterLabels:
+      VPC:
+        default: VPC
+      PublicSubnet:
+        default: Public subnet
+      PrivateSubnet:
+        default: Private subnet
+      InternalRouteTable:
+        default: Internal route table
+      GatewayName:
+        default: Gateway Name
+      GatewayInstanceType:
+        default: Gateway Instance type
+      KeyName:
+        default: Key name
+      AllocatePublicAddress:
+        default: Allocate an Elastic IP
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      VolumeEncryption:
+        default: Volume encryption KMS key identifier
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      GatewayVersion:
+        default: Gateway Version & license
+      Shell:
+        default: Admin shell
+      GatewaySICKey:
+        default: Gateway SIC key
+      GatewayToken:
+        default: Smart-1 Cloud Token
+      GatewayPasswordHash:
+        default: Gateway Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      ResourcesTagName:
+        default: Resources prefix tag
+      GatewayHostname:
+        default: Gateway Hostname
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Bootstrap Script
+      NTPPrimary:
+        default: Primary NTP server
+      NTPSecondary:
+        default: Secondary NTP server
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateway address
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  PublicSubnet:
+    Description: The public subnet of the security gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+  PrivateSubnet:
+    Description: The private subnet of the security gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+  InternalRouteTable:
+    Description: The route table id in which to set 0.0.0.0/0 route to the Gateway instance (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
+    Type: String
+    Default: ''
+  GatewayName:
+    Description: The name tag of the Security Gateway instances. (optional)
+    Type: String
+    Default: Check-Point-Gateway
+  GatewayInstanceType:
+    Description: The instance type of the Secutiry Gateway.
+    Type: String
+    Default: c6i.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    Default: 100
+    MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  VolumeEncryption:
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
+    Type: String
+    Default: alias/aws/ebs
+  EnableInstanceConnect:
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewayVersion:
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81.10-BYOL
+      - R81.20-BYOL
+      - R82-BYOL
+      - R82.10-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections
+      between Check Point components. Choose a random string consisting of at least
+      8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '[a-zA-Z0-9]{8,}'
+    NoEcho: true
+  GatewayToken:
+      Description: Follow the instructions in SK180501 to quickly connect this Gateway to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+      Type: String
+      AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
+      NoEcho: true
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  ResourcesTagName:
+    Description: The name tag of the resources. (optional)
+    Type: String
+    Default: ''
+  GatewayHostname:
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
+    ConstraintDescription: A valid hostname label or an empty string.
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  NTPPrimary:
+    Description: (optional)
+    Type: String
+    Default: 169.254.169.123
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  NTPSecondary:
+    Description: (optional)
+    Type: String
+    Default: 0.pool.ntp.org
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the Security Gateway is provisioned using its private
+      or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic
+      provisioning configuration.
+    Type: String
+  ConfigurationTemplate:
+    Description: A name of a Security Gateway configuration template in the automatic
+      provisioning configuration.
+    Type: String
+    MaxLength: 30
+Conditions:
+  ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
+  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
+  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  ProvidedManagementParameters: !And [!Not [!Equals [!Ref ManagementServer, '']], !Not [!Equals [!Ref ConfigurationTemplate, '']]]
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+Resources:
+  ReadyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: AllocateAddress
+    Properties: {}
+  ReadyCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: AllocateAddress
+    DependsOn: GatewayInstance
+    Properties:
+      Handle: !Ref ReadyHandle
+      Timeout: 1800
+  GatewayIAMRole:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ ec2.amazonaws.com.cn ]
+            Action: sts:AssumeRole
+      Path: /
+  GatewayInstanceProfile:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [!Ref GatewayIAMRole]
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
+        PolicyRole: !Ref GatewayIAMRole
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion,GW]]
+  ExternalNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - ExternalNetworkInterface
+      Description: eth0
+      SourceDestCheck: false
+      GroupSet:
+        - !Ref PermissiveSecurityGroup
+      SubnetId: !Ref PublicSubnet
+  InternalNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - InternalNetworkInterface
+      Description: eth1
+      SourceDestCheck: false
+      GroupSet:
+        - !Ref PermissiveSecurityGroup
+      SubnetId: !Ref PrivateSubnet
+  PermissiveSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - PermissiveSecurityGroup
+      GroupDescription: Permissive security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  InternalDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: ProvidedRouteTable
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NetworkInterfaceId: !Ref InternalNetworkInterface
+      RouteTableId: !Ref InternalRouteTable
+  GatewayInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: GatewayLaunchTemplate
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
+      Tags:
+        - Key: Name
+          Value: !Ref GatewayName
+        - !If
+          - ProvidedManagementParameters
+          - Key: x-chkp-tags
+            Value:
+              !Join
+              - ':'
+              - - !Join ['=', [management, !Ref ManagementServer]]
+                - !Join ['=', [template,!Ref ConfigurationTemplate]]
+                - !Join ['=',[ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
+          - !Ref 'AWS::NoValue'
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ExternalNetworkInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref InternalNetworkInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref GatewayInstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; token=''${GatewayToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue']
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  PublicAddress:
+    Type: AWS::EC2::EIP
+    Condition: AllocateAddress
+    Properties:
+      Domain: vpc
+  AddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Condition: AllocateAddress
+    DependsOn: GatewayInstance
+    Properties:
+      NetworkInterfaceId: !Ref ExternalNetworkInterface
+      AllocationId: !GetAtt PublicAddress.AllocationId
+      PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+Outputs:
+  PublicAddress:
+    Description: The public address of the Check Point instance.
+    Value: !Ref PublicAddress
+    Condition: AllocateAddress
+  PrivateExternalAddress:
+    Description: The private external address of the Check Point instance.
+    Value: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+  PrivateInternalAddress:
+    Description: The private internal address of the Check Point instance.
+    Value: !GetAtt InternalNetworkInterface.PrimaryPrivateIpAddress
+  SSH:
+    Description: SSH command to the Check Point instance.
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
+    Condition: AllocateAddress
+  URL:
+    Description: URL to the portal.
+    Value: !Join ['', ['https://', !Ref PublicAddress]]
+    Condition: AllocateAddress
+  ManagementName:
+    Description: The name that represents the Security Management Server.
+    Value: !Ref ManagementServer
+  ConfigurationTemplateName:
+    Description: The name that represents the configuration template. Configurations
+      required to automatically provision the Gateways in the Auto Scaling Group,
+      such as what Security Policy to install and which Blades to enable, will be
+      placed under this template name.
+    Value: !Ref ConfigurationTemplate

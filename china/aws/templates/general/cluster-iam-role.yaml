@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an IAM role for selected permissions (20250617)
+Resources:
+  ClusterIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: [ec2.amazonaws.com.cn]
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: ClusterPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:AssignPrivateIpAddresses
+                  - ec2:AssociateAddress
+                  - ec2:CreateRoute
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeRouteTables
+                  - ec2:ReplaceRoute
+                Resource: '*'
+Outputs:
+  ClusterIAMRole:
+    Description: The IAM role.
+    Value: !Ref ClusterIAMRole
+  ClusterARNRole:
+    Description: The IAM role ARN.
+    Value: !GetAtt ClusterIAMRole.Arn

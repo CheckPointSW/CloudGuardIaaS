@@ -1,0 +1,780 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Deploys a Check Point Cluster into an existing VPC (20250617). 
+  See CloudGuard Network for AWS Cross Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - VPC
+          - PublicSubnetA
+          - PublicSubnetB
+          - PrivateSubnetA
+          - PrivateSubnetB
+          - InternalRouteTable
+      - Label:
+          default: EC2 Instance Configuration
+        Parameters:
+          - GatewayName
+          - GatewayInstanceType
+          - KeyName
+          - AllocatePublicAddress
+          - VolumeSize
+          - VolumeType
+          - VolumeEncryption
+          - EnableInstanceConnect
+          - GatewayPredefinedRole
+          - TerminationProtection
+          - MetaDataToken
+      - Label:
+          default: Check Point Settings
+        Parameters:
+          - GatewayVersion
+          - Shell
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - GatewaySICKey
+      - Label:
+          default: Quick connect to Smart-1 Cloud (Recommended)
+        Parameters:
+          - MemberAToken
+          - MemberBToken
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - ResourcesTagName
+          - GatewayHostname
+          - AllowUploadDownload
+          - CloudWatch
+          - GatewayBootstrapScript
+          - NTPPrimary
+          - NTPSecondary
+    ParameterLabels:
+      VPC:
+        default: VPC
+      PublicSubnetA:
+        default: Public subnet 1
+      PublicSubnetB:
+        default: Public subnet 2
+      PrivateSubnetA:
+        default: Private subnet 1
+      PrivateSubnetB:
+        default: Private subnet 2
+      InternalRouteTable:
+        default: Internal route table
+      GatewayName:
+        default: Gateway Name
+      GatewayInstanceType:
+        default: Security Gateways instance type
+      KeyName:
+        default: Key name
+      AllocatePublicAddress:
+        default: Allocate Elastic IPs
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      VolumeEncryption:
+        default: Volume encryption KMS key identifier
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      GatewayPredefinedRole:
+        default: Existing IAM role name
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      GatewayVersion:
+        default: Version & license
+      Shell:
+        default: Admin shell
+      GatewayPasswordHash:
+        default: Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      GatewaySICKey:
+        default: SIC key
+      MemberAToken:
+        default: Smart-1 Cloud Token for member A
+      MemberBToken:
+        default: Smart-1 Cloud Token for member B
+      ResourcesTagName:
+        default: Resources prefix tag
+      GatewayHostname:
+        default: Gateway Hostname
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Bootstrap Script
+      NTPPrimary:
+        default: Primary NTP server
+      NTPSecondary:
+        default: Secondary NTP server
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  PublicSubnetA:
+    Description: Select a public subnet for the first Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the first Security Gateway.
+  PublicSubnetB:
+    Description: Select a public subnet for the second Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a public subnet for the second Security Gateway.
+  PrivateSubnetA:
+    Description: Select a private subnet for the first Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the first Security Gateway.
+  PrivateSubnetB:
+    Description: Select a private subnet for the second Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: you must select a private subnet for the second Security Gateway.
+  InternalRouteTable:
+    Description: Set 0.0.0.0/0 route to the Active Cluster member instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Cluster, this requires manual configuration in the Route Table. (optional)
+    Type: String
+    Default: ''
+  GatewayName:
+    Description: The name tag of the Security Gateway instances. (optional)
+    Type: String
+    Default: Check-Point-Cluster
+  GatewayInstanceType:
+    Description: The instance type of the Secutiry Gateway.
+    Type: String
+    Default: c6i.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Description: Allocate an Elastic IP for each cluster member, in addition to the shared cluster Elastic IP.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    Default: 100
+    MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  VolumeEncryption:
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
+    Type: String
+    Default: alias/aws/ebs
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  GatewayPredefinedRole:
+    Description: A predefined IAM role to attach to the cluster profile. (optional)
+    Type: String
+    Default: ''
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewayVersion:
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81.20-BYOL
+      - R82-BYOL
+      - R82.10-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections
+      between Check Point components. Choose a random string consisting of at least
+      8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '^[a-zA-Z0-9]{8,}$'
+    ConstraintDescription: At least 8 alpha numeric characters.
+    NoEcho: true
+  MemberAToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
+    Type: String
+    NoEcho: true
+  MemberBToken:
+    Description: Follow the instructions in sk180501 to quickly connect this Cross AZ Cluster to Smart-1 Cloud. Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal.
+    AllowedPattern: '(^aHR0cHM6Ly9(.+)|(.*)\s[aHR0cHM6Ly9](.+)|^$)'
+    Type: String
+    NoEcho: true
+  ResourcesTagName:
+    Description: Name tag prefix of the resources. (optional)
+    Type: String
+    Default: ''
+  GatewayHostname:
+    Description: The host name will be appended with member-a/b accordingly (optional). The name must not contain reserved words. For details, refer to sk40179.
+    Type: String
+    Default: ''
+    AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z]))?$'
+    ConstraintDescription: A valid hostname label or an empty string.
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose
+      Improve product experience by sending data to Check Point.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  NTPPrimary:
+    Description: (optional)
+    Type: String
+    Default: 169.254.169.123
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  NTPSecondary:
+    Description: (optional)
+    Type: String
+    Default: 0.pool.ntp.org
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+Conditions:
+  ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
+  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
+  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
+  CreateRole: !Equals [!Ref GatewayPredefinedRole, '']
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  EmptyHostName: !Equals [!Ref GatewayHostname, '']
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+Resources:
+  ClusterReadyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: AllocateAddress
+    Properties: {}
+  ClusterReadyCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    DependsOn: [MemberAInstance, MemberBInstance]
+    Condition: AllocateAddress
+    Properties:
+      Count: 2
+      Handle: !Ref ClusterReadyHandle
+      Timeout: 1800
+  ClusterRole:
+    Condition: CreateRole
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/iam/cluster-iam-role.yaml
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: [!If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]]
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
+        PolicyRole: !If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion, GW]]
+  PermissiveSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Permissive security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - PermissiveSecurityGroup
+  MemberAExternalInterface:
+    Type: AWS::EC2::NetworkInterface
+    DependsOn: PermissiveSecurityGroup
+    Properties:
+      Description: Member A external.
+      SecondaryPrivateIpAddressCount: 1
+      SourceDestCheck: false
+      GroupSet: [!Ref PermissiveSecurityGroup]
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - Member_A_ExternalInterface
+  MemberBExternalInterface:
+    Type: AWS::EC2::NetworkInterface
+    DependsOn: PermissiveSecurityGroup
+    Properties:
+      Description: Member B external.
+      SecondaryPrivateIpAddressCount: 1
+      SourceDestCheck: false
+      GroupSet: [!Ref PermissiveSecurityGroup]
+      SubnetId: !Ref PublicSubnetB
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - Member_B_ExternalInterface
+  MemberAInternalInterface:
+    Type: AWS::EC2::NetworkInterface
+    DependsOn: PermissiveSecurityGroup
+    Properties:
+      Description: Member A internal.
+      GroupSet: [!Ref PermissiveSecurityGroup]
+      SourceDestCheck: false
+      SubnetId: !Ref PrivateSubnetA
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - Member_A_InternalInterface
+  MemberBInternalInterface:
+    Type: AWS::EC2::NetworkInterface
+    DependsOn: PermissiveSecurityGroup
+    Properties:
+      Description: Member B internal.
+      GroupSet: [!Ref PermissiveSecurityGroup]
+      SourceDestCheck: false
+      SubnetId: !Ref PrivateSubnetB
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - Member_B_InternalInterface
+  InternalDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: ProvidedRouteTable
+    DependsOn: MemberAInternalInterface
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NetworkInterfaceId: !Ref MemberAInternalInterface
+      RouteTableId: !Ref InternalRouteTable
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ProvidedRouteTable
+    Properties:
+      RouteTableId: !Ref InternalRouteTable
+      SubnetId: !Ref PrivateSubnetA
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ProvidedRouteTable
+    Properties:
+      RouteTableId: !Ref InternalRouteTable
+      SubnetId: !Ref PrivateSubnetB
+  ClusterPublicAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  MemberAPublicAddress:
+    Type: AWS::EC2::EIP
+    Condition: AllocateAddress
+    Properties:
+      Domain: vpc
+  MemberBPublicAddress:
+    Type: AWS::EC2::EIP
+    Condition: AllocateAddress
+    Properties:
+      Domain: vpc
+  ClusterAddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    DependsOn: MemberAInstance
+    Properties:
+      NetworkInterfaceId: !Ref MemberAExternalInterface
+      AllocationId: !GetAtt ClusterPublicAddress.AllocationId
+      PrivateIpAddress: !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]
+  MemberAAddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Condition: AllocateAddress
+    DependsOn: MemberAInstance
+    Properties:
+      NetworkInterfaceId: !Ref MemberAExternalInterface
+      AllocationId: !GetAtt MemberAPublicAddress.AllocationId
+      PrivateIpAddress: !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress
+  MemberBAddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Condition: AllocateAddress
+    DependsOn: MemberBInstance
+    Properties:
+      NetworkInterfaceId: !Ref MemberBExternalInterface
+      AllocationId: !GetAtt MemberBPublicAddress.AllocationId
+      PrivateIpAddress: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
+  MemberAInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, ClusterPublicAddress, MemberBInternalInterface, MemberBExternalInterface, MemberAGatewayLaunchTemplate]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberAGatewayLaunchTemplate
+        Version: !GetAtt MemberAGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
+      Tags:
+        - Key: Name
+          Value: !Join ['-', [!Ref GatewayName, Member-A]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberAPublicAddress, '' ] ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
+  MemberBInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, ClusterPublicAddress, MemberAInternalInterface, MemberBGatewayLaunchTemplate]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref MemberBGatewayLaunchTemplate
+        Version: !GetAtt MemberBGatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
+      Tags:
+        - Key: Name
+          Value: !Join ['-', [!Ref GatewayName, Member-B]]
+        - Key: x-chkp-member-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberBPublicAddress, '' ] ] ]
+              - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
+              - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
+        - Key: x-chkp-cluster-ips
+          Value: !Join
+            - ':'
+            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
+              - !Join [ '=', [ secondary-external-private-ip, !Select [ 0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses ] ] ]
+  MemberAGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberAExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberAInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+              !Join
+              - |+
+
+              - - '#cloud-config'
+                - 'runcmd:'
+                - '  - |'
+                - '    set -e'
+                - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
+                - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+                - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
+                - !Join ['', ['    other_member_ip="', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress, '"']]
+                - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
+                - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
+                - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
+                - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
+                - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+                - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+                - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+                - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+                - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+                - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  MemberBGatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref MemberBExternalInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref MemberBInternalInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+            - DeviceName: '/dev/xvda'
+              Ebs:
+                Encrypted: !If [ EncryptedVolume, true, false ]
+                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+                VolumeType: !Ref VolumeType
+                VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !Ref ClusterInstanceProfile
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
+              - !If [AllocateAddress, !Sub '    wait_handle=''${ClusterReadyHandle}''',!Ref 'AWS::NoValue']
+              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
+              - !Join ['', ['    other_member_ip="', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress, '"']]
+              - !Join ['', ['    secondary_ip="', !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses], '"']]
+              - !Join ['', ['    remote_secondary_ip="', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses], '"']]
+              - !Join ['', ['    cluster_ip="', !Ref ClusterPublicAddress, '"']]
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join [ '', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+Outputs:
+  ClusterPublicAddress:
+    Description: The public address of the cluster.
+    Value: !Ref ClusterPublicAddress
+  MemberAPublicAddress:
+    Condition: AllocateAddress
+    Description: The public address of member A.
+    Value: !Ref MemberAPublicAddress
+  MemberASSH:
+    Condition: AllocateAddress
+    Description: SSH command to member A.
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref MemberAPublicAddress]]
+  MemberAURL:
+    Condition: AllocateAddress
+    Description: URL to the member A portal.
+    Value: !Join ['', ['https://', !Ref MemberAPublicAddress]]
+  MemberAExternalInterface:
+    Description: The external interface of member A.
+    Value: !Ref MemberAExternalInterface
+  MemberAPrivateExternalAddress:
+    Description: The primary external private address of member A.
+    Value: !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress
+  MemberAPrivateAliasAddress:
+    Description: The secondary external private IP address of Member A.
+    Value: !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]
+  MemberAPrivateInternalAddress:
+    Description: The private Internal address of member A.
+    Value: !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress
+  MemberBPublicAddress:
+    Condition: AllocateAddress
+    Description: The public address of member B.
+    Value: !Ref MemberBPublicAddress
+  MemberBSSH:
+    Condition: AllocateAddress
+    Description: SSH command to member B.
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref MemberBPublicAddress]]
+  MemberBURL:
+    Condition: AllocateAddress
+    Description: URL to the member B portal.
+    Value: !Join ['', ['https://', !Ref MemberBPublicAddress]]
+  MemberBPrivateExternalAddress:
+    Description: The primary external private address of member B.
+    Value: !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress
+  MemberBPrivateAliasAddress:
+    Description: The secondary external private IP address of Member B.
+    Value: !Select [0, !GetAtt MemberBExternalInterface.SecondaryPrivateIpAddresses]
+  MemberBPrivateInternalAddress:
+    Description: The private Internal address of member B.
+    Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
+Rules:
+  MemberATokenNotProvided:
+    RuleCondition: !Equals [!Ref MemberAToken, '']
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
+        Assert: !Equals [!Ref MemberBToken, '']
+  MemberBTokenNotProvided:
+    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    Assertions:
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
+        Assert: !Equals [ !Ref MemberAToken, '' ]
+  MembersTokenValueEquals:
+    RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]
+    Assertions:
+      - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
+        Assert: !Equals [ !Ref MemberAToken, '' ]
+      - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
+        Assert: !Equals [ !Ref MemberBToken, '' ]
