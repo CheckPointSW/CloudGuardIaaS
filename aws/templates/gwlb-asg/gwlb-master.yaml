@@ -49,8 +49,8 @@ Metadata:
           - GatewayMaintenancePasswordHash
           - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
+          - IPMode
           - AllocatePublicAddress
-          - EnableIPv6Traffic
           - CloudWatch
           - GatewayBootstrapScript
       - Label:
@@ -82,6 +82,8 @@ Metadata:
         default: Auto Scaling Group Public Subnet 4
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       EnableVolumeEncryption:
         default: Enable environment volume encryption
       VolumeSize:
@@ -156,8 +158,6 @@ Metadata:
         default: Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group name
-      EnableIPv6Traffic:
-        default: Add support for IPv6 traffic inspection
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -553,6 +553,9 @@ Parameters:
       - R82-BYOL
       - R82-PAYG-NGTP
       - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
   GatewayPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -585,13 +588,13 @@ Parameters:
     AllowedValues:
       - true
       - false
-  EnableIPv6Traffic:
-    Description: Enables inspection of IPv6 traffic encapsulated within IPv4 Geneve tunnels, ensuring proper handling of IPv6 traffic on IPv4 autoscale gateways (supported on version R81.20 with JHF 99 and above).
+  IPMode:
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide. 
     Type: String
-    Default: false
     AllowedValues:
-      - true
-      - false
+      - IPv4
+      - DualStack
+    Default: IPv4
   CloudWatch:
     Description: Report Check Point specific CloudWatch metrics.
     Type: String
@@ -736,6 +739,8 @@ Parameters:
       - R81.20-PAYG
       - R82-BYOL
       - R82-PAYG
+      - R82.10-BYOL
+      - R82.10-PAYG
   ManagementPasswordHash:
     Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
     Type: String
@@ -778,12 +783,12 @@ Conditions:
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
-  EnableIPv6: !Equals [!Ref EnableIPv6Traffic, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !If [EnableIPv6, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
+      TemplateURL: !If [IsIPv6Enabled, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
       Parameters:
         AvailabilityZones: !Join [',' , !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
@@ -843,7 +848,7 @@ Resources:
         AdminCIDR: !Ref AdminCIDR
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
-        EnableIPv6Traffic: !Ref EnableIPv6Traffic
+        IPMode: !Ref IPMode
 Outputs:
   VPCID:
     Description: VPC ID.
