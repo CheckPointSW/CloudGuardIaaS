@@ -20,7 +20,10 @@
         "R81.20 - Pay As You Go (NGTX)",
         "R82 - Bring Your Own License",
         "R82 - Pay As You Go (NGTP)",
-        "R82 - Pay As You Go (NGTX)"
+        "R82 - Pay As You Go (NGTX)",
+        "R82.10 - Bring Your Own License",
+        "R82.10 - Pay As You Go (NGTP)",
+        "R82.10 - Pay As You Go (NGTX)"
       ],
       "defaultValue": "R82 - Bring Your Own License",
       "metadata": {
@@ -393,7 +396,10 @@
       "R81.20 - Pay As You Go (NGTX)": "NGTX",
       "R82 - Bring Your Own License": "BYOL",
       "R82 - Pay As You Go (NGTP)": "NGTP",
-      "R82 - Pay As You Go (NGTX)": "NGTX"
+      "R82 - Pay As You Go (NGTX)": "NGTX",
+      "R82.10 - Bring Your Own License": "BYOL",
+      "R82.10 - Pay As You Go (NGTP)": "NGTP",
+      "R82.10 - Pay As You Go (NGTX)": "NGTX"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -405,7 +411,10 @@
       "R81.20 - Pay As You Go (NGTX)": "R8120",
       "R82 - Bring Your Own License": "R82",
       "R82 - Pay As You Go (NGTP)": "R82",
-      "R82 - Pay As You Go (NGTX)": "R82"
+      "R82 - Pay As You Go (NGTX)": "R82",
+      "R82.10 - Bring Your Own License": "R8210",
+      "R82.10 - Pay As You Go (NGTP)": "R8210",
+      "R82.10 - Pay As You Go (NGTX)": "R8210"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "serialConsoleGeographies": {
