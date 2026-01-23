@@ -947,6 +947,9 @@ Resources:
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
+      ListenerAttributes:
+        - Key: tcp.idle_timeout.seconds
+          Value: 3600
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
