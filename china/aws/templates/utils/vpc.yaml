@@ -1,0 +1,571 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template creates a Multi-AZ, multi-subnet VPC infrastructure (20250617)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Availability Zone Configuration
+        Parameters:
+          - AvailabilityZones
+          - NumberOfAZs
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PublicSubnet3CIDR
+          - PublicSubnet4CIDR
+          - CreatePrivateSubnets
+          - PrivateSubnet1CIDR
+          - PrivateSubnet2CIDR
+          - PrivateSubnet3CIDR
+          - PrivateSubnet4CIDR
+          - CreateAttachmentSubnets
+          - AttachmentSubnet1CIDR
+          - AttachmentSubnet2CIDR
+          - AttachmentSubnet3CIDR
+          - AttachmentSubnet4CIDR
+    ParameterLabels:
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of Availability Zones
+      VPCCIDR:
+        default: VPC CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
+      PublicSubnet3CIDR:
+        default: Public subnet 3 CIDR
+      PublicSubnet4CIDR:
+        default: Public subnet 4 CIDR
+      CreatePrivateSubnets:
+        default: Create private subnets
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      PrivateSubnet3CIDR:
+        default: Private subnet 3 CIDR
+      PrivateSubnet4CIDR:
+        default: Private subnet 4 CIDR
+      CreateAttachmentSubnets:
+        default: Create Attachment subnets
+      AttachmentSubnet1CIDR:
+        default: Attachment subnet 1 CIDR
+      AttachmentSubnet2CIDR:
+        default: Attachment subnet 2 CIDR
+      AttachmentSubnet3CIDR:
+        default: Attachment subnet 3 CIDR
+      AttachmentSubnet4CIDR:
+        default: Attachment subnet 4 CIDR
+Parameters:
+  AvailabilityZones:
+    Description: 'List of Availability Zones to use for the subnets in the VPC. Note: The logical order is preserved.'
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    MinLength: 1
+  NumberOfAZs:
+    Description: Number of Availability Zones to use in the VPC. This must match your
+      selections in the list of Availability Zones parameter.
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 4
+  VPCCIDR:
+    Description: CIDR block for the VPC.
+    Type: String
+    Default: 10.0.0.0/16
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet1CIDR:
+    Description: CIDR block for the public DMZ subnet 1 located in Availability Zone 1.
+    Type: String
+    Default: 10.0.10.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet2CIDR:
+    Description: CIDR block for the public DMZ subnet 2 located in Availability Zone 2.
+    Type: String
+    Default: 10.0.20.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet3CIDR:
+    Description: CIDR block for the public DMZ subnet 3 located in Availability Zone 3.
+    Type: String
+    Default: 10.0.30.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PublicSubnet4CIDR:
+    Description: CIDR block for the public DMZ subnet 4 located in Availability Zone 4.
+    Type: String
+    Default: 10.0.40.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  CreatePrivateSubnets:
+    Description: Set to false to create only public subnets. If false, the CIDR parameters.
+      for ALL private subnets will be ignored.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  PrivateSubnet1CIDR:
+    Description: CIDR block for private subnet 1 located in Availability Zone 1.
+    Type: String
+    Default: 10.0.11.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PrivateSubnet2CIDR:
+    Description: CIDR block for private subnet 2 located in Availability Zone 2.
+    Type: String
+    Default: 10.0.21.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PrivateSubnet3CIDR:
+    Description: CIDR block for private subnet 3 located in Availability Zone 3.
+    Type: String
+    Default: 10.0.31.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  PrivateSubnet4CIDR:
+    Description: CIDR block for private subnet 4 located in Availability Zone 4.
+    Type: String
+    Default: 10.0.41.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  CreateAttachmentSubnets:
+    Description: Set true for creating designated subnets for VPC attachments. If false,
+      the CIDR parameters for the Attachment subnets will be ignored.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  AttachmentSubnet1CIDR:
+    Description: CIDR block for Attachment subnet 1 located in Availability Zone 1.
+    Type: String
+    Default: 10.0.12.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  AttachmentSubnet2CIDR:
+    Description: CIDR block for Attachment subnet 2 located in Availability Zone 2.
+    Type: String
+    Default: 10.0.22.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  AttachmentSubnet3CIDR:
+    Description: CIDR block for Attachment subnet 3 located in Availability Zone 3.
+    Type: String
+    Default: 10.0.32.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  AttachmentSubnet4CIDR:
+    Description: CIDR block for Attachment subnet 4 located in Availability Zone 4.
+    Type: String
+    Default: 10.0.42.0/24
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+Conditions:
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
+  2AZs: !Or [!Equals [!Ref NumberOfAZs, 2], !Condition 3AZs]
+  PrivateSubnets: !Equals [!Ref CreatePrivateSubnets, true]
+  2AZsPrivateSubnets: !And [!Condition PrivateSubnets, !Condition 2AZs]
+  3AZsPrivateSubnets: !And [!Condition PrivateSubnets, !Condition 3AZs]
+  4AZsPrivateSubnets: !And [!Condition PrivateSubnets, !Condition 4AZs]
+  AttachmentSubnets: !Equals [!Ref CreateAttachmentSubnets, true]
+  2AZsAttachmentSubnets: !And [!Condition AttachmentSubnets, !Condition 2AZs]
+  3AZsAttachmentSubnets: !And [!Condition AttachmentSubnets, !Condition 3AZs]
+  4AZsAttachmentSubnets: !And [!Condition AttachmentSubnets, !Condition 4AZs]
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+        - Key: Network
+          Value: Public
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    DependsOn: [VPC, InternetGateway]
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet1CIDR
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Public subnet 1
+        - Key: Network
+          Value: Public
+      MapPublicIpOnLaunch: true
+  PublicSubnet2:
+    Condition: 2AZs
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet2CIDR
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Public subnet 2
+        - Key: Network
+          Value: Public
+      MapPublicIpOnLaunch: true
+  PublicSubnet3:
+    Condition: 3AZs
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet3CIDR
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Public subnet 3
+        - Key: Network
+          Value: Public
+      MapPublicIpOnLaunch: true
+  PublicSubnet4:
+    Condition: 4AZs
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet4CIDR
+      AvailabilityZone: !Select [3, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Public subnet 4
+        - Key: Network
+          Value: Public
+      MapPublicIpOnLaunch: true
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: Public Subnets Route Table
+        - Key: Network
+          Value: Public
+  PublicSubnetRoute:
+    DependsOn: [VPCGatewayAttachment, PublicSubnetRouteTable]
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    DependsOn: [PublicSubnet1, PublicSubnetRouteTable]
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 2AZs
+    DependsOn: [PublicSubnet2, PublicSubnetRouteTable]
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 3AZs
+    DependsOn: [PublicSubnet3, PublicSubnetRouteTable]
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PublicSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 4AZs
+    DependsOn: [PublicSubnet4, PublicSubnetRouteTable]
+    Properties:
+      SubnetId: !Ref PublicSubnet4
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Condition: PrivateSubnets
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Private subnet 1
+        - Key: Network
+          Value: Private
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Condition: 2AZsPrivateSubnets
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Private subnet 2
+        - Key: Network
+          Value: Private
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Condition: 3AZsPrivateSubnets
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet3CIDR
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Private subnet 3
+        - Key: Network
+          Value: Private
+  PrivateSubnet4:
+    Type: AWS::EC2::Subnet
+    Condition: 4AZsPrivateSubnets
+    DependsOn: VPC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet4CIDR
+      AvailabilityZone: !Select [3, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Private subnet 4
+        - Key: Network
+          Value: Private
+  AttachmentSubnet1:
+    Condition: AttachmentSubnets
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AttachmentSubnet1CIDR
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Attachment subnet 1
+        - Key: Network
+          Value: Private
+  AttachmentSubnet2:
+    Condition: AttachmentSubnets
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AttachmentSubnet2CIDR
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Attachment subnet 2
+        - Key: Network
+          Value: Private
+  AttachmentSubnet3:
+    Condition: 3AZsAttachmentSubnets
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AttachmentSubnet3CIDR
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Attachment subnet 3
+        - Key: Network
+          Value: Private
+  AttachmentSubnet4:
+    Condition: 4AZsAttachmentSubnets
+    DependsOn: VPC
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AttachmentSubnet4CIDR
+      AvailabilityZone: !Select [3, !Ref AvailabilityZones]
+      Tags:
+        - Key: Name
+          Value: Attachment subnet 4
+        - Key: Network
+          Value: Private
+Outputs:
+  VPCID:
+    Value: !Ref VPC
+    Description: VPC ID.
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCID'
+  VPCCIDR:
+    Value: !Ref VPCCIDR
+    Description: VPC CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-VPCCIDR'
+  PublicSubnet1CIDR:
+    Description: Public subnet 1 CIDR in Availability Zone 1.
+    Value: !Ref PublicSubnet1CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet1CIDR'
+  PublicSubnet1ID:
+    Description: Public subnet 1 ID in Availability Zone 1.
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet1ID'
+  PublicSubnet2CIDR:
+    Condition: 2AZs
+    Description: Public subnet 2 CIDR in Availability Zone 2.
+    Value: !Ref PublicSubnet2CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet2CIDR'
+  PublicSubnet2ID:
+    Condition: 2AZs
+    Description: Public subnet 2 ID in Availability Zone 2.
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet2ID'
+  PublicSubnet3CIDR:
+    Condition: 3AZs
+    Description: Public subnet 3 CIDR in Availability Zone 3.
+    Value: !Ref PublicSubnet3CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet3CIDR'
+  PublicSubnet3ID:
+    Condition: 3AZs
+    Description: Public subnet 3 ID in Availability Zone 3.
+    Value: !Ref PublicSubnet3
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet3ID'
+  PublicSubnet4CIDR:
+    Condition: 4AZs
+    Description: Public subnet 4 CIDR in Availability Zone 4.
+    Value: !Ref PublicSubnet4CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet4CIDR'
+  PublicSubnet4ID:
+    Condition: 4AZs
+    Description: Public subnet 4 ID in Availability Zone 4.
+    Value: !Ref PublicSubnet4
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnet4ID'
+  PublicSubnetRouteTable:
+    Value: !Ref PublicSubnetRouteTable
+    Description: Public subnet route table.
+    Export:
+      Name: !Sub '${AWS::StackName}-PublicSubnetRouteTable'
+  PrivateSubnet1CIDR:
+    Condition: PrivateSubnets
+    Description: Private subnet 1 CIDR in Availability Zone 1.
+    Value: !Ref PrivateSubnet1CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet1CIDR'
+  PrivateSubnet1ID:
+    Condition: PrivateSubnets
+    Description: Private subnet 1 ID in Availability Zone 1.
+    Value: !Ref PrivateSubnet1
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet1ID'
+  PrivateSubnet2CIDR:
+    Condition: 2AZsPrivateSubnets
+    Description: Private subnet 2 CIDR in Availability Zone 2.
+    Value: !Ref PrivateSubnet2CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet2CIDR'
+  PrivateSubnet2ID:
+    Condition: 2AZsPrivateSubnets
+    Description: Private subnet 2 ID in Availability Zone 2.
+    Value: !Ref PrivateSubnet2
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet2ID'
+  PrivateSubnet3CIDR:
+    Condition: 3AZsPrivateSubnets
+    Description: Private subnet 3 CIDR in Availability Zone 3.
+    Value: !Ref PrivateSubnet3CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet3CIDR'
+  PrivateSubnet3ID:
+    Condition: 3AZsPrivateSubnets
+    Description: Private subnet 3 ID in Availability Zone 3.
+    Value: !Ref PrivateSubnet3
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet3ID'
+  PrivateSubnet4CIDR:
+    Condition: 4AZsPrivateSubnets
+    Description: Private subnet 4 CIDR in Availability Zone 4.
+    Value: !Ref PrivateSubnet4CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet4CIDR'
+  PrivateSubnet4ID:
+    Condition: 4AZsPrivateSubnets
+    Description: Private subnet 4 ID in Availability Zone 4.
+    Value: !Ref PrivateSubnet4
+    Export:
+      Name: !Sub '${AWS::StackName}-PrivateSubnet4ID'
+  AttachmentSubnet1CIDR:
+    Condition: AttachmentSubnets
+    Description: Attachment subnet 1 CIDR in Availability Zone 1.
+    Value: !Ref AttachmentSubnet1CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet1CIDR'
+  AttachmentSubnet1ID:
+    Condition: AttachmentSubnets
+    Description: Attachment subnet 1 ID in Availability Zone 1.
+    Value: !Ref AttachmentSubnet1
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet1ID'
+  AttachmentSubnet2CIDR:
+    Condition: 2AZsAttachmentSubnets
+    Description: Attachment subnet 2 CIDR in Availability Zone 2.
+    Value: !Ref AttachmentSubnet2CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet2CIDR'
+  AttachmentSubnet2ID:
+    Condition: 2AZsAttachmentSubnets
+    Description: Attachment subnet 2 ID in Availability Zone 2.
+    Value: !Ref AttachmentSubnet2
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet2ID'
+  AttachmentSubnet3CIDR:
+    Condition: 3AZsAttachmentSubnets
+    Description: Attachment subnet 3 CIDR in Availability Zone 3.
+    Value: !Ref AttachmentSubnet3CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet3CIDR'
+  AttachmentSubnet3ID:
+    Condition: 3AZsAttachmentSubnets
+    Description: Attachment subnet 3 ID in Availability Zone 3.
+    Value: !Ref AttachmentSubnet3
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet3ID'
+  AttachmentSubnet4CIDR:
+    Condition: 4AZsAttachmentSubnets
+    Description: Attachment subnet 4 CIDR in Availability Zone 4.
+    Value: !Ref AttachmentSubnet4CIDR
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet4CIDR'
+  AttachmentSubnet4ID:
+    Condition: 4AZsAttachmentSubnets
+    Description: Attachment subnet 4 ID in Availability Zone 4.
+    Value: !Ref AttachmentSubnet4
+    Export:
+      Name: !Sub '${AWS::StackName}-AttachmentSubnet4ID'
+  IGWID:
+    Description: IGW ID.
+    Value: !Join ['', [!Ref InternetGateway]]
+    Export:
+      Name: !Sub '${AWS::StackName}-IGWID'

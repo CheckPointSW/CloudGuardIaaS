@@ -1,0 +1,677 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Create an Auto Scaling group of Check Point gateways (20250617)
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide administration guide for detailed deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - VPC
+          - GatewaysSubnets
+      - Label:
+          default: EC2 Instances Configuration
+        Parameters:
+          - GatewayName
+          - GatewayInstanceType
+          - KeyName
+          - VolumeSize
+          - VolumeType
+          - EnableVolumeEncryption
+          - EnableInstanceConnect
+          - MetaDataToken
+      - Label:
+          default: Auto Scaling Configuration
+        Parameters:
+          - AutoScaleGroupName
+          - GatewaysMinSize
+          - GatewaysMaxSize
+          - AdminEmail
+          - GatewaysTargetGroups
+      - Label:
+          default: Check Point Settings
+        Parameters:
+          - GatewayVersion
+          - Shell
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - GatewaySICKey
+          - AllowUploadDownload
+          - CloudWatch
+          - EnableIPv6Traffic
+          - GatewayBootstrapScript
+      - Label:
+          default: Automatic Provisioning with Security Management Server Settings
+        Parameters:
+          - ControlGatewayOverPrivateOrPublicAddress
+          - AllocatePublicAddress
+          - ManagementServer
+          - ConfigurationTemplate
+      - Label:
+          default: Proxy Configuration (optional)
+        Parameters:
+          - ELBType
+          - ELBPort
+          - ELBClients
+    ParameterLabels:
+      VPC:
+        default: VPC
+      GatewaysSubnets:
+        default: Gateways subnets
+      GatewayName:
+        default: Gateways name
+      GatewayInstanceType:
+        default: Gateways instance type
+      KeyName:
+        default: Key name
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      EnableVolumeEncryption:
+        default: Enable volume encryption
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      MetaDataToken:
+        default: Metadata HTTP token
+      GatewaysMinSize:
+        default: Minimum Gateway group size
+      GatewaysMaxSize:
+        default: Maximum Gateway group size
+      AdminEmail:
+        default: Email address
+      GatewaysTargetGroups:
+        default: Gateways target groups
+      GatewayVersion:
+        default: Gateways version & license
+      Shell:
+        default: Admin shell
+      GatewayPasswordHash:
+        default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      GatewaySICKey:
+        default: Gateways SIC key
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      AllocatePublicAddress:
+        default: Allocate Public IPs
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+      ELBType:
+        default: Proxy type
+      ELBPort:
+        default: Proxy port
+      ELBClients:
+        default: Allowed proxy clients
+      AutoScaleGroupName:
+        default: Auto Scale Group name
+      EnableIPv6Traffic:
+        default: Add support for IPv6 traffic inspection
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  GatewaysSubnets:
+    Description: Select at least 2 public subnets in the VPC.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  GatewayName:
+    Description: The name tag of the Security Gateway instances. (optional)
+    Type: String
+    Default: Check-Point-Gateway
+  GatewayInstanceType:
+    Description: The instance type of the Secutiry Gateways.
+    Type: String
+    Default: c6i.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  VolumeSize:
+    Type: Number
+    Default: 100
+    MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  EnableVolumeEncryption:
+    Description: Encrypt Auto Scaling instances volume with default AWS KMS key.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewaysMinSize:
+    Description: The minimal number of gateways in the Auto Scaling group.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GatewaysMaxSize:
+    Description: The maximal number of gateways in the Auto Scaling group.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+    ConstraintDescription: Must be a valid email address.
+  GatewaysTargetGroups:
+    Description: A list of Target Groups to associate with the Auto Scaling
+      group (comma separated list of ARNs, without spaces). (optional)
+    Type: String
+    Default: ''
+  GatewayVersion:
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81.20-BYOL
+      - R82-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections
+      between Check Point components. Choose a random string consisting of at least
+      8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '^[a-zA-Z0-9]{8,}$'
+    ConstraintDescription: At least 8 alpha numeric characters.
+    NoEcho: true
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  AllocatePublicAddress:
+    Description: Allocate a Public IP for gateway members.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
+    Type: String
+    Default: management-server
+    MinLength: 1
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
+    Type: String
+    Default: ASG-configuration
+    MinLength: 1
+    MaxLength: 30
+  ELBType:
+    Type: String
+    Default: none
+    AllowedValues:
+      - none
+      - internal
+      - internet-facing
+  ELBPort:
+    Type: Number
+    Default: 8080
+  ELBClients:
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: '^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})$'
+  AutoScaleGroupName:
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
+  EnableIPv6Traffic:
+    Description: Add support for IPv6 traffic inspection.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+Conditions:
+  ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
+  ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  CreateELB: !Not [!Equals [!Ref ELBType, none]]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+  GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
+  EnableIPv6: !Equals [!Ref EnableIPv6Traffic, true]
+Resources:
+  ChkpGatewayRole:
+    Type: AWS::IAM::Role
+    Condition: EnableCloudWatch
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com.cn
+            Action:
+              - sts:AssumeRole
+      Path: /
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: ChkpGatewayPolicy
+        PolicyRole: !Ref ChkpGatewayRole
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Condition: EnableCloudWatch
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ChkpGatewayRole
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion, GW]]
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Condition: ProvidedAdminEmail
+    Properties:
+      Subscription:
+        - Endpoint: !Ref AdminEmail
+          Protocol: email
+  ElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Condition: CreateELB
+    Properties:
+      CrossZone: true
+      Listeners:
+        - LoadBalancerPort: !Ref ELBPort
+          InstancePort: !Ref ELBPort
+          Protocol: TCP
+      HealthCheck:
+        Target: !Join [':', [TCP, !Ref ELBPort]]
+        HealthyThreshold: 3
+        UnhealthyThreshold: 5
+        Interval: 30
+        Timeout: 5
+      Scheme: !Ref ELBType
+      Subnets: !Ref GatewaysSubnets
+      Policies:
+        - PolicyName: EnableProxyProtocol
+          PolicyType: ProxyProtocolPolicyType
+          Attributes:
+            - Name: ProxyProtocol
+              Value: true
+          InstancePorts:
+            - !Ref ELBPort
+      SecurityGroups:
+        - !Ref ELBSecurityGroup
+  PermissiveSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join ['_', [!Ref 'AWS::StackName', PermissiveSecurityGroup]]
+      GroupDescription: Permissive security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+  GatewayGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: GatewayLaunchTemplate
+    Properties:
+      # AutoScalingGroupName: !If [GenerateAutoScalingName, !Join ["-", [!Ref 'AWS::StackName', GatewayGroup]], !Ref AutoScaleGroupName]
+      VPCZoneIdentifier: !Ref GatewaysSubnets
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      MinSize: !Ref GatewaysMinSize
+      MaxSize: !Ref GatewaysMaxSize
+      LoadBalancerNames: !If [CreateELB, [!Ref ElasticLoadBalancer], !Ref 'AWS::NoValue']
+      TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref GatewaysTargetGroups], !Ref 'AWS::NoValue']
+      HealthCheckGracePeriod: 3600
+      HealthCheckType: ELB
+      NotificationConfiguration: !If
+        - ProvidedAdminEmail
+        - TopicARN: !Ref NotificationTopic
+          NotificationTypes:
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+        - !Ref 'AWS::NoValue'
+      Tags:
+        - Key: Name
+          Value: !Ref GatewayName
+          PropagateAtLaunch: true
+        - Key: x-chkp-tags
+          Value: !Join
+            - ':'
+            - - !Join ['=', [management, !Ref ManagementServer]]
+              - !Join ['=', [template, !Ref ConfigurationTemplate]]
+              - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
+          PropagateAtLaunch: true
+        - Key: x-chkp-topology
+          Value: internal
+          PropagateAtLaunch: true
+        - Key: x-chkp-solution
+          Value: autoscale_gwlb
+          PropagateAtLaunch: true
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: !Ref AllocatePublicAddress
+            Groups:
+              - !Ref PermissiveSecurityGroup
+        Monitoring:
+          Enabled: true
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !Ref EnableVolumeEncryption
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'network:'
+              - '  version: 1'
+              - '  config:'
+              - '  - type: bridge'
+              - '    name: br0'
+              - '    mtu: *eth0-mtu'
+              - '    subnets:'
+              - '      - address: *eth0-private'
+              - '        type: static'
+              - '        gateway: *default-gateway'
+              - '        dns_nameservers:'
+              - '        - *eth0-dns1'
+              - '    bridge_interfaces:'
+              - '      - eth0'
+              - 'kernel_parameters:'
+              - '  sim:'
+              - '    - sim_geneve_enabled=1'
+              - '    - sim_geneve_br_dev=br0'
+              - '  fw:'
+              - '    - fwtls_bridge_mode_inspection=1'
+              - '    - fw_geneve_enabled=1'
+              - 'bootcmd:'
+              - '    - echo "brctl hairpin br0 eth0 on" >> /etc/rc.local'
+              - '    - echo "cpprod_util CPPROD_SetValue \"fw1\" \"AwsGwlb\" 4 1 1" >> /etc/rc.local'
+              - '    - |'
+              - '      gparam_file_path="$(find $PPKDIR/boot/modules/ -regextype egrep -regex ''.*(sim_kern_64_3_10_64_v6|sim_kern_64_v6)\.gparams'')"'
+              - '      if cat $gparam_file_path | grep -q sim_geneve_enabled ; then'
+              - '          cp /etc/basedb /etc/basedb.bak'
+              - '          grep -vx "ipv6 t" /etc/basedb.bak | grep -vx "ipv6 f" > /etc/basedb;'
+              - '          echo "ipv6 t" >> /etc/basedb;'
+              - '          /etc/rc3.d/S07ipv6gen'
+              - '      fi'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"autoscale_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  GatewayScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref GatewayGroup
+      Cooldown: 300
+      ScalingAdjustment: 1
+  GatewayScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref GatewayGroup
+      Cooldown: 300
+      ScalingAdjustment: -1
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 80% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      AlarmActions:
+        - !Ref GatewayScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref GatewayGroup
+      ComparisonOperator: GreaterThanThreshold
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 60% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 60
+      AlarmActions:
+        - !Ref GatewayScaleDownPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref GatewayGroup
+      ComparisonOperator: LessThanThreshold
+  ELBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: CreateELB
+    Properties:
+      GroupDescription: ELB security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: !Ref ELBClients
+          FromPort: !Ref ELBPort
+          ToPort: !Ref ELBPort
+Outputs:
+  URL:
+    Description: The URL of the Proxy.
+    Condition: CreateELB
+    Value: !Join ['', ['http://', !GetAtt ElasticLoadBalancer.DNSName]]
+  SecurityGroup:
+    Description: The Security Group of the Auto Scaling group.
+    Value: !GetAtt PermissiveSecurityGroup.GroupId
+Rules:
+  GatewayAddressAllocationRule:
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
+    Assertions:  
+      - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
+        Assert: !Equals [!Ref AllocatePublicAddress, 'true']
