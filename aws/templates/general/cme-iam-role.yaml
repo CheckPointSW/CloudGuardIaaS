@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Creates an IAM role for selected permissions (20240507)
+Description: Creates an IAM role for selected permissions (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -8,7 +8,7 @@ Metadata:
         Parameters:
           - Permissions
       - Label:
-          default: Advanced Configuration (optional)
+          default: Advanced Settings (optional)
         Parameters:
           - STSRoles
           - TrustedAccount

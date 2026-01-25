@@ -1,22 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20241027)
+  Security Gateway & Management (Standalone) instance in a new VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - StandaloneVersion
+          - StandaloneInstanceType
+          - KeyName
+          - AdminCIDR
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - AvailabilityZone
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - StandaloneName
           - VPCCIDR
           - PublicSubnetCIDR
           - PrivateSubnetCIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
-          - StandaloneName
-          - StandaloneInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -24,16 +29,9 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - StandaloneVersion
           - Shell
           - StandalonePasswordHash
           - StandaloneMaintenancePasswordHash
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - StandaloneHostname
           - AllowUploadDownload
@@ -41,7 +39,6 @@ Metadata:
           - StandaloneBootstrapScript
           - NTPPrimary
           - NTPSecondary
-          - AdminCIDR
           - GatewaysAddresses
     ParameterLabels:
       AvailabilityZone:
@@ -55,7 +52,7 @@ Metadata:
       StandaloneName:
         default: Standalone Name
       StandaloneInstanceType:
-        default: Instance type
+        default: Standalone Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -73,7 +70,7 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       StandaloneVersion:
-        default: License
+        default: Standalone Version & License
       Shell:
         default: Admin shell
       StandalonePasswordHash:
@@ -95,7 +92,7 @@ Metadata:
       NTPSecondary:
         default: Secondary NTP server
       AdminCIDR:
-        default: Administrator addresses
+        default: Allow SmartConsole connections from these networks
       GatewaysAddresses:
         default: Gateways addresses
 Parameters:
@@ -174,7 +171,7 @@ Parameters:
   StandaloneVersion:
     Description: Standalone Version & License.
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG-NGTP
     AllowedValues:
       - R81.10-PAYG-NGTP
       - R81.10-BYOL
@@ -182,8 +179,8 @@ Parameters:
       - R81.20-BYOL
       - R82-PAYG-NGTP
       - R82-BYOL
-      - R82.10-PAYG-NGTP
       - R82.10-BYOL
+      - R82.10-PAYG-NGTP
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -422,7 +419,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: Must be a valid EC2 instance type
   ResourcesTagName:
     Description: The name tag of the resources. (optional)

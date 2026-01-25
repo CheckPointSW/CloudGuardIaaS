@@ -1,23 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point cross AZ Cluster in a new VPC (20241027)
+Description: Deploy a Check Point cross AZ Cluster in a new VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
         Parameters:
           - AvailabilityZones
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - GatewayName
           - VPCCIDR
           - PublicSubnet1CIDR
           - PublicSubnet2CIDR
           - PrivateSubnet1CIDR
           - PrivateSubnet2CIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
-          - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -26,22 +28,11 @@ Metadata:
           - GatewayPredefinedRole
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
           - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
           - MemberAToken
           - MemberBToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -63,9 +54,9 @@ Metadata:
       PrivateSubnet2CIDR:
         default: Private subnet 2 CIDR
       GatewayName:
-        default: Gateway Name
+        default: Gateways name
       GatewayInstanceType:
-        default: Security Gateways instance type
+        default: Gateways Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -85,15 +76,15 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
-        default: SIC key
+        default: Gateways SIC key
       MemberAToken:
         default: Smart-1 Cloud Token for member A
       MemberBToken:
@@ -101,7 +92,7 @@ Metadata:
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
-        default: Gateway Hostname
+        default: Gateways Hostname
       AllowUploadDownload:
         default: Allow upload & download
       CloudWatch:
@@ -375,7 +366,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the Security Gateways.
@@ -432,17 +422,11 @@ Parameters:
   GatewayVersion:
     Description: The license to install on the Security Gateways.
     Type: String
-    Default: R82-BYOL
+    Default: R81.10-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP
       - R81.10-PAYG-NGTX
-      - R82-BYOL
-      - R82-PAYG-NGTP
-      - R82-PAYG-NGTX
-      - R82.10-BYOL
-      - R82.10-PAYG-NGTP
-      - R82.10-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String

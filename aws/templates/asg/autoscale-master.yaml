@@ -1,15 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into a new VPC (20250821)
+  Create an Auto Scaling group of Check Point gateways into a new VPC (20260101)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+              - GatewayVersion
+              - GatewayInstanceType
+              - GatewaySICKey
+              - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - AvailabilityZones
           - NumberOfAZs
+      - Label:
+          default: Advanced Settings
+        Parameters:
           - VPCCIDR
           - PublicSubnet1CIDR
           - PublicSubnet2CIDR
@@ -19,45 +29,26 @@ Metadata:
           - PrivateSubnet2CIDR
           - PrivateSubnet3CIDR
           - PrivateSubnet4CIDR
-      - Label:
-          default: EC2 Instances Configuration
-        Parameters:
           - AutoScaleGroupName
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - EnableVolumeEncryption
           - EnableInstanceConnect
           - MetaDataToken
-      - Label:
-          default: Auto Scaling Configuration
-        Parameters:
+          - AdminEmail
+          - Shell
           - GatewaysMinSize
           - GatewaysMaxSize
-          - AdminEmail
           - GatewaysTargetGroups
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
-          - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
           - AllowUploadDownload
           - CloudWatch
           - GatewayBootstrapScript
-      - Label:
-          default: Automatic Provisioning with Security Management Server Settings
-        Parameters:
           - ControlGatewayOverPrivateOrPublicAddress
           - ManagementServer
           - ConfigurationTemplate
-      - Label:
-          default: Proxy Configuration (optional)
-        Parameters:
           - ELBType
           - ELBPort
           - ELBClients
@@ -87,7 +78,7 @@ Metadata:
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
-        default: Gateways instance type
+        default: Gateways Instance type
       KeyName:
         default: Key name
       VolumeSize:
@@ -101,21 +92,21 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewaysMinSize:
-        default: Minimum Gateway group size
+        default: Minimum Gateways group size
       GatewaysMaxSize:
-        default: Maximum Gateway group size
+        default: Maximum Gateways group size
       AdminEmail:
         default: Email address
       GatewaysTargetGroups:
-        default: Gateways target groups
+        default: Gateways Target Groups
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Gateways Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
         default: Gateways SIC key
       AllowUploadDownload:
@@ -125,17 +116,17 @@ Metadata:
       GatewayBootstrapScript:
         default: Gateways bootstrap script
       ControlGatewayOverPrivateOrPublicAddress:
-        default: Gateways addresses
+        default: Management Server Settings - Gateways addresses
       ManagementServer:
-        default: Management Server
+        default: Management Server Settings - Management Name
       ConfigurationTemplate:
-        default: Configuration template
+        default: Management Server Settings - Configuration template
       ELBType:
-        default: Proxy type
+        default: Proxy Settings - Proxy type
       ELBPort:
-        default: Proxy port
+        default: Proxy Settings - Proxy port
       ELBClients:
-        default: Allowed proxy clients
+        default: Proxy Settings - Allowed proxy clients
       AutoScaleGroupName:
         default: Auto Scale Group name
 Parameters:
@@ -433,7 +424,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instances.
@@ -495,7 +485,7 @@ Parameters:
     Default: ''
   GatewayVersion:
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG-NGTX
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG-NGTP

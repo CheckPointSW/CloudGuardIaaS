@@ -1,22 +1,29 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Management Server into a new VPC (20250821)
+  Deploys a Check Point Management Server into a new VPC (20260101)
   See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - ManagementVersion
+          - ManagementInstanceType
+          - SICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - AvailabilityZone
+      - Label:
+          default: Security Management Server Settings
+        Parameters:
           - VPCCIDR
           - PublicSubnet1CIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
           - ManagementName
-          - ManagementInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -24,30 +31,16 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: IAM Permissions (ignored when the installation is not Primary Management
-            Server)
-        Parameters:
           - ManagementPermissions
           - ManagementPredefinedRole
           - ManagementSTSRoles
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - ManagementVersion
           - Shell
           - ManagementPasswordHash
           - ManagementMaintenancePasswordHash
-      - Label:
-          default: Security Management Server Settings
-        Parameters:
           - ManagementHostname
           - ManagementInstallationType
-          - SICKey
           - AllowUploadDownload
-          - AdminCIDR
           - GatewayManagement
-          - GatewaysAddresses
           - ManagementBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -61,7 +54,7 @@ Metadata:
       ManagementName:
         default: Management name
       ManagementInstanceType:
-        default: Instance type
+        default: Management Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -85,7 +78,7 @@ Metadata:
       ManagementSTSRoles:
         default: STS roles
       ManagementVersion:
-        default: Version & license
+        default: Management Version & License
       Shell:
         default: Admin shell
       ManagementPasswordHash:
@@ -93,11 +86,11 @@ Metadata:
       ManagementMaintenancePasswordHash:
         default:  Management Maintenance Password hash
       ManagementHostname:
-        default: Management hostname
+        default: Management Hostname
       ManagementInstallationType:
-        default: Management installation type
+        default: Management Installation type
       SICKey:
-        default: SIC key
+        default: Management SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
@@ -320,7 +313,6 @@ Parameters:
       - r7a.24xlarge
       - r7a.32xlarge
       - r7a.48xlarge
-
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance.
@@ -394,7 +386,7 @@ Parameters:
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG
