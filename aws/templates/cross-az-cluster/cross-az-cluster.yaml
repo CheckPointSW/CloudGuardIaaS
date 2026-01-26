@@ -1,23 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Cluster into an existing VPC (20241027)
+Description: Deploys a Check Point Cluster into an existing VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - PublicSubnetA
           - PublicSubnetB
           - PrivateSubnetA
           - PrivateSubnetB
-          - InternalRouteTable
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
+          - InternalRouteTable
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -26,22 +31,11 @@ Metadata:
           - GatewayPredefinedRole
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
           - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
           - MemberAToken
           - MemberBToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -63,9 +57,9 @@ Metadata:
       InternalRouteTable:
         default: Internal route table
       GatewayName:
-        default: Gateway Name
+        default: Gateways name
       GatewayInstanceType:
-        default: Security Gateways instance type
+        default: Security Gateways Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -85,15 +79,15 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
-        default: SIC key
+        default: Gateways SIC key
       MemberAToken:
         default: Smart-1 Cloud Token for member A
       MemberBToken:
@@ -101,7 +95,7 @@ Metadata:
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
-        default: Gateway Hostname
+        default: Gateways Hostname
       AllowUploadDownload:
         default: Allow upload & download
       CloudWatch:
@@ -369,7 +363,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: must be a valid EC2 instance type.
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance.
@@ -425,7 +418,7 @@ Parameters:
       - false
   GatewayVersion:
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG-NGTX
     AllowedValues:
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
@@ -785,7 +778,7 @@ Resources:
                 - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
                 - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
                 - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-                - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+                - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   MemberBGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -832,7 +825,7 @@ Resources:
               - !Join [ '', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cross-az-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"cross_az_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" clusterIp=\"${cluster_ip}\" secondaryIp=\"${secondary_ip}\" otherMemberPrivateClusterIp=\"${remote_secondary_ip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
 Outputs:
   ClusterPublicAddress:

@@ -1,48 +1,42 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server into an existing VPC  (20241027)
+Description: Deploys a Check Point Multi-Domain Server into an existing VPC  (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - MDSVersion
+          - MDSInstanceType
+          - MDSSICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - MDSSubnet
+          - AdminCIDR
+          - GatewaysAddresses
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
           - MDSName
-          - MDSInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: IAM Permissions (ignored when the installation type is not Primary
-            Multi-Domain Server)
-        Parameters:
           - MDSPermissions
           - MDSPredefinedRole
           - MDSSTSRoles
-      - Label:
-          default: Check Point Settings
-        Parameters:
           - MDSVersion
           - Shell
           - MDSPasswordHash
           - MDSMaintenancePasswordHash
-      - Label:
-          default: Multi-Domain Server Settings
-        Parameters:
           - MDSHostname
           - MDSInstallationType
-          - MDSSICKey
           - AllowUploadDownload
-          - AdminCIDR
-          - GatewaysAddresses
           - MDSBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -54,7 +48,7 @@ Metadata:
       MDSName:
         default: MDS name
       MDSInstanceType:
-        default: Instance type
+        default: MDS Instance type
       KeyName:
         default: Key name
       VolumeSize:
@@ -76,7 +70,7 @@ Metadata:
       MDSSTSRoles:
         default: STS roles
       MDSVersion:
-        default: Version & license
+        default: MDS Version & License
       Shell:
         default: Admin shell
       MDSPasswordHash:
@@ -84,11 +78,11 @@ Metadata:
       MDSMaintenancePasswordHash:
         default: MDS Maintenance Password hash
       MDSHostname:
-        default: MDS hostname
+        default: MDS Hostname
       MDSInstallationType:
-        default: MDS installation type
+        default: MDS Installation type
       MDSSICKey:
-        default: SIC key
+        default: MDS SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
@@ -120,6 +114,7 @@ Parameters:
     Type: String
     Default: m5.2xlarge
     AllowedValues:
+      - c5.large
       - c5.xlarge
       - c5.2xlarge
       - c5.4xlarge
@@ -127,6 +122,7 @@ Parameters:
       - c5.12xlarge
       - c5.18xlarge
       - c5.24xlarge
+      - c5d.large
       - c5d.xlarge
       - c5d.2xlarge
       - c5d.4xlarge
@@ -134,11 +130,13 @@ Parameters:
       - c5d.12xlarge
       - c5d.18xlarge
       - c5d.24xlarge
+      - c5n.large
       - c5n.xlarge
       - c5n.2xlarge
       - c5n.4xlarge
       - c5n.9xlarge
       - c5n.18xlarge
+      - c6i.large
       - c6i.xlarge
       - c6i.2xlarge
       - c6i.4xlarge
@@ -147,6 +145,7 @@ Parameters:
       - c6i.16xlarge
       - c6i.24xlarge
       - c6i.32xlarge
+      - c6in.large
       - c6in.xlarge
       - c6in.2xlarge
       - c6in.4xlarge
@@ -179,6 +178,7 @@ Parameters:
       - c7i-flex.8xlarge
       - c7i-flex.12xlarge
       - c7i-flex.16xlarge
+      - m5.large
       - m5.xlarge
       - m5.2xlarge
       - m5.4xlarge
@@ -186,6 +186,7 @@ Parameters:
       - m5.12xlarge
       - m5.16xlarge
       - m5.24xlarge
+      - m6a.large
       - m6a.xlarge
       - m6a.2xlarge
       - m6a.4xlarge
@@ -195,6 +196,7 @@ Parameters:
       - m6a.24xlarge
       - m6a.32xlarge
       - m6a.48xlarge
+      - m6i.large
       - m6i.xlarge
       - m6i.2xlarge
       - m6i.4xlarge
@@ -241,6 +243,7 @@ Parameters:
       - m8i-flex.8xlarge
       - m8i-flex.12xlarge
       - m8i-flex.16xlarge
+      - r5.large
       - r5.xlarge
       - r5.2xlarge
       - r5.4xlarge
@@ -248,6 +251,7 @@ Parameters:
       - r5.12xlarge
       - r5.16xlarge
       - r5.24xlarge
+      - r5a.large
       - r5a.xlarge
       - r5a.2xlarge
       - r5a.4xlarge
@@ -255,6 +259,7 @@ Parameters:
       - r5a.12xlarge
       - r5a.16xlarge
       - r5a.24xlarge
+      - r5b.large
       - r5b.xlarge
       - r5b.2xlarge
       - r5b.4xlarge
@@ -262,6 +267,7 @@ Parameters:
       - r5b.12xlarge
       - r5b.16xlarge
       - r5b.24xlarge
+      - r5n.large
       - r5n.xlarge
       - r5n.2xlarge
       - r5n.4xlarge
@@ -275,6 +281,7 @@ Parameters:
       - r6gd.12xlarge
       - r6gd.16xlarge
       - r6gd.metal
+      - r6i.large
       - r6i.xlarge
       - r6i.2xlarge
       - r6i.4xlarge
@@ -398,7 +405,7 @@ Parameters:
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   MDSMaintenancePasswordHash:
-    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
@@ -609,5 +616,15 @@ Resources:
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
-              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
+Outputs:
+  InstanceId:
+    Description: InstanceId of the deployed MDS
+    Value: !Ref MDSInstance
+  PrivateIp:
+    Description: Private IP address of the deployed MDS
+    Value: !GetAtt MDSInstance.PrivateIp
+  SecurityGroupId:
+    Description: Security Group ID of the deployed MDS
+    Value: !Ref MDSSecurityGroup

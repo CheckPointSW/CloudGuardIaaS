@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Returns a Check Point Amazon Machine ID (20211212)
+Description: Returns a Check Point Amazon Machine ID (20260101)
 Parameters:
   Version:
     Description: Security Gateway or Management Server version
