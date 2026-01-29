@@ -1,0 +1,578 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Deploys a Check Point Management Server (20250617)
+  See sk130372 administration guide for detailed deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: VPC Network Configuration
+        Parameters:
+          - VPC
+          - ManagementSubnet
+      - Label:
+          default: EC2 Instance Configuration
+        Parameters:
+          - ManagementName
+          - ManagementInstanceType
+          - KeyName
+          - AllocatePublicAddress
+          - VolumeSize
+          - VolumeType
+          - VolumeEncryption
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+      - Label:
+          default: IAM Permissions (ignored when the installation is not Primary Management
+            Server)
+        Parameters:
+          - ManagementPermissions
+          - ManagementPredefinedRole
+          - ManagementSTSRoles
+      - Label:
+          default: Check Point Settings
+        Parameters:
+          - ManagementVersion
+          - Shell
+          - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
+      - Label:
+          default: Security Management Server Settings
+        Parameters:
+          - ManagementHostname
+          - PrimaryManagement
+          - ManagementSICKey
+          - AllowUploadDownload
+          - AdminCIDR
+          - GatewayManagement
+          - GatewaysAddresses
+          - ManagementBootstrapScript
+          - NTPPrimary
+          - NTPSecondary
+    ParameterLabels:
+      VPC:
+        default: VPC
+      ManagementSubnet:
+        default: Management subnet
+      ManagementName:
+        default: Management name
+      ManagementInstanceType:
+        default: Instance type
+      KeyName:
+        default: Key name
+      AllocatePublicAddress:
+        default: Allocate an Elastic IP
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      VolumeEncryption:
+        default: Volume encryption KMS key identifier
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      ManagementPermissions:
+        default: IAM role
+      ManagementPredefinedRole:
+        default: Existing IAM role name
+      ManagementSTSRoles:
+        default: STS roles
+      ManagementVersion:
+        default: Version & license
+      Shell:
+        default: Admin shell
+      ManagementPasswordHash:
+        default: Password hash
+      ManagementMaintenancePasswordHash:
+        default: Management Maintenance Password hash
+      ManagementHostname:
+        default: Management hostname
+      PrimaryManagement:
+        default: Primary management
+      ManagementSICKey:
+        default: SIC key
+      AllowUploadDownload:
+        default: Allow upload & download
+      AdminCIDR:
+        default: Administrator addresses
+      GatewayManagement:
+        default: Gateways management
+      GatewaysAddresses:
+        default: Gateways addresses
+      ManagementBootstrapScript:
+        default: Management bootstrap script
+      NTPPrimary:
+        default: Primary NTP server
+      NTPSecondary:
+        default: Secondary NTP server
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  ManagementSubnet:
+    Description: To access the instance from the internet, make sure the subnet has
+      a route to the internet
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+  ManagementName:
+    Description: The Management name tag.
+    Type: String
+    Default: Check-Point-Management
+  ManagementInstanceType:
+    Description: The instance type of the Security Management Server.
+    Type: String
+    Default: m5.xlarge
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Description: Allocate an elastic IP for the Management.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  VolumeEncryption:
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
+    Type: String
+    Default: alias/aws/ebs
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementPermissions:
+    Description: IAM role to attach to the instance profile.
+    Type: String
+    Default: Create with read permissions
+    AllowedValues:
+      - None (configure later)
+      - Use existing (specify an existing IAM role name)
+      - Create with assume role permissions (specify an STS role ARN)
+      - Create with read permissions
+      - Create with read-write permissions
+  ManagementPredefinedRole:
+    Description: A predefined IAM role to attach to the instance profile. Ignored
+      if IAM role is not set to 'Use existing'.
+    Type: String
+    Default: ''
+  ManagementSTSRoles:
+    Description: The IAM role will be able to assume these STS Roles (comma separated
+      list of ARNs, without spaces). Ignored if IAM role is set to 'None' or 'Use
+      existing'.
+    Type: CommaDelimitedList
+    Default: ''
+  ManagementVersion:
+    Description: The license to install on the Security Management Server.
+    Type: String
+    Default: R81.20-BYOL
+    AllowedValues:
+      - R81.10-BYOL
+      - R81.20-BYOL
+      - R82-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  ManagementPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  ManagementHostname:
+    Description: (optional)
+    Type: String
+    Default: mgmt-aws
+    AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
+    ConstraintDescription: A valid hostname label or an empty string.
+  PrimaryManagement:
+    Description: Determines if this is the primary Management Server or not.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementSICKey:
+    Description: >-
+      Mandatory only if deploying a secondary Management Server, the Secure Internal
+      Communication key creates trusted connections between Check Point components.
+      Choose a random string consisting of at least 8 alphanumeric characters.
+    Type: String
+    Default: ''
+    AllowedPattern: '(|[a-zA-Z0-9]{8,})'
+    ConstraintDescription: Can be empty if this is a primary Management Server. Otherwise,
+      at least 8 alpha numeric characters.
+    NoEcho: true
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate
+      with the Management Server.
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Management.
+      Server
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  GatewayManagement:
+    Description: Select 'Over the internet' if any of the gateways you wish to manage
+      are not directly accessed via their private IP address.
+    Type: String
+    Default: Locally managed
+    AllowedValues:
+      - Locally managed
+      - Over the internet
+  ManagementBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  NTPPrimary:
+    Description: (optional)
+    Type: String
+    Default: 169.254.169.123
+    AllowedPattern: '[\.a-zA-Z0-9\-]*'
+  NTPSecondary:
+    Description: (optional)
+    Type: String
+    Default: 0.pool.ntp.org
+    AllowedPattern: '[\.a-zA-Z0-9\-]*'
+Conditions:
+  EIP: !Equals [!Ref AllocatePublicAddress, true]
+  ManageOverInternet: !Equals [!Ref GatewayManagement, Over the internet]
+  ManageOverInternetAndEIP: !And [!Condition EIP, !Condition ManageOverInternet]
+  CreateRole: !Or
+    - !Equals [!Ref ManagementPermissions, Create with assume role permissions (specify an STS role ARN)]
+    - !Equals [!Ref ManagementPermissions, Create with read permissions]
+    - !Equals [!Ref ManagementPermissions, Create with read-write permissions]
+  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
+  UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
+  NoSIC: !Equals [!Ref ManagementSICKey, '']
+  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+Resources:
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
+  ManagementReadyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: EIP
+    Properties: {}
+  ManagementReadyCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: EIP
+    DependsOn: ManagementInstance
+    Properties:
+      Handle: !Ref ManagementReadyHandle
+      Timeout: 1800
+  ManagementSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Management security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 257
+          ToPort: 257
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 8211
+          ToPort: 8211
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18191
+          ToPort: 18191
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18192
+          ToPort: 18192
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18208
+          ToPort: 18208
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18210
+          ToPort: 18210
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18211
+          ToPort: 18211
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18221
+          ToPort: 18221
+        - CidrIp: !Ref GatewaysAddresses
+          IpProtocol: tcp
+          FromPort: 18264
+          ToPort: 18264
+        - CidrIp: !Ref AdminCIDR
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+        - CidrIp: !Ref AdminCIDR
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+        - CidrIp: !Ref AdminCIDR
+          IpProtocol: tcp
+          FromPort: 18190
+          ToPort: 18190
+        - CidrIp: !Ref AdminCIDR
+          IpProtocol: tcp
+          FromPort: 19009
+          ToPort: 19009
+  ManagementRoleStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateRole
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/gwlb/cme-iam-role-gwlb.yaml
+      Parameters:
+        Permissions: !Ref ManagementPermissions
+        STSRoles: !Join [',', !Ref ManagementSTSRoles]
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Condition: PreRole
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ManagementPredefinedRole
+  ManagementInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: ManagementLaunchTemplate
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref ManagementLaunchTemplate
+        Version: !GetAtt ManagementLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
+      Tags:
+        - Key: Name
+          Value: !Ref ManagementName
+      NetworkInterfaces:
+        - DeviceIndex: 0
+          AssociatePublicIpAddress: false
+          Description: eth0
+          GroupSet:
+            - !Ref ManagementSecurityGroup
+          DeleteOnTermination: true
+          SubnetId: !Ref ManagementSubnet
+  ManagementLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref ManagementInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [ EncryptedVolume, true, false ]
+              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; primary_mgmt=${PrimaryManagement} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary}'
+              - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
+              - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref ManagementSICKey, ')"']]]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
+              - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
+              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"management_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  PublicAddress:
+    Type: AWS::EC2::EIP
+    Condition: EIP
+    Properties:
+      Domain: vpc
+  AddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Condition: EIP
+    DependsOn: ManagementInstance
+    Properties:
+      InstanceId: !Ref ManagementInstance
+      AllocationId: !GetAtt PublicAddress.AllocationId
+Outputs:
+  PublicAddress:
+    Condition: EIP
+    Description: The public address of the Management Server.
+    Value: !Ref PublicAddress
+  SSH:
+    Condition: EIP
+    Description: SSH command.
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
+  URL:
+    Condition: EIP
+    Description: URL to the portal.
+    Value: !Join ['', ['https://', !Ref PublicAddress]]
