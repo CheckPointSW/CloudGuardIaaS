@@ -1,29 +1,32 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20241027)"
+Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20260101)"
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: General Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - NumberOfAZs
-      - Label:
-          default: Security Network Configuration
-        Parameters:
           - SecurityVPC
           - GatewaysSubnets
       - Label:
-          default: Servers Network Configuration
+          default: CloudGuard Management Server Settings
         Parameters:
-          - ServersVPC
-          - ServersSubnets
-          - ServersCIDRs
-          - GWLBeSubnets
-          - ServerIGW
+          - ManagementDeploy
+          - ManagementVersion
+          - ManagementInstanceType
+          - AdminCIDR
+          - GatewaysAddresses
       - Label:
-          default: General Settings
+          default: Advanced Settings
         Parameters:
-          - KeyName
           - EnableVolumeEncryption
           - VolumeSize
           - VolumeType
@@ -35,49 +38,34 @@ Metadata:
           - ConfigurationTemplate
           - AdminEmail
           - Shell
-      - Label:
-          default: Gateway Load Balancer Configuration
-        Parameters:
           - GWLBName
           - TargetGroupName
           - AcceptConnectionRequired
           - CrossZoneLoadBalancing
-      - Label:
-          default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
-        Parameters:
           - AutoScaleGroupName
           - GatewayName
-          - GatewayInstanceType
           - GatewaysMinSize
           - GatewaysMaxSize
-          - GatewayVersion
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
-      - Label:
-          default: Check Point CloudGuard IaaS Security Management Server Configuration
-        Parameters:
-          - ManagementDeploy
-          - ManagementInstanceType
-          - ManagementVersion
-          - ManagementPasswordHash
-          - ManagementMaintenancePasswordHash
-          - GatewaysPolicy
-          - GatewaysBlades
-          - AdminCIDR
-          - GatewayManagement
-          - GatewaysAddresses
-      - Label:
-          default: Web Servers Auto Scaling Group Configuration
-        Parameters:
           - ServerInstanceType
           - ServerAMI
           - ALBProtocol
           - ServicePort
           - ResourcesTagName
+          - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
+          - GatewaysPolicy
+          - GatewaysBlades
+          - GatewayManagement
+          - ServersVPC
+          - ServersSubnets
+          - ServersCIDRs
+          - GWLBeSubnets
+          - ServerIGW
     ParameterLabels:
       NumberOfAZs:
         default: Number of AZs
@@ -128,15 +116,15 @@ Metadata:
       CrossZoneLoadBalancing:
         default:  Enable Cross Zone Load Balancing
       GatewayName:
-        default: Gateways instance name
+        default: Gateways name
       GatewayInstanceType:
-        default: Gateways instance type
+        default: Gateways Instance type
       GatewaysMinSize:
         default: Minimum group size
       GatewaysMaxSize:
         default: Maximum group size
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       GatewayPasswordHash:
         default: Gateways Password hash
       GatewayMaintenancePasswordHash:
@@ -152,25 +140,25 @@ Metadata:
       ManagementDeploy:
         default: Deploy Management Server
       ManagementInstanceType:
-        default: Management instance type
+        default: Management Instance type
       ManagementVersion:
-        default: Management version & license
+        default: Management Version & License
       ManagementPasswordHash:
-        default: Management password hash
+        default: Management Server Settings - Management password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Maintenance Password hash
+        default:  Management Server Settings - Management Maintenance Password hash
       GatewaysPolicy:
-        default: Security Policy
+        default: Management Server Settings - Security Policy
       GatewaysBlades:
-        default: Default Blades
+        default: Management Server Settings - Default Blades
       AdminCIDR:
-        default: Administrator addresses
+        default: Allow SmartConsole connections from these networks
       GatewayManagement:
-        default: Manage Gateways
+        default: Management Server Settings - Manage Gateways
       GatewaysAddresses:
         default: Gateways addresses
       ServerInstanceType:
-        default: Servers instance type
+        default: Servers Instance type
       ServerAMI:
         default: AMI ID
       ALBProtocol:
@@ -540,7 +528,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: Must be a valid EC2 instance type
   GatewaysMinSize:
     Description: The minimal number of Security Gateways.
@@ -555,7 +542,7 @@ Parameters:
   GatewayVersion:
     Description: The version and license to install on the Security Gateways.
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG-NGTX
     AllowedValues:
       - R81.20-BYOL
       - R81.20-PAYG-NGTP
@@ -657,6 +644,17 @@ Parameters:
       - c6in.16xlarge
       - c6in.24xlarge
       - c6in.32xlarge
+      - c7a.large
+      - c7a.xlarge
+      - c7a.2xlarge
+      - c7a.4xlarge
+      - c7a.8xlarge
+      - c7a.12xlarge
+      - c7a.16xlarge
+      - c7a.24xlarge
+      - c7a.32xlarge
+      - c7a.48xlarge
+      - c7a.metal-48xl
       - c7i.large
       - c7i.xlarge
       - c7i.2xlarge
@@ -667,6 +665,8 @@ Parameters:
       - c7i.24xlarge
       - c7i.32xlarge
       - c7i.48xlarge
+      - c7i.metal-24xl
+      - c7i.metal-48xl
       - c7i-flex.large
       - c7i-flex.xlarge
       - c7i-flex.2xlarge
@@ -722,13 +722,6 @@ Parameters:
       - m7i.48xlarge
       - m7i.metal-24xl
       - m7i.metal-48xl
-      - m7i-flex.large
-      - m7i-flex.xlarge
-      - m7i-flex.2xlarge
-      - m7i-flex.4xlarge
-      - m7i-flex.8xlarge
-      - m7i-flex.12xlarge
-      - m7i-flex.16xlarge
       - m8i.large
       - m8i.xlarge
       - m8i.2xlarge
@@ -781,6 +774,14 @@ Parameters:
       - r5n.12xlarge
       - r5n.16xlarge
       - r5n.24xlarge
+      - r6gd.large
+      - r6gd.xlarge
+      - r6gd.2xlarge
+      - r6gd.4xlarge
+      - r6gd.8xlarge
+      - r6gd.12xlarge
+      - r6gd.16xlarge
+      - r6gd.metal
       - r6i.large
       - r6i.xlarge
       - r6i.2xlarge
@@ -799,13 +800,32 @@ Parameters:
       - r7a.24xlarge
       - r7a.32xlarge
       - r7a.48xlarge
-
-
+      - r7i.large
+      - r7i.xlarge
+      - r7i.2xlarge
+      - r7i.4xlarge
+      - r7i.8xlarge
+      - r7i.12xlarge
+      - r7i.16xlarge
+      - r7i.24xlarge
+      - r7i.48xlarge
+      - r7i.metal-24xl
+      - r7i.metal-48xl
+      - r7iz.large
+      - r7iz.xlarge
+      - r7iz.2xlarge
+      - r7iz.4xlarge
+      - r7iz.8xlarge
+      - r7iz.12xlarge
+      - r7iz.16xlarge
+      - r7iz.32xlarge
+      - r7iz.metal-16xl
+      - r7iz.metal-32xl
     ConstraintDescription: Must be a valid EC2 instance type
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG
     AllowedValues:
       - R81.10-BYOL
       - R81.10-PAYG
@@ -947,6 +967,9 @@ Resources:
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
+      ListenerAttributes:
+        - Key: tcp.idle_timeout.seconds
+          Value: 3600
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup

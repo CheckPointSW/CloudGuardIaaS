@@ -1,22 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (20241027)
+  Security Gateway & Management (Standalone) instance into an existing VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - StandaloneVersion
+          - StandaloneInstanceType
+          - KeyName
+          - AdminCIDR
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - PublicSubnet
           - PrivateSubnet
-          - InternalRouteTable
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
+          - InternalRouteTable
           - StandaloneName
-          - StandaloneInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -24,16 +29,9 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - StandaloneVersion
           - Shell
           - StandalonePasswordHash
           - StandaloneMaintenancePasswordHash
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - StandaloneHostname
           - AllowUploadDownload
@@ -41,7 +39,6 @@ Metadata:
           - StandaloneBootstrapScript
           - NTPPrimary
           - NTPSecondary
-          - AdminCIDR
           - GatewaysAddresses
     ParameterLabels:
       VPC:
@@ -73,7 +70,7 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       StandaloneVersion:
-        default: License
+        default: Standalone Version & License
       Shell:
         default: Admin shell
       StandalonePasswordHash:
@@ -95,7 +92,7 @@ Metadata:
       NTPSecondary:
         default: Secondary NTP server
       AdminCIDR:
-        default: Administrator addresses
+        default: Allow SmartConsole connections from these networks
       GatewaysAddresses:
         default: Gateways addresses
 Parameters:
@@ -111,7 +108,7 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   InternalRouteTable:
-    Description: The route table id in which to set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
+    Description: The route table ID in which to set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
     Type: String
     Default: ''
   StandaloneName:
@@ -333,7 +330,6 @@ Parameters:
       - r7iz.32xlarge
       - r7iz.metal-16xl
       - r7iz.metal-32xl
-
     ConstraintDescription: Must be a valid EC2 instance type
   KeyName:
     Description: The EC2 Key Pair to allow SSH access to the instance.
@@ -385,7 +381,7 @@ Parameters:
   StandaloneVersion:
     Description: Standalone Version & License.
     Type: String
-    Default: R82-BYOL
+    Default: R82-PAYG-NGTP
     AllowedValues:
       - R81.10-PAYG-NGTP
       - R81.10-BYOL
@@ -393,8 +389,8 @@ Parameters:
       - R81.20-BYOL
       - R82-PAYG-NGTP
       - R82-BYOL
-      - R82.10-PAYG-NGTP
       - R82.10-BYOL
+      - R82.10-PAYG-NGTP
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -616,7 +612,7 @@ Resources:
               - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"' ] ]
               - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"' ] ]
               - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref StandaloneVersion ] ] } ]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
