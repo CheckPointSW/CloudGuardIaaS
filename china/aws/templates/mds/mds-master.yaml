@@ -1,51 +1,42 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: |
-  Deploys a Check Point Multi-Domain Server into a new VPC (20250617)
-  See sk130372 administration guide for detailed deployment and configuration steps.
+Description: Deploys a Check Point Multi-Domain Server into a new VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - MDSVersion
+          - MDSInstanceType
+          - MDSSICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - AvailabilityZone
+      - Label:
+          default: Advanced Settings
+        Parameters:
           - VPCCIDR
           - PublicSubnet1CIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
           - MDSName
-          - MDSInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: IAM Permissions (ignored when the installation type is not Primary
-            Multi-Domain Server)
-        Parameters:
           - MDSPermissions
           - MDSPredefinedRole
           - MDSSTSRoles
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - MDSVersion
           - Shell
           - MDSPasswordHash
           - MDSMaintenancePasswordHash
-      - Label:
-          default: Multi-Domain Server Settings
-        Parameters:
           - MDSHostname
           - MDSInstallationType
-          - MDSSICKey
           - AllowUploadDownload
-          - AdminCIDR
-          - GatewaysAddresses
           - MDSBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -59,7 +50,7 @@ Metadata:
       MDSName:
         default: MDS name
       MDSInstanceType:
-        default: Instance type
+        default: MDS Instance type
       KeyName:
         default: Key name
       VolumeSize:
@@ -81,7 +72,7 @@ Metadata:
       MDSSTSRoles:
         default: STS roles
       MDSVersion:
-        default: Version & license
+        default: MDS Version & License
       Shell:
         default: Admin shell
       MDSPasswordHash:
@@ -89,11 +80,11 @@ Metadata:
       MDSMaintenancePasswordHash:
         default: MDS Maintenance Password hash
       MDSHostname:
-        default: MDS hostname
+        default: MDS Hostname
       MDSInstallationType:
-        default: MDS installation type
+        default: MDS Installation type
       MDSSICKey:
-        default: SIC key
+        default: MDS SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
@@ -324,7 +315,7 @@ Parameters:
   MDSVersion:
     Description: The license to install on the Multi-Domain Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -438,136 +429,45 @@ Resources:
         PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
         CreatePrivateSubnets: false
         CreateAttachmentSubnets: false
-  AMI:
+  MDSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/utils/amis.yaml
+      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/management/mds.yaml
       Parameters:
-        Version: !Join ['-', [!Ref MDSVersion, MGMT]]
-  MDSSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: MDS security group
-      VpcId: !GetAtt VPCStack.Outputs.VPCID
-      SecurityGroupIngress:
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 257
-          ToPort: 257
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 8211
-          ToPort: 8211
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18191
-          ToPort: 18191
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18192
-          ToPort: 18192
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18208
-          ToPort: 18208
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18210
-          ToPort: 18210
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18211
-          ToPort: 18211
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18221
-          ToPort: 18221
-        - CidrIp: !Ref GatewaysAddresses
-          IpProtocol: tcp
-          FromPort: 18264
-          ToPort: 18264
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 18190
-          ToPort: 18190
-        - CidrIp: !Ref AdminCIDR
-          IpProtocol: tcp
-          FromPort: 19009
-          ToPort: 19009
-  MDSRoleStack:
-    Type: AWS::CloudFormation::Stack
-    Condition: CreateRole
-    Properties:
-      TemplateURL: https://cgi-cfts.s3.cn-northwest-1.amazonaws.com.cn/iam/cme-iam-role.yaml
-      Parameters:
-        Permissions: !Ref MDSPermissions
-        STSRoles: !Join [',', !Ref MDSSTSRoles]
-  InstanceProfile:
-    Type: AWS::IAM::InstanceProfile
-    Condition: PreRole
-    Properties:
-      Path: /
-      Roles:
-        - !Ref MDSPredefinedRole
-  MDSInstance:
-    Type: AWS::EC2::Instance
-    DependsOn: [MDSSecurityGroup, MDSLaunchTemplate]
-    Properties:
-      LaunchTemplate:
-        LaunchTemplateId: !Ref MDSLaunchTemplate
-        Version: !GetAtt MDSLaunchTemplate.LatestVersionNumber
-      DisableApiTermination: !Ref TerminationProtection
-      Tags:
-        - Key: Name
-          Value: !Ref MDSName
-      NetworkInterfaces:
-        - DeviceIndex: 0
-          AssociatePublicIpAddress: false
-          Description: eth0
-          GroupSet:
-            - !Ref MDSSecurityGroup
-          DeleteOnTermination: true
-          SubnetId: !GetAtt VPCStack.Outputs.PublicSubnet1ID
-  MDSLaunchTemplate:
-    Type: AWS::EC2::LaunchTemplate
-    Properties:
-      LaunchTemplateData:
+        MDSVersion: !Ref MDSVersion
+        MDSInstanceType: !Ref MDSInstanceType
+        MDSSICKey: !Ref MDSSICKey
         KeyName: !Ref KeyName
-        ImageId: !GetAtt AMI.Outputs.ImageId
-        InstanceType: !Ref MDSInstanceType
-        MetadataOptions:
-          HttpTokens: !If [EnableMetaDataToken, required, optional]
-        BlockDeviceMappings:
-          - DeviceName: '/dev/xvda'
-            Ebs:
-              Encrypted: !If [ EncryptedVolume, true, false ]
-              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
-              VolumeType: !Ref VolumeType
-              VolumeSize: !Ref VolumeSize
-        IamInstanceProfile:
-          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt MDSRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
-        UserData: !Base64
-          Fn::Join:
-            - |+
-
-            - - '#cloud-config'
-              - 'runcmd:'
-              - '  - |'
-              - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${MDSHostname} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; admin_subnet=${AdminCIDR}'
-              - !If [PrimaryMDS, '    primary=true ; secondary=false', !If [SecondaryMDS, '    primary=false ; secondary=true', '    primary=false ; secondary=false']]
-              - !If [PrimaryMDS, '    sic=notused', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref MDSSICKey, ')"']]]
-              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref MDSBootstrapScript, ')"']]
-              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
-              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
-              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
-              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
-      VersionDescription: Initial template version
+        VPC: !GetAtt VPCStack.Outputs.VPCID
+        MDSSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
+        AdminCIDR: !Ref AdminCIDR
+        GatewaysAddresses: !Ref GatewaysAddresses
+        MDSName: !Ref MDSName
+        VolumeSize: !Ref VolumeSize
+        VolumeType: !Ref VolumeType
+        VolumeEncryption: !Ref VolumeEncryption
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
+        MDSPermissions: !Ref MDSPermissions
+        MDSPredefinedRole: !Ref MDSPredefinedRole
+        MDSSTSRoles: !Join [',', !Ref MDSSTSRoles]
+        Shell: !Ref Shell
+        MDSPasswordHash: !Ref MDSPasswordHash
+        MDSMaintenancePasswordHash: !Ref MDSMaintenancePasswordHash
+        MDSHostname: !Ref MDSHostname
+        MDSInstallationType: !Ref MDSInstallationType
+        AllowUploadDownload: !Ref AllowUploadDownload
+        MDSBootstrapScript: !Ref MDSBootstrapScript
+        NTPPrimary: !Ref NTPPrimary
+        NTPSecondary: !Ref NTPSecondary
+Outputs:
+  InstanceId:
+    Description: The instance ID of the Multi-Domain Server.
+    Value: !GetAtt MDSStack.Outputs.InstanceId
+  PrivateIp:
+    Description: The private IP address of the Multi-Domain Server.
+    Value: !GetAtt MDSStack.Outputs.PrivateIp
+  SecurityGroupId:
+    Description: The security group ID attached to the Multi-Domain Server.
+    Value: !GetAtt MDSStack.Outputs.SecurityGroupId

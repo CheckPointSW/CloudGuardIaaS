@@ -1,50 +1,42 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: |
-  Deploys a Check Point Multi-Domain Server into an existing VPC (20250617)
-  See sk130372 administration guide for detailed deployment and configuration steps.
+Description: Deploys a Check Point Multi-Domain Server into an existing VPC  (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - MDSVersion
+          - MDSInstanceType
+          - MDSSICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - MDSSubnet
+          - AdminCIDR
+          - GatewaysAddresses
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
           - MDSName
-          - MDSInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - VolumeEncryption
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: IAM Permissions (ignored when the installation type is not Primary
-            Multi-Domain Server)
-        Parameters:
           - MDSPermissions
           - MDSPredefinedRole
           - MDSSTSRoles
-      - Label:
-          default: Check Point Settings
-        Parameters:
           - MDSVersion
           - Shell
           - MDSPasswordHash
           - MDSMaintenancePasswordHash
-      - Label:
-          default: Multi-Domain Server Settings
-        Parameters:
           - MDSHostname
           - MDSInstallationType
-          - MDSSICKey
           - AllowUploadDownload
-          - AdminCIDR
-          - GatewaysAddresses
           - MDSBootstrapScript
           - NTPPrimary
           - NTPSecondary
@@ -56,7 +48,7 @@ Metadata:
       MDSName:
         default: MDS name
       MDSInstanceType:
-        default: Instance type
+        default: MDS Instance type
       KeyName:
         default: Key name
       VolumeSize:
@@ -78,7 +70,7 @@ Metadata:
       MDSSTSRoles:
         default: STS roles
       MDSVersion:
-        default: Version & license
+        default: MDS Version & License
       Shell:
         default: Admin shell
       MDSPasswordHash:
@@ -86,11 +78,11 @@ Metadata:
       MDSMaintenancePasswordHash:
         default: MDS Maintenance Password hash
       MDSHostname:
-        default: MDS hostname
+        default: MDS Hostname
       MDSInstallationType:
-        default: MDS installation type
+        default: MDS Installation type
       MDSSICKey:
-        default: SIC key
+        default: MDS SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
@@ -287,7 +279,7 @@ Parameters:
   MDSVersion:
     Description: The license to install on the Multi-Domain Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -310,13 +302,13 @@ Parameters:
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   MDSMaintenancePasswordHash:
-    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
     Type: String
     Default: ''
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   MDSHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: mds-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -521,5 +513,15 @@ Resources:
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref MDSMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref MDSVersion]]}]
-              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"mds\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"mds\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" primary=\"${primary}\" secondary=\"${secondary}\" adminSubnet=\"${admin_subnet}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
+Outputs:
+  InstanceId:
+    Description: InstanceId of the deployed MDS
+    Value: !Ref MDSInstance
+  PrivateIp:
+    Description: Private IP address of the deployed MDS
+    Value: !GetAtt MDSInstance.PrivateIp
+  SecurityGroupId:
+    Description: Security Group ID of the deployed MDS
+    Value: !Ref MDSSecurityGroup

@@ -1,54 +1,43 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: |
-  Create an Auto Scaling group of Check Point gateways into an existing VPC (20250617). 
-  See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps
+Description: Create an Auto Scaling group of Check Point gateways into an existing VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - GatewaysSubnets
       - Label:
-          default: EC2 Instances Configuration
+          default: Advanced Settings
         Parameters:
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - EnableVolumeEncryption
           - EnableInstanceConnect
           - MetaDataToken
-      - Label:
-          default: Auto Scaling Configuration
-        Parameters:
           - AutoScaleGroupName
+          - Shell
           - GatewaysMinSize
           - GatewaysMaxSize
-          - AdminEmail
           - GatewaysTargetGroups
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
-          - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
-          - AllowUploadDownload
+          - AdminEmail
           - CloudWatch
+          - AllowUploadDownload
           - GatewayBootstrapScript
-      - Label:
-          default: Automatic Provisioning with Security Management Server Settings
-        Parameters:
           - ControlGatewayOverPrivateOrPublicAddress
           - ManagementServer
           - ConfigurationTemplate
-      - Label:
-          default: Proxy Configuration (optional)
-        Parameters:
           - ELBType
           - ELBPort
           - ELBClients
@@ -60,7 +49,7 @@ Metadata:
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
-        default: Gateways instance type
+        default: Gateways Instance type
       KeyName:
         default: Key name
       VolumeSize:
@@ -74,21 +63,21 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewaysMinSize:
-        default: Minimum Gateway group size
+        default: Minimum Gateways group size
       GatewaysMaxSize:
-        default: Maximum Gateway group size
+        default: Maximum Gateways group size
       AdminEmail:
         default: Email address
       GatewaysTargetGroups:
-        default: Gateways target groups
+        default: Gateways Target groups
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Gateways Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
         default: Gateways SIC key
       AllowUploadDownload:
@@ -98,17 +87,17 @@ Metadata:
       GatewayBootstrapScript:
         default: Gateways bootstrap script
       ControlGatewayOverPrivateOrPublicAddress:
-        default: Gateways addresses
+        default: Management Server Settings - Gateways addresses
       ManagementServer:
-        default: Management Server
+        default: Management Server Settings - Server
       ConfigurationTemplate:
-        default: Configuration template
+        default: Management Server Settings - Configuration template
       ELBType:
-        default: Proxy type
+        default: Proxy Settings - Proxy type
       ELBPort:
-        default: Proxy port
+        default: Proxy Settings - Proxy port
       ELBClients:
-        default: Allowed proxy clients
+        default: Proxy Settings - Allowed proxy clients
       AutoScaleGroupName:
         default: Auto Scale Group name
 Parameters:
@@ -300,7 +289,7 @@ Parameters:
     Default: ''
   GatewayVersion:
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -556,7 +545,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"autoscale\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy

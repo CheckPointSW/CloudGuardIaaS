@@ -1,23 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point cross AZ Cluster in a new VPC (20241027)
+Description: Deploy a Check Point cross AZ Cluster in a new VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
         Parameters:
           - AvailabilityZones
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - GatewayName
           - VPCCIDR
           - PublicSubnet1CIDR
           - PublicSubnet2CIDR
           - PrivateSubnet1CIDR
           - PrivateSubnet2CIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
-          - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -26,22 +28,11 @@ Metadata:
           - GatewayPredefinedRole
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
           - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
           - MemberAToken
           - MemberBToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -63,9 +54,9 @@ Metadata:
       PrivateSubnet2CIDR:
         default: Private subnet 2 CIDR
       GatewayName:
-        default: Gateway Name
+        default: Gateways name
       GatewayInstanceType:
-        default: Security Gateways instance type
+        default: Gateways Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -85,15 +76,15 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
-        default: SIC key
+        default: Gateways SIC key
       MemberAToken:
         default: Smart-1 Cloud Token for member A
       MemberBToken:
@@ -101,7 +92,7 @@ Metadata:
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
-        default: Gateway Hostname
+        default: Gateways Hostname
       AllowUploadDownload:
         default: Allow upload & download
       CloudWatch:
@@ -154,7 +145,7 @@ Parameters:
   GatewayInstanceType:
     Description: The instance type of the Secutiry Gateway.
     Type: String
-    Default: c5.xlarge
+    Default: c6i.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -206,15 +197,6 @@ Parameters:
       - c6i.16xlarge
       - c6i.24xlarge
       - c6i.32xlarge
-      - c6in.large
-      - c6in.xlarge
-      - c6in.2xlarge
-      - c6in.4xlarge
-      - c6in.8xlarge
-      - c6in.12xlarge
-      - c6in.16xlarge
-      - c6in.24xlarge
-      - c6in.32xlarge
       - r5.large
       - r5.xlarge
       - r5.2xlarge

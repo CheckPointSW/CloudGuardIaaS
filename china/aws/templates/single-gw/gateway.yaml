@@ -1,23 +1,25 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (20250617)
-  See sk175207 for Gateway administration guide deployment and configuration steps.
+Description: Deploys a Check Point Security Gateway into an existing VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - PublicSubnet
           - PrivateSubnet
-          - InternalRouteTable
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -25,21 +27,10 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
+          - InternalRouteTable
           - Shell
-          - GatewaySICKey
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
-          - GatewayToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -47,9 +38,7 @@ Metadata:
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
-      - Label:
-          default: Automatic Provisioning with Security Management Server Settings (optional)
-        Parameters:
+          - GatewayToken
           - ControlGatewayOverPrivateOrPublicAddress
           - ManagementServer
           - ConfigurationTemplate
@@ -83,7 +72,7 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Gateway Version & license
+        default: Gateway Version & License
       Shell:
         default: Admin shell
       GatewaySICKey:
@@ -127,7 +116,7 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     MinLength: 1
   InternalRouteTable:
-    Description: The route table id in which to set 0.0.0.0/0 route to the Gateway instance (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
+    Description: The route table ID in which to set 0.0.0.0/0 route to the Gateway instance (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
     Type: String
     Default: ''
   GatewayName:
@@ -290,7 +279,7 @@ Parameters:
       - false
   GatewayVersion:
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -335,7 +324,7 @@ Parameters:
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -550,7 +539,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP

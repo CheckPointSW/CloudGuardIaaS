@@ -1,23 +1,23 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: |
-  Deploys a Check Point Security Gateway into a new VPC (20250617)
-  See sk175207 for Gateway administration guide deployment and configuration steps.
+Description: Deploys a Check Point Security Gateway into a new VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
         Parameters:
           - AvailabilityZone
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - GatewayName
           - VPCCIDR
           - PublicSubnetCIDR
           - PrivateSubnetCIDR
-      - Label:
-          default: EC2 Instance Configuration
-        Parameters:
-          - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -25,21 +25,10 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
           - Shell
-          - GatewaySICKey
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
           - GatewayToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -47,9 +36,6 @@ Metadata:
           - GatewayBootstrapScript
           - NTPPrimary
           - NTPSecondary
-      - Label:
-          default: Automatic Provisioning with Security Management Server Settings (optional)
-        Parameters:
           - ControlGatewayOverPrivateOrPublicAddress
           - ManagementServer
           - ConfigurationTemplate
@@ -83,7 +69,7 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Gateway Version & license
+        default: Gateway Version & License
       Shell:
         default: Admin shell
       GatewaySICKey:
@@ -296,7 +282,7 @@ Parameters:
       - false
   GatewayVersion:
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -341,7 +327,7 @@ Parameters:
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
+    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'

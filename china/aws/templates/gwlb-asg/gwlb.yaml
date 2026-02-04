@@ -1,66 +1,59 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20250617). 
-  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - GatewaysSubnets
       - Label:
-          default: General Settings
+          default: Advanced Settings
         Parameters:
-          - KeyName
+          - GWLBName
           - EnableVolumeEncryption
+          - IPMode
+          - AllocatePublicAddress
           - VolumeSize
           - VolumeType
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
           - AllowUploadDownload
+          - AutoScaleGroupName
           - ManagementServer
           - ConfigurationTemplate
           - AdminEmail
           - Shell
-      - Label:
-          default: Gateway Load Balancer Configuration
-        Parameters:
-          - GWLBName
           - TargetGroupName
           - AcceptConnectionRequired
           - CrossZoneLoadBalancing
-      - Label:
-          default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
-        Parameters:
-          - AutoScaleGroupName
           - GatewayName
-          - GatewayInstanceType
           - GatewaysMinSize
           - GatewaysMaxSize
-          - GatewayVersion
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
-          - AllocatePublicAddress
-          - IPMode
           - CloudWatch
           - GatewayBootstrapScript
-      - Label:
-          default: Check Point CloudGuard IaaS Security Management Server Configuration
-        Parameters:
           - ManagementDeploy
           - ManagementInstanceType
           - ManagementVersion
           - ManagementPasswordHash
           - ManagementMaintenancePasswordHash
           - GatewaysPolicy
-          - AdminCIDR
           - GatewayManagement
-          - GatewaysAddresses
     ParameterLabels:
       VPC:
         default: VPC
@@ -101,15 +94,15 @@ Metadata:
       CrossZoneLoadBalancing:
         default:  Enable Cross Zone Load Balancing
       GatewayName:
-        default: Gateways instance name
+        default: Gateways name
       GatewayInstanceType:
-        default: Gateways instance type
+        default: Gateways Instance type
       GatewaysMinSize:
         default: Minimum group size
       GatewaysMaxSize:
         default: Maximum group size
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       GatewayPasswordHash:
         default: Gateways Password hash
       GatewayMaintenancePasswordHash:
@@ -125,23 +118,23 @@ Metadata:
       GatewayBootstrapScript:
         default: Gateways bootstrap script
       ManagementDeploy:
-        default: Deploy Management Server
+        default: Management Server Settings - Deploy Management Server
       ManagementInstanceType:
-        default: Management instance type
+        default: Management Server Settings - Instance type
       ManagementVersion:
-        default: Management version & license
+        default: Management Server Settings - Version & License
       ManagementPasswordHash:
-        default: Management password hash
+        default: Management Server Settings - password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Maintenance Password hash
+        default:  Management Server Settings - Maintenance Password hash
       GatewaysPolicy:
-        default: Security Policy
+        default: Management Server Settings - Security Policy
       AdminCIDR:
-        default: Administrator addresses
+        default: Management Server Settings - Allow SmartConsole connections from these networks
       GatewayManagement:
-        default: Manage Gateways
+        default: Management Server Settings - Manage Gateways
       GatewaysAddresses:
-        default: Gateways addresses
+        default: Management Server Settings - Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group name
 Parameters:
@@ -435,9 +428,9 @@ Parameters:
     Default: ''
     NoEcho: true
   ManagementDeploy:
-    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
+    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the parameters related to it in the advanced settings section.
     Type: String
-    Default: true
+    Default: false
     AllowedValues:
       - true
       - false
@@ -643,6 +636,9 @@ Resources:
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
+      ListenerAttributes:
+        - Key: tcp.idle_timeout.seconds
+          Value: 3600
       DefaultActions:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup

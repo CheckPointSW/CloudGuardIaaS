@@ -1,56 +1,47 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways (20250617)
+  Create an Auto Scaling group of Check Point gateways (20260122)
   See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - GatewaysSubnets
       - Label:
-          default: EC2 Instances Configuration
+          default: Advanced Settings
         Parameters:
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - VolumeSize
           - VolumeType
           - EnableVolumeEncryption
+          - IPMode
           - EnableInstanceConnect
           - MetaDataToken
-      - Label:
-          default: Auto Scaling Configuration
-        Parameters:
           - AutoScaleGroupName
           - GatewaysMinSize
           - GatewaysMaxSize
           - AdminEmail
           - GatewaysTargetGroups
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
           - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
           - AllowUploadDownload
           - CloudWatch
-          - EnableIPv6Traffic
           - GatewayBootstrapScript
-      - Label:
-          default: Automatic Provisioning with Security Management Server Settings
-        Parameters:
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - ManagementServer
           - ConfigurationTemplate
-      - Label:
-          default: Proxy Configuration (optional)
-        Parameters:
           - ELBType
           - ELBPort
           - ELBClients
@@ -65,6 +56,8 @@ Metadata:
         default: Gateways instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -108,15 +101,13 @@ Metadata:
       ConfigurationTemplate:
         default: Configuration template
       ELBType:
-        default: Proxy type
+        default: Proxy Settings - Proxy type
       ELBPort:
-        default: Proxy port
+        default: Proxy Settings - Proxy port
       ELBClients:
-        default: Allowed proxy clients
+        default: Proxy Settings - Allowed proxy clients
       AutoScaleGroupName:
         default: Auto Scale Group name
-      EnableIPv6Traffic:
-        default: Add support for IPv6 traffic inspection
 Parameters:
   VPC:
     Description: Select an existing VPC.
@@ -297,10 +288,11 @@ Parameters:
     Default: ''
   GatewayVersion:
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.20-BYOL
       - R82-BYOL
+      - R82.10-BYOL
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -345,6 +337,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  IPMode:
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide.
+    Type: String
+    AllowedValues:
+      - IPv4
+      - DualStack
+    Default: IPv4
   GatewayBootstrapScript:
     Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
     Type: String
@@ -394,13 +393,6 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
-  EnableIPv6Traffic:
-    Description: Add support for IPv6 traffic inspection.
-    Type: String
-    Default: false
-    AllowedValues:
-      - true
-      - false
 Conditions:
   ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
   ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
@@ -408,7 +400,7 @@ Conditions:
   CreateELB: !Not [!Equals [!Ref ELBType, none]]
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
-  EnableIPv6: !Equals [!Ref EnableIPv6Traffic, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
 Resources:
   ChkpGatewayRole:
     Type: AWS::IAM::Role
@@ -575,6 +567,7 @@ Resources:
               - '        - *eth0-dns1'
               - '    bridge_interfaces:'
               - '      - eth0'
+              - !If [IsIPv6Enabled, '  ipv6_enabled: true', '  ipv6_enabled: false']
               - 'kernel_parameters:'
               - '  sim:'
               - '    - sim_geneve_enabled=1'
@@ -583,16 +576,7 @@ Resources:
               - '    - fwtls_bridge_mode_inspection=1'
               - '    - fw_geneve_enabled=1'
               - 'bootcmd:'
-              - '    - echo "brctl hairpin br0 eth0 on" >> /etc/rc.local'
-              - '    - echo "cpprod_util CPPROD_SetValue \"fw1\" \"AwsGwlb\" 4 1 1" >> /etc/rc.local'
-              - '    - |'
-              - '      gparam_file_path="$(find $PPKDIR/boot/modules/ -regextype egrep -regex ''.*(sim_kern_64_3_10_64_v6|sim_kern_64_v6)\.gparams'')"'
-              - '      if cat $gparam_file_path | grep -q sim_geneve_enabled ; then'
-              - '          cp /etc/basedb /etc/basedb.bak'
-              - '          grep -vx "ipv6 t" /etc/basedb.bak | grep -vx "ipv6 f" > /etc/basedb;'
-              - '          echo "ipv6 t" >> /etc/basedb;'
-              - '          /etc/rc3.d/S07ipv6gen'
-              - '      fi'
+              - '    - $CGEDIR/scripts/hairpin_on.sh AwsGwlb'
               - 'runcmd:'
               - '  - |'
               - '    set -e'
@@ -602,7 +586,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"autoscale_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260122\" templateName=\"autoscale_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy

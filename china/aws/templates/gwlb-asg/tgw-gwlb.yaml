@@ -1,12 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20250617). 
-  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - IGWID
@@ -17,6 +24,9 @@ Metadata:
           - TgwSubnet2Id
           - TgwSubnet3Id
           - TgwSubnet4Id
+      - Label:
+          default: Advanced Settings
+        Parameters:
           - NatGwSubnet1CIDR
           - NatGwSubnet2CIDR
           - NatGwSubnet3CIDR
@@ -25,10 +35,6 @@ Metadata:
           - GWLBeSubnet2CIDR
           - GWLBeSubnet3CIDR
           - GWLBeSubnet4CIDR
-      - Label:
-          default: General Settings
-        Parameters:
-          - KeyName
           - EnableVolumeEncryption
           - VolumeSize
           - VolumeType
@@ -40,40 +46,26 @@ Metadata:
           - ConfigurationTemplate
           - AdminEmail
           - Shell
-      - Label:
-          default: Check Point CloudGuard IaaS Security Gateways Auto Scaling Group Configuration
-        Parameters:
           - AutoScaleGroupName
           - GatewayName
-          - GatewayInstanceType
           - GatewaysMinSize
           - GatewaysMaxSize
-          - GatewayVersion
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
           - ControlGatewayOverPrivateOrPublicAddress
           - AllocatePublicAddress
           - CloudWatch
           - GatewayBootstrapScript
-      - Label:
-          default: Gateway Load Balancer Configuration
-        Parameters:
           - GWLBName
           - TargetGroupName
           - CrossZoneLoadBalancing
-      - Label:
-          default: Check Point CloudGuard IaaS Security Management Server Configuration
-        Parameters:
           - ManagementDeploy
           - ManagementInstanceType
           - ManagementVersion
           - ManagementPasswordHash
           - ManagementMaintenancePasswordHash
           - GatewaysPolicy
-          - AdminCIDR
           - GatewayManagement
-          - GatewaysAddresses
     ParameterLabels:
       VPC:
         default: VPC
@@ -134,19 +126,19 @@ Metadata:
       Shell:
         default: Admin shell
       GatewayName:
-        default: Gateways instance name
+        default: Gateways name
       GatewayInstanceType:
-        default: Gateways instance type
+        default: Gateways Instance type
       GatewaysMinSize:
         default: Minimum group size
       GatewaysMaxSize:
         default: Maximum group size
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       GatewayPasswordHash:
         default: Gateways Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
         default: Gateways SIC key
       ControlGatewayOverPrivateOrPublicAddress:
@@ -158,29 +150,29 @@ Metadata:
       GatewayBootstrapScript:
         default: Gateways bootstrap script
       GWLBName:
-        default: Gateway Load Balancer Name
+        default: Gateways Load Balancer Name
       TargetGroupName:
         default: Target Group Name
       CrossZoneLoadBalancing:
         default:  Enable Cross Zone Load Balancing
       ManagementDeploy:
-        default: Deploy Management Server
+        default: Management Server Settings - Deploy Management Server
       ManagementInstanceType:
-        default: Management instance type
+        default: Management Server Settings - Instance type
       ManagementVersion:
-        default: Management version & license
+        default: Management Server Settings - Version & License
       ManagementPasswordHash:
-        default: Management password hash
+        default: Management Server Settings - Password hash
       ManagementMaintenancePasswordHash:
-        default: Management Maintenance Password hash
+        default: Management Server Settings - Maintenance Password hash
       GatewaysPolicy:
-        default: Security Policy
+        default: Management Server Settings - Security Policy
       AdminCIDR:
-        default: Administrator addresses
+        default: Management Server Settings - Allow SmartConsole connections from these networks
       GatewayManagement:
-        default: Manage Gateways
+        default: Management Server Settings - Manage Gateways
       GatewaysAddresses:
-        default: Gateways addresses
+        default: Management Server Settings - Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group name
 Parameters:
@@ -190,7 +182,7 @@ Parameters:
     MinLength: 1
     ConstraintDescription: You must select a VPC.
   IGWID:
-    Description: VPC's Internet Gateway Id (e.g. igw-123a4567).
+    Description: VPC's Internet Gateway ID (e.g. igw-123a4567).
     Type: String
     MinLength: 1
     ConstraintDescription: You must insert an Internet Gateway Id.
@@ -212,12 +204,12 @@ Parameters:
     Description: The TGW attachment subnet ID located in the 1st Availability Zone.
     Type: String
     MinLength: 1
-    ConstraintDescription: You must insert Tgw Subnet Id for Availability Zone 1.
+    ConstraintDescription: You must insert Tgw Subnet ID for Availability Zone 1.
   TgwSubnet2Id:
     Description: The TGW attachment subnet ID located in the 2nd Availability Zone.
     Type: String
     MinLength: 1
-    ConstraintDescription: You must insert Tgw Subnet Id for Availability Zone 2.
+    ConstraintDescription: You must insert Tgw Subnet ID for Availability Zone 2.
   TgwSubnet3Id:
     Description: The TGW attachment subnet ID located in the 3rd Availability Zone.
     Type: String
@@ -472,7 +464,7 @@ Parameters:
   GatewayVersion:
     Description: The version and license to install on the Security Gateways.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
@@ -540,9 +532,9 @@ Parameters:
       - true
       - false
   ManagementDeploy:
-    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the other parameters of this section.
+    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the parameters below.
     Type: String
-    Default: true
+    Default: false
     AllowedValues:
       - true
       - false
@@ -654,7 +646,7 @@ Parameters:
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL

@@ -1,23 +1,27 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point cross AZ Cluster into an existing VPC (20241027)
+Description: Deploys a Check Point cross AZ Cluster into an existing VPC (20260101)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
-          default: VPC Network Configuration
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+      - Label:
+          default: VPC Network Settings
         Parameters:
           - VPC
           - PublicSubnetA
           - PublicSubnetB
           - PrivateSubnetA
           - PrivateSubnetB
-          - InternalRouteTable
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
           - GatewayName
-          - GatewayInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -26,22 +30,12 @@ Metadata:
           - GatewayPredefinedRole
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - GatewayVersion
+          - InternalRouteTable
           - Shell
           - GatewayPasswordHash
           - GatewayMaintenancePasswordHash
-          - GatewaySICKey
-      - Label:
-          default: Quick connect to Smart-1 Cloud (Recommended)
-        Parameters:
           - MemberAToken
           - MemberBToken
-      - Label:
-          default: Advanced Settings
-        Parameters:
           - ResourcesTagName
           - GatewayHostname
           - AllowUploadDownload
@@ -63,9 +57,9 @@ Metadata:
       InternalRouteTable:
         default: Internal route table
       GatewayName:
-        default: Gateway Name
+        default: Gateways name
       GatewayInstanceType:
-        default: Security Gateways instance type
+        default: Gateways Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -85,15 +79,15 @@ Metadata:
       MetaDataToken:
         default: Metadata HTTP token
       GatewayVersion:
-        default: Gateways version & license
+        default: Gateways Version & License
       Shell:
         default: Admin shell
       GatewayPasswordHash:
         default: Password hash
       GatewayMaintenancePasswordHash:
-        default: Gateway Maintenance Password hash
+        default: Gateways Maintenance Password hash
       GatewaySICKey:
-        default: SIC key
+        default: Gateways SIC key
       MemberAToken:
         default: Smart-1 Cloud Token for member A
       MemberBToken:
@@ -101,7 +95,7 @@ Metadata:
       ResourcesTagName:
         default: Resources prefix tag
       GatewayHostname:
-        default: Gateway Hostname
+        default: Gateways Hostname
       AllowUploadDownload:
         default: Allow upload & download
       CloudWatch:
@@ -148,7 +142,7 @@ Parameters:
     Default: Check-Point-Cluster
   GatewayInstanceType:
     Type: String
-    Default: c5.xlarge
+    Default: c6i.xlarge
     AllowedValues:
       - c4.large
       - c4.xlarge
@@ -200,15 +194,6 @@ Parameters:
       - c6i.16xlarge
       - c6i.24xlarge
       - c6i.32xlarge
-      - c6in.large
-      - c6in.xlarge
-      - c6in.2xlarge
-      - c6in.4xlarge
-      - c6in.8xlarge
-      - c6in.12xlarge
-      - c6in.16xlarge
-      - c6in.24xlarge
-      - c6in.32xlarge
       - r5.large
       - r5.xlarge
       - r5.2xlarge
@@ -601,7 +586,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"geo-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"geo_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" otherMemberIp=\"${other_member_ip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"geo-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"geo_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" elasticIp=\"${eip}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" otherMemberIp=\"${other_member_ip}\" bootstrapScript64=\"${bootstrap}\"'
   MemberBGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -643,7 +628,7 @@ Resources:
               - !Join [ '', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"' ] ]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"geo-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20240204\" templateName=\"geo_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"geo-cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"geo_cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" otherMemberIp=\"${other_member_ip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   MemberAPublicAddress:
     Type: AWS::EC2::EIP

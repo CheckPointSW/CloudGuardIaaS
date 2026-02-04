@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: This template creates a Multi-AZ, multi-subnet VPC infrastructure (20260101)
+Description: This template creates a Multi-AZ, multi-subnet VPC infrastructure (20260122)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

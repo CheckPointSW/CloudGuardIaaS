@@ -1,21 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Management Server (20250617)
+  Deploys a Check Point Management Server (20260122)
   See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
+      - Label:
+          default: Basic Settings
+        Parameters:
+          - ManagementVersion
+          - ManagementInstanceType
+          - ManagementSICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
       - Label:
           default: VPC Network Configuration
         Parameters:
           - VPC
           - ManagementSubnet
       - Label:
-          default: EC2 Instance Configuration
+          default: Advanced Settings
         Parameters:
           - ManagementName
-          - ManagementInstanceType
-          - KeyName
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -23,33 +30,19 @@ Metadata:
           - EnableInstanceConnect
           - TerminationProtection
           - MetaDataToken
-      - Label:
-          default: IAM Permissions (ignored when the installation is not Primary Management
-            Server)
-        Parameters:
-          - ManagementPermissions
-          - ManagementPredefinedRole
-          - ManagementSTSRoles
-      - Label:
-          default: Check Point Settings
-        Parameters:
-          - ManagementVersion
+          - ManagementHostname
+          - PrimaryManagement
+          - AllowUploadDownload
           - Shell
           - ManagementPasswordHash
           - ManagementMaintenancePasswordHash
-      - Label:
-          default: Security Management Server Settings
-        Parameters:
-          - ManagementHostname
-          - PrimaryManagement
-          - ManagementSICKey
-          - AllowUploadDownload
-          - AdminCIDR
           - GatewayManagement
-          - GatewaysAddresses
           - ManagementBootstrapScript
           - NTPPrimary
           - NTPSecondary
+          - ManagementPermissions
+          - ManagementPredefinedRole
+          - ManagementSTSRoles
     ParameterLabels:
       VPC:
         default: VPC
@@ -58,7 +51,7 @@ Metadata:
       ManagementName:
         default: Management name
       ManagementInstanceType:
-        default: Instance type
+        default: Management Instance type
       KeyName:
         default: Key name
       AllocatePublicAddress:
@@ -82,7 +75,7 @@ Metadata:
       ManagementSTSRoles:
         default: STS roles
       ManagementVersion:
-        default: Version & license
+        default: Management Version & License
       Shell:
         default: Admin shell
       ManagementPasswordHash:
@@ -90,15 +83,15 @@ Metadata:
       ManagementMaintenancePasswordHash:
         default: Management Maintenance Password hash
       ManagementHostname:
-        default: Management hostname
+        default: Management Hostname
       PrimaryManagement:
         default: Primary management
       ManagementSICKey:
-        default: SIC key
+        default: Management SIC key
       AllowUploadDownload:
         default: Allow upload & download
       AdminCIDR:
-        default: Administrator addresses
+        default: Allow SmartConsole connections from these networks
       GatewayManagement:
         default: Gateways management
       GatewaysAddresses:
@@ -300,11 +293,12 @@ Parameters:
   ManagementVersion:
     Description: The license to install on the Security Management Server.
     Type: String
-    Default: R81.20-BYOL
+    Default: R82-BYOL
     AllowedValues:
       - R81.10-BYOL
       - R81.20-BYOL
       - R82-BYOL
+      - R82.10-BYOL
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -549,7 +543,7 @@ Resources:
               - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20250617\" templateName=\"management_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260122\" templateName=\"management_gwlb\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" primary=\"${primary_mgmt}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
