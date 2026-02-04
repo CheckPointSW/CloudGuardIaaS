@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create an S3 bucket in the same region as the stack, and copy a zip of a Lambda from remote bucket to it (20250617)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Lambda zip location
+        Parameters:
+          - SourceBucketName
+          - FolderName
+          - LambdaPathObjects
+    ParameterLabels:
+      SourceBucketName:
+        default: Source Bucket Name
+      FolderName:
+        default: Folder Name
+      LambdaPathObjects:
+        default: Lambda Path
+Parameters:
+  SourceBucketName:
+    Description: The source bucket (e.g. lambda-bucket ).
+    Type: String
+    MinLength: 1
+  FolderName:
+    Description: The source folder (e.g. lambda-prefix/ ).
+    Type: String
+    AllowedPattern: '^[0-9a-zA-Z-_/]*/$'
+  LambdaPathObjects:
+    Description: A zip file (e.g. lambda.zip).
+    Type: String
+    AllowedPattern: '.*\.zip'
+Resources:
+  LambdaZipBucket:
+    Type: AWS::S3::Bucket
+  CopyZips:
+    Type: Custom::CopyZips
+    Properties:
+      ServiceToken: !GetAtt CopyZipsFunction.Arn
+      SourceBucket: !Ref SourceBucketName
+      DestBucket: !Ref LambdaZipBucket
+      Prefix: !Ref FolderName
+      Objects:
+        - !Ref LambdaPathObjects
+  CopyZipsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: !Sub lambda-copier-${LambdaZipBucket}
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub arn:aws:s3:::${SourceBucketName}/${FolderName}*
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub arn:aws:s3:::${LambdaZipBucket}/${FolderName}*
+  CopyZipsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Copies objects from a source S3 bucket to a destination.
+      Handler: index.handler
+      Runtime: python3.7
+      Role: !GetAtt CopyZipsRole.Arn
+      Timeout: 240
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import threading
+          import boto3
+          import cfnresponse
+
+
+          def copy_objects(source_bucket, dest_bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              for o in objects:
+                  key = prefix + o
+                  copy_source = {'Bucket': source_bucket, 'Key': key }
+                  print(f'copy_source: {copy_source}')
+                  print(f'dest_bucket = {dest_bucket}')
+                  print(f'key = {key}')
+                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket, Key=key)
+
+
+          def delete_objects(bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              objects = {'Objects': [{'Key': prefix + o} for o in objects]}
+              s3.delete_objects(Bucket=bucket, Delete=objects)
+
+
+          def timeout(event, context):
+              logging.error('Execution is about to time out, sending failure'
+                            ' response to CloudFormation')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
+
+
+          def handler(event, context):
+              # make sure we send a failure to CloudFormation if the function
+              # is going to timeout
+              timer = threading.Timer((context.get_remaining_time_in_millis()
+                                       / 1000.00) - 0.5, timeout, args=[event, context])
+              timer.start()
+
+              print(f'Received event: {json.dumps(event)}')
+              status = cfnresponse.SUCCESS
+              try:
+                  source_bucket = event['ResourceProperties']['SourceBucket']
+                  dest_bucket = event['ResourceProperties']['DestBucket']
+                  prefix = event['ResourceProperties']['Prefix']
+                  objects = event['ResourceProperties']['Objects']
+                  if event['RequestType'] == 'Delete':
+                      delete_objects(dest_bucket, prefix, objects)
+                  else:
+                      copy_objects(source_bucket, dest_bucket, prefix, objects)
+              except Exception as e:
+                  logging.error('Exception: %s' % e, exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  timer.cancel()
+                  cfnresponse.send(event, context, status, {}, None)
+Outputs:
+  LambdaZipBucket:
+    Description: The new S3 bucket in the local region.
+    Value: !Ref LambdaZipBucket
