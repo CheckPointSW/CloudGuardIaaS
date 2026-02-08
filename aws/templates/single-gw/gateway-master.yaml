@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Security Gateway into a new VPC (20260101)
+Description: |
+  Deploys a Check Point Security Gateway into a new VPC (20260205)
+  See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -18,6 +20,7 @@ Metadata:
           - VPCCIDR
           - PublicSubnetCIDR
           - PrivateSubnetCIDR
+          - IPMode
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -54,8 +57,10 @@ Metadata:
         default: Gateway Instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       AllocatePublicAddress:
-        default: Allocate an Elastic IP
+        default: Allocate an Elastic IPv4 address (Irrelevant for IPv6 only mode)
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -356,6 +361,14 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  IPMode:
+    Description: Specifies the IP mode for the Security Gateway and AWS resources.
+    Type: String
+    AllowedValues:
+      - IPv4
+      # - IPv6
+      - DualStack
+    Default: IPv4
   AllocatePublicAddress:
     Type: String
     Default: true
@@ -411,6 +424,9 @@ Parameters:
       - R82-BYOL
       - R82-PAYG-NGTP
       - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
   Shell:
     Description: Change the admin shell to enable advanced command line configuration.
     Type: String
@@ -450,7 +466,7 @@ Parameters:
     Type: String
     Default: ''
   GatewayHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -493,22 +509,24 @@ Parameters:
       - private
       - public
   ManagementServer:
-    Description: The name that represents the Security Management Server in the automatic.
-      provisioning configuration.
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
     Type: String
   ConfigurationTemplate:
-    Description: A name of a Security Gateway configuration template in the automatic.
-      provisioning configuration.
+    Description: A name of a Security Gateway configuration template in the automatic provisioning configuration.
     Type: String
     MaxLength: 30
 Conditions:
-  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  IsIPv4Enabled: !Not [!Equals [!Ref IPMode, "IPv6"]]
+  AllocatePublicIPv4:
+    !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      TemplateURL:
+        !If [IsIPv6Enabled, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
       Parameters:
         AvailabilityZones: !Ref AvailabilityZone
         NumberOfAZs: 1
@@ -517,6 +535,7 @@ Resources:
         CreatePrivateSubnets: true
         PrivateSubnet1CIDR: !Ref PrivateSubnetCIDR
         CreateAttachmentSubnets: false
+        IPMode: !Ref IPMode
   InternalRoutingTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -568,24 +587,27 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
+        IPMode: !Ref IPMode
 Outputs:
   CheckPointInstancePublicAddress:
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Description: The public address of the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.PublicAddress
   CheckPointInstancePrivateExternalAddress:
+    Condition: IsIPv4Enabled
     Description: The private external address of the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.PrivateExternalAddress
   CheckPointInstancePrivateInternalAddress:
+    Condition: IsIPv4Enabled
     Description: The private internal address of the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.PrivateInternalAddress
   CheckPointInstanceSSH:
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Description: SSH command to the Check Point instance.
     Value: !GetAtt GatewayStack.Outputs.SSH
   CheckPointInstanceURL:
-    Condition: AllocateAddress
-    Description: URL to the portal
+    Condition: AllocatePublicIPv4
+    Description: URL to the portal.
     Value: !GetAtt GatewayStack.Outputs.URL
   ManagementName:
     Description: The name that represents the Security Management Server.
