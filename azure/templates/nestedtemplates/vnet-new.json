@@ -91,8 +91,7 @@
             "name": "To-Internal",
             "properties": {
               "addressPrefix": "[parameters('virtualNetworkAddressPrefix')]",
-              "nextHopType": "VirtualAppliance",
-              "nextHopIpAddress": "[parameters('subnet1StartAddress')]"
+              "nextHopType": "None"
             }
           }
         ]
