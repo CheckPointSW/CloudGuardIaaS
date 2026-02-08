@@ -1349,6 +1349,110 @@
             }
           },
           {
+            "name": "ipv6InfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "true",
+            "options": {
+              "icon": "Info",
+              "text": "Enable IPv6 support to add an IPv6 public load balancer frontend and IPv6 configurations on the gateway network interfaces. Existing VNets/subnets are not modified."
+            }
+          },
+          {
+            "name": "enableIpv6",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable IPv6 Support",
+            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes and static IPv6 NIC addresses; for an existing Virtual Network we do not modify the VNet or subnets and the static IPv6 NIC addresses you enter must already be valid in those existing subnet prefixes. An IPv6 public load balancer frontend and IPv6 NIC configurations will be created when enabled. For required configuration, see <a href='https://support.checkpoint.com/results/sk/sk170760' target='_blank'>sk170760</a>.",
+            "defaultValue": "No (IPv4 only)",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No (IPv4 only)",
+                  "value": false
+                },
+                {
+                  "label": "Yes (IPv4 + IPv6 dual-stack)",
+                  "value": true
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          
+          {
+            "name": "ipv6AddressSpace",
+            "type": "Microsoft.Common.Section",
+            "label": "IPv6 Address Configuration",
+            "visible": "[steps('network').enableIpv6]",
+            "elements": [
+              {
+                "name": "virtualNetworkIpv6AddressPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Virtual Network IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca::/48",
+                "toolTip": "The IPv6 address prefix for the virtual network (e.g., ace:cab:deca::/48)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/(4[8-9]|5[0-9]|6[0-4])$",
+                  "validationMessage": "Please enter a valid IPv6 CIDR notation (e.g., ace:cab:deca::/48)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet1Ipv6Prefix", 
+                "type": "Microsoft.Common.TextBox",
+                "label": "Frontend Subnet IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca:deed::/64",
+                "toolTip": "The IPv6 address prefix for the frontend subnet (e.g., ace:cab:deca:deed::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Please enter a valid IPv6 CIDR notation (e.g., ace:cab:deca:deed::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet2Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox", 
+                "label": "Backend Subnet IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca:deee::/64",
+                "toolTip": "The IPv6 address prefix for the backend subnet (e.g., ace:cab:deca:deee::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Please enter a valid IPv6 CIDR notation (e.g., ace:cab:deca:deee::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet1Ipv6StartAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Frontend NIC IPv6 Address (Static)",
+                "defaultValue": "ace:cab:deca:deed::a",
+                "toolTip": "[if(equals(steps('network').virtualNetwork.newOrExisting, 'new'), 'Enter the static IPv6 address for the Frontend NIC (no CIDR) within the Frontend Subnet IPv6 prefix above.', 'Enter the static IPv6 address for the Frontend NIC (no CIDR) inside your existing Frontend subnet IPv6 prefix.')]",
+                "constraints": {
+                  "required": "[steps('network').enableIpv6]",
+                  "regex": "^([0-9A-Fa-f]{0,4}:){1,7}[0-9A-Fa-f]{0,4}$",
+                  "validationMessage": "Enter a valid IPv6 address (no CIDR suffix)."
+                },
+                "visible": "[steps('network').enableIpv6]"
+              },
+              {
+                "name": "subnet2Ipv6StartAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Backend NIC IPv6 Address (Static)",
+                "defaultValue": "ace:cab:deca:deee::a",
+                "toolTip": "[if(equals(steps('network').virtualNetwork.newOrExisting, 'new'), 'Enter the static IPv6 address for the Backend NIC (no CIDR) within the Backend Subnet IPv6 prefix above.', 'Enter the static IPv6 address for the Backend NIC (no CIDR) inside your existing Backend subnet IPv6 prefix.')]",
+                "constraints": {
+                  "required": "[steps('network').enableIpv6]",
+                  "regex": "^([0-9A-Fa-f]{0,4}:){1,7}[0-9A-Fa-f]{0,4}$",
+                  "validationMessage": "Enter a valid IPv6 address (no CIDR suffix)."
+                },
+                "visible": "[steps('network').enableIpv6]"
+              }
+            ]
+          },
+          {
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
@@ -1557,7 +1661,13 @@
       "NewNsgName": "[steps('network').NSGName]",
       "storageAccountDeployMode": "[steps('network').storageAccountDeployMode]",
       "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
-      "existingStorageAccountId": "[steps('network').existingStorageAccount]"
+      "existingStorageAccountId": "[steps('network').existingStorageAccount]",
+      "enableIpv6": "[steps('network').enableIpv6]",
+      "virtualNetworkIpv6AddressPrefix": "[if(steps('network').enableIpv6, steps('network').ipv6AddressSpace.virtualNetworkIpv6AddressPrefix, '')]",
+      "Subnet1Ipv6Prefix": "[if(steps('network').enableIpv6, steps('network').ipv6AddressSpace.subnet1Ipv6Prefix, '')]", 
+      "Subnet2Ipv6Prefix": "[if(steps('network').enableIpv6, steps('network').ipv6AddressSpace.subnet2Ipv6Prefix, '')]",
+      "Subnet1Ipv6StartAddress": "[if(steps('network').enableIpv6, steps('network').ipv6AddressSpace.subnet1Ipv6StartAddress, '')]",
+      "Subnet2Ipv6StartAddress": "[if(steps('network').enableIpv6, steps('network').ipv6AddressSpace.subnet2Ipv6StartAddress, '')]"
     }
   }
 }
