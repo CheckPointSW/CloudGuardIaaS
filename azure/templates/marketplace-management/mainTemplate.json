@@ -327,7 +327,7 @@
     }
   },
   "variables": {
-    "templateName": "management",
+    "templateName": "[if(parameters('enableIpv6'), 'management_dual_stack', 'management')]",
     "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
