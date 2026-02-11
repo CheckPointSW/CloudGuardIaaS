@@ -369,7 +369,7 @@
     }
   },
   "variables": {
-    "templateName": "single",
+    "templateName": "[if(parameters('enableIpv6'), 'single_dual_stack', 'single')]",
     "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
