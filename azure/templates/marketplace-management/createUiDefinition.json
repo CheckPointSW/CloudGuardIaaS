@@ -726,6 +726,93 @@
             }
           },
           {
+            "name": "enableIpv6",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable IPv6 Support",
+            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes and a static IPv6 NIC address; for an existing Virtual Network we do not modify the VNet or subnet and the static IPv6 NIC address you enter must already be valid in the existing subnet prefix. The management VM NIC will get this static IPv6 when enabled.",
+            "defaultValue": "No (IPv4 only)",
+            "constraints": {
+              "allowedValues": [
+                { "label": "No (IPv4 only)", "value": false },
+                { "label": "Yes (IPv4 + IPv6)", "value": true }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "ipv6Section",
+            "type": "Microsoft.Common.Section",
+            "label": "IPv6 Configuration",
+            "visible": "[steps('network').enableIpv6]",
+            "elements": [
+              {
+                "name": "virtualNetworkIpv6AddressPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Virtual Network IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca::/48",
+                "toolTip": "IPv6 address prefix for the virtual network (e.g., ace:cab:deca::/48)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/(4[8-9]|5[0-9]|6[0-4])$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca::/48)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "Subnet1Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Management Subnet IPv6 Prefix",
+                "defaultValue": "ace:cab:deca:deed::/64",
+                "toolTip": "IPv6 address prefix for the management subnet (e.g., ace:cab:deca:deed::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca:deed::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "Subnet1Ipv6StartAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Management NIC IPv6 Address (Static)",
+                "defaultValue": "ace:cab:deca:deed::a",
+                "toolTip": "[if(equals(steps('network').virtualNetwork.newOrExisting, 'new'), 'Enter the static IPv6 address for the management NIC (no CIDR) within the Management Subnet IPv6 prefix above.', 'Enter the static IPv6 address for the management NIC (no CIDR) inside your existing subnet IPv6 prefix.')]",
+                "constraints": {
+                  "required": "[steps('network').enableIpv6]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))$",
+                  "validationMessage": "Enter a valid IPv6 address (no CIDR)"
+                },
+                "visible": "[steps('network').enableIpv6]"
+              },
+              {
+                "name": "managementGUIClientNetworkIpv6",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Allow SmartConsole IPv6 connections from these networks (optional)",
+                "defaultValue": "::/0",
+                "toolTip": "Optional IPv6 CIDR(s) for SmartConsole access (e.g., ace:cab:deca:deed::/64). Leave ::/0 to allow all.",
+                "constraints": {
+                  "required": false,
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4}){1,6}|:(:[0-9A-Fa-f]{1,4}){1,7}|::)/(12[0-8]|1[01][0-9]|[1-9][0-9]|[0-9])$",
+                  "validationMessage": "Enter a valid IPv6 network CIDR (e.g., ace:cab:deca:deed::/64)"
+                },
+                "visible": "[steps('network').enableIpv6]"
+              }
+            ]
+          },
+          {
+            "name": "managementGUIClientNetwork",
+            "type": "Microsoft.Common.TextBox",
+            "label": "Allow SmartConsole connections from these networks",
+            "toolTip": "Allow SmartConsole connections from the following CIDR networks, for example: 192.168.1.0/26",
+            "constraints": {
+              "required": true,
+              "regex": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+              "validationMessage": "Enter a valid IPv4 network CIDR"
+            },
+            "visible": "[equals(steps('chkp-advanced').installationType, 'management')]"
+          },
+          {
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
@@ -913,7 +1000,12 @@
       "Subnet1StartAddress": "[steps('network').virtualNetwork.subnets.subnet1.startAddress]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
-      "managementGUIClientNetwork": "[steps('chkp').managementGUIClientNetwork]",
+      "managementGUIClientNetwork": "[steps('network').managementGUIClientNetwork]",
+      "enableIpv6": "[steps('network').enableIpv6]",
+      "virtualNetworkIpv6AddressPrefix": "[if(steps('network').enableIpv6, steps('network').ipv6Section.virtualNetworkIpv6AddressPrefix, '')]",
+      "Subnet1Ipv6Prefix": "[if(steps('network').enableIpv6, steps('network').ipv6Section.Subnet1Ipv6Prefix, '')]",
+      "Subnet1Ipv6StartAddress": "[if(steps('network').enableIpv6, steps('network').ipv6Section.Subnet1Ipv6StartAddress, '')]",
+      "managementGUIClientNetworkIpv6": "[if(steps('network').enableIpv6, steps('network').ipv6Section.managementGUIClientNetworkIpv6, '')]",
       "installationType": "[steps('chkp-advanced').installationType]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
