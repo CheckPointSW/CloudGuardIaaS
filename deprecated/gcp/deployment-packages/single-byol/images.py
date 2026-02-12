@@ -1,5 +1,5 @@
 IMAGES = {
-  "check-point-r8210-byol": "check-point-r8210-byol-464-991003164-v202602120943-auto",
+  "check-point-r8210-byol": "check-point-r8210-byol-464-991001970-v20251229",
   "check-point-r82-payg": "check-point-r82-payg-777-991001734-v20250121",
   "check-point-r82-gw-payg-single": "check-point-r82-gw-payg-single-777-991001695-v20241021",
   "check-point-r82-gw-payg-mig": "check-point-r82-gw-payg-mig-777-991001695-v20241021",
