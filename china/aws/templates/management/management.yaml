@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Management Server into an existing VPC (20260101)
+Description: |
+  Deploys a Check Point Management Server into an existing VPC (20260205)
+  See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -21,6 +23,7 @@ Metadata:
           default: Advanced Settings
         Parameters:
           - ManagementName
+          - IPMode
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -52,8 +55,10 @@ Metadata:
         default: Management Instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       AllocatePublicAddress:
-        default: Allocate an Elastic IP
+        default: Allocate an Elastic IPv4 address (Irrelevant for IPv6 only mode)
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -224,6 +229,13 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  IPMode:
+    Description: Specifies the IP mode for the Management and AWS resources.
+    Type: String
+    AllowedValues:
+      - IPv4
+      - DualStack
+    Default: IPv4
   AllocatePublicAddress:
     Description: Allocate an elastic IP for the Management.
     Type: String
@@ -320,7 +332,7 @@ Parameters:
     AllowedPattern: '[\$\./a-zA-Z0-9]*'
     NoEcho: true
   ManagementHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: The name must not contain reserved words. For details, refer to sk40179. (optional)
     Type: String
     Default: mgmt-aws
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -352,15 +364,15 @@ Parameters:
       - true
       - false
   AdminCIDR:
-    Description: Allow web, SSH, and graphical clients only from this network to communicate
+    Description: Allow web, SSH, and graphical clients only from this network to communicate (IPv4 or IPv6 CIDR)
       with the Management Server.
     Type: String
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management
+    Description: Allow gateways only from this network to communicate with the Management (IPv4 or IPv6 CIDR)
       Server.
     Type: String
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
   GatewayManagement:
     Description: Select 'Over the internet' if any of the gateways you wish to manage
       are not directly accessed via their private IP address.
@@ -385,9 +397,14 @@ Parameters:
     Default: 0.pool.ntp.org
     AllowedPattern: '[\.a-zA-Z0-9\-]*'
 Conditions:
-  EIP: !Equals [!Ref AllocatePublicAddress, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  IsIPv4Enabled: !Not [!Equals [!Ref IPMode, "IPv6"]]
+  AllocatePublicIPv4:
+    !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
+  IsGatewaysAddressesIPv6: !Not [!Equals [!Select [0, !Split [':', !Ref GatewaysAddresses]], !Ref GatewaysAddresses]]
+  AdminCIDRIsIPv6: !Not [!Equals [!Select [0, !Split [':', !Ref AdminCIDR]], !Ref AdminCIDR]]
   ManageOverInternet: !Equals [!Ref GatewayManagement, Over the internet]
-  ManageOverInternetAndEIP: !And [!Condition EIP, !Condition ManageOverInternet]
+  ManageOverInternetAndEIP: !And [!Condition AllocatePublicIPv4, !Condition ManageOverInternet]
   CreateRole: !Or
     - !Equals [!Ref ManagementPermissions, Create with assume role permissions (specify an STS role ARN)]
     - !Equals [!Ref ManagementPermissions, Create with read permissions]
@@ -406,11 +423,11 @@ Resources:
         Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
   ManagementReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     Properties: {}
   ManagementReadyCondition:
     Type: AWS::CloudFormation::WaitCondition
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     DependsOn: ManagementInstance
     Properties:
       Handle: !Ref ManagementReadyHandle
@@ -421,55 +438,68 @@ Resources:
       GroupDescription: Management security group
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 257
           ToPort: 257
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 8211
           ToPort: 8211
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18191
           ToPort: 18191
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18192
           ToPort: 18192
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18208
           ToPort: 18208
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18210
           ToPort: 18210
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18211
           ToPort: 18211
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18221
           ToPort: 18221
-        - CidrIp: !Ref GatewaysAddresses
+        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
+          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18264
           ToPort: 18264
-        - CidrIp: !Ref AdminCIDR
+        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
+          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-        - CidrIp: !Ref AdminCIDR
+        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
+          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-        - CidrIp: !Ref AdminCIDR
+        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
+          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 18190
           ToPort: 18190
-        - CidrIp: !Ref AdminCIDR
+        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
+          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
           IpProtocol: tcp
           FromPort: 19009
           ToPort: 19009
@@ -507,6 +537,7 @@ Resources:
             - !Ref ManagementSecurityGroup
           DeleteOnTermination: true
           SubnetId: !Ref ManagementSubnet
+          Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   ManagementLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -534,38 +565,38 @@ Resources:
               - 'runcmd:'
               - '  - |'
               - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; eip=${AllocatePublicAddress} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
-              - !If [EIP, !Sub '    wait_handle=''${ManagementReadyHandle}''',!Ref 'AWS::NoValue']
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
+              - !If [AllocatePublicIPv4, !Sub '    wait_handle=''${ManagementReadyHandle}'' ; eip=${AllocatePublicAddress}', '    eip=false']
               - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
               - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260205\" templateName=\"management\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     Properties:
       Domain: vpc
   AddressAssoc:
     Type: AWS::EC2::EIPAssociation
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     DependsOn: ManagementInstance
     Properties:
       InstanceId: !Ref ManagementInstance
       AllocationId: !GetAtt PublicAddress.AllocationId
 Outputs:
   PublicAddress:
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     Description: The public address of the Management Server.
     Value: !Ref PublicAddress
   SSH:
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     Description: SSH command.
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
   URL:
-    Condition: EIP
+    Condition: AllocatePublicIPv4
     Description: URL to the portal.
     Value: !Join ['', ['https://', !Ref PublicAddress]]

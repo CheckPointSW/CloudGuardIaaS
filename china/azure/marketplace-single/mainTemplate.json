@@ -156,6 +156,44 @@
       },
       "defaultValue": "10.0.2.10"
     },
+    "enableIpv6": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable IPv6 dual-stack networking support"
+      }
+    },
+    "virtualNetworkIpv6AddressPrefix": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca::/48",
+      "metadata": {
+        "description": "The IPv6 address prefix of the virtual network"
+      }
+    },
+    "Subnet1Ipv6Prefix": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca:deed::/64",
+      "metadata": {
+        "description": "The IPv6 address prefix of the 1st subnet"
+      }
+    },
+    "Subnet2Ipv6Prefix": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca:deee::/64",
+      "metadata": {
+        "description": "The IPv6 address prefix of the 2nd subnet"
+      }
+    },
+    "Subnet1Ipv6StartAddress": {
+    "type": "string",
+    "defaultValue": "ace:cab:deca:deed::a",
+    "metadata": { "description": "First IPv6 address for NIC1 on Subnet1" }
+    },
+    "Subnet2Ipv6StartAddress": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca:deee::a",
+      "metadata": { "description": "First IPv6 address for NIC2 on Subnet2" }
+    },
     "vnetNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
@@ -323,7 +361,7 @@
     }
   },
   "variables": {
-    "templateName": "single",
+    "templateName": "[if(parameters('enableIpv6'), 'single_dual_stack', 'single')]",
     "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
@@ -1235,11 +1273,13 @@
     },
     "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
     "publicIPAddressName": "[parameters('vmName')]",
+    "publicIPAddressNameV6": "lb-public-ipv6",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
     "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/china/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/china/azure/templates/',parameters('_artifactsLocation'))]",
     "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "networkSetupURLDualstack": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-dualstack-new.json', parameters('_artifactsLocationSasToken')))]",
     "sicKey": "[parameters('sicKey')]",
     "managementGUIClientNetwork": "[parameters('managementGUIClientNetwork')]",
     "vmID": "[resourceId('Microsoft.Compute/virtualMachines/', parameters('vmName'))]",
@@ -1247,10 +1287,73 @@
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
     "monitoringMetricsPublisher": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', '3913510d-42f4-4e42-8a64-420c390055eb')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
+    "networkNewDeploymentName": "[if(parameters('enableIpv6'), 'networkNewSetupDualstack', 'networkNewSetup')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "subnet1ResourceId": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]",
+    "subnet2ResourceId": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2Name'))]",
+    "nic1IPv4ConfigWithPublicIP": {
+      "name": "ipconfig1",
+      "properties": {
+        "privateIPAddress": "[parameters('Subnet1StartAddress')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddressVersion": "IPv4",
+        "primary": true,
+        "publicIPAddress": {
+          "id": "[variables('publicIPAddressId')]"
+        },
+        "subnet": {
+          "id": "[variables('subnet1ResourceId')]"
+        }
+      }
+    },
+    "nic1IPv6Config": {
+      "name": "ipconfig1-v6",
+      "properties": {
+        "privateIPAddress": "[parameters('Subnet1Ipv6StartAddress')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddressVersion": "IPv6",
+        "subnet": {
+          "id": "[variables('subnet1ResourceId')]"
+        },
+        "loadBalancerBackendAddressPools": [
+          {
+            "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'loadBalancer', 'LBBAP-v6')]"
+          }
+        ]
+      }
+    },
+    "nic1IPv4OnlyConfigs": "[createArray(variables('nic1IPv4ConfigWithPublicIP'))]",
+    "nic1IPv6Configs": "[createArray(variables('nic1IPv4ConfigWithPublicIP'), variables('nic1IPv6Config'))]",
+    "nic1IpConfigurations": "[if(parameters('enableIpv6'), variables('nic1IPv6Configs'), variables('nic1IPv4OnlyConfigs'))]",
+    "nic2IPv4Config": {
+      "name": "ipconfig2",
+      "properties": {
+        "privateIPAddress": "[parameters('Subnet2StartAddress')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddressVersion": "IPv4",
+        "subnet": {
+          "id": "[variables('subnet2ResourceId')]"
+        }
+      }
+    },
+    "nic2IPv6Config": {
+      "name": "ipconfig2-v6",
+      "properties": {
+        "privateIPAddress": "[parameters('Subnet2Ipv6StartAddress')]",
+        "privateIPAllocationMethod": "Static",
+        "privateIPAddressVersion": "IPv6",
+        "subnet": {
+          "id": "[variables('subnet2ResourceId')]"
+        }
+      }
+    },
+    "nic2IPv4OnlyConfigs": "[createArray(variables('nic2IPv4Config'))]",
+    "nic2IPv6Configs": "[createArray(variables('nic2IPv4Config'), variables('nic2IPv6Config'))]",
+    "nic2IpConfigurations": "[if(parameters('enableIpv6'), variables('nic2IPv6Configs'), variables('nic2IPv4OnlyConfigs'))]",
     "NewNsgReference": {
       "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+  },
+  "networkDependency": "[if(equals(parameters('vnetNewOrExisting'), 'new'), resourceId('Microsoft.Resources/deployments', variables('networkNewDeploymentName')), resourceId('Microsoft.Resources/deployments','networkExistingSetup'))]"
   },
   "resources": [
     {
@@ -1289,8 +1392,8 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Storage/storageAccounts'), parameters('tagsByResource')['Microsoft.Storage/storageAccounts'], json('{}')) ]"
     },
     {
-      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-      "name": "networkNewSetup",
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), not(parameters('enableIpv6')))]",
+      "name": "[variables('networkNewDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "properties": {
@@ -1335,6 +1438,72 @@
           },
           "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
+          }
+        }
+      }
+    },
+    {
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), parameters('enableIpv6'))]",
+      "name": "networkNewSetupDualstack",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURLDualstack')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressPrefixes": {
+            "value": "[createArray(parameters('virtualNetworkAddressPrefix'))]"
+          },
+          "virtualNetworkAddressPrefixV6": {
+            "value": "[parameters('virtualNetworkIpv6AddressPrefix')]"
+          },
+          "Subnet1Name": {
+            "value": "[parameters('Subnet1Name')]"
+          },
+          "Subnet1Prefix": {
+            "value": "[parameters('Subnet1Prefix')]"
+          },
+          "Subnet1PrefixV6": {
+            "value": "[parameters('Subnet1Ipv6Prefix')]"
+          },
+          "Subnet2Name": {
+            "value": "[parameters('Subnet2Name')]"
+          },
+          "Subnet2Prefix": {
+            "value": "[parameters('Subnet2Prefix')]"
+          },
+          "Subnet2PrefixV6": {
+            "value": "[parameters('Subnet2Ipv6Prefix')]"
+          },
+          "Subnet2StartAddress": {
+            "value": "[parameters('Subnet2StartAddress')]"
+          },
+          "Subnet2Ipv6StartAddress": {
+            "value": "[parameters('Subnet2Ipv6StartAddress')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]"
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]"
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]"
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deploymentType": {
+            "value": "single"
           }
         }
       }
@@ -1390,59 +1559,131 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
-      "type": "Microsoft.Network/networkInterfaces",
+      "condition": "[parameters('enableIpv6')]",
+      "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-06-01",
-      "dependsOn": [
-        "[coalesce(resourceId('Microsoft.Resources/deployments/', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
-        "[variables('publicIPAddressId')]"
-      ],
       "location": "[variables('location')]",
-      "name": "[variables('nic1Name')]",
+      "name": "[variables('publicIPAddressNameV6')]",
+      "sku": {
+        "name": "Standard"
+      },
       "properties": {
-        "enableIPForwarding": true,
-        "enableAcceleratedNetworking": true,
-        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-        "ipConfigurations": [
+        "idleTimeoutInMinutes": 30,
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv6",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]"
+        }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
+    },
+    {
+      "condition": "[parameters('enableIpv6')]",
+      "apiVersion": "2020-05-01",
+      "name": "loadBalancer",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameV6'))]"
+      ],
+      "properties": {
+        "frontendIpConfigurations": [
           {
-            "name": "ipconfig1",
+            "name": "LB-v6",
             "properties": {
-              "privateIPAddress": "[parameters('Subnet1StartAddress')]",
-              "privateIPAllocationMethod": "Static",
-              "PublicIpAddress": {
-                "Id": "[variables('publicIPAddressId')]"
-              },
-              "subnet": {
-                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameV6'))]"
               }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "LBBAP-v6"
+          }
+        ],
+        "loadBalancingRules": [
+            {
+              "name": "lb-http-v6",
+              "properties": {
+                "frontendIPConfiguration": { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations','loadBalancer','LB-v6')]" },
+                "backendAddressPool":      { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools','loadBalancer','LBBAP-v6')]" },
+                "probe":                   { "id": "[resourceId('Microsoft.Network/loadBalancers/probes','loadBalancer','lb-probe')]" },
+                "protocol": "Tcp",
+                "frontendPort": 80,
+                "backendPort": 80,
+                "enableFloatingIP": true,
+                "enableTcpReset": true,
+                "idleTimeoutInMinutes": 15,
+                "disableOutboundSnat": true
+              }
+            }
+        ],
+        "probes": [
+          {
+            "name": "lb-probe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 8117,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ],
+        "outboundRules": [
+          {
+            "name": "ob-v6",
+            "properties": {
+              "allocatedOutboundPorts": 8192,
+              "protocol": "All",
+              "idleTimeoutInMinutes": 4,
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'loadBalancer', 'LBBAP-v6')]"
+              },
+              "frontendIPConfigurations": [
+                {
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIpConfigurations', 'loadBalancer', 'LB-v6')]"
+                }
+              ]
             }
           }
         ]
       },
-      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
     },
     {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
-      "dependsOn": [
-        "[coalesce(resourceId('Microsoft.Resources/deployments/', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments/', 'networkExistingSetup'))]"
-      ],
+      "name": "[variables('nic1Name')]",
       "location": "[variables('location')]",
-      "name": "[variables('nic2Name')]",
+      "dependsOn": [
+        "[variables('networkDependency')]",
+        "[variables('publicIPAddressId')]",
+        "[resourceId('Microsoft.Network/loadBalancers','loadBalancer')]"
+      ],
       "properties": {
         "enableIPForwarding": true,
         "enableAcceleratedNetworking": true,
-        "ipConfigurations": [
-          {
-            "name": "ipconfig2",
-            "properties": {
-              "privateIPAddress": "[parameters('Subnet2StartAddress')]",
-              "privateIPAllocationMethod": "Static",
-              "subnet": {
-                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets/', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
-              }
-            }
-          }
-        ]
+        "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
+        "ipConfigurations": "[variables('nic1IpConfigurations')]"
+      },
+      "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('nic2Name')]",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('networkDependency')]"
+      ],
+      "properties": {
+        "enableIPForwarding": true,
+        "enableAcceleratedNetworking": true,
+        "ipConfigurations": "[variables('nic2IpConfigurations')]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
@@ -1479,7 +1720,7 @@
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[if(equals(variables('customMetrics'), 'yes'), variables('identity'), json('null'))]",
       "properties": {
-        "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
+        "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), parameters('virtualNetworkAddressPrefix'), reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
         "diagnosticsProfile": {
           "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-05-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
         },
@@ -1506,7 +1747,7 @@
           "adminPassword": "[parameters('adminPassword')]",
           "adminUsername": "[concat('not','used')]",
           "computerName": "[toLower(parameters('vmName'))]",
-          "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefix.value, reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
+          "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), parameters('virtualNetworkAddressPrefix'), reference('networkExistingSetup').outputs.vnetAddressPrefix.value), '\"', '\n' ))]",
           "linuxConfiguration": "[variables('linuxConfiguration')]"
         },
         "storageProfile": {
@@ -1544,6 +1785,11 @@
     "GatewayIPAddr": {
       "type": "string",
       "value": "[reference(variables('publicIPAddressId')).IpAddress]"
+    },
+    "GatewayIPv6Addr": {
+       "condition": "[parameters('enableIpv6')]",
+        "type": "string",
+        "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressNameV6'))).ipAddress]"
     },
     "GatewayFQDN": {
       "type": "string",

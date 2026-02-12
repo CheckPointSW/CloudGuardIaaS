@@ -1,0 +1,189 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+        "type": "string"
+    },
+    "virtualNetworkName": {
+        "type": "string", "defaultValue": "vnet" 
+    },
+    "virtualNetworkAddressPrefixes": {
+        "type": "array",
+        "metadata": {
+            "description": "(Dual-stack) IPv4 address prefixes array for the virtual network"
+        }
+    },
+    "virtualNetworkAddressPrefixV6": {
+        "type": "string",
+        "defaultValue": "ace:cab:deca::/48",
+        "metadata": {
+            "description": "(Dual-stack) IPv6 virtual network prefix (single CIDR)" 
+        }
+    },
+    "Subnet1Name": {
+        "type": "string",
+        "defaultValue": "Frontend",
+        "metadata": {
+            "description": "The name of the 1st subnet" 
+        }
+    },
+    "Subnet1Prefix": {
+        "type": "string",
+        "defaultValue": "10.0.1.0/24",
+        "metadata": {
+            "description": "IPv4 address prefix of the 1st subnet" 
+        }
+    },
+    "Subnet1PrefixV6": {
+        "type": "string",
+        "defaultValue": "ace:cab:deca:deed::/64",
+        "metadata": {
+            "description": "IPv6 address prefix of the 1st subnet" 
+        }
+    },
+    "vmName": {
+        "type": "string",
+        "defaultValue": "[concat(resourceGroup().name, '-vnet')]" 
+    },
+    "deployNsg": {
+        "type": "bool",
+        "defaultValue": false 
+    },
+    "NewNsgName": {
+        "type": "string",
+        "defaultValue": "[concat(parameters('vmName'), '-nsg')]" 
+    },
+    "deployRouteTable": {
+        "type": "bool",
+        "defaultValue": false 
+    },
+    "deployGWLB": {
+        "type": "bool",
+        "defaultValue": false 
+    },
+    "tagsByResource": {
+        "type": "object",
+        "defaultValue": {} 
+    }
+  },
+  "variables": {
+        "localSubnetRouteV4": [
+            {
+                "name": "Local-Subnet",
+                "properties": {
+                    "addressPrefix": "[parameters('subnet1Prefix')]",
+                    "nextHopType": "VnetLocal"
+                }
+            },
+            {
+                "name": "To-Vnet",
+                "properties": {
+                    "addressPrefix": "[parameters('virtualNetworkAddressPrefixes')[0]]",
+                    "nextHopType": "None"
+                }
+            }
+        ],
+        "localSubnetRouteV6": [
+            {
+                "name": "Local-Subnet-V6",
+                "properties": {
+                    "addressPrefix": "[parameters('subnet1PrefixV6')]",
+                    "nextHopType": "VnetLocal"
+                }
+            },
+            {
+                "name": "To-Vnet-V6",
+                "properties": {
+                    "addressPrefix": "[parameters('virtualNetworkAddressPrefixV6')]",
+                    "nextHopType": "None"
+                }
+            }
+        ],
+        "routesArray": "[concat(variables('localSubnetRouteV4'), variables('localSubnetRouteV6'))]",
+    "nsgProperties": {
+        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]" 
+    },
+    "routeTableID": "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
+    "routeTableProperties": {
+        "id": "[variables('routeTableID')]" 
+    },
+    "deployGWLBVar": "[parameters('deployGWLB')]",
+    "addressPrefixesUnion": "[union(parameters('virtualNetworkAddressPrefixes'), createArray(parameters('virtualNetworkAddressPrefixV6')))]",
+    "subnet1AddressPrefixes": "[createArray(parameters('subnet1Prefix'), parameters('subnet1PrefixV6'))]",
+    "vnetProperties": {
+        "addressSpace": {
+            "addressPrefixes": "[variables('addressPrefixesUnion')]" 
+        },
+        "subnets": [
+            {
+            "name": "[parameters('subnet1Name')]",
+            "properties": {
+                "addressPrefixes": "[variables('subnet1AddressPrefixes')]",
+                "routeTable": "[if(and(parameters('deployRouteTable'), variables('deployGWLBVar')), variables('routeTableProperties'), json('null'))]"
+            }}
+        ]
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/routeTables",
+      "condition": "[and(parameters('deployRouteTable'), variables('deployGWLBVar'))]",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('subnet1Name')]",
+      "properties": {
+        "routes": "[variables('routesArray')]" 
+    },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/routeTables'), parameters('tagsByResource')['Microsoft.Network/routeTables'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('virtualNetworkName')]",
+      "dependsOn": [ "[variables('routeTableID')]" ],
+      "properties": "[variables('vnetProperties')]",
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/virtualNetworks'), parameters('tagsByResource')['Microsoft.Network/virtualNetworks'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "condition": "[parameters('deployNsg')]",
+      "apiVersion": "2020-06-01",
+      "location": "[parameters('location')]",
+      "name": "[parameters('NewNsgName')]",
+      "properties": {
+        "securityRules": [
+            {
+                "name": "AllowAllInBound",
+                "properties": {
+                    "description": "Allow all inbound",
+                    "protocol": "*",
+                    "sourcePortRange": "*",
+                    "destinationPortRange": "*",
+                    "sourceAddressPrefix": "*",
+                    "destinationAddressPrefix": "*",
+                    "access": "Allow",
+                    "priority": 100,
+                    "direction": "Inbound"
+                    }
+            } 
+        ]},
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+    }
+  ],
+  "outputs": {
+    "vnetId": {
+        "type": "string",
+        "value": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]" 
+    },
+    "vnetAddressPrefix": {
+        "type": "string",
+        "value": "[parameters('virtualNetworkAddressPrefixes')[0]]" 
+    },
+    "nsgProperties": {
+        "type": "object",
+        "value": "[variables('nsgProperties')]" 
+    }
+  }
+}
