@@ -88,6 +88,10 @@
                 {
                   "label": "R82",
                   "value": "R82"
+                },
+                {
+                  "label": "R82.10",
+                  "value": "R82.10"
                 }
               ]
             }
@@ -205,6 +209,35 @@
             "count": 1
           },
           {
+            "name": "R8210vmSizeUiBYOL",
+            "type": "Microsoft.Compute.SizeSelector",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82.10'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
+            "label": "Virtual machine size",
+            "toolTip": "The VM size. Minimum of 16 cores and 64 GB RAM is required.",
+            "recommendedSizes": [
+              "Standard_D4ds_v4",
+              "Standard_D4d_v4"
+            ],
+            "constraints": {
+              "excludedSizes": [
+                "Standard_A1_v2",
+                "Standard_D1_v2",
+                "Standard_DS1_v2",
+                "Standard_F1",
+                "Standard_F1s",
+                "Standard_G1",
+                "Standard_GS1"
+              ]
+            },
+            "osPlatform": "Linux",
+            "imageReference": {
+              "publisher": "1740992136172",
+              "offer": "check-point-cg-r8210",
+              "sku": "mgmt-byol"
+            },
+            "count": 1
+          },
+          {
             "name": "managementGUIClientNetwork",
             "type": "Microsoft.Common.TextBox",
             "label": "Allow SmartConsole connections from these networks",
@@ -296,7 +329,7 @@
             }
           },
           {
-            "visible": "[bool(basics('auth').sshPublicKey)]",
+             "visible": "[bool(basics('auth').sshPublicKey)]",
             "name": "EnableSerialConsolePassword",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable Serial console password",
@@ -625,6 +658,35 @@
             "visible": "[steps('network').NSG]"
           },
           {
+            "name": "storageAccountDeployMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Storage Account Deployment Mode",
+            "toolTip": "Select your preferred Storage Account deployment mode, New to a new Storage Account, Existing to an existing Storage Account, Managed to managed Storage Account, None to deploy without a Storage Account",
+            "defaultValue": "New",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "New",
+                  "value": "New"
+                },
+                {
+                  "label": "Existing",
+                  "value": "Existing"
+                },
+                {
+                  "label": "Managed",
+                  "value": "Managed"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
             "name": "addStorageAccountIpRules",
             "type": "Microsoft.Common.OptionsGroup",
             "defaultValue": "Network access from all networks",
@@ -641,9 +703,48 @@
                   "value": true
                 }
               ],
-              "required": true
+              "required": "[equals(steps('network').storageAccountDeployMode, 'New')]"
             },
-            "visible": true
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'New')]"
+          },
+          {
+            "name": "existingStorageAccount",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Storage Account",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing Storage Account",
+            "resourceType": "Microsoft.Storage/storageAccounts",
+            "constraints": {
+              "required": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+            },
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+          },
+          {
+            "name": "infoExistingStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
+            "options": {
+              "icon": "Info",
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+            }
+          },
+          {
+            "name": "infoManagedStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Managed')]",
+            "options": {
+              "icon": "Info",
+              "text": "Azure will use a managed Storage Account for the deployment, no additional configuration is required."
+            }
+          },
+          {
+            "name": "warningNoneStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
+            "options": {
+              "icon": "Warning",
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+            }
           }
         ]
       },
@@ -684,7 +785,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('gatewayNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R82vmSizeUiBYOL)]",
+      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R82vmSizeUiBYOL, steps('chkp').R8210vmSizeUiBYOL)]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "Subnet1Name": "[steps('network').virtualNetwork.subnets.subnet1.name]",
@@ -705,8 +806,10 @@
       "tagsByResource": "[steps('tags').tagsByResource]",
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
-      "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "NewNsgName": "[steps('network').NSGName]",      
+      "storageAccountDeployMode": "[steps('network').storageAccountDeployMode]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]"
     }
