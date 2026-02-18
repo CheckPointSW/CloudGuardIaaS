@@ -31,7 +31,8 @@ In order to check the template version, please refer to [sk125252](https://suppo
 
 | Template Version | Description                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| 20260208         | Add IPv6 support via IPMode variable: "IPv4", "DualStack", "IPv6" (coming soon)                               |
+| 20260216         | Dual-stack support for standalone solution.                                                                   |
+| 20260205         | Add IPv6 support via IPMode variable: "IPv4", "DualStack", "IPv6" (coming soon)                               |
 | 20240704         | - R80.40 version deprecation.<br/>- R81 version deprecation.                                                  |
 | 20240519         | Add support for requiring use instance metadata service version 2 (IMDSv2) only                               |
 | 20231113         | Stability fixes.                                                                                              |

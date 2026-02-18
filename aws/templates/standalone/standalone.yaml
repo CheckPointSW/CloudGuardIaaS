@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (20260101)
+  Security Gateway & Management (Standalone) instance into an existing VPC (20260216)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -22,6 +22,7 @@ Metadata:
         Parameters:
           - InternalRouteTable
           - StandaloneName
+          - IPMode
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -55,8 +56,10 @@ Metadata:
         default: Standalone Instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       AllocatePublicAddress:
-        default: Allocate an Elastic IP
+        default: Allocate an Elastic IPv4 address (Irrelevant for IPv6 only mode)
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -342,6 +345,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  IPMode:
+    Description: Specifies the IP mode for the Standalone and AWS resources.
+    Type: String
+    AllowedValues:
+      - IPv4
+      - DualStack
+    Default: IPv4
   VolumeSize:
     Type: Number
     MinValue: 100
@@ -418,7 +428,7 @@ Parameters:
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -453,31 +463,36 @@ Parameters:
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
   AdminCIDR:
-    Description: Allow web, SSH, and graphical clients only from this network to communicate.
-      with the Management Server.
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR).
     Type: String
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management.
-      Server. (optional)
+    Description: Allow gateways only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR) (optional).
     Type: String
-    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
 Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
-  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
   IsBYOL: !Equals [!Select [1, !Split ['-', !Ref StandaloneVersion]], 'BYOL']
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  IsIPv4Enabled: !Not [!Equals [!Ref IPMode, "IPv6"]]
+  EnableIPv4RouteTable:
+    !And [!Condition IsIPv4Enabled, !Condition ProvidedRouteTable]
+  EnableIPv6RouteTable:
+    !And [!Condition IsIPv6Enabled, !Condition ProvidedRouteTable]
+  AllocatePublicIPv4:
+    !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
 Resources:
   ReadyHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Properties: {}
   ReadyCondition:
     Type: AWS::CloudFormation::WaitCondition
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     DependsOn: StandaloneInstance
     Properties:
       Handle: !Ref ReadyHandle
@@ -528,6 +543,7 @@ Resources:
       GroupSet:
         - !Ref PermissiveSecurityGroup
       SubnetId: !Ref PublicSubnet
+      Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   InternalNetworkInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -542,6 +558,7 @@ Resources:
       GroupSet:
         - !Ref PermissiveSecurityGroup
       SubnetId: !Ref PrivateSubnet
+      Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -554,13 +571,28 @@ Resources:
       GroupDescription: Permissive security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        - IpProtocol: -1
-          CidrIp: 0.0.0.0/0
+        - !If
+          - IsIPv4Enabled
+          - IpProtocol: -1
+            CidrIp: 0.0.0.0/0
+          - !Ref "AWS::NoValue"
+        - !If
+          - IsIPv6Enabled
+          - IpProtocol: -1
+            CidrIpv6: ::/0
+          - !Ref "AWS::NoValue"
   InternalDefaultRoute:
     Type: AWS::EC2::Route
-    Condition: ProvidedRouteTable
+    Condition: EnableIPv4RouteTable
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
+      NetworkInterfaceId: !Ref InternalNetworkInterface
+      RouteTableId: !Ref InternalRouteTable
+  InternalDefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: EnableIPv6RouteTable
+    Properties:
+      DestinationIpv6CidrBlock: "::/0"
       NetworkInterfaceId: !Ref InternalNetworkInterface
       RouteTableId: !Ref InternalRouteTable
   StandaloneInstance:
@@ -606,37 +638,41 @@ Resources:
               - 'runcmd:'
               - '  - |'
               - '    set -e'
-              - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; eip=${AllocatePublicAddress} ; admin_subnet=${AdminCIDR}'
-              - !If [ AllocateAddress, !Sub '    wait_handle=''${ReadyHandle}''',!Ref 'AWS::NoValue' ]
+              - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR}'
+              - !If
+                    - IsIPv6Enabled
+                    - !If [ IsIPv4Enabled, "    template_name=\"standalone_dual_stack\"", "    template_name=\"standalone_ipv6\"" ]
+                    - "    template_name=\"standalone\""
+              - !If [ AllocatePublicIPv4, !Sub '    wait_handle=''${ReadyHandle}'' ; eip=${AllocatePublicAddress}', '    eip=false']
               - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"' ] ]
               - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"' ] ]
               - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"' ] ]
               - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref StandaloneVersion ] ] } ]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"standalone\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Properties:
       Domain: vpc
   AddressAssoc:
     Type: AWS::EC2::EIPAssociation
     DependsOn: StandaloneInstance
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Properties:
       NetworkInterfaceId: !Ref ExternalNetworkInterface
       AllocationId: !GetAtt PublicAddress.AllocationId
       PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
 Outputs:
   PublicAddress:
-    Condition: AllocateAddress
-    Description: The public address of the Check Point instance.
+    Condition: AllocatePublicIPv4
+    Description: The public IPv4 address of the Check Point instance.
     Value: !Ref PublicAddress
   SSH:
-    Condition: AllocateAddress
-    Description: SSH command to the Check Point instance.
+    Condition: AllocatePublicIPv4
+    Description: SSH command to the Check Point instance (IPv4).
     Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
   URL:
-    Condition: AllocateAddress
-    Description: URL to the portal.
-    Value: !Join ['', ['https://', !Ref PublicAddress ]]
+    Condition: AllocatePublicIPv4
+    Description: URL to the portal (IPv4).
+    Value: !Join ['', ['https://', !Ref PublicAddress]]
