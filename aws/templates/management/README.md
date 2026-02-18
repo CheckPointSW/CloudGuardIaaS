@@ -25,7 +25,6 @@ In order to check the template version, please refer to [sk125252](https://suppo
 
 | Template Version | Description                                                                                                   |
 | ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| 20260302         | Phone home feature removal.                                                                                   |
 | 20260216         | Dual-stack support for standalone solution.                                                                   |
 | 20260205         | Add IPv6 support via IPMode variable: "IPv4" and "DualStack"                                                  |
 | 20240704         | - R80.40 version deprecation.<br/>- R81 version deprecation.                                                  |

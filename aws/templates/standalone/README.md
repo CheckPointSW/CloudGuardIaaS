@@ -31,8 +31,7 @@ In order to check the template version, please refer to [sk116585](https://suppo
 
 | Template Version | Description                                                                                                      |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-| 20260302         | Phone home feature removal.                                                                                      |
-| 20260216         | Dual-stack support for standalone solution via IPMode variable.                                                  |
+| 20260216         | Dual-stack support for standalone solution.                                                                      |
 | 20240704         | - R80.40 version deprecation.<br/>- R81 version deprecation.                                                     |
 | 20240519         | Add support for requiring use instance metadata service version 2 (IMDSv2) only                                  |
 | 20231113         | - Stability fixes.<br/>- Add support for BYOL license type for Standalone.                                       |
