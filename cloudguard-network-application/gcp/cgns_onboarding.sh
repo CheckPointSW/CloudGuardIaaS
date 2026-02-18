@@ -55,6 +55,7 @@ GCP_NSI_PRMISSIONS=(
   "compute.instanceTemplates.list"
   "compute.instanceTemplates.useReadOnly"
   "compute.instances.create"
+  "compute.instances.setLabels"
   "compute.instances.setMetadata"
   "compute.instances.setTags"
   "compute.instances.get"
