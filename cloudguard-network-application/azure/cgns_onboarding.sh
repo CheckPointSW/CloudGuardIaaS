@@ -319,7 +319,7 @@ rollback() {
 rollback_delete_customer_app() {
   az_wrapper ad app list --filter "displayName eq '$app_name'" --query "[].appId" -o tsv
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "Failed to list applications with the name: $app_name. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 
@@ -341,7 +341,7 @@ rollback_delete_customer_app() {
 
   az_wrapper ad app delete --id "$application_id"
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "\nFailed to delete application: $app_name, App ID: $application_id."
   fi
 
@@ -410,7 +410,7 @@ rollback_delete_role_assignments(){
   local space_separated_role_assignments_ids
 
   az_wrapper role assignment list --scope "$onboarding_scope" --query "[?principalName=='$app_to_delete']" -o json
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     yellow "\nFailed to list role assignments for application ID: $app_to_delete. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 
@@ -420,7 +420,7 @@ rollback_delete_role_assignments(){
 
   lightblue "\nDeleting role assignments"
   az_wrapper role assignment delete --ids "$space_separated_role_assignments_ids"
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     yellow "\nFailed to delete role assignments for application ID: $app_to_delete. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 }
@@ -492,7 +492,7 @@ validate_user_permissions() {
   local userPrincipalName
   az_wrapper ad signed-in-user show --query "userPrincipalName" --output tsv
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "Failed to get the signed-in user's principal name. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 
@@ -504,7 +504,7 @@ validate_user_permissions() {
   local userRoleAssignments
   az_wrapper role assignment list --assignee "$userPrincipalName" --include-inherited --include-groups --scope "$scope_type"
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "Failed to list role assignments for user: $userPrincipalName. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 
@@ -656,7 +656,7 @@ create_cloudguard_app_registration() {
     az_wrapper ad sp create-for-rbac -n "$app_name" --role "Reader" --scopes "$onboarding_scope" 2>/dev/null
     sp_info="$AzOutput"
 
-    if [ $AzRetVal -ne 0 ]; then
+    if [ "$AzRetVal" -ne 0 ]; then
       exit_with_error "Failed to create app registration with role Reader. Error from Azure: \n$AzOutput"
     fi
 
@@ -667,7 +667,7 @@ create_cloudguard_app_registration() {
 
   az_wrapper ad sp show --id "$application_id" --query id --output tsv
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "Failed to fetch service principal id for application: $application_id. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
   sp_id="$AzOutput"
@@ -684,7 +684,7 @@ create_service_principal_for_multi_tenant_app() {
     # create service principal for given application id
     az_wrapper ad sp create --id "$multi_tenant_app_id"
 
-    if [ $AzRetVal -ne 0 ]; then
+    if [ "$AzRetVal" -ne 0 ]; then
       exit_with_error "Failed to create service principal for application: $multi_tenant_app_id. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
     fi
 
@@ -702,7 +702,7 @@ service_principal_doesnt_exists() {
   az_wrapper ad sp show --id "$app_id" --query id --output tsv
   sp_id="$AzOutput"
 
-  if [ $AzRetVal -ne 0 ] || [ -z "$sp_id" ]; then
+  if [ "$AzRetVal" -ne 0 ] || [ -z "$sp_id" ]; then
     lightblue "Service principal doesn't exists for application $app_id"
     return 0
   fi
@@ -752,7 +752,7 @@ create_role_assignments_for_cloudguard_app() {
     # fetch service principal id if it has not been set yet
     az_wrapper ad sp show --id "$app_id" --query id --output tsv
 
-    if [ $AzRetVal -ne 0 ]; then
+    if [ "$AzRetVal" -ne 0 ]; then
       exit_with_error "Failed to fetch service principal id for application: $app_id. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
     fi
 
@@ -790,7 +790,7 @@ app_add_role_assignment_if_needed() {
   local role_assignment_id
   az_wrapper role assignment list --assignee "$app_id" --role "$role" --scope "$scope"
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     exit_with_error "Failed to list role assignments for application: $app_id. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
 
@@ -802,7 +802,7 @@ app_add_role_assignment_if_needed() {
     # role assignment does not exists, create it
     lightblue "\nCreating '$role' role assignment for app '$app_id'"
     az_wrapper role assignment create --assignee "$app_id" --role "$role" --scope "$scope"
-    if [ $AzRetVal -ne 0 ]; then
+    if [ "$AzRetVal" -ne 0 ]; then
       exit_with_error "Failed to create $role role assignment for application:$app_id. Error from Azure: \n$AzOutput"
     fi
   else
@@ -816,7 +816,7 @@ app_add_role_assignment_if_needed() {
 print_onboarding_parameters() {
   az_wrapper account show --query "tenantId" -o tsv
 
-  if [ $AzRetVal -ne 0 ]; then
+  if [ "$AzRetVal" -ne 0 ]; then
     yellow "Failed to get tenant id. $NECESSARY_PERMISSIONS_STR. Error from Azure: \n$AzOutput"
   fi
   tenant_id="$AzOutput"

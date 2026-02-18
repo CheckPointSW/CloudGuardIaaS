@@ -173,7 +173,7 @@ enable_api_services() {
   for service in "${GCP_API_SERVICES[@]}"; do
     green "Enabling service $service"
     gcloud_wrapper services enable "$service" --project "$service_account_project_id"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       yellow "\nWarning: Failed to enable service $service. Error from Gcloud: \n$GcloudOutput. Continuing..."
     fi
   done
@@ -343,7 +343,7 @@ get_scope_iam_policy() {
     gcloud_wrapper projects get-iam-policy "$scopeIdVar" --format=json
   fi
 
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failed to get IAM policy for $scopeVar $scopeIdVar. Error from Gcloud: \n$GcloudOutput"
   fi
 }
@@ -351,7 +351,7 @@ get_scope_iam_policy() {
 get_organization_scope_iam_policy() {
   # Get the IAM policy for the specified scope
   gcloud_wrapper organizations get-iam-policy "$organization_id" --format=json
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failed to get IAM policy for $scopeVar $scopeIdVar. Error from Gcloud: \n$GcloudOutput"
   fi
 }
@@ -388,7 +388,7 @@ create_project_custom_role_for_nsi() {
   # Check if the role already exists
   gcloud_wrapper iam roles describe "$role_name" --project="$project_id" --format=json
   # Check if the role exists and is not deleted
-  if [ $GcloudRetVal -eq 0 ]; then
+  if [ "$GcloudRetVal" -eq 0 ]; then
     local is_deleted
     is_deleted=$(echo "$GcloudOutput" | jq -r '.deleted // false')
     if [ "$is_deleted" = "true" ]; then
@@ -397,14 +397,14 @@ create_project_custom_role_for_nsi() {
       yellow "Custom role $role_name exists but is in deleted state. Will undelete it."
     fi
   fi
-  if [ $GcloudRetVal -eq 0 ]; then
+  if [ "$GcloudRetVal" -eq 0 ]; then
     yellow "Custom role $role_name already exists in project $project_id. Skipping creation."
     return 0
   fi
   if [ "$is_deleted" = "true" ]; then
     # Undelete the role if it was previously deleted
     gcloud_wrapper iam roles undelete "$role_name" --project="$project_id"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to undelete custom role $role_name. Error from Gcloud: \n$GcloudOutput"
     fi
     green "\nUndeleting custom role $role_name"
@@ -412,7 +412,7 @@ create_project_custom_role_for_nsi() {
   fi
   # Create a custom role with the specified permissions
   gcloud_wrapper iam roles create "$role_name" --project="$project_id" --title="$role_name" --permissions="$permissions" --description="Custom role for NSI onboarding"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failed to create custom role $role_name. Error from Gcloud: \n$GcloudOutput"
   fi
   green "\nCreating custom role $role_name with permissions: $permissions"
@@ -426,7 +426,7 @@ create_organization_custom_role_for_nsi() {
   # Check if the role already exists
   gcloud_wrapper iam roles describe "$role_name" --organization="$organization_id" --format=json
   # Check if the role exists and is not deleted
-  if [ $GcloudRetVal -eq 0 ]; then
+  if [ "$GcloudRetVal" -eq 0 ]; then
     local is_deleted
     is_deleted=$(echo "$GcloudOutput" | jq -r '.deleted // false')
     if [ "$is_deleted" = "true" ]; then
@@ -435,14 +435,14 @@ create_organization_custom_role_for_nsi() {
       yellow "Custom role $role_name exists but is in deleted state. Will undelete it."
     fi
   fi
-  if [ $GcloudRetVal -eq 0 ]; then
+  if [ "$GcloudRetVal" -eq 0 ]; then
     yellow "Custom role $role_name already exists in organization $organization_id. Skipping creation."
     return 0
   fi
   if [ "$is_deleted" = "true" ]; then
     # Undelete the role if it was previously deleted
     gcloud_wrapper iam roles undelete "$role_name" --organization="$organization_id"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to undelete custom role $role_name. Error from Gcloud: \n$GcloudOutput"
     fi
     green "\nUndeleting custom role $role_name"
@@ -450,7 +450,7 @@ create_organization_custom_role_for_nsi() {
   fi
   # Create a custom role with the specified permissions
   gcloud_wrapper iam roles create "$role_name" --organization="$organization_id" --title="$role_name" --permissions="$permissions" --description="Custom role for NSI onboarding"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failed to create custom role $role_name. Error from Gcloud: \n$GcloudOutput"
   fi
   green "\nCreating custom role $role_name with permissions: $permissions"
@@ -482,7 +482,7 @@ create_organization_custom_role_for_nsi() {
 get_project_organization_id() {
   if [ -n "$project_id" ]; then
     gcloud_wrapper projects get-ancestors "$project_id" --format json
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to get organization ID for project $project_id. Error from Gcloud: \n$GcloudOutput"
     fi
     organization_id=$(echo "$GcloudOutput" | jq -r '.[] | select(.type == "organization") | .id')
@@ -534,7 +534,7 @@ add_role_assignment_if_needed() {
     if [ "$scopeVar" == "$PROJECT_SCOPE" ]; then
         gcloud_wrapper projects add-iam-policy-binding "$scopeIdVar" --member "serviceAccount:$service_account_email" --role "$role" --condition=None
     fi
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to assign role $role to service account $service_account_email for $scopeVar: $scopeIdVar. Error from Gcloud: \n$GcloudOutput"
     fi
   fi
@@ -550,7 +550,7 @@ add_role_assignment_organization_if_needed() {
     green "Assigning role $role to service account $service_account_email for organization/$organization_id scope"
     gcloud_wrapper organizations add-iam-policy-binding "organizations/$organization_id" --member "serviceAccount:$service_account_email" --role "$role" --condition=None
 
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to assign role $role to service account $service_account_email for $scopeVar: $scopeIdVar. Error from Gcloud: \n$GcloudOutput"
     fi
   fi
@@ -622,13 +622,13 @@ set_service_account_email() {
 ###############################################################
 create_service_account_if_required() {
     gcloud_wrapper iam service-accounts list --project="$service_account_project_id" --filter="email:$service_account_email" --format="value(email)"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
         exit_with_error "Failed to list service accounts for project $service_account_project_id. Error from Gcloud: \n$GcloudOutput"
     fi
     if [ -z "$GcloudOutput" ]; then
         green "Service account $service_account_name does not exists, Creating service account $service_account_name"
         gcloud_wrapper iam service-accounts create "$service_account_name" --project "$service_account_project_id"
-        if [ $GcloudRetVal -ne 0 ]; then
+        if [ "$GcloudRetVal" -ne 0 ]; then
         exit_with_error "Failed to create service account $service_account_name service_account_project_id $service_account_project_id. Error from Gcloud: \n$GcloudOutput"
         fi
     else
@@ -702,15 +702,15 @@ validate_project_user_permissions() {
   local user_email="$1"
   local project_id="$2"
   gcloud_wrapper projects get-ancestors-iam-policy "$project_id" --format=json
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     gcloud_wrapper projects get-iam-policy "$project_id" --format=json
   fi
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on get-ancestors-iam-policy project $project_id. Error from Gcloud: \n$GcloudOutput"
   fi  
   local bindings
   bindings=$(echo "$GcloudOutput" | jq -r 'if type == "array" then . else [.] end | [.[] | if .bindings then .bindings else .policy.bindings end | .[] | select(.members[] | contains("user:'"$user_email"'"))]')
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on get-ancestors-iam-policy project $project_id. Error from Gcloud: \n$GcloudOutput"
   fi
   if ! role_exists_in_bindings "$OWNER_ROLE" "$bindings"; then
@@ -737,7 +737,7 @@ validate_project_user_permissions_by_projectId(){
 validate_folder_user_permissions() {
   local user_email="$1"
   gcloud_wrapper resource-manager folders get-ancestors-iam-policy "$folder_id" --flatten='policy.bindings[].members' --format=json --filter=policy.bindings.members="user:$user_email"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on resource-manager folders get-ancestors-iam-policy $folder_id. Error from Gcloud: \n$GcloudOutput"
   fi
   local bindings
@@ -752,7 +752,7 @@ validate_folder_user_permissions() {
 validate_organization_user_permissions() {
   local user_email="$1"
   gcloud_wrapper organizations get-iam-policy "$organization_id" --flatten='bindings[].members' --format=json --filter=bindings.members="user:$user_email"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on get-iam-policy organization $organization_id. Error from Gcloud: \n$GcloudOutput"
   fi
   local bindings
@@ -771,7 +771,7 @@ validate_organization_user_permissions() {
 
 validate_user_permissions() {
   gcloud_wrapper config get-value account
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on getting currently active google cloud account that the gcloud CLI is using for authentication and API calls. Error from Gcloud: \n$GcloudOutput"
   fi
   local user_email
@@ -863,7 +863,7 @@ remove_role_assignment_if_needed() {
     else # organization scope
         gcloud_wrapper organizations remove-iam-policy-binding "$scopeIdVar" --member "serviceAccount:$service_account_email" --role "$role"
     fi
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to remove role $role from service account $service_account_email for $scopeVar: $scopeIdVar. Error from Gcloud: \n$GcloudOutput"
     fi
   fi
@@ -876,7 +876,7 @@ remove_organization_role_assignment_if_needed() {
   if ! is_role_unassigned "$role" "$iam_policy"; then
     green "Removing $role role assignment from service account $service_account_email"
     gcloud_wrapper organizations remove-iam-policy-binding "$organization_id" --member "serviceAccount:$service_account_email" --role "$role"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to remove role $role from service account $service_account_email for organization: $organization_id. Error from Gcloud: \n$GcloudOutput"
     fi
   fi
@@ -900,7 +900,7 @@ delete_custom_role() {
   fi
   
   gcloud_wrapper iam roles describe "$role_name" "$scope_flag"="$scope_id" --format=json
-  if [ $GcloudRetVal -eq 0 ]; then
+  if [ "$GcloudRetVal" -eq 0 ]; then
     # Check if the role is already in a deleted state
     local is_deleted
     is_deleted=$(echo "$GcloudOutput" | jq -r '.deleted // false')
@@ -910,7 +910,7 @@ delete_custom_role() {
     else
       green "\nDeleting $scope_type-level custom role: $role_name"
       gcloud_wrapper iam roles delete "$role_name" "$scope_flag"="$scope_id"
-      if [ $GcloudRetVal -ne 0 ]; then
+      if [ "$GcloudRetVal" -ne 0 ]; then
         yellow "Warning: Failed to delete custom role $role_name from $scope_type $scope_id. Error from Gcloud: \n$GcloudOutput"
       else
         green "Successfully deleted $scope_type-level custom role: $role_name"
@@ -940,7 +940,7 @@ delete_custom_roles() {
 delete_service_account() {
   # Check if the service account exists before attempting to delete it
   gcloud_wrapper iam service-accounts list --project="$service_account_project_id" --filter="email:$service_account_email" --format="value(email)"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failed to check if service account $service_account_email exists. Error from Gcloud: \n$GcloudOutput"
   fi
   
@@ -948,7 +948,7 @@ delete_service_account() {
   if [ -n "$GcloudOutput" ]; then
     green "\nDeleting service account $service_account_email"
     gcloud_wrapper iam service-accounts delete "$service_account_email" --project "$service_account_project_id"
-    if [ $GcloudRetVal -ne 0 ]; then
+    if [ "$GcloudRetVal" -ne 0 ]; then
       exit_with_error "Failed to delete service account $service_account_email. Error from Gcloud: \n$GcloudOutput"
     fi
     green "Service account $service_account_email deleted successfully"
@@ -1004,7 +1004,7 @@ rollback() {
 
 create_service_account_key() {
   gcloud_wrapper iam service-accounts keys create "$service_account_name.json" --iam-account "$service_account_email" --project "$service_account_project_id"
-  if [ $GcloudRetVal -ne 0 ]; then
+  if [ "$GcloudRetVal" -ne 0 ]; then
     exit_with_error "Failure on iam service-accounts keys create $service_account_name.json for $service_account_email and project $service_account_project_id. Error from Gcloud: \n$GcloudOutput"
   fi
 
