@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (20260507)
+  Security Gateway & Management (Standalone) instance into an existing VPC (20260216)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -474,12 +474,6 @@ Parameters:
     Description: Allow gateways only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR) (optional).
     Type: String
     AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
-  ExistingSecurityGroup:
-    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
-    Type: String
-    Default: ''
-    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
-    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
@@ -650,12 +644,16 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR}'
-              - !If [IsIPv6Enabled, !If [IsIPv4Enabled, '    template_name="standalone_dual_stack"', '    template_name="standalone_ipv6"'], '    template_name="standalone"']
-              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"']]
-              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"']]
-              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"']]
-              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref StandaloneVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - !If
+                    - IsIPv6Enabled
+                    - !If [ IsIPv4Enabled, "    template_name=\"standalone_dual_stack\"", "    template_name=\"standalone_ipv6\"" ]
+                    - "    template_name=\"standalone\""
+              - !If [ AllocatePublicIPv4, !Sub '    wait_handle=''${ReadyHandle}'' ; eip=${AllocatePublicAddress}', '    eip=false']
+              - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"' ] ]
+              - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"' ] ]
+              - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"' ] ]
+              - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref StandaloneVersion ] ] } ]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
