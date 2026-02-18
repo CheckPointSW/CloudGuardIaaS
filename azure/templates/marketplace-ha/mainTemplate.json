@@ -1836,7 +1836,7 @@
         "UserData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
         "availabilitySet": "[if(and(not(variables('useAZ')), equals(parameters('extendedZone'), 'None')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
-          "bootDiagnostics": "[if(equals(parameters('extendedZone'), 'None'), if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2025-06-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2025-06-01').primaryEndpoints.blob)))), createObject('enabled', false()))]"
+          "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2025-06-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -1939,7 +1939,7 @@
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionIds')[if(greater(copyIndex(1), 2), 1, 0)]]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2025-04-01', 'Full').identity.principalId]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2024-07-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
@@ -1974,10 +1974,10 @@
             "value": "[variables('roleDefinitionIds')[copyIndex()]]"
           },
           "principalId1": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2025-04-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2024-07-01', 'Full').identity.principalId]"
           },
           "principalId2": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2025-04-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2024-07-01', 'Full').identity.principalId]"
           },
           "index": {
             "value": "[copyIndex()]"
