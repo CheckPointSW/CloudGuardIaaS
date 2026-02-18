@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (20260205)
+  Deploys a Check Point Security Gateway into an existing VPC (20260216)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -696,13 +696,17 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; hostname=${GatewayHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; token=''${GatewayToken}'''
+              - !If
+                    - IsIPv6Enabled
+                    - !If [ IsIPv4Enabled, "    template_name=\"gateway_dual_stack\"", "    template_name=\"gateway_ipv6\"" ]
+                    - "    template_name=\"gateway\""
               - !If [AllocatePublicIPv4, !Sub '    wait_handle=''${ReadyHandle}'' ; eip=${AllocatePublicAddress}', '    eip=false']
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260205\" templateName=\"gateway\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP

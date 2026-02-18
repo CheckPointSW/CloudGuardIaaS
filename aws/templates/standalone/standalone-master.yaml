@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20260101)
+  Security Gateway & Management (Standalone) instance in a new VPC (20260216)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -22,6 +22,7 @@ Metadata:
           - VPCCIDR
           - PublicSubnetCIDR
           - PrivateSubnetCIDR
+          - IPMode          
           - AllocatePublicAddress
           - VolumeSize
           - VolumeType
@@ -55,8 +56,10 @@ Metadata:
         default: Standalone Instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       AllocatePublicAddress:
-        default: Allocate an Elastic IP
+        default: Allocate an Elastic IPv4 address (Irrelevant for IPv6 only mode)
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -132,6 +135,13 @@ Parameters:
     AllowedValues:
       - true
       - false
+  IPMode:
+    Description: Specifies the IP mode for the Standalone and AWS resources.
+    Type: String
+    Default: IPv4
+    AllowedValues:
+      - IPv4
+      - DualStack
   VolumeSize:
     Type: Number
     MinValue: 100
@@ -425,7 +435,7 @@ Parameters:
     Type: String
     Default: ''
   StandaloneHostname:
-    Description: The name must not contain reserved words. For details, refer to sk40179 (optional).
+    Description: (optional)
     Type: String
     Default: ''
     AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
@@ -460,23 +470,25 @@ Parameters:
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
   AdminCIDR:
-    Description: Allow web, SSH, and graphical clients only from this network to communicate.
-      with the Management Server
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR).
     Type: String
-    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
   GatewaysAddresses:
-    Description: Allow gateways only from this network to communicate with the Management.
-      Server. (optional)
+    Description: Allow gateways only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR) (optional).
     Type: String
-    AllowedPattern: '^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2])))?$'
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
 Conditions:
-  AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  IsIPv4Enabled: !Not [!Equals [!Ref IPMode, "IPv6"]]
+  AllocatePublicIPv4:
+    !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      TemplateURL:
+        !If [IsIPv6Enabled, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
       Parameters:
         AvailabilityZones: !Ref AvailabilityZone
         NumberOfAZs: 1
@@ -485,6 +497,7 @@ Resources:
         CreatePrivateSubnets: true
         PrivateSubnet1CIDR: !Ref PrivateSubnetCIDR
         CreateAttachmentSubnets: false
+        IPMode: !Ref IPMode
   InternalRoutingTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -532,16 +545,17 @@ Resources:
         NTPSecondary: !Ref NTPSecondary
         AdminCIDR: !Ref AdminCIDR
         GatewaysAddresses: !Ref GatewaysAddresses
+        IPMode: !Ref IPMode
 Outputs:
   CheckPointInstancePublicAddress:
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Description: The public address of the Check Point instance.
     Value: !GetAtt StandaloneStack.Outputs.PublicAddress
   CheckPointInstanceSSH:
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Description: SSH command to the Check Point instance.
     Value: !GetAtt StandaloneStack.Outputs.SSH
   CheckPointInstanceURL:
-    Condition: AllocateAddress
+    Condition: AllocatePublicIPv4
     Description: URL to the portal.
     Value: !GetAtt StandaloneStack.Outputs.URL

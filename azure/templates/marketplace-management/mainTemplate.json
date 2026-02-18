@@ -1657,7 +1657,7 @@
       "properties": {
         "UserData": "[variables('customData64')]",
         "diagnosticsProfile": {
-          "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2023-05-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
+          "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2025-01-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2025-01-01').primaryEndpoints.blob))))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
