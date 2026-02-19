@@ -11,7 +11,7 @@
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
 
-# Licenses_Collector - version 6
+# Licenses_Collector - version 7
 
 usage()
 {
@@ -126,6 +126,13 @@ psql_client cpm postgres -c "select domb.name, dod.domainid, count(1) from domai
 
 log_msg "  Collecting number of all licenses into $TMPPATH (for cprlic debug)"
 psql_client cpm postgres -c "select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;" >> $TMPPATH/number_of_all_licenses.txt
+
+log_msg "  Collecting cpinfo data into $TMPPATH/cpinfo_y_all.txt"
+cpinfo -y all > $TMPPATH/cpinfo_y_all.txt 2> /dev/null
+
+log_msg "  Collecting cpvinfo data into $TMPPATH/cpvinfo_vsec_lic.txt"
+cpvinfo $MDS_FWDIR/cpm-server/mgmt_vsec_lic.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
+cpvinfo $MDS_FWDIR/cpm-server/vsec_lic_cli.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
 
 log_msg "  Compressing $TMPPATH into $OUTPUTFILE_NAME"
 tar -cvf $OUTPUTFILE_NAME $TMPPATH > /dev/null 2>&1
