@@ -566,7 +566,7 @@
   },
   "variables": {
     "resourceGroupName": "[resourceGroup().name]",
-    "templateName": "vmss-v2",
+    "templateName": "[if(parameters('enableIPv6'), 'vmss-v2_dual_stack', 'vmss-v2')]",
     "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
