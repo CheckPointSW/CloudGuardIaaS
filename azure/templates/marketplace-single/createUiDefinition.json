@@ -969,13 +969,19 @@
           },
           {
             "name": "Smart1CloudToken",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Smart-1 Cloud Token",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Smart-1 Cloud Token",
+              "confirmPassword": "Confirm Smart-1 Cloud Token"
+            },
             "toolTip": "Paste here the token copied from the Connect Gateway screen in Smart-1 Cloud portal",
             "constraints": {
               "required": true,
               "regex": "[\\S\\s]{5,}",
-              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+              "validationMessage": "Smart1Cloud Token Should contain at least 5 characters"
+            },
+            "options": {
+              "hideConfirmation": false
             },
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }

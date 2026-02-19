@@ -969,25 +969,37 @@
           },
           {
             "name": "Smart1CloudTokenA",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Smart-1 Cloud Token Member A",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Smart-1 Cloud Token Member A",
+              "confirmPassword": "Confirm Smart-1 Cloud Token Member A"
+            },
             "toolTip": "Paste here the token copied from the Connect Gateway (Member A) screen in Smart-1 Cloud portal",
             "constraints": {
               "required": true,
               "regex": "[\\S\\s]{5,}",
-              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+              "validationMessage": "Smart1Cloud Token Should contain at least 5 characters"
+            },
+            "options": {
+              "hideConfirmation": false
             },
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           },
           {
               "name": "Smart1CloudTokenB",
-              "type": "Microsoft.Common.TextBox",
-              "label": "Smart-1 Cloud Token Member B",
+              "type": "Microsoft.Common.PasswordBox",
+              "label": {
+                "password": "Smart-1 Cloud Token Member B",
+                "confirmPassword": "Confirm Smart-1 Cloud Token Member B"
+              },
               "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
               "constraints": {
                 "required": true,
                 "regex": "[\\S\\s]{5,}",
-                "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+                "validationMessage": "Smart1Cloud Token Should contain at least 5 characters"
+              },
+              "options": {
+                "hideConfirmation": false
               },
               "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }
