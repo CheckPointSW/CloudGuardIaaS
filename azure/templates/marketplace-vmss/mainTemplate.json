@@ -1595,7 +1595,7 @@
     "v6ProbeName": "[concat(variables('appName'), '-v6')]",
     "ilbV6ProbeName": "[concat(variables('ilbNameV4'), '-v6')]",
     "v6HealthProtocol": "Tcp",
-    "v6HealthPort": 443,
+    "v6HealthPort": 8117,
     "elbBEAddressPoolPropertiesV6": "[if(variables('enableIpv6'), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV6Direct')))), if(variables('deployELBv6'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbV6Name'), variables('elbV6BEAddressPoolName')))), json('null'))), json('null'))]",
     "ilbBEAddressPoolPropertiesV6": "[if(variables('enableIpv6'), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV6Direct')))), if(variables('deployILBv6'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbV6Name'), variables('ilbV6BEAddressPoolName')))), json('null'))), json('null'))]",
     "ilbV6SubnetDependency": "[variables('vnetID')]",
