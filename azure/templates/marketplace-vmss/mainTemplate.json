@@ -170,7 +170,7 @@
         "description": "Deploy the Load Balancers with floating IP"
       }
     },
-    "instanceLevelPublicIP": {
+    "instanceLevelPublicIPv4": {
       "type": "string",
       "allowedValues": [
         "no",
@@ -302,6 +302,37 @@
       },
       "defaultValue": "10.0.2.4"
     },
+    "enableIPv6": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "Enable dual-stack IPv6 (adds IPv6-only ELB and IPv6 ipConfigurations on eth0 and eth1)."
+      }
+    },
+    "virtualNetworkAddressPrefixV6": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca::/48",
+      "metadata": {
+        "description": "(Dualstack only) IPv6 address space prefix for the VNet (single CIDR)."
+      }
+    },
+    "subnet1PrefixV6": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca:deed::/64",
+      "metadata": { "description": "(Dualstack only) IPv6 prefix for subnet1." }
+    },
+    "subnet2PrefixV6": {
+      "type": "string",
+      "defaultValue": "ace:cab:deca:deee::/64",
+      "metadata": { "description": "(Dualstack only) IPv6 prefix for subnet2." }
+    },
+    "ilbFrontendIPv6Address": {
+      "type": "string",
+      "metadata": {
+      "description": "(Optional) IPv6 address for the Internal Load Balancer frontend. Leave empty to have Azure assign a dynamic address automatically; provide a value (within the Subnet2 IPv6 prefix) to allocate it statically."
+      },
+      "defaultValue": "ace:cab:deca:deee::a"
+    },
     "vnetNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
@@ -411,6 +442,15 @@
       "metadata": {
         "description": "The Internal Load Balancer distribution method"
       }
+    },
+    "ipv6AllocatedOutboundPorts": {
+      "type": "int",
+      "defaultValue": 1024,
+      "metadata": {
+        "description": "Allocated outbound SNAT ports for the IPv6 ELB outbound rule. Increase for high scale."
+      },
+      "minValue": 1024,
+      "maxValue": 64000
     },
     "deploymentMode": {
       "type": "string",
@@ -525,7 +565,6 @@
     }
   },
   "variables": {
-    "resourceGroup": "[resourceGroup()]",
     "resourceGroupName": "[resourceGroup().name]",
     "templateName": "vmss-v2",
     "templateVersion": "20240904",
@@ -1335,7 +1374,7 @@
     "storageAccountIps": "[concat(variables('SerialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
     "isBlink": true,
     "subnet2Name": "[parameters('subnet2Name')]",
-    "storageAccountName": "[concat('bootdiag', uniqueString(variables('resourceGroup').id, deployment().name))]",
+    "storageAccountName": "[concat('bootdiag', uniqueString(resourceGroup().id, deployment().name))]",
     "storageAccountType": "Standard_LRS",
     "diskSize100GB": 100,
     "additionalDiskSizeGB": "[if(contains('R8110 R8120', variables('osVersion')), 0, parameters('additionalDiskSizeGB'))]",
@@ -1429,13 +1468,16 @@
     "upgrading": "[equals(parameters('upgrading'), 'yes')]",
     "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/',parameters('_artifactsLocation'))]",
     "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
+    "networkSetupURLDualstack": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-dualstack-new.json', parameters('_artifactsLocationSasToken')))]",
+    "networkNewDeploymentName": "[if(parameters('enableIPv6'), 'networkNewSetupDualstack', 'networkNewSetup')]",
+    "networkExistingDeploymentName": "[if(parameters('enableIPv6'), 'networkExistingSetupDualstack', 'networkExistingSetup')]",
     "loadBalacerSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
     "loadBalancerSetupId": "[resourceId(variables('lbRGName'), 'Microsoft.Resources/deployments', 'loadBalancerSetup')]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), variables('resourceGroupName'), parameters('virtualNetworkExistingRGName'))]",
-    "vnetID": "[if(variables('deployNewVnet'), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', 'networkNewSetup'), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', 'networkExistingSetup'))]",
+    "vnetID": "[if(variables('deployNewVnet'), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', variables('networkNewDeploymentName')), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', variables('networkExistingDeploymentName')))]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
     "availabilityZonesLocations": [
@@ -1468,7 +1510,7 @@
       "italynorth"
     ],
     "availabilityZonesProperty": "[range(1, parameters('availabilityZonesNum'))]",
-    "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
+    "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIPv4'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
     "mgmtIpAddressType": "[split(variables('mgmtInterface'), '-')[1]]",
     "mgmtInterfaceName": "[split(variables('mgmtInterface'), '-')[0]]",
     "mgmtIPaddress": "[if(equals(variables('mgmtInterfaceName'), 'eth0'), parameters('mgmtIPaddress'), '')]",
@@ -1479,7 +1521,8 @@
       "x-chkp-management-interface": "[variables('mgmtInterfaceName')]",
       "x-chkp-topology": "eth0:external,eth1:internal",
       "x-chkp-anti-spoofing": "eth0:false,eth1:false",
-      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]"
+      "x-chkp-srcImageUri": "[parameters('sourceImageVhdUri')]",
+      "x-chkp-ip-version": "[if(variables('enableIpv6'), 'dual-stack', 'ipv4-only')]"
     },
     "uniqueTags": {
       "x-chkp-management-address": "[variables('mgmtIPaddress')]"
@@ -1516,11 +1559,398 @@
     },
     "publicIPPrefixLength": "[variables('IPv4Lengths')[parameters('IPv4Length')]]",
     "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]",
+    "upgradingForLB": "[and(variables('upgrading'), and(greater(length(parameters('elbResourceId')), 0), greater(length(parameters('ilbResourceId')), 0)))]",
     "NewNsgReference": {
       "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
-    }
+    },
+    "enableIpv6": "[parameters('enableIPv6')]",
+    "dualstackNewVnet": "[and(variables('enableIpv6'), equals(parameters('vnetNewOrExisting'), 'new'))]",
+    "appName": "[concat(parameters('vmName'), '-app-1')]",
+    "appAddressNameV4": "[variables('appName')]",
+    "appAddressIdV4": "[resourceId('Microsoft.Network/publicIPAddresses', variables('appAddressNameV4'))]",
+    "appFENameV4": "[variables('appName')]",
+    "elbNameV4": "frontend-lb",
+    "elbBEAddressPoolNameV4": "[concat(variables('elbNameV4'), '-pool')]",
+    "elbBEAddressPoolNameV6Direct": "[concat(variables('elbNameV4'), '-pool-v6')]",
+    "appProbeNameV4": "[variables('appName')]",
+    "lbHealthPortV4": 8117,
+    "ilbNameV4": "backend-lb",
+    "ilbBEAddressPoolNameV4": "[concat(variables('ilbNameV4'), '-pool')]",
+    "ilbBEAddressPoolNameV6Direct": "[concat(variables('ilbNameV4'), '-pool-v6')]",
+    "useStandaloneV6LBs": "[and(variables('enableIpv6'), not(variables('dualstackNewVnet')))]",
+    "deployELBv6": "[and(variables('useStandaloneV6LBs'), or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ELBOnly')))]",
+    "deployILBv6": "[and(variables('useStandaloneV6LBs'), or(equals(parameters('deploymentMode'),'Standard'), equals(parameters('deploymentMode'),'ILBOnly')))]",
+    "appV6AddressName": "[concat(parameters('vmName'), '-app-1-v6')]",
+    "appAddressIdV6": "[resourceId('Microsoft.Network/publicIPAddresses', variables('appV6AddressName'))]",
+    "elbV6Name": "frontend-lb-v6",
+    "elbV6FEName": "[concat(variables('appName'), '-v6')]",
+    "elbV6BEAddressPoolName": "[concat(variables('elbV6Name'), '-pool')]",
+    "ilbV6Name": "backend-lb-v6",
+    "ilbV6FEName": "[variables('ilbV6Name')]",
+    "ilbV6BEAddressPoolName": "[concat(variables('ilbV6Name'), '-pool')]",
+    "vmssDependsElbOrSetup": "[if(variables('dualstackNewVnet'), resourceId('Microsoft.Network/loadBalancers', variables('elbNameV4')), variables('loadBalancerSetupId'))]",
+    "vmssDependsIlbOrSetup": "[if(variables('dualstackNewVnet'), resourceId('Microsoft.Network/loadBalancers', variables('ilbNameV4')), variables('loadBalancerSetupId'))]",
+    "vmssDependsElbV6OrVnet": "[if(variables('deployELBv6'), resourceId('Microsoft.Network/loadBalancers', variables('elbV6Name')), variables('vnetID'))]",
+    "vmssDependsIlbV6OrVnet": "[if(variables('deployILBv6'), resourceId('Microsoft.Network/loadBalancers', variables('ilbV6Name')), variables('vnetID'))]",
+    "v6ProbeName": "[concat(variables('appName'), '-v6')]",
+    "ilbV6ProbeName": "[concat(variables('ilbNameV4'), '-v6')]",
+    "v6HealthProtocol": "Tcp",
+    "v6HealthPort": 443,
+    "elbBEAddressPoolPropertiesV6": "[if(variables('enableIpv6'), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV6Direct')))), if(variables('deployELBv6'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbV6Name'), variables('elbV6BEAddressPoolName')))), json('null'))), json('null'))]",
+    "ilbBEAddressPoolPropertiesV6": "[if(variables('enableIpv6'), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV6Direct')))), if(variables('deployILBv6'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbV6Name'), variables('ilbV6BEAddressPoolName')))), json('null'))), json('null'))]",
+    "ilbV6SubnetDependency": "[variables('vnetID')]",
+    "ilbV6LbOrVnetDependency": "[if(not(variables('dualstackNewVnet')), variables('loadBalancerSetupId'), variables('vnetID'))]",
+    "nsgResourceId": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]",
+    "nsgDependency": "[if(and(variables('dualstackNewVnet'), parameters('deployNewNSG')), variables('nsgResourceId'), variables('vnetID'))]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "condition": "[or(variables('deployELBv6'), variables('dualstackNewVnet'))]",
+      "apiVersion": "2020-06-01",
+      "location": "[variables('location')]",
+      "name": "[variables('appV6AddressName')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv6",
+        "dnsSettings": {
+          "domainNameLabel": "[toLower(concat(parameters('vmName'), '-v6-', uniquestring(resourceGroup().id, deployment().name)))]"
+        }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "condition": "[and(variables('dualstackNewVnet'), parameters('deployNewNSG'))]",
+      "apiVersion": "2020-06-01",
+      "location": "[variables('location')]",
+      "name": "[parameters('NewNsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowAllInBound",
+            "properties": {
+              "description": "Allow all inbound connections",
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkSecurityGroups'), parameters('tagsByResource')['Microsoft.Network/networkSecurityGroups'], json('{}')) ]"
+    },
+    
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "condition": "[variables('dualstackNewVnet')]",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('elbNameV4')]",
+      "location": "[variables('location')]",
+      "sku": { "name": "Standard" },
+      "dependsOn": [
+        "[variables('appAddressIdV6')]",
+        "[variables('appAddressIdV4')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          { "name": "[variables('appFENameV4')]", "properties": { "publicIPAddress": { "id": "[variables('appAddressIdV4')]" } } },
+          { "name": "[variables('elbV6FEName')]", "properties": { "publicIPAddress": { "id": "[variables('appAddressIdV6')]" } } }
+        ],
+        "backendAddressPools": [
+          { "name": "[variables('elbBEAddressPoolNameV4')]" },
+          { "name": "[variables('elbBEAddressPoolNameV6Direct')]" }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('appProbeNameV4')]",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbNameV4'), variables('appFENameV4'))]" },
+              "backendAddressPool": { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV4'))]" },
+              "probe": { "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbNameV4'), variables('appProbeNameV4'))]" },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": "[variables('enableFloatingIP')]",
+              "loadDistribution": "[parameters('appLoadDistribution')]"
+            }
+          },
+          {
+            "name": "[variables('v6ProbeName')]",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbNameV4'), variables('elbV6FEName'))]" },
+              "backendAddressPool": { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV6Direct'))]" },
+              "probe": { "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbNameV4'), variables('v6ProbeName'))]" },
+              "disableOutboundSnat": true,
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": "[variables('enableFloatingIP')]",
+              "loadDistribution": "[parameters('appLoadDistribution')]"
+            }
+          }
+        ],
+        "probes": [
+          { "name": "[variables('appProbeNameV4')]", "properties": { "protocol": "Tcp", "port": "[variables('lbHealthPortV4')]", "intervalInSeconds": 5, "numberOfProbes": 2 } },
+          { "name": "[variables('v6ProbeName')]", "properties": { "protocol": "[variables('v6HealthProtocol')]", "port": "[variables('v6HealthPort')]", "intervalInSeconds": 5, "numberOfProbes": 2 } }
+        ],
+        "outboundRules": [
+          {
+            "name": "egress-v6",
+            "properties": {
+              "allocatedOutboundPorts": "[parameters('ipv6AllocatedOutboundPorts')]",
+              "protocol": "All",
+              "frontendIPConfigurations": [ { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbNameV4'), variables('elbV6FEName'))]" } ],
+              "backendAddressPool": { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV6Direct'))]" }
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
+    },
+    
+    {
+      "type": "Microsoft.Network/publicIPAddresses",
+      "condition": "[variables('dualstackNewVnet')]",
+      "apiVersion": "2020-06-01",
+      "location": "[variables('location')]",
+      "name": "[variables('appAddressNameV4')]",
+      "sku": { "name": "Standard" },
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "publicIPAddressVersion": "IPv4",
+        "dnsSettings": { "domainNameLabel": "[concat(toLower(parameters('vmName')), '-', uniquestring(resourceGroup().id, deployment().name))]" }
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "condition": "[variables('dualstackNewVnet')]",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('ilbNameV4')]",
+      "location": "[variables('location')]",
+      "sku": { "name": "Standard" },
+      "dependsOn": [
+        "[variables('vnetID')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('ilbNameV4')]",
+            "properties": {
+              "privateIPAllocationMethod": "[if(greater(length(parameters('subnet2StartAddress')), 0), 'Static', 'Dynamic')]",
+              "privateIPAddress": "[if(greater(length(parameters('subnet2StartAddress')), 0), parameters('subnet2StartAddress'), json('null'))]",
+              "subnet": { "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('subnet2Name'))]" }
+            }
+          },
+          {
+            "name": "[concat(variables('ilbNameV4'), '-v6')]",
+            "properties": {
+              "privateIPAllocationMethod": "[if(greater(length(parameters('ilbFrontendIPv6Address')), 0), 'Static', 'Dynamic')]",
+              "privateIPAddress": "[if(greater(length(parameters('ilbFrontendIPv6Address')), 0), parameters('ilbFrontendIPv6Address'), json('null'))]",
+              "privateIPAddressVersion": "IPv6",
+              "subnet": { "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('subnet2Name'))]" }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          { "name": "[variables('ilbBEAddressPoolNameV4')]" },
+          { "name": "[variables('ilbBEAddressPoolNameV6Direct')]" }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('ilbNameV4')]",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('ilbNameV4'), variables('ilbNameV4'))]" },
+              "backendAddressPool": { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV4'))]" },
+              "probe": { "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('ilbNameV4'), variables('ilbNameV4'))]" },
+              "protocol": "All",
+              "frontendPort": 0,
+              "backendPort": 0,
+              "loadDistribution": "[parameters('ilbLoadDistribution')]",
+              "enableFloatingIP": "[variables('enableFloatingIP')]"
+            }
+          },
+          {
+            "name": "[concat(variables('ilbNameV4'), '-v6')]",
+            "properties": {
+              "frontendIPConfiguration": { "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('ilbNameV4'), concat(variables('ilbNameV4'), '-v6'))]" },
+              "backendAddressPool": { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV6Direct'))]" },
+              "probe": { "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('ilbNameV4'), variables('ilbV6ProbeName'))]" },
+              "protocol": "All",
+              "frontendPort": 0,
+              "backendPort": 0,
+              "loadDistribution": "[parameters('ilbLoadDistribution')]",
+              "enableFloatingIP": "[variables('enableFloatingIP')]",
+              "disableOutboundSnat": true
+            }
+          }
+        ],
+        "probes": [
+          { "name": "[variables('ilbNameV4')]", "properties": { "protocol": "Tcp", "port": "[variables('lbHealthPortV4')]", "intervalInSeconds": 5, "numberOfProbes": 2 } },
+          { "name": "[variables('ilbV6ProbeName')]", "properties": { "protocol": "[variables('v6HealthProtocol')]", "port": "[variables('v6HealthPort')]", "intervalInSeconds": 5, "numberOfProbes": 2 } }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "condition": "[variables('deployELBv6')]",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('elbV6Name')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[variables('appAddressIdV6')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('elbV6FEName')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('appAddressIdV6')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('elbV6BEAddressPoolName')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('v6ProbeName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbV6Name'), variables('elbV6FEName'))]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbV6Name'), variables('elbV6BEAddressPoolName'))]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('elbV6Name'), variables('v6ProbeName'))]"
+              },
+              "disableOutboundSnat": true,
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": "[variables('enableFloatingIP')]",
+              "loadDistribution": "[parameters('appLoadDistribution')]"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('v6ProbeName')]",
+            "properties": {
+              "protocol": "[variables('v6HealthProtocol')]",
+              "port": "[variables('v6HealthPort')]",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ],
+        "outboundRules": [
+          {
+            "name": "egress-v6",
+            "properties": {
+              "allocatedOutboundPorts": "[parameters('ipv6AllocatedOutboundPorts')]",
+              "protocol": "All",
+              "frontendIPConfigurations": [
+                {
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('elbV6Name'), variables('elbV6FEName'))]"
+                }
+              ],
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbV6Name'), variables('elbV6BEAddressPoolName'))]"
+              }
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
+    },
+    {
+      "type": "Microsoft.Network/loadBalancers",
+      "condition": "[variables('deployILBv6')]",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('ilbV6Name')]",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "dependsOn": [
+        "[variables('vnetID')]",
+        "[variables('ilbV6SubnetDependency')]",
+        "[variables('ilbV6LbOrVnetDependency')]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('ilbV6FEName')]",
+            "properties": {
+              "privateIPAllocationMethod": "[if(greater(length(parameters('ilbFrontendIPv6Address')), 0), 'Static', 'Dynamic')]",
+              "privateIPAddress": "[if(greater(length(parameters('ilbFrontendIPv6Address')), 0), parameters('ilbFrontendIPv6Address'), json('null'))]",
+              "privateIPAddressVersion": "IPv6",
+              "subnet": {
+                "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('subnet2Name'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('ilbV6BEAddressPoolName')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "[variables('ilbV6Name')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('ilbV6Name'), variables('ilbV6FEName'))]"
+              },
+              "backendAddressPool": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbV6Name'), variables('ilbV6BEAddressPoolName'))]"
+              },
+              "probe": {
+                "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('ilbV6Name'), variables('ilbV6ProbeName'))]"
+              },
+              "protocol": "All",
+              "frontendPort": 0,
+              "backendPort": 0,
+              "loadDistribution": "[parameters('ilbLoadDistribution')]",
+              "enableFloatingIP": "[variables('enableFloatingIP')]",
+              "disableOutboundSnat": true
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('ilbV6ProbeName')]",
+            "properties": {
+              "protocol": "[variables('v6HealthProtocol')]",
+              "port": "[variables('v6HealthPort')]",
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+        ]
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/loadBalancers'), parameters('tagsByResource')['Microsoft.Network/loadBalancers'], json('{}')) ]"
+    },
     {
       "condition": "[and(equals(parameters('createNewIPPrefix'), 'yes'), equals(parameters('publicIPPrefix'), 'yes'))]",
       "apiVersion": "2020-06-01",
@@ -1566,8 +1996,8 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
-      "condition": "[equals(parameters('vnetNewOrExisting'), 'new')]",
-      "name": "networkNewSetup",
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), not(parameters('enableIPv6')))]",
+      "name": "[variables('networkNewDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "resourceGroup": "[variables('vnetRGName')]",
@@ -1615,8 +2045,73 @@
       }
     },
     {
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), parameters('enableIPv6'))]",
+      "name": "[variables('networkNewDeploymentName')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "resourceGroup": "[variables('vnetRGName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('networkSetupURLDualstack')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[variables('location')]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "virtualNetworkAddressPrefixes": {
+            "value": "[parameters('virtualNetworkAddressPrefixes')]" 
+          },
+          "subnet1Name": {
+            "value": "[parameters('subnet1Name')]" 
+          },
+          "subnet1Prefix": {
+            "value": "[parameters('subnet1Prefix')]" 
+          },
+          "subnet2Name": {
+            "value": "[parameters('subnet2Name')]" },
+          "subnet2Prefix": { "value": "[parameters('subnet2Prefix')]"
+          },
+          "virtualNetworkAddressPrefixV6": {
+            "value": "[parameters('virtualNetworkAddressPrefixV6')]" 
+          },
+          "subnet1PrefixV6": {
+            "value": "[parameters('subnet1PrefixV6')]" 
+          },
+          "subnet2PrefixV6": {
+            "value": "[parameters('subnet2PrefixV6')]" 
+          },
+          "Subnet2StartAddress": {
+            "value": "[parameters('subnet2StartAddress')]"
+          },
+          "Subnet2Ipv6StartAddress": {
+            "value": "[parameters('ilbFrontendIPv6Address')]"
+          },
+          "vmName": {
+            "value": "[parameters('vmName')]" 
+          },
+          "deployNsg": {
+            "value": "[parameters('deployNewNSG')]" 
+          },
+          "NewNsgName": {
+            "value": "[parameters('NewNsgName')]" 
+          },
+          "tagsByResource": {
+            "value": "[parameters('tagsByResource')]"
+          },
+          "deploymentType": {
+            "value": "vmss"
+          }
+        }
+      }
+    },
+    {
       "condition": "[equals(parameters('vnetNewOrExisting'), 'existing')]",
-      "name": "networkExistingSetup",
+      "name": "[variables('networkExistingDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
       "resourceGroup": "[variables('vnetRGName')]",
@@ -1652,6 +2147,7 @@
       }
     },
     {
+      "condition": "[not(variables('dualstackNewVnet'))]",
       "name": "loadBalancerSetup",
       "type": "Microsoft.Resources/deployments",
       "resourceGroup": "[variables('lbRGName')]",
@@ -1700,7 +2196,7 @@
             "value": "[parameters('ilbTargetBEAddressPoolName')]"
           },
           "upgrading": {
-            "value": "[variables('upgrading')]"
+            "value": "[variables('upgradingForLB')]"
           },
           "floatingIp": {
             "value": "[variables('enableFloatingIP')]"
@@ -1738,7 +2234,7 @@
       "type": "Microsoft.Compute/images",
       "apiVersion": "2020-06-01",
       "name": "[variables('customImage')]",
-      "location": "[variables('resourceGroup').location]",
+      "location": "[variables('location')]",
       "properties": {
         "storageProfile": {
           "osDisk": {
@@ -1762,9 +2258,13 @@
       "tags": "[union(variables('vmssTags'),if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachineScaleSets'), parameters('tagsByResource')['Microsoft.Compute/virtualMachineScaleSets'], json('{}')))]",
       "dependsOn": [
         "[variables('vnetID')]",
-        "[variables('loadBalancerSetupId')]",
         "[variables('storageAccountId')]",
-        "[variables('customImageId')]"
+        "[variables('customImageId')]",
+        "[variables('nsgDependency')]",
+        "[variables('vmssDependsElbOrSetup')]",
+        "[variables('vmssDependsIlbOrSetup')]",
+        "[variables('vmssDependsElbV6OrVnet')]",
+        "[variables('vmssDependsIlbV6OrVnet')]"
       ],
       "sku": {
         "name": "[parameters('vmSize')]",
@@ -1777,7 +2277,7 @@
           "mode": "Manual"
         },
         "virtualMachineProfile": {
-          "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+          "UserData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(variables('dualstackNewVnet'), parameters('virtualNetworkAddressPrefixes')[0], if(equals(parameters('vnetNewOrExisting'), 'new'), reference(variables('networkNewDeploymentName')).outputs.vnetAddressPrefixes.value[0], reference(variables('networkExistingDeploymentName')).outputs.vnetAddressPrefixes.value[0])), '\"', '\n' ))]",
           "storageProfile": {
             "osDisk": {
               "caching": "ReadWrite",
@@ -1793,7 +2293,7 @@
             "adminPassword": "[parameters('adminPassword')]",
             "adminUsername": "[concat('not','used')]",
             "computerNamePrefix": "[toLower(parameters('vmName'))]",
-            "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n' ))]",
+            "customData": "[base64(concat(variables('customData'), '\n', 'vnet=\"', if(variables('dualstackNewVnet'), parameters('virtualNetworkAddressPrefixes')[0], if(equals(parameters('vnetNewOrExisting'), 'new'), reference(variables('networkNewDeploymentName')).outputs.vnetAddressPrefixes.value[0], reference(variables('networkExistingDeploymentName')).outputs.vnetAddressPrefixes.value[0])), '\"', '\n' ))]",
             "linuxConfiguration": "[variables('linuxConfiguration')]"
           },
           "networkProfile": {
@@ -1805,15 +2305,20 @@
                   "enableIPForwarding": true,
                   "enableAcceleratedNetworking": true,
                   "networkSecurityGroup": "[if(parameters('deployNewNSG') , variables('NewNsgReference') , parameters('ExistingNSG'))]",
-                  "ipConfigurations": [
+                  "copy": [
                     {
-                      "name": "ipconfig1",
-                      "properties": {
-                        "publicIpAddressConfiguration": "[if(equals(parameters('instanceLevelPublicIP'),'yes'), variables('useIpPrefix'), json('null'))]",
-                        "subnet": {
-                          "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet1Name'))]"
-                        },
-                        "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.elbId.value), json('null'), reference('loadBalancerSetup').outputs.elbBEAddressPoolProperties.value)]"
+                      "name": "ipConfigurations",
+                      "count": "[if(variables('enableIpv6'), 2, 1)]",
+                      "input": {
+                        "name": "[if(equals(copyIndex('ipConfigurations'), 0), 'ipconfig1', 'ipconfig1-v6')]",
+                        "properties": {
+                          "privateIPAddressVersion": "[if(equals(copyIndex('ipConfigurations'), 1), 'IPv6', json('null'))]",
+                          "publicIpAddressConfiguration": "[if(equals(copyIndex('ipConfigurations'), 0), if(equals(parameters('instanceLevelPublicIPv4'),'yes'), variables('useIpPrefix'), json('null')), json('null'))]",
+                          "subnet": {
+                            "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet1Name'))]"
+                          },
+                          "loadBalancerBackendAddressPools": "[if(equals(copyIndex('ipConfigurations'), 0), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbNameV4'), variables('elbBEAddressPoolNameV4')))), if(empty(reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.elbId.value), json('null'), reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.elbBEAddressPoolProperties.value)), variables('elbBEAddressPoolPropertiesV6'))]"
+                        }
                       }
                     }
                   ]
@@ -1825,14 +2330,20 @@
                   "primary": false,
                   "enableIPForwarding": true,
                   "enableAcceleratedNetworking": true,
-                  "ipConfigurations": [
+                  "copy": [
                     {
-                      "name": "ipconfig2",
-                      "properties": {
-                        "subnet": {
-                          "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('Subnet2Name'))]"
-                        },
-                        "loadBalancerBackendAddressPools": "[if(empty(reference('loadBalancerSetup').outputs.ilbId.value), json('null'), reference('loadBalancerSetup').outputs.ilbBEAddressPoolProperties.value)]"
+                      "name": "ipConfigurations",
+                      "count": "[if(variables('enableIpv6'), 2, 1)]",
+                      "input": {
+                        "name": "[if(equals(copyIndex('ipConfigurations'), 0), 'ipconfig2', 'ipconfig2-v6')]",
+                        "properties": {
+                          "privateIPAddressVersion": "[if(equals(copyIndex('ipConfigurations'), 1), 'IPv6', json('null'))]",
+                          "publicIpAddressConfiguration": "[json('null')]",
+                          "subnet": {
+                            "id": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnet2Name'))]"
+                          },
+                          "loadBalancerBackendAddressPools": "[if(equals(copyIndex('ipConfigurations'), 0), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV4')))), if(empty(reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.ilbId.value), json('null'), reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.ilbBEAddressPoolProperties.value)), variables('ilbBEAddressPoolPropertiesV6'))]"
+                        }
                       }
                     }
                   ]
@@ -1924,11 +2435,27 @@
   "outputs": {
     "ApplicationAddress": {
       "type": "string",
-      "value": "[reference('loadBalancerSetup').outputs.ApplicationAddress.value]"
+      "value": "[if(variables('dualstackNewVnet'), reference(variables('appAddressIdV4'), '2020-06-01').ipAddress, reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.ApplicationAddress.value)]"
     },
     "ApplicationFQDN": {
       "type": "string",
-      "value": "[reference('loadBalancerSetup').outputs.ApplicationFQDN.value]"
+      "value": "[if(variables('dualstackNewVnet'), reference(variables('appAddressIdV4'), '2020-06-01').dnsSettings.fqdn, reference(variables('loadBalancerSetupId'), '2020-06-01').outputs.ApplicationFQDN.value)]"
+    },
+    "ApplicationAddressV6": {
+      "type": "string",
+      "value": "[if(or(variables('deployELBv6'), variables('dualstackNewVnet')), reference(variables('appAddressIdV6'), '2020-06-01').ipAddress, '')]"
+    },
+    "ApplicationFQDNV6": {
+      "type": "string",
+      "value": "[if(or(variables('deployELBv6'), variables('dualstackNewVnet')), reference(variables('appAddressIdV6'), '2020-06-01').dnsSettings.fqdn, '')]"
+    },
+    "IPv6LBId": {
+      "type": "string",
+      "value": "[if(variables('deployELBv6'), resourceId('Microsoft.Network/loadBalancers', variables('elbV6Name')), '')]"
+    },
+    "IPv6BEPoolId": {
+      "type": "string",
+      "value": "[if(variables('deployELBv6'), resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('elbV6Name'), variables('elbV6BEAddressPoolName')), '')]"
     }
   }
 }

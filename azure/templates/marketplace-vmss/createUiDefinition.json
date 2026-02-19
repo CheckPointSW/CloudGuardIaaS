@@ -1167,7 +1167,7 @@
             "visible": true
           },
           {
-            "name": "instanceLevelPublicIP",
+            "name": "instanceLevelPublicIPv4",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the VMSS with instance level Public IP address",
             "defaultValue": "No",
@@ -1203,7 +1203,7 @@
                 }
               ]
             },
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'yes')]"
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'yes')]"
           },
           {
             "name": "createNewIPPrefix",
@@ -1283,7 +1283,7 @@
           {
             "name": "externalCommunicationInfoBox",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('chkp-advanced').instanceLevelPublicIP, 'no'), equals(steps('chkp-advanced').deploymentMode, 'ILBOnly'))]",
+            "visible": "[and(equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'no'), equals(steps('chkp-advanced').deploymentMode, 'ILBOnly'))]",
             "options": {
               "icon": "Warning",
               "text": "For outbound inspection it is mandatory to deploy an external load balancer and/or instance level public IP addresses."
@@ -1357,7 +1357,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Management interface and IP address",
             "defaultValue": "Backend NIC's private IP address",
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'yes')]",
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'yes')]",
             "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC and with public or private IP.",
             "constraints": {
               "allowedValues": [
@@ -1381,7 +1381,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Management interface and IP address",
             "defaultValue": "Backend NIC's private IP address",
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'no')]",
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'no')]",
             "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC's private IP address.",
             "constraints": {
               "allowedValues": [
@@ -1733,6 +1733,81 @@
             }
           },
           {
+            "name": "enableIpv6",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable IPv6 Support",
+            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes; for an existing Virtual Network we do not modify the Virtual Network or subnets.",
+            "defaultValue": "No (IPv4 only)",
+            "constraints": {
+              "allowedValues": [
+                { "label": "No (IPv4 only)", "value": false },
+                { "label": "Yes (IPv4 + IPv6)", "value": true }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "ipv6Section",
+            "type": "Microsoft.Common.Section",
+            "label": "IPv6 Configuration",
+            "visible": "[steps('network').enableIpv6]",
+            "elements": [
+              {
+                "name": "virtualNetworkIpv6AddressPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Virtual Network IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca::/48",
+                "toolTip": "IPv6 address prefix for the virtual network (e.g., ace:cab:deca::/48)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/(4[8-9]|5[0-9]|6[0-4])$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca::/48)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet1Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Frontend Subnet IPv6 Prefix",
+                "defaultValue": "ace:cab:deca:deed::/64",
+                "toolTip": "IPv6 address prefix for the frontend subnet (e.g., ace:cab:deca:deed::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca:deed::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet2Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Backend Subnet IPv6 Prefix",
+                "defaultValue": "ace:cab:deca:deee::/64",
+                "toolTip": "IPv6 address prefix for the backend subnet (e.g., ace:cab:deca:deee::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca:deee::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet2Ipv6StartAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Internal LB IPv6 Frontend Address (Backend Subnet)",
+                "defaultValue": "ace:cab:deca:deee::a",
+                "toolTip": "Static IPv6 address for the Internal Load Balancer frontend in the backend subnet (no CIDR). Required only when enabling IPv6 with an existing VNet; for a new VNet the template derives or defaults this value.",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing'))]",
+                  "regex": "^([0-9A-Fa-f]{0,4}:){1,7}[0-9A-Fa-f]{0,4}$",
+                  "validationMessage": "Enter a valid IPv6 address (no CIDR)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing'))]"
+              }
+            ]
+          },
+          {
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
@@ -1919,7 +1994,7 @@
       "configurationTemplate": "[steps('autoprovision').configurationTemplate]",
       "adminEmail": "[steps('chkp-advanced').adminEmail]",
       "deploymentMode": "[steps('chkp-advanced').deploymentMode]",
-      "instanceLevelPublicIP": "[steps('chkp-advanced').instanceLevelPublicIP]",
+      "instanceLevelPublicIPv4": "[steps('chkp-advanced').instanceLevelPublicIPv4]",
       "lbsTargetRGName": "[steps('chkp-advanced').lbsTargetRGName]",
       "elbResourceId": "[steps('chkp-advanced').elbResourceId]",
       "elbTargetBEAddressPoolName": "[steps('chkp-advanced').elbBEAddressPoolName]",
@@ -1949,6 +2024,11 @@
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+      "enableIPv6": "[steps('network').enableIpv6]",
+      "virtualNetworkAddressPrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.virtualNetworkIpv6AddressPrefix, '')]",
+      "subnet1PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet1Ipv6Prefix, '')]",
+      "subnet2PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet2Ipv6Prefix, '')]",
+      "ilbFrontendIPv6Address": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing')), steps('network').ipv6Section.subnet2Ipv6StartAddress, '')]",
       "floatingIP": "[steps('chkp-advanced').floatingIP]",
       "IPv4Length": "[steps('chkp-advanced').IPv4Length]",
       "publicIPPrefix": "[steps('chkp-advanced').publicIPPrefix]",
