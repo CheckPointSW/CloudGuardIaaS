@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Management Server into an existing VPC (20260216)
+  Deploys a Check Point Management Server into an existing VPC (20260302)
   See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -508,17 +508,6 @@ Resources:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
       Parameters:
         Version: !Join ['-', [!Ref ManagementVersion, MGMT]]
-  ManagementReadyHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: AllocatePublicIPv4
-    Properties: {}
-  ManagementReadyCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    Condition: AllocatePublicIPv4
-    DependsOn: ManagementInstance
-    Properties:
-      Handle: !Ref ManagementReadyHandle
-      Timeout: 1800
   ManagementSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -657,14 +646,14 @@ Resources:
                     - IsIPv6Enabled
                     - !If [ IsIPv4Enabled, "    template_name=\"management_dual_stack\"", "    template_name=\"management_ipv6\"" ]
                     - "    template_name=\"management\""
-              - !If [AllocatePublicIPv4, !Sub '    wait_handle=''${ManagementReadyHandle}'' ; eip=${AllocatePublicAddress}', '    eip=false']
+              - !If [AllocatePublicIPv4, !Sub '    eip=${AllocatePublicAddress}', '    eip=false']
               - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
               - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py waitHandle=\"${wait_handle}\" sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
