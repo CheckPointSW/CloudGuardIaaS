@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point cross AZ Cluster into an existing VPC (20260709)
+  Deploys a Check Point cross AZ Cluster into an existing VPC (20260302)
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment Guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:

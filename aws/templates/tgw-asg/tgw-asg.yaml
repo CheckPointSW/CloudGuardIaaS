@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: |
-  Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (20260507).
+  Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (20260302).
   See CloudGuard Network for AWS Auto Scale Group with Transit Gateway deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -125,8 +125,6 @@ Metadata:
         default: Configuration template
       AutoScaleGroupName:
         default: Auto Scale Group name
-      ExistingSecurityGroup:
-        default: Existing Security Group (optional)
 Parameters:
   VPC:
     Description: Select an existing VPC.
