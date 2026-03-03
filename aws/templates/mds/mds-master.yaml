@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploys a Check Point Multi-Domain Server into a new VPC (20260101)
+Description: |
+  Deploys a Check Point Multi-Domain Server into a new VPC (20260302)
+  See sk143213 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -321,7 +324,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -465,21 +468,6 @@ Parameters:
     Type: String
     Default: '0.pool.ntp.org'
     AllowedPattern: '[\.a-zA-Z0-9\-]*'
-Conditions:
-  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
-  CreateRole: !And
-    - !Or
-      - !Condition PrimaryMDS
-      - !Condition SecondaryMDS
-    - !Or
-      - !Equals [!Ref MDSPermissions, Create with assume role permissions (specify an STS role ARN)]
-      - !Equals [!Ref MDSPermissions, Create with read permissions]
-      - !Equals [!Ref MDSPermissions, Create with read-write permissions]
-  UseRole: !And [!Or [!Condition PrimaryMDS, !Condition SecondaryMDS], !Not [!Equals [!Ref MDSPermissions, None (configure later)]]]
-  PrimaryMDS: !Equals [!Ref MDSInstallationType, Primary Multi-Domain Server]
-  SecondaryMDS: !Equals [!Ref MDSInstallationType, Secondary Multi-Domain Server]
-  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
-  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack

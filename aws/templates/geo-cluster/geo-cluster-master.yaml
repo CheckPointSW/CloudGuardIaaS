@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Check Point cross AZ Cluster in a new VPC (20260101)
+Description: |
+  Deploys a Check Point cross AZ Cluster into an existing VPC (20260302)
+  See CloudGuard Network for AWS Single Availability Zone Cluster Deployment Guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -381,7 +384,7 @@ Parameters:
       - false
   VolumeSize:
     Type: Number
-    Default: 100
+    Default: 200
     MinValue: 100
   VolumeType:
     Description: General Purpose SSD Volume Type
@@ -524,7 +527,6 @@ Resources:
         PrivateSubnet2CIDR: !Ref PrivateSubnet2CIDR
   InternalRouteTable:
     Type: AWS::EC2::RouteTable
-    DependsOn: VPCStack
     Properties:
       VpcId: !GetAtt VPCStack.Outputs.VPCID
       Tags:
@@ -607,17 +609,17 @@ Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
-    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    RuleCondition: !Equals [!Ref MemberBToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
-        Assert: !Equals [ !Ref MemberAToken, '' ]
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
+        Assert: !Equals [!Ref MemberAToken, '']
   MembersTokenValueEquals:
-    RuleCondition: !EachMemberEquals [ [ !Ref MemberBToken ], !Ref MemberAToken ]
+    RuleCondition: !EachMemberEquals [[!Ref MemberBToken], !Ref MemberAToken]
     Assertions:
       - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
-        Assert: !Equals [ !Ref MemberAToken, '' ]
+        Assert: !Equals [!Ref MemberAToken, '']
       - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
-        Assert: !Equals [ !Ref MemberBToken, '' ]
+        Assert: !Equals [!Ref MemberBToken, '']

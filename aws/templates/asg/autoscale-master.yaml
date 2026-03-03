@@ -1,6 +1,7 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into a new VPC (20260101)
+  Create an Auto Scaling group of Check Point gateways into a new VPC (20260302)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -8,10 +9,10 @@ Metadata:
       - Label:
           default: Basic Settings
         Parameters:
-              - GatewayVersion
-              - GatewayInstanceType
-              - GatewaySICKey
-              - KeyName
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
       - Label:
           default: VPC Network Settings
         Parameters:
@@ -432,7 +433,7 @@ Parameters:
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
   VolumeSize:
     Type: Number
-    Default: 100
+    Default: 200
     MinValue: 100
   VolumeType:
     Description: General Purpose SSD Volume Type
@@ -587,8 +588,8 @@ Parameters:
     Default: ""
     MaxLength: 100
 Conditions:
-  4AZs: !Equals [ !Ref NumberOfAZs, 4 ]
-  3AZs: !Or [ !Equals [ !Ref NumberOfAZs, 3 ], !Condition 4AZs ]
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   CreateELB: !Not [!Equals [!Ref ELBType, none]]
 Resources:
   VPCStack:
@@ -596,7 +597,7 @@ Resources:
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
-        AvailabilityZones: !Join [ ',' , !Ref AvailabilityZones ]
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
         VPCCIDR: !Ref VPCCIDR
         PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
@@ -610,7 +611,7 @@ Resources:
   AutoScaleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.us-east-1.amazonaws.com/autoscale/autoscale.yaml
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/autoscale/autoscale.yaml
       Parameters:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         GatewaysSubnets: !Join

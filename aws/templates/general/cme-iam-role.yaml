@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Creates an IAM role for selected permissions (20260101)
+Description: |
+  Creates an IAM role for selected permissions (20260302)
+  See sk122074 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -144,9 +147,9 @@ Resources:
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
-        InstanceProfileName: !Ref CMEIAMRole
-        Roles:
-          - !Ref CMEIAMRole
+      InstanceProfileName: !Ref CMEIAMRole
+      Roles:
+        - !Ref CMEIAMRole
 Outputs:
   CMEIAMRole:
     Description: The IAM role.

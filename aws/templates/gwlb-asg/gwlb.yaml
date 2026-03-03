@@ -1,6 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20260101)
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC  (20260302).
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -62,7 +64,7 @@ Metadata:
       KeyName:
         default: Key name
       IPMode:
-        default: IP Configuration Mode  
+        default: IP Configuration Mode
       EnableVolumeEncryption:
         default: Enable environment volume encryption
       VolumeSize:
@@ -90,9 +92,9 @@ Metadata:
       TargetGroupName:
         default: Target Group Name
       AcceptConnectionRequired:
-        default:  Connection Acceptance Required
+        default: Connection Acceptance Required
       CrossZoneLoadBalancing:
-        default:  Enable Cross Zone Load Balancing
+        default: Enable Cross Zone Load Balancing
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
@@ -126,7 +128,7 @@ Metadata:
       ManagementPasswordHash:
         default: Management Server Settings - password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Server Settings - Maintenance Password hash
+        default: Management Server Settings - Maintenance Password hash
       GatewaysPolicy:
         default: Management Server Settings - Security Policy
       AdminCIDR:
@@ -162,7 +164,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -539,7 +541,7 @@ Parameters:
       - true
       - false
   IPMode:
-    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide. 
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide.
     Type: String
     AllowedValues:
       - IPv4
@@ -826,10 +828,10 @@ Parameters:
     Type: String
     AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
   AutoScaleGroupName:
-      Description: The Name of the Auto Scaling Group. (optional)
-      Type: String
-      Default: ""
-      MaxLength: 100
+    Description: The Name of the Auto Scaling Group. (optional)
+    Type: String
+    Default: ""
+    MaxLength: 100
 Conditions:
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
@@ -979,7 +981,7 @@ Outputs:
     Value: !Sub ['com.amazonaws.vpce.${AWS::Region}.${Service}', {Service: !Ref VpcEndpointService}]
 Rules:
   GatewayAddressAllocationRule:
-    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
-    Assertions:  
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
+    Assertions:
       - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
         Assert: !Equals [!Ref AllocatePublicAddress, 'true']

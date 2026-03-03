@@ -1,6 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260101).
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260302).
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -105,9 +107,9 @@ Metadata:
       TargetGroupName:
         default: Target Group Name
       AcceptConnectionRequired:
-        default:  Connection Acceptance Required
+        default: Connection Acceptance Required
       CrossZoneLoadBalancing:
-        default:  Enable Cross Zone Load Balancing
+        default: Enable Cross Zone Load Balancing
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
@@ -208,7 +210,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -892,7 +894,7 @@ Resources:
     Properties:
       TemplateURL: !If [IsIPv6Enabled, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
       Parameters:
-        AvailabilityZones: !Join [',' , !Ref AvailabilityZones]
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
         VPCCIDR: !Ref VPCCIDR
         PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
@@ -911,8 +913,8 @@ Resources:
           - ','
           - - !GetAtt VPCStack.Outputs.PublicSubnet1ID
             - !GetAtt VPCStack.Outputs.PublicSubnet2ID
-            - !If [ 3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue' ]
-            - !If [ 4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue' ]
+            - !If [3AZs, !GetAtt VPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt VPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
         KeyName: !Ref KeyName
         EnableVolumeEncryption: !Ref EnableVolumeEncryption
         VolumeType: !Ref VolumeType

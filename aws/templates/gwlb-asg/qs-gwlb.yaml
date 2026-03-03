@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20260101)"
+Description: |
+  Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20260302).
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -112,9 +115,9 @@ Metadata:
       TargetGroupName:
         default: Target Group Name
       AcceptConnectionRequired:
-        default:  Connection Acceptance Required
+        default: Connection Acceptance Required
       CrossZoneLoadBalancing:
-        default:  Enable Cross Zone Load Balancing
+        default: Enable Cross Zone Load Balancing
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
@@ -146,7 +149,7 @@ Metadata:
       ManagementPasswordHash:
         default: Management Server Settings - Management password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Server Settings - Management Maintenance Password hash
+        default: Management Server Settings - Management Maintenance Password hash
       GatewaysPolicy:
         default: Management Server Settings - Security Policy
       GatewaysBlades:
@@ -216,7 +219,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -917,12 +920,10 @@ Parameters:
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
-  2AZs: !Or [!Equals [!Ref NumberOfAZs, 2], !Condition 3AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
-  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
-  EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
+  EncryptedProtocol: !Equals [!Ref ALBProtocol, 'HTTPS']
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   GatewayLoadBalancer:
@@ -1068,7 +1069,6 @@ Resources:
             - 'echo -e "\nFinished Bootstrap script\n"'
   GWLBeEndpointStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: VpcEndpointService
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-endpoints.yaml
       Parameters:
@@ -1129,7 +1129,7 @@ Outputs:
     Value: !GetAtt ServersStacks.Outputs.ServerLBURL
     Condition: DeployManagement
   ServerSecurityGroupID:
-    Description: The Application Servers Security Group ID.  
+    Description: The Application Servers Security Group ID.
     Value: !GetAtt ServersStacks.Outputs.ServerSecurityGroupID
     Condition: DeployManagement
   Server1EndpointRoute:
@@ -1148,7 +1148,7 @@ Outputs:
     Condition: 4AZs
 Rules:
   GatewayAddressAllocationRule:
-    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
-    Assertions:  
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
+    Assertions:
       - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
         Assert: !Equals [!Ref AllocatePublicAddress, 'true']
