@@ -1,68 +1,8 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Cluster into an existing VPC (20260407).
+  Deploys a Check Point Cluster into an existing VPC (20260302).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
-Mappings:
-  # Maps Local Zone AZ names to their NetworkBorderGroup.
-  # The NBG is the AZ name with the trailing AZ letter removed (e.g. ap-southeast-2-per-1a -> ap-southeast-2-per-1).
-  # Add new Local Zone AZs here as needed.
-  LocalZoneNetworkBorderGroups:
-    # Australia
-    ap-southeast-2-per-1a:
-      NBG: ap-southeast-2-per-1
-    # US East 1 Local Zones
-    us-east-1-atl-1a:
-      NBG: us-east-1-atl-1
-    us-east-1-bos-1a:
-      NBG: us-east-1-bos-1
-    us-east-1-chi-1a:
-      NBG: us-east-1-chi-1
-    us-east-1-dfw-1a:
-      NBG: us-east-1-dfw-1
-    us-east-1-iah-1a:
-      NBG: us-east-1-iah-1
-    us-east-1-mci-1a:
-      NBG: us-east-1-mci-1
-    us-east-1-mia-1a:
-      NBG: us-east-1-mia-1
-    us-east-1-msp-1a:
-      NBG: us-east-1-msp-1
-    us-east-1-nyc-1a:
-      NBG: us-east-1-nyc-1
-    us-east-1-phl-1a:
-      NBG: us-east-1-phl-1
-    # US West 2 Local Zones
-    us-west-2-den-1a:
-      NBG: us-west-2-den-1
-    us-west-2-las-1a:
-      NBG: us-west-2-las-1
-    us-west-2-lax-1a:
-      NBG: us-west-2-lax-1
-    us-west-2-lax-1b:
-      NBG: us-west-2-lax-1
-    us-west-2-phx-1a:
-      NBG: us-west-2-phx-1
-    us-west-2-sea-1a:
-      NBG: us-west-2-sea-1
-    # EU Local Zones
-    eu-central-1-ham-1a:
-      NBG: eu-central-1-ham-1
-    eu-central-1-waw-1a:
-      NBG: eu-central-1-waw-1
-    eu-west-2-man-1a:
-      NBG: eu-west-2-man-1
-    # AP Local Zones
-    ap-northeast-1-tpe-1a:
-      NBG: ap-northeast-1-tpe-1
-    ap-northeast-2-sel-1a:
-      NBG: ap-northeast-2-sel-1
-    ap-southeast-1-kul-1a:
-      NBG: ap-southeast-1-kul-1
-    ap-southeast-1-sin-1a:
-      NBG: ap-southeast-1-sin-1
-    ap-southeast-4-mel-1a:
-      NBG: ap-southeast-4-mel-1
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -703,22 +643,15 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join ['=', ['public-ip', !If [AllocateAddress, !If [IsLocalZone, !Ref MemberAPublicAddressLocalZone, !Ref MemberAPublicAddressRegional], '']]]
-              - !Join ['=', ['external-private-ip', !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress]]
-              - !Join ['=', ['internal-private-ip', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress]]
+            - [!Join ['=', ['public-ip', !If [AllocateAddress, !Ref MemberAPublicAddress, '']]],
+               !Join ['=', ['external-private-ip', !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress]],
+               !Join ['=', ['internal-private-ip', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress]]]
         - Key: x-chkp-cluster-ips
-          Value: !If
-            - AllocateAddress
-            - !Join
-              - ':'
-              - - !Join ['=', ['cluster-ip', !If [IsLocalZone, !Ref ClusterPublicAddressLocalZone, !Ref ClusterPublicAddressRegional]]]
-                - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
-                - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
-            - !Join
-              - ':'
-              - - !Join ['=', ['cluster-ip', '']]
-                - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
-                - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
+          Value: !Join
+            - ':'
+            - [!Join ['=', ['cluster-ip', !Ref ClusterPublicAddress]],
+               !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]],
+               !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]]
   MemberBInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -732,22 +665,15 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join ['=', ['public-ip', !If [AllocateAddress, !If [IsLocalZone, !Ref MemberBPublicAddressLocalZone, !Ref MemberBPublicAddressRegional], '']]]
-              - !Join ['=', ['external-private-ip', !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress]]
-              - !Join ['=', ['internal-private-ip', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress]]
+            - [!Join ['=', ['public-ip', !If [AllocateAddress, !Ref MemberBPublicAddress, '']]],
+               !Join ['=', ['external-private-ip', !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress]],
+               !Join ['=', ['internal-private-ip', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress]]]
         - Key: x-chkp-cluster-ips
-          Value: !If
-            - AllocateAddress
-            - !Join
-              - ':'
-              - - !Join ['=', ['cluster-ip', !If [IsLocalZone, !Ref ClusterPublicAddressLocalZone, !Ref ClusterPublicAddressRegional]]]
-                - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
-                - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
-            - !Join
-              - ':'
-              - - !Join ['=', ['cluster-ip', '']]
-                - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
-                - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
+          Value: !Join
+            - ':'
+            - [!Join ['=', ['cluster-ip', !Ref ClusterPublicAddress]],
+               !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]],
+               !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]]
   MemberAGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -781,15 +707,14 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
-              # Removed wait_handle reference as ClusterReadyHandle resource is no longer present
               - !If [EmptyHostName, '    hostname=""', !Sub '    hostname=${GatewayHostname}-member-a']
-              - !Join ['', ['    eip="', !If [AllocateAddress, !If [IsLocalZone, !Ref MemberAPublicAddressLocalZone, !Ref MemberAPublicAddressRegional], ''], '"']]
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260407\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   MemberBGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -825,13 +750,13 @@ Resources:
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
               - !If [EmptyHostName, '    hostname=""', !Sub '    hostname=${GatewayHostname}-member-b']
-              - !Join ['', ['    eip="', !If [AllocateAddress, !If [IsLocalZone, !Ref MemberBPublicAddressLocalZone, !Ref MemberBPublicAddressRegional], ''], '"']]
+              - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260407\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   ClusterPublicAddressLocalZone:
     Type: AWS::EC2::EIP
