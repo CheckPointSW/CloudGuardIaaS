@@ -1,6 +1,7 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Management Server into an existing VPC (20260302)
+  Deploys a Check Point Management Server into an existing VPC (20260216)
   See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -84,7 +85,7 @@ Metadata:
       ManagementPasswordHash:
         default: Password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Maintenance Password hash
+        default: Management Maintenance Password hash
       ManagementHostname:
         default: Management Hostname
       ManagementInstallationType:
@@ -329,7 +330,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -374,7 +375,7 @@ Parameters:
       - Create with read-write permissions
   ManagementPredefinedRole:
     Description: A predefined IAM role to attach to the instance profile. Ignored.
-      if IAM role is not set to 'Use existing'
+      if IAM role is not set to 'Use existing'.
     Type: String
     Default: ''
   ManagementSTSRoles:
@@ -499,7 +500,7 @@ Conditions:
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   UseRole: !Not [!Equals [!Ref ManagementPermissions, None (configure later)]]
   NoSIC: !Equals [!Ref SICKey, '']
-  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole]]
+  PreRole: !And [!Condition UseRole, !Not [!Condition CreateRole], !Not [!Equals [!Ref ManagementPredefinedRole, '']]]
   EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
 Resources:
   AMI:
@@ -514,71 +515,188 @@ Resources:
       GroupDescription: Management security group
       VpcId: !Ref VPC
       SecurityGroupIngress:
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 257
-          ToPort: 257
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 8211
-          ToPort: 8211
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18191
-          ToPort: 18191
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18192
-          ToPort: 18192
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18208
-          ToPort: 18208
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18210
-          ToPort: 18210
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18211
-          ToPort: 18211
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18221
-          ToPort: 18221
-        - CidrIp: !If [IsGatewaysAddressesIPv6, !Ref "AWS::NoValue", !Ref GatewaysAddresses]
-          CidrIpV6: !If [IsGatewaysAddressesIPv6, !Ref GatewaysAddresses, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18264
-          ToPort: 18264
-        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
-          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
-        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
-          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 443
-          ToPort: 443
-        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
-          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 18190
-          ToPort: 18190
-        - CidrIp: !If [AdminCIDRIsIPv6, !Ref "AWS::NoValue", !Ref AdminCIDR]
-          CidrIpV6: !If [AdminCIDRIsIPv6, !Ref AdminCIDR, !Ref "AWS::NoValue"]
-          IpProtocol: tcp
-          FromPort: 19009
-          ToPort: 19009
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 257
+            ToPort: 257
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 257
+            ToPort: 257
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 8211
+            ToPort: 8211
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 8211
+            ToPort: 8211
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18191
+            ToPort: 18191
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18191
+            ToPort: 18191
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18192
+            ToPort: 18192
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18192
+            ToPort: 18192
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18208
+            ToPort: 18208
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18208
+            ToPort: 18208
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18210
+            ToPort: 18210
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18210
+            ToPort: 18210
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18211
+            ToPort: 18211
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18211
+            ToPort: 18211
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18221
+            ToPort: 18221
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18221
+            ToPort: 18221
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - IsGatewaysAddressesIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18264
+            ToPort: 18264
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - IsGatewaysAddressesIPv6
+          - IpProtocol: tcp
+            FromPort: 18264
+            ToPort: 18264
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - AdminCIDRIsIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - AdminCIDRIsIPv6
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - AdminCIDRIsIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - AdminCIDRIsIPv6
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - AdminCIDRIsIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 18190
+            ToPort: 18190
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - AdminCIDRIsIPv6
+          - IpProtocol: tcp
+            FromPort: 18190
+            ToPort: 18190
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
+        - !If
+          - AdminCIDRIsIPv6
+          - !Ref AWS::NoValue
+          - IpProtocol: tcp
+            FromPort: 19009
+            ToPort: 19009
+            CidrIp: !Ref GatewaysAddresses
+        - !If
+          - AdminCIDRIsIPv6
+          - IpProtocol: tcp
+            FromPort: 19009
+            ToPort: 19009
+            CidrIpv6: !Ref GatewaysAddresses
+          - !Ref AWS::NoValue
   ManagementRoleStack:
     Type: AWS::CloudFormation::Stack
     Condition: CreateRole
@@ -596,7 +714,6 @@ Resources:
         - !Ref ManagementPredefinedRole
   ManagementInstance:
     Type: AWS::EC2::Instance
-    DependsOn: ManagementLaunchTemplate
     Properties:
       LaunchTemplate:
         LaunchTemplateId: !Ref ManagementLaunchTemplate
@@ -626,12 +743,21 @@ Resources:
         BlockDeviceMappings:
           - DeviceName: '/dev/xvda'
             Ebs:
-              Encrypted: !If [ EncryptedVolume, true, false ]
-              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              Encrypted: !If [EncryptedVolume, true, false]
+              KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
               VolumeType: !Ref VolumeType
               VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
-          Name: !If [ UseRole, !If [ PreRole, !Ref InstanceProfile, !GetAtt ManagementRoleStack.Outputs.CMEIAMRole ], !Ref 'AWS::NoValue' ]
+          Name: !If
+            - UseRole
+            - !If
+              - PreRole
+              - !Ref InstanceProfile
+              - !If
+                - CreateRole
+                - !GetAtt ManagementRoleStack.Outputs.CMEIAMRole
+                - !Ref 'AWS::NoValue'
+            - !Ref 'AWS::NoValue'
         UserData:
           'Fn::Base64':
             !Join
@@ -643,17 +769,16 @@ Resources:
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; hostname=${ManagementHostname} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; mgmt_install_type=''${ManagementInstallationType}'''
               - !If
-                    - IsIPv6Enabled
-                    - !If [ IsIPv4Enabled, "    template_name=\"management_dual_stack\"", "    template_name=\"management_ipv6\"" ]
-                    - "    template_name=\"management\""
-              - !If [AllocatePublicIPv4, !Sub '    eip=${AllocatePublicAddress}', '    eip=false']
+                - IsIPv6Enabled
+                - !If [IsIPv4Enabled, "    template_name=\"management_dual_stack\"", "    template_name=\"management_ipv6\""]
+                - "    template_name=\"management\""
               - !If [NoSIC, '    sic=""', !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref SICKey, ')"']]]
               - !If [ManageOverInternetAndEIP, '    pub_mgmt=true', '    pub_mgmt=false']
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref ManagementBootstrapScript, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref ManagementMaintenancePasswordHash, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref ManagementVersion]]}]
-              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py sicKey=\"${sic}\" installationType=\"management\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" "management_installation_type=\"${mgmt_install_type}\"" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" overTheInternet=\"${pub_mgmt}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP
@@ -663,7 +788,6 @@ Resources:
   AddressAssoc:
     Type: AWS::EC2::EIPAssociation
     Condition: AllocatePublicIPv4
-    DependsOn: ManagementInstance
     Properties:
       InstanceId: !Ref ManagementInstance
       AllocationId: !GetAtt PublicAddress.AllocationId

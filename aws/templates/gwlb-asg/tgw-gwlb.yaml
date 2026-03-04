@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20260101)
+Description: |
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20260302).
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -154,7 +157,7 @@ Metadata:
       TargetGroupName:
         default: Target Group Name
       CrossZoneLoadBalancing:
-        default:  Enable Cross Zone Load Balancing
+        default: Enable Cross Zone Load Balancing
       ManagementDeploy:
         default: Management Server Settings - Deploy Management Server
       ManagementInstanceType:
@@ -279,7 +282,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -938,7 +941,6 @@ Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
-  VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   GWLBeSubnet1:
@@ -1251,7 +1253,6 @@ Resources:
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
   GWLBe1:
-    DependsOn: [GWLBStack, GWLBeSubnet1]
     Type: AWS::EC2::VPCEndpoint
     Properties:
       VpcId: !Ref VPC
@@ -1260,7 +1261,6 @@ Resources:
         - !Ref GWLBeSubnet1
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
   GWLBe2:
-    DependsOn: [GWLBStack, GWLBeSubnet2]
     Type: AWS::EC2::VPCEndpoint
     Properties:
       VpcId: !Ref VPC
@@ -1269,7 +1269,6 @@ Resources:
         - !Ref GWLBeSubnet2
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
   GWLBe3:
-    DependsOn: [GWLBStack, GWLBeSubnet3]
     Type: AWS::EC2::VPCEndpoint
     Condition: 3AZs
     Properties:
@@ -1279,7 +1278,6 @@ Resources:
         - !Ref GWLBeSubnet3
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
   GWLBe4:
-    DependsOn: [GWLBStack, GWLBeSubnet4]
     Type: AWS::EC2::VPCEndpoint
     Condition: 4AZs
     Properties:
@@ -1393,7 +1391,6 @@ Resources:
     Properties:
       Domain: vpc
   NatGateway1:
-    DependsOn: [GWLBStack, NatGwSubnet1]
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGwPublicAddress1.AllocationId
@@ -1402,7 +1399,6 @@ Resources:
         - Key: Name
           Value: NatGW1
   NatGateway2:
-    DependsOn: [GWLBStack, NatGwSubnet2]
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGwPublicAddress2.AllocationId
@@ -1411,7 +1407,6 @@ Resources:
         - Key: Name
           Value: NatGW2
   NatGateway3:
-    DependsOn: [GWLBStack, NatGwSubnet3]
     Type: AWS::EC2::NatGateway
     Condition: 3AZs
     Properties:
@@ -1421,7 +1416,6 @@ Resources:
         - Key: Name
           Value: NatGW3
   NatGateway4:
-    DependsOn: [GWLBStack, NatGwSubnet4]
     Type: AWS::EC2::NatGateway
     Condition: 4AZs
     Properties:
@@ -1449,7 +1443,7 @@ Outputs:
     Value: !GetAtt GWLBStack.Outputs.GWLBServiceName
 Rules:
   GatewayAddressAllocationRule:
-    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public'] 
-    Assertions:  
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
+    Assertions:
       - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
         Assert: !Equals [!Ref AllocatePublicAddress, 'true']

@@ -1,6 +1,7 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into a new VPC (20260216)
+  Deploys a Check Point Security Gateway into a new VPC (20260302)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -377,7 +378,7 @@ Parameters:
       - false
   VolumeSize:
     Type: Number
-    Default: 100
+    Default: 200
     MinValue: 100
   VolumeType:
     Description: General Purpose SSD Volume Type

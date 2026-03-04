@@ -1,6 +1,7 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (20260302)
+  Security Gateway & Management (Standalone) instance into an existing VPC (20260216)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -355,7 +356,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -486,6 +487,17 @@ Conditions:
   AllocatePublicIPv4:
     !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
 Resources:
+  ReadyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Condition: AllocatePublicIPv4
+    Properties: {}
+  ReadyCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: AllocatePublicIPv4
+    DependsOn: StandaloneInstance
+    Properties:
+      Handle: !Ref ReadyHandle
+      Timeout: 1800
   StandaloneIAMRole:
     Condition: EnableCloudWatch
     Type: AWS::IAM::Role
@@ -495,7 +507,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: [ ec2.amazonaws.com ]
+              Service: ec2.amazonaws.com
             Action: sts:AssumeRole
       Path: /
   StandaloneInstanceProfile:
@@ -503,21 +515,21 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
-      Roles: [ !Ref StandaloneIAMRole ]
+      Roles: !Ref StandaloneIAMRole
   CloudwatchPolicy:
     Condition: EnableCloudWatch
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
       Parameters:
-        PolicyName: !If [ ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName' ]
+        PolicyName: !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
         PolicyRole: !Ref StandaloneIAMRole
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
       Parameters:
-        Version: !If [IsBYOL, !Join ['-', [!Ref StandaloneVersion,MGMT]], !Ref StandaloneVersion]
+        Version: !If [IsBYOL, !Join ['-', [!Ref StandaloneVersion, MGMT]], !Ref StandaloneVersion]
   ExternalNetworkInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -586,7 +598,6 @@ Resources:
       RouteTableId: !Ref InternalRouteTable
   StandaloneInstance:
     Type: AWS::EC2::Instance
-    DependsOn: GatewayLaunchTemplate
     Properties:
       LaunchTemplate:
         LaunchTemplateId: !Ref GatewayLaunchTemplate
@@ -612,12 +623,12 @@ Resources:
         BlockDeviceMappings:
           - DeviceName: '/dev/xvda'
             Ebs:
-              Encrypted: !If [ EncryptedVolume, true, false ]
-              KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
+              Encrypted: !If [EncryptedVolume, true, false]
+              KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
               VolumeType: !Ref VolumeType
               VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
-          Name: !If [ EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue' ]
+          Name: !If [EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue']
         UserData:
           'Fn::Base64':
             !Join
@@ -628,16 +639,12 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR}'
-              - !If
-                    - IsIPv6Enabled
-                    - !If [ IsIPv4Enabled, "    template_name=\"standalone_dual_stack\"", "    template_name=\"standalone_ipv6\"" ]
-                    - "    template_name=\"standalone\""
-              - !If [ AllocatePublicIPv4, !Sub '    eip=${AllocatePublicAddress}', '    eip=false']
-              - !Join [ '', [ '    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"' ] ]
-              - !Join [ '', [ '    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"' ] ]
-              - !Join [ '', [ '    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"' ] ]
-              - !Sub [ '    version=${Version}', { Version: !Select [ 0, !Split [ '-', !Ref StandaloneVersion ] ] } ]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260216\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - !If [IsIPv6Enabled, !If [IsIPv4Enabled, '    template_name="standalone_dual_stack"', '    template_name="standalone_ipv6"'], '    template_name="standalone"']
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref StandaloneVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   PublicAddress:
     Type: AWS::EC2::EIP

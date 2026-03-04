@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Cluster into an existing VPC (20260302)
+Description: |
+  Deploys a Check Point Cluster into an existing VPC (20260302).
+  See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -360,7 +363,7 @@ Parameters:
       - false
   VolumeSize:
     Type: Number
-    Default: 100
+    Default: 200
     MinValue: 100
   VolumeType:
     Description: General Purpose SSD Volume Type
@@ -499,7 +502,6 @@ Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   CreateRole: !Equals [!Ref GatewayPredefinedRole, '']
-  ProvidedPassHash: !Not [!Equals [!Ref GatewayPasswordHash, '']]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   EmptyHostName: !Equals [!Ref GatewayHostname, '']
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
@@ -521,8 +523,8 @@ Resources:
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
       Parameters:
-          PolicyName: !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
-          PolicyRole: !If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]
+        PolicyName: !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+        PolicyRole: !If [CreateRole, !GetAtt ClusterRole.Outputs.ClusterIAMRole, !Ref GatewayPredefinedRole]
   AMI:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -546,7 +548,6 @@ Resources:
               - PermissiveSecurityGroup
   MemberAExternalInterface:
     Type: AWS::EC2::NetworkInterface
-    DependsOn: PermissiveSecurityGroup
     Properties:
       Description: Member A external.
       SecondaryPrivateIpAddressCount: 1
@@ -562,7 +563,6 @@ Resources:
               - Member_A_ExternalInterface
   MemberBExternalInterface:
     Type: AWS::EC2::NetworkInterface
-    DependsOn: PermissiveSecurityGroup
     Properties:
       Description: Member B external.
       SourceDestCheck: false
@@ -577,7 +577,6 @@ Resources:
               - Member_B_ExternalInterface
   MemberAInternalInterface:
     Type: AWS::EC2::NetworkInterface
-    DependsOn: PermissiveSecurityGroup
     Properties:
       Description: Member A internal.
       SecondaryPrivateIpAddressCount: 1
@@ -593,7 +592,6 @@ Resources:
               - Member_A_InternalInterface
   MemberBInternalInterface:
     Type: AWS::EC2::NetworkInterface
-    DependsOn: PermissiveSecurityGroup
     Properties:
       Description: Member B internal.
       GroupSet: [!Ref PermissiveSecurityGroup]
@@ -609,7 +607,6 @@ Resources:
   InternalDefaultRoute:
     Type: AWS::EC2::Route
     Condition: ProvidedRouteTable
-    DependsOn: MemberAInternalInterface
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
       NetworkInterfaceId: !Ref MemberAInternalInterface
@@ -622,7 +619,6 @@ Resources:
       SubnetId: !Ref PrivateSubnet
   MemberAInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberAExternalInterface, MemberAInternalInterface, MemberAGatewayLaunchTemplate]
     Properties:
       LaunchTemplate:
         LaunchTemplateId: !Ref MemberAGatewayLaunchTemplate
@@ -634,18 +630,17 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberAPublicAddress, '' ] ] ]
-              - !Join [ '=', [ external-private-ip, !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress ] ]
-              - !Join [ '=', [ internal-private-ip, !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress ] ]
+            - [!Join ['=', ['public-ip', !If [AllocateAddress, !Ref MemberAPublicAddress, '']]],
+               !Join ['=', ['external-private-ip', !GetAtt MemberAExternalInterface.PrimaryPrivateIpAddress]],
+               !Join ['=', ['internal-private-ip', !GetAtt MemberAInternalInterface.PrimaryPrivateIpAddress]]]
         - Key: x-chkp-cluster-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
-              - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
-              - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
+            - [!Join ['=', ['cluster-ip', !Ref ClusterPublicAddress]],
+               !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]],
+               !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]]
   MemberBInstance:
     Type: AWS::EC2::Instance
-    DependsOn: [MemberBExternalInterface, MemberBInternalInterface, MemberBGatewayLaunchTemplate]
     Properties:
       LaunchTemplate:
         LaunchTemplateId: !Ref MemberBGatewayLaunchTemplate
@@ -657,15 +652,15 @@ Resources:
         - Key: x-chkp-member-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ public-ip, !If [ AllocateAddress, !Ref MemberBPublicAddress, '' ] ] ]
-              - !Join [ '=', [ external-private-ip, !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress ] ]
-              - !Join [ '=', [ internal-private-ip, !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress ] ]
+            - [!Join ['=', ['public-ip', !If [AllocateAddress, !Ref MemberBPublicAddress, '']]],
+               !Join ['=', ['external-private-ip', !GetAtt MemberBExternalInterface.PrimaryPrivateIpAddress]],
+               !Join ['=', ['internal-private-ip', !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress]]]
         - Key: x-chkp-cluster-ips
           Value: !Join
             - ':'
-            - - !Join [ '=', [ cluster-ip, !Ref ClusterPublicAddress ] ]
-              - !Join [ '=', [ cluster-eth0-private-ip, !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ] ] ]
-              - !Join [ '=', [ cluster-eth1-private-ip, !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ] ] ]
+            - [!Join ['=', ['cluster-ip', !Ref ClusterPublicAddress]],
+               !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]],
+               !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]]
   MemberAGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -681,12 +676,12 @@ Resources:
         MetadataOptions:
           HttpTokens: !If [EnableMetaDataToken, required, optional]
         BlockDeviceMappings:
-            - DeviceName: '/dev/xvda'
-              Ebs:
-                Encrypted: !If [ EncryptedVolume, true, false ]
-                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
-                VolumeType: !Ref VolumeType
-                VolumeSize: !Ref VolumeSize
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [EncryptedVolume, true, false]
+              KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
           Name: !Ref ClusterInstanceProfile
         UserData:
@@ -699,14 +694,14 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenA=''${MemberAToken}'''
-              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-a']
+              - !If [EmptyHostName, '    hostname=""', !Sub '    hostname=${GatewayHostname}-member-a']
               - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberAPublicAddress, ''], '"']]
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   MemberBGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -723,12 +718,12 @@ Resources:
         MetadataOptions:
           HttpTokens: !If [EnableMetaDataToken, required, optional]
         BlockDeviceMappings:
-            - DeviceName: '/dev/xvda'
-              Ebs:
-                Encrypted: !If [ EncryptedVolume, true, false ]
-                KmsKeyId: !If [ EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue' ]
-                VolumeType: !Ref VolumeType
-                VolumeSize: !Ref VolumeSize
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [EncryptedVolume, true, false]
+              KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
         IamInstanceProfile:
           Name: !Ref ClusterInstanceProfile
         UserData:
@@ -741,14 +736,14 @@ Resources:
               - '  - |'
               - '    set -e'
               - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; tokenB=''${MemberBToken}'''
-              - !If [EmptyHostName, '    hostname=""',!Sub '    hostname=${GatewayHostname}-member-b']
+              - !If [EmptyHostName, '    hostname=""', !Sub '    hostname=${GatewayHostname}-member-b']
               - !Join ['', ['    eip="', !If [AllocateAddress, !Ref MemberBPublicAddress, ''], '"']]
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260101\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   ClusterPublicAddress:
     Type: AWS::EC2::EIP
@@ -832,27 +827,26 @@ Outputs:
     Value: !GetAtt MemberBInternalInterface.PrimaryPrivateIpAddress
   ClusterPrivateAliasExternalAddress:
     Description: The secondary external private IP address of the cluster.
-    Value: !Select [ 0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses ]
+    Value: !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]
   ClusterPrivateAliasInternalAddress:
     Description: The secondary internal private IP address of the cluster.
-    Value: !Select [ 0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses ]
+    Value: !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]
 
 Rules:
   MemberATokenNotProvided:
     RuleCondition: !Equals [!Ref MemberAToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty."
+      - AssertDescription: "Smart-1 Cloud Token for member A can not be empty"
         Assert: !Equals [!Ref MemberBToken, '']
   MemberBTokenNotProvided:
-    RuleCondition: !Equals [ !Ref MemberBToken, '' ]
+    RuleCondition: !Equals [!Ref MemberBToken, '']
     Assertions:
-      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty."
-        Assert: !Equals [ !Ref MemberAToken, '' ]
+      - AssertDescription: "Smart-1 Cloud Token for member B can not be empty"
+        Assert: !Equals [!Ref MemberAToken, '']
   MembersTokenValueEquals:
     RuleCondition: !EachMemberEquals [[!Ref MemberBToken], !Ref MemberAToken]
     Assertions:
       - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
-        Assert: !Equals [ !Ref MemberAToken, '' ]
+        Assert: !Equals [!Ref MemberAToken, '']
       - AssertDescription: "The same Smart-1 Cloud token is used for the two Cluster members. Each Cluster member must have a unique token"
-        Assert: !Equals [ !Ref MemberBToken, '' ]
-
+        Assert: !Equals [!Ref MemberBToken, '']

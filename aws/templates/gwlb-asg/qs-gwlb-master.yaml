@@ -1,5 +1,8 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260101)
+Description: |
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260302).
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -142,9 +145,9 @@ Metadata:
       TargetGroupName:
         default: Target Group Name
       AcceptConnectionRequired:
-        default:  Connection Acceptance Required
+        default: Connection Acceptance Required
       CrossZoneLoadBalancing:
-        default:  Enable Cross Zone Load Balancing
+        default: Enable Cross Zone Load Balancing
       GatewayName:
         default: Gateways name
       GatewayInstanceType:
@@ -309,7 +312,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
@@ -1003,7 +1006,7 @@ Parameters:
     AllowedPattern: '^(ami-(([0-9a-f]{8})|([0-9a-f]{17})))$'
     ConstraintDescription: Amazon Machine Image ID must be in the form ami-xxxxxxxx or ami-xxxxxxxxxxxxxxxxx.
   SubnetTagsInboundCIDR:
-    Description: Inbound Subnet tagging for Inspection (Comma-delimited list of CIDR blocks for inspection), For more information, visit the documentation at CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide Admin guide. 
+    Description: Inbound Subnet tagging for Inspection (Comma-delimited list of CIDR blocks for inspection), For more information, visit the documentation at CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide Admin guide.
     Type: CommaDelimitedList
     Default: "0.0.0.0/0"
   SubnetTagsOutboundCIDR:
@@ -1019,9 +1022,6 @@ Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
-  EncryptedProtocol: !Equals [ ALBProtocol, HTTPS ]
-  ProvidedPort: !Not [!Equals [!Ref ServicePort, '']]
-  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
   SecurityVPCStack:
@@ -1029,7 +1029,7 @@ Resources:
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
       Parameters:
-        AvailabilityZones: !Join [',' , !Ref AvailabilityZones]
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
         VPCCIDR: !Ref SecurityVPCCIDR
         PublicSubnet1CIDR: !Ref SecurityPublicSubnet1CIDR
@@ -1042,7 +1042,7 @@ Resources:
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb-servers-vpc.yaml
       Parameters:
-        AvailabilityZones: !Join [ ',' , !Ref AvailabilityZones ]
+        AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
         VPCCIDR: !Ref ServersVPCCIDR
         ServersSubnet1CIDR: !Ref ServersPublicSubnet1CIDR
@@ -1053,11 +1053,10 @@ Resources:
         GWLBeSubnet2CIDR: !Ref GWLBeSubnet2CIDR
         GWLBeSubnet3CIDR: !Ref GWLBeSubnet3CIDR
         GWLBeSubnet4CIDR: !Ref GWLBeSubnet4CIDR
-        SubnetTagsOutboundCIDR: !Join [ ',' , !Ref SubnetTagsOutboundCIDR ]
-        SubnetTagsInboundCIDR: !Join [ ',' , !Ref SubnetTagsInboundCIDR ]
+        SubnetTagsOutboundCIDR: !Join [',', !Ref SubnetTagsOutboundCIDR]
+        SubnetTagsInboundCIDR: !Join [',', !Ref SubnetTagsInboundCIDR]
   MainStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: [SecurityVPCStack, ServersVPCStack]
     Properties:
       TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/qs-gwlb.yaml
       Parameters:
@@ -1068,11 +1067,21 @@ Resources:
           - ','
           - - !GetAtt SecurityVPCStack.Outputs.PublicSubnet1ID
             - !GetAtt SecurityVPCStack.Outputs.PublicSubnet2ID
-            - !If [ 3AZs, !GetAtt SecurityVPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue' ]
-            - !If [ 4AZs, !GetAtt SecurityVPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue' ]
+            - !If [3AZs, !GetAtt SecurityVPCStack.Outputs.PublicSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt SecurityVPCStack.Outputs.PublicSubnet4ID, !Ref 'AWS::NoValue']
         ServersVPC: !GetAtt ServersVPCStack.Outputs.VPCID
-        ServersSubnets: !Join [',', [!GetAtt ServersVPCStack.Outputs.ServersSubnet1ID, !GetAtt ServersVPCStack.Outputs.ServersSubnet2ID, !If [ 3AZs, !GetAtt ServersVPCStack.Outputs.ServersSubnet3ID, !Ref 'AWS::NoValue' ], !If [ 4AZs, !GetAtt ServersVPCStack.Outputs.ServersSubnet4ID, !Ref 'AWS::NoValue' ]]]
-        GWLBeSubnets: !Join [',', [!GetAtt ServersVPCStack.Outputs.GWLBeSubnet1ID, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet2ID, !If [ 3AZs, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet3ID, !Ref 'AWS::NoValue' ], !If [ 4AZs, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet4ID, !Ref 'AWS::NoValue' ]]]
+        ServersSubnets: !Join
+          - ','
+          - - !GetAtt ServersVPCStack.Outputs.ServersSubnet1ID
+            - !GetAtt ServersVPCStack.Outputs.ServersSubnet2ID
+            - !If [3AZs, !GetAtt ServersVPCStack.Outputs.ServersSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt ServersVPCStack.Outputs.ServersSubnet4ID, !Ref 'AWS::NoValue']
+        GWLBeSubnets: !Join
+          - ','
+          - - !GetAtt ServersVPCStack.Outputs.GWLBeSubnet1ID
+            - !GetAtt ServersVPCStack.Outputs.GWLBeSubnet2ID
+            - !If [3AZs, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet3ID, !Ref 'AWS::NoValue']
+            - !If [4AZs, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet4ID, !Ref 'AWS::NoValue']
         KeyName: !Ref KeyName
         EnableVolumeEncryption: !Ref EnableVolumeEncryption
         VolumeType: !Ref VolumeType
@@ -1115,13 +1124,13 @@ Resources:
         ResourcesTagName: !Ref ResourcesTagName
         ServerInstanceType: !Ref ServerInstanceType
         ServerAMI: !Ref ServerAMI
-        ServerIGW: !GetAtt ServersVPCStack.Outputs.IGWID  
+        ServerIGW: !GetAtt ServersVPCStack.Outputs.IGWID
         ServersCIDRs: !Join
           - ','
           - - !Ref ServersPublicSubnet1CIDR
             - !Ref ServersPublicSubnet2CIDR
-            - !If [ 3AZs, !Ref ServersPublicSubnet3CIDR, !Ref 'AWS::NoValue' ]
-            - !If [ 4AZs, !Ref ServersPublicSubnet4CIDR, !Ref 'AWS::NoValue' ]
+            - !If [3AZs, !Ref ServersPublicSubnet3CIDR, !Ref 'AWS::NoValue']
+            - !If [4AZs, !Ref ServersPublicSubnet4CIDR, !Ref 'AWS::NoValue']
 
 Outputs:
   SecurityVPCID:
@@ -1158,7 +1167,7 @@ Outputs:
     Value: !GetAtt MainStack.Outputs.ServerLBURL
     Condition: DeployManagement
   ServerSecurityGroupID:
-    Description: The Application Servers Security Group ID.  
+    Description: The Application Servers Security Group ID.
     Value: !GetAtt MainStack.Outputs.ServerSecurityGroupID
     Condition: DeployManagement
   Server1EndpointRoute:
@@ -1177,8 +1186,8 @@ Outputs:
     Condition: 4AZs
 
 Rules:
- GatewayAddressAllocationRule:
-   RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
-   Assertions:
-     - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
-       Assert: !Equals [!Ref AllocatePublicAddress, 'true']
+  GatewayAddressAllocationRule:
+    RuleCondition: !Equals [!Ref ControlGatewayOverPrivateOrPublicAddress, 'public']
+    Assertions:
+      - AssertDescription: "Gateway's selected to be provisioned by public IP, but ['AllocatePublicAddress'] parameter is false"
+        Assert: !Equals [!Ref AllocatePublicAddress, 'true']

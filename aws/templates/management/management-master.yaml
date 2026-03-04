@@ -1,6 +1,7 @@
+---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Management Server into a new VPC (20260216)
+  Deploys a Check Point Management Server into a new VPC (20260302)
   See sk130372 administration guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -87,7 +88,7 @@ Metadata:
       ManagementPasswordHash:
         default: Password hash
       ManagementMaintenancePasswordHash:
-        default:  Management Maintenance Password hash
+        default: Management Maintenance Password hash
       ManagementHostname:
         default: Management Hostname
       ManagementInstallationType:
@@ -339,7 +340,7 @@ Parameters:
   VolumeSize:
     Type: Number
     MinValue: 100
-    Default: 100
+    Default: 200
   VolumeType:
     Description: General Purpose SSD Volume Type
     Type: String
