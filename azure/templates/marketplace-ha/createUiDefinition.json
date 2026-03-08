@@ -5,6 +5,52 @@
   "parameters": {
     "basics": [
       {
+        "name": "zoneInfo",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "request": {
+          "method": "GET",
+          "path": "[concat('/subscriptions/', subscription().subscriptionId, '/locations/?api-version=2022-12-01')]"
+        }
+      },
+      {
+        "name": "availabilityZonesChoice",
+        "type": "Microsoft.Common.OptionsGroup",
+        "label": "Use availability zones",
+        "defaultValue": "No",
+        "toolTip": "Deploy the Cluster VMs across availability zones for high availability and fault tolerance.",
+        "constraints": {
+          "allowedValues": [
+            { "label": "No", "value": "No" },
+            { "label": "Yes", "value": "Yes" }
+          ]
+        },
+        "visible": "[and(not(empty(basics('zoneInfo').value)), greater(int(if(greater(length(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))), 0), if(greater(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings), 0), string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)), '0'), '0')), 0))]"
+      },
+      {
+        "name": "zonesDropdown",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Choose zones",
+        "toolTip": "Select availability zones for deployment.",
+        "multiselect": true,
+        "selectAll": false,
+        "filter": true,
+        "defaultValue": ["1", "2"],
+        "constraints": {
+          "allowedValues": "[map(range(1, int(string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)))), (item) => parse(concat('{\"label\":\"Zone ', string(item), '\",\"value\":\"', string(item), '\"}')))]",
+          "required": false
+        },
+        "visible": "[equals(basics('availabilityZonesChoice'), 'Yes')]"
+      },
+      {
+        "name": "zonesTooMany",
+        "type": "Microsoft.Common.InfoBox",
+        "visible": "[and(equals(basics('availabilityZonesChoice'), 'Yes'), greater(length(coalesce(basics('zonesDropdown'), parse('[]'))), 2))]",
+        "options": {
+          "icon": "Error",
+          "text": "HA cluster deploys exactly 2 VMs. Please select at most 2 availability zones."
+        }
+      },
+      {
         "name": "basics settings text block",
         "type": "Microsoft.Common.TextBlock",
         "visible": true,
@@ -63,7 +109,7 @@
           {
             "name": "InfoAzureAdminGuide",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "true",
+            "visible": "[not(equals(steps('chkp-advanced').adminShell, '__dependency__'))]",
             "options": {
               "icon": "Info",
               "text": "See <a href='https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_CloudGuard_Network_for_Azure_HA_Cluster/Content/Topics-Azure-HA/Introduction.htm' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps "
@@ -1144,26 +1190,6 @@
             }
           },
           {
-            "name": "availabilityOptions",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Availability options",
-            "defaultValue": "Availability Set",
-            "toolTip": "Use replicated Cluster VMs in Availability Set or Availability Zones. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth', concat(' ', location(), ' '))]",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "Availability Set",
-                  "value": "Availability Set"
-                },
-                {
-                  "label": "Availability Zones",
-                  "value": "Availability Zones"
-                }
-              ]
-            }
-          },
-          {
             "name": "bootstrapScript",
             "type": "Microsoft.Common.FileUpload",
             "label": "Bootstrap script",
@@ -1848,7 +1874,8 @@
       "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
       "managedSystemAssigned": "[steps('chkp-advanced').managedSystemAssigned]",
       "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
-      "availabilityOptions": "[steps('chkp-advanced').availabilityOptions]",
+      "availabilityZones": "[if(equals(basics('availabilityZonesChoice'), 'Yes'), if(greater(length(coalesce(basics('zonesDropdown'), parse('[]'))), 0), basics('zonesDropdown'), parse('[\"1\", \"2\"]')), parse('[]'))]",
+      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]",
       "customMetrics": "[steps('chkp-advanced').customMetrics]",
       "floatingIP": "[steps('chkp-advanced').floatingIP]",
       "publicIPPrefix": "[steps('chkp-advanced').publicIPPrefix]",
