@@ -5,6 +5,43 @@
   "parameters": {
     "basics": [
       {
+        "name": "zoneInfo",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "request": {
+          "method": "GET",
+          "path": "[concat('/subscriptions/', subscription().subscriptionId, '/locations/?api-version=2022-12-01')]"
+        }
+      },
+      {
+        "name": "availabilityZonesChoice",
+        "type": "Microsoft.Common.OptionsGroup",
+        "label": "Use availability zones",
+        "defaultValue": "No",
+        "toolTip": "Deploy the VMSS across availability zones for high availability and fault tolerance.",
+        "constraints": {
+          "allowedValues": [
+            { "label": "No", "value": "No" },
+            { "label": "Yes", "value": "Yes" }
+          ]
+        },
+        "visible": "[and(not(empty(basics('zoneInfo').value)), greater(int(if(greater(length(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))), 0), if(greater(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings), 0), string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)), '0'), '0')), 0))]"
+      },
+      {
+        "name": "zonesDropdown",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Choose zones",
+        "toolTip": "Select availability zones for deployment.",
+        "multiselect": true,
+        "selectAll": true,
+        "filter": true,
+        "defaultValue": ["1", "2", "3"],
+        "constraints": {
+          "allowedValues": "[map(range(1, int(string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)))), (item) => parse(concat('{\"label\":\"Zone ', string(item), '\",\"value\":\"', string(item), '\"}')))]",
+          "required": false
+        },
+        "visible": "[equals(basics('availabilityZonesChoice'), 'Yes')]"
+      },
+      {
         "name": "CloudGuard VMSS settings text block",
         "type": "Microsoft.Common.TextBlock",
         "visible": true,
@@ -1397,34 +1434,6 @@
             }
           },
           {
-            "name": "availabilityZonesNum",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Number of Availability Zones to use",
-            "defaultValue": "None",
-            "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth ', concat(' ', location(), ' '))]",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "None",
-                  "value": 0
-                },
-                {
-                  "label": "One zone",
-                  "value": 1
-                },
-                {
-                  "label": "Two zones",
-                  "value": 2
-                },
-                {
-                  "label": "Three zones",
-                  "value": 3
-                }
-              ]
-            }
-          },
-          {
             "name": "customMetrics",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable CloudGuard metrics",
@@ -2005,7 +2014,6 @@
       "mgmtIPaddress": "[steps('autoprovision').mgmtIPaddress]",
       "appLoadDistribution": "[steps('chkp-advanced').appLoadDistribution]",
       "ilbLoadDistribution": "[steps('chkp-advanced').ilbLoadDistribution]",
-      "availabilityZonesNum": "[coalesce(steps('chkp-advanced').availabilityZonesNum, int('0'))]",
       "customMetrics": "[steps('chkp-advanced').customMetrics]",
       "cloudGuardVersion": "[concat(steps('autoprovision').cloudGuardVersion, ' - ', coalesce(steps('autoprovision').R80Offer, 'Bring Your Own License'))]",
       "vmSize": "[coalesce(steps('autoprovision').R8110vmSizeUiBYOL, steps('autoprovision').R8110vmSizeUiNGTP, steps('autoprovision').R8110vmSizeUiNGTX , steps('autoprovision').R8120vmSizeUiBYOL, steps('autoprovision').R8120vmSizeUiNGTP, steps('autoprovision').R8120vmSizeUiNGTX, steps('autoprovision').R82vmSizeUiBYOL, steps('autoprovision').R82vmSizeUiNGTP, steps('autoprovision').R82vmSizeUiNGTX, steps('autoprovision').R8210vmSizeUiBYOL, steps('autoprovision').R8210vmSizeUiNGTP, steps('autoprovision').R8210vmSizeUiNGTX)]",
@@ -2043,7 +2051,9 @@
       "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
       "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]"
+      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]",
+      "availabilityZones": "[if(equals(basics('availabilityZonesChoice'), 'Yes'), if(greater(length(coalesce(basics('zonesDropdown'), parse('[]'))), 0), basics('zonesDropdown'), parse('[\"1\", \"2\", \"3\"]')), parse('[]'))]",
+      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]"
     }
   }
 }
