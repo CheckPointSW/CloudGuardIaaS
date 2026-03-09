@@ -1485,7 +1485,7 @@
     "vnetID": "[if(variables('deployNewVnet'), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', variables('networkNewDeploymentName')), resourceId(variables('vnetRGName'), 'Microsoft.Resources/deployments', variables('networkExistingDeploymentName')))]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
     "customImageId": "[variables('imageReferenceCustomUri').id]",
-    "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIP'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
+    "mgmtInterface": "[if(equals(parameters('instanceLevelPublicIPv4'), 'yes'), parameters('mgmtInterfaceOpt1'), parameters('mgmtInterfaceOpt2'))]",
     "mgmtIpAddressType": "[split(variables('mgmtInterface'), '-')[1]]",
     "mgmtInterfaceName": "[split(variables('mgmtInterface'), '-')[0]]",
     "mgmtIPaddress": "[if(equals(variables('mgmtInterfaceName'), 'eth0'), parameters('mgmtIPaddress'), '')]",
