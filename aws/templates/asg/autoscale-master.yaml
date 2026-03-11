@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into a new VPC (20260302)
+  Create an Auto Scaling group of Check Point gateways into a new VPC (20260310)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -32,6 +32,7 @@ Metadata:
           - PrivateSubnet4CIDR
           - AutoScaleGroupName
           - GatewayName
+          - IPMode
           - VolumeSize
           - VolumeType
           - EnableVolumeEncryption
@@ -50,9 +51,6 @@ Metadata:
           - ControlGatewayOverPrivateOrPublicAddress
           - ManagementServer
           - ConfigurationTemplate
-          - ELBType
-          - ELBPort
-          - ELBClients
     ParameterLabels:
       AvailabilityZones:
         default: Availability Zones
@@ -82,6 +80,8 @@ Metadata:
         default: Gateways Instance type
       KeyName:
         default: Key name
+      IPMode:
+        default: IP Configuration Mode
       VolumeSize:
         default: Root volume size (GB)
       VolumeType:
@@ -122,12 +122,6 @@ Metadata:
         default: Management Server Settings - Management Name
       ConfigurationTemplate:
         default: Management Server Settings - Configuration template
-      ELBType:
-        default: Proxy Settings - Proxy type
-      ELBPort:
-        default: Proxy Settings - Proxy port
-      ELBClients:
-        default: Proxy Settings - Allowed proxy clients
       AutoScaleGroupName:
         default: Auto Scale Group name
 Parameters:
@@ -431,6 +425,14 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     MinLength: 1
     ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  IPMode:
+    Description: Specifies the IP mode for the Autoscale Group and AWS resources.
+    Type: String
+    AllowedValues:
+      - IPv4
+      # - IPv6
+      - DualStack
+    Default: IPv4
   VolumeSize:
     Type: Number
     Default: 200
@@ -568,20 +570,6 @@ Parameters:
     Default: ASG-configuration
     MinLength: 1
     MaxLength: 30
-  ELBType:
-    Type: String
-    Default: none
-    AllowedValues:
-      - none
-      - internal
-      - internet-facing
-  ELBPort:
-    Type: Number
-    Default: 8080
-  ELBClients:
-    Type: String
-    Default: 0.0.0.0/0
-    AllowedPattern: '^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})$'
   AutoScaleGroupName:
     Description: The Name of the Auto Scaling Group. (optional)
     Type: String
@@ -590,12 +578,13 @@ Parameters:
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
-  CreateELB: !Not [!Equals [!Ref ELBType, none]]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml
+      TemplateURL:
+        !If [IsIPv6Enabled, https://cgi-cfts.s3.amazonaws.com/utils/vpc-ipv6.yaml, https://cgi-cfts.s3.amazonaws.com/utils/vpc.yaml]
       Parameters:
         AvailabilityZones: !Join [',', !Ref AvailabilityZones]
         NumberOfAZs: !Ref NumberOfAZs
@@ -608,6 +597,7 @@ Resources:
         PrivateSubnet2CIDR: !Ref PrivateSubnet2CIDR
         PrivateSubnet3CIDR: !Ref PrivateSubnet3CIDR
         PrivateSubnet4CIDR: !Ref PrivateSubnet4CIDR
+        IPMode: !Ref IPMode
   AutoScaleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -643,15 +633,9 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
-        ELBType: !Ref ELBType
-        ELBPort: !Ref ELBPort
-        ELBClients: !Ref ELBClients
         AutoScaleGroupName: !Ref AutoScaleGroupName
+        IPMode: !Ref IPMode
 Outputs:
-  URL:
-    Description: The URL of the Proxy.
-    Condition: CreateELB
-    Value: !GetAtt AutoScaleStack.Outputs.URL
   SecurityGroup:
     Description: The Security Group of the Auto Scaling group.
     Value: !GetAtt AutoScaleStack.Outputs.SecurityGroup
