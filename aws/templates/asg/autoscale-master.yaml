@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into a new VPC (20260310)
+  Create an Auto Scaling group of Check Point gateways into a new VPC (20260302)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -578,7 +578,7 @@ Parameters:
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
-  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  CreateELB: !Not [!Equals [!Ref ELBType, none]]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
