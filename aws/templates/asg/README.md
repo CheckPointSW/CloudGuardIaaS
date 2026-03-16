@@ -27,6 +27,7 @@ In order to check the template version, please refer to [sk125252](https://suppo
 
 | Template Version | Description                                                                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 20260316         | Added Diagnostics.                                                                                             |
 | 20260310         | Added IPv6 support via IPMode variable.                                                                                             |
 | 20260101         | Templates version 20260101 and higher support R82.10                                                                                |
 | 20250826         | Changed the default solution version to R82-BYOL                                                                                    |
