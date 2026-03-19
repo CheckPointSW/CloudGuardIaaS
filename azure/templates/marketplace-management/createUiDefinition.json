@@ -1,9 +1,44 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-  "handler": "Microsoft.Compute.MultiVm",
+  "handler": "Microsoft.Azure.CreateUIDef",
   "version": "0.1.2-preview",
   "parameters": {
     "basics": [
+      {
+        "name": "zoneInfo",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "request": {
+          "method": "GET",
+          "path": "[concat('/subscriptions/', subscription().subscriptionId, '/locations/?api-version=2022-12-01')]"
+        }
+      },
+      {
+        "name": "availabilityZonesChoice",
+        "type": "Microsoft.Common.OptionsGroup",
+        "label": "Use availability zones",
+        "defaultValue": "No",
+        "toolTip": "Deploy the Management VM in an availability zone for high availability and fault tolerance.",
+        "constraints": {
+          "allowedValues": [
+            { "label": "No", "value": "No" },
+            { "label": "Yes", "value": "Yes" }
+          ]
+        },
+        "visible": "[and(not(empty(basics('zoneInfo').value)), greater(int(if(greater(length(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))), 0), if(greater(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings), 0), string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)), '0'), '0')), 0))]"
+      },
+      {
+        "name": "zoneDropdown",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Availability zone",
+        "toolTip": "Select the availability zone for the Management VM.",
+        "filter": true,
+        "defaultValue": "Zone 1",
+        "constraints": {
+          "allowedValues": "[map(range(1, int(string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)))), (item) => parse(concat('{\"label\":\"Zone ', string(item), '\",\"value\":\"', string(item), '\"}')))]",
+          "required": false
+        },
+        "visible": "[and(equals(basics('availabilityZonesChoice'), 'Yes'), not(equals(steps('chkp-advanced').adminShell, '__dependency__')))]"
+      },
       {
         "name": "chkp refrence architecture",
         "type": "Microsoft.Common.TextBlock",
@@ -974,6 +1009,8 @@
       }
     ],
     "outputs": {
+      "availabilityZones": "[if(equals(basics('availabilityZonesChoice'), 'Yes'), parse(concat('[\"', coalesce(basics('zoneDropdown'), '1'), '\"]')), parse('[]'))]",
+      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]",
       "location": "[location()]",
       "cloudGuardVersion": "[concat(steps('chkp').cloudGuardVersion, ' - ', coalesce(steps('chkp').R80Offer, 'Bring Your Own License'))]",
       "adminPassword": "[basics('auth').password]",
