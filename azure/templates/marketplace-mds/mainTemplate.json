@@ -217,6 +217,24 @@
         "description": "The URI of the blob containing the development image"
       }
     },
+    "availabilityZones": {
+      "type": "array",
+      "defaultValue": [],
+      "metadata": {
+        "description": "List of availability zones. When 'availabilityZonesChoice' is set to 'Yes', the VM will be deployed in the specified zone."
+      }
+    },
+    "availabilityZonesChoice": {
+      "type": "string",
+      "defaultValue": "No",
+      "allowedValues": [
+        "No",
+        "Yes"
+      ],
+      "metadata": {
+        "description": "Enable Availability Zones for the MDS VM. 'Yes' to use Availability Zones, or 'No' to deploy without zones."
+      }
+    },
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
@@ -1074,6 +1092,7 @@
     "serialConsoleIps": "[if(contains(variables('serialConsoleGeographies'),variables('location')),variables('serialConsoleGeographies')[variables('location')],createArray())]",
     "storageAccountIps": "[concat(variables('SerialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
     "isBlink": "[bool('false')]",
+    "useAZ": "[equals(parameters('availabilityZonesChoice'), 'Yes')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
     "logserver": "[equals(parameters('installationType'), 'mds-logserver')]",
@@ -1445,6 +1464,7 @@
       ],
       "location": "[variables('location')]",
       "name": "[parameters('vmName')]",
+      "zones": "[if(variables('useAZ'), if(greater(length(parameters('availabilityZones')), 0), parameters('availabilityZones'), json('[\"1\"]')), json('null'))]",
       "plan": "[if(equals(parameters('sourceImageVhdUri'),'noCustomUri'), variables('plan'), json('null'))]",
       "identity": "[variables('identity')]",
       "properties": {
