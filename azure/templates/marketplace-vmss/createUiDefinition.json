@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-  "handler": "Microsoft.Compute.MultiVm",
+  "handler": "Microsoft.Azure.CreateUIDef",
   "version": "0.1.2-preview",
   "parameters": {
     "basics": [
@@ -1225,9 +1225,9 @@
           {
             "name": "publicIPPrefix",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Public IP prefix",
+            "label": "Public IP prefix (IPv4 only)",
             "defaultValue": "No",
-            "toolTip": "Define if deploy existsing Public IP Prefix or a new Public IP Prefix.",
+            "toolTip": "Define if deploy existing Public IP Prefix or a new Public IP Prefix. IPv4 only; IPv6 prefixes are not supported.",
             "constraints": {
               "allowedValues": [
                 {
@@ -1245,8 +1245,8 @@
           {
             "name": "createNewIPPrefix",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Create new IP prefiex",
-            "toolTip": "Create new or existsing Public IP Prefix",
+            "label": "Create new IP prefix (IPv4 only)",
+            "toolTip": "Create new or existing Public IP Prefix. IPv4 only; IPv6 prefixes are not supported.",
             "defaultValue": "No",
             "constraints": {
               "allowedValues": [
@@ -1267,7 +1267,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "IPv4 IP prefix length",
             "defaultValue": "/31 (2 addresses)",
-            "toolTip": "Choose the length of the IP prefix for IP v4.",
+            "toolTip": "Choose the length of the IPv4 IP prefix. IPv4 only; IPv6 prefixes are not supported.",
             "multiselect": false,
             "selectAll": false,
             "filter": false,
@@ -2032,7 +2032,7 @@
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
-      "enableIPv6": "[steps('network').enableIpv6]",
+      "enableIpv6": "[steps('network').enableIpv6]",
       "virtualNetworkAddressPrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.virtualNetworkIpv6AddressPrefix, '')]",
       "subnet1PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet1Ipv6Prefix, '')]",
       "subnet2PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet2Ipv6Prefix, '')]",

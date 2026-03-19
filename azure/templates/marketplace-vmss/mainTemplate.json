@@ -189,7 +189,7 @@
         "yes"
       ],
       "metadata": {
-        "description": "Use public IP prefix."
+        "description": "Use public IP prefix (IPv4 only; IPv6 prefixes are not supported)."
       }
     },
     "createNewIPPrefix": {
@@ -200,7 +200,7 @@
         "yes"
       ],
       "metadata": {
-        "description": "Create new IP prefix or use an existing one."
+        "description": "Create new IP prefix or use an existing one (IPv4 only; IPv6 prefixes are not supported)."
       }
     },
     "IPv4Length": {
@@ -213,7 +213,7 @@
         "/31 (2 addresses)"
       ],
       "metadata": {
-        "description": "Choose the IP prefix length for IP v4."
+        "description": "Choose the IP prefix length for IPv4 (IPv4 only; IPv6 prefixes are not supported)."
       }
     },
     "ipPrefixExistingResourceId": {
@@ -302,7 +302,7 @@
       },
       "defaultValue": "10.0.2.4"
     },
-    "enableIPv6": {
+    "enableIpv6": {
       "type": "bool",
       "defaultValue": false,
       "metadata": {
@@ -571,7 +571,7 @@
   },
   "variables": {
     "resourceGroupName": "[resourceGroup().name]",
-    "templateName": "[if(parameters('enableIPv6'), 'vmss-v2_dual_stack', 'vmss-v2')]",
+    "templateName": "[if(parameters('enableIpv6'), 'vmss-v2_dual_stack', 'vmss-v2')]",
     "templateVersion": "20240904",
     "location": "[parameters('location')]",
     "offers": {
@@ -1474,8 +1474,8 @@
     "_artifactsLocation": "[if(contains(parameters('_artifactsLocation'),'raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/marketplace'),'https://raw.githubusercontent.com/CheckPointSW/CloudGuardIaaS/master/azure/templates/',parameters('_artifactsLocation'))]",
     "networkSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-ha-', parameters('vnetNewOrExisting'), '.json', parameters('_artifactsLocationSasToken')))]",
     "networkSetupURLDualstack": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/vnet-2-subnet-dualstack-new.json', parameters('_artifactsLocationSasToken')))]",
-    "networkNewDeploymentName": "[if(parameters('enableIPv6'), 'networkNewSetupDualstack', 'networkNewSetup')]",
-    "networkExistingDeploymentName": "[if(parameters('enableIPv6'), 'networkExistingSetupDualstack', 'networkExistingSetup')]",
+    "networkNewDeploymentName": "[if(parameters('enableIpv6'), 'networkNewSetupDualstack', 'networkNewSetup')]",
+    "networkExistingDeploymentName": "[if(parameters('enableIpv6'), 'networkExistingSetupDualstack', 'networkExistingSetup')]",
     "loadBalacerSetupURL": "[uri(variables('_artifactsLocation'), concat('nestedtemplates/load-balancers.json', parameters('_artifactsLocationSasToken')))]",
     "lbsTargetRGName": "[parameters('lbsTargetRGName')]",
     "lbRGName": "[if(variables('upgrading'), variables('lbsTargetRGName'), resourceGroup().name)]",
@@ -1538,7 +1538,7 @@
     "NewNsgReference": {
       "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
     },
-    "enableIpv6": "[parameters('enableIPv6')]",
+    "enableIpv6": "[parameters('enableIpv6')]",
     "dualstackNewVnet": "[and(variables('enableIpv6'), equals(parameters('vnetNewOrExisting'), 'new'))]",
     "appName": "[concat(parameters('vmName'), '-app-1')]",
     "appAddressNameV4": "[variables('appName')]",
@@ -1971,7 +1971,7 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
     {
-      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), not(parameters('enableIPv6')))]",
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), not(parameters('enableIpv6')))]",
       "name": "[variables('networkNewDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
@@ -2020,7 +2020,7 @@
       }
     },
     {
-      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), parameters('enableIPv6'))]",
+      "condition": "[and(equals(parameters('vnetNewOrExisting'), 'new'), parameters('enableIpv6'))]",
       "name": "[variables('networkNewDeploymentName')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
