@@ -88,6 +88,10 @@
                 {
                   "label": "R82",
                   "value": "R82"
+                },
+                {
+                  "label": "R82.10",
+                  "value": "R82.10"
                 }
               ]
             }
@@ -129,27 +133,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -180,138 +177,6 @@
               "publisher": "1740992136172",
               "offer": "check-point-cg-r8110",
               "sku": "sg-byol"
-            },
-            "count": 2
-          },
-          {
-            "name": "R8110vmSizeUiNGTP",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.10'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8110",
-              "sku": "sg-ngtp"
-            },
-            "count": 2
-          },
-          {
-            "name": "R8110vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.10'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8110",
-              "sku": "sg-ngtx"
             },
             "count": 2
           },
@@ -327,27 +192,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -378,138 +236,6 @@
               "publisher": "1740992136172",
               "offer": "check-point-cg-r8120",
               "sku": "sg-byol"
-            },
-            "count": 2
-          },
-          {
-            "name": "R8120vmSizeUiNGTP",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8120",
-              "sku": "sg-ngtp"
-            },
-            "count": 2
-          },
-          {
-            "name": "R8120vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R81.20'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8120",
-              "sku": "sg-ngtx"
             },
             "count": 2
           },
@@ -525,27 +251,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -580,9 +299,9 @@
             "count": 2
           },
           {
-            "name": "R82vmSizeUiNGTP",
+            "name": "R8210vmSizeUiBYOL",
             "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, '(NGTP)'))]",
+            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82.10'), contains(steps('chkp').R80Offer, 'Bring Your Own License'))]",
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
@@ -591,27 +310,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -640,74 +352,8 @@
             "osPlatform": "Linux",
             "imageReference": {
               "publisher": "1740992136172",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtp"
-            },
-            "count": 2
-          },
-          {
-            "name": "R82vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('chkp').cloudGuardVersion, 'R82'), contains(steps('chkp').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtx"
+              "offer": "check-point-cg-r8210",
+              "sku": "sg-byol"
             },
             "count": 2
           },
@@ -759,25 +405,37 @@
           },
           {
             "name": "Smart1CloudTokenA",
-            "type": "Microsoft.Common.TextBox",
-            "label": "Smart-1 Cloud Token Member A",
+            "type": "Microsoft.Common.PasswordBox",
+            "label": {
+              "password": "Smart-1 Cloud Token Member A",
+              "confirmPassword": "Confirm Smart-1 Cloud Token Member A"
+            },
             "toolTip": "Paste here the token copied from the Connect Gateway (Member A) screen in Smart-1 Cloud portal",
             "constraints": {
               "required": true,
               "regex": "[\\S\\s]{5,}",
-              "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+              "validationMessage": "Smart1Cloud Token Should contain at least 5 characters"
+            },
+            "options": {
+              "hideConfirmation": false
             },
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           },
           {
               "name": "Smart1CloudTokenB",
-              "type": "Microsoft.Common.TextBox",
-              "label": "Smart-1 Cloud Token Member B",
+              "type": "Microsoft.Common.PasswordBox",
+              "label": {
+                "password": "Smart-1 Cloud Token Member B",
+                "confirmPassword": "Confirm Smart-1 Cloud Token Member B"
+              },
               "toolTip": "Paste here the token copied from the Connect Gateway (Member B) screen in Smart-1 Cloud portal",
               "constraints": {
                 "required": true,
                 "regex": "[\\S\\s]{5,}",
-                "validationMessage": "Smart1Cloud Token Should contain at lease 5 characters"
+                "validationMessage": "Smart1Cloud Token Should contain at least 5 characters"
+              },
+              "options": {
+                "hideConfirmation": false
               },
               "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]"
           }
@@ -1102,7 +760,7 @@
             "name": "floatingIP",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the Load Balancers with floating IP",
-            "defaultValue": "No",
+            "defaultValue": "Yes",
             "toolTip": "Deploy the Load Balancers with floating IP.",
             "constraints": {
               "allowedValues": [
@@ -1479,6 +1137,35 @@
             "visible": "[steps('network').NSG]"
           },
           {
+            "name": "storageAccountDeployMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Storage Account Deployment Mode",
+            "toolTip": "Select your preferred Storage Account deployment mode, New to a new Storage Account, Existing to an existing Storage Account, Managed to managed Storage Account, None to deploy without a Storage Account",
+            "defaultValue": "New",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "New",
+                  "value": "New"
+                },
+                {
+                  "label": "Existing",
+                  "value": "Existing"
+                },
+                {
+                  "label": "Managed",
+                  "value": "Managed"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
             "name": "addStorageAccountIpRules",
             "type": "Microsoft.Common.OptionsGroup",
             "defaultValue": "Network access from all networks",
@@ -1495,9 +1182,48 @@
                   "value": true
                 }
               ],
-              "required": true
+              "required": "[equals(steps('network').storageAccountDeployMode, 'New')]"
             },
-            "visible": true
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'New')]"
+          },
+          {
+            "name": "existingStorageAccount",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Storage Account",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing Storage Account",
+            "resourceType": "Microsoft.Storage/storageAccounts",
+            "constraints": {
+              "required": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+            },
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+          },
+          {
+            "name": "infoExistingStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
+            "options": {
+              "icon": "Info",
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+            }
+          },
+          {
+            "name": "infoManagedStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Managed')]",
+            "options": {
+              "icon": "Info",
+              "text": "Azure will use a managed Storage Account for the deployment, no additional configuration is required."
+            }
+          },
+          {
+            "name": "warningNoneStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
+            "options": {
+              "icon": "Warning",
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+            }
           }
         ]
       },
@@ -1540,7 +1266,7 @@
       "authenticationType": "[basics('auth').authenticationType]",
       "sshPublicKey": "[basics('auth').sshPublicKey]",
       "vmName": "[basics('clusterObjectNameUi')]",
-      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8110vmSizeUiNGTP, steps('chkp').R8110vmSizeUiNGTX, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R8120vmSizeUiNGTP, steps('chkp').R8120vmSizeUiNGTX, steps('chkp').R82vmSizeUiBYOL, steps('chkp').R82vmSizeUiNGTP, steps('chkp').R82vmSizeUiNGTX)]",
+      "vmSize": "[coalesce(steps('chkp').R8110vmSizeUiBYOL, steps('chkp').R8120vmSizeUiBYOL, steps('chkp').R82vmSizeUiBYOL, steps('chkp').R8210vmSizeUiBYOL)]",
       "sicKey": "[steps('chkp').sicKeyUi]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefixes": "[steps('network').virtualNetwork.addressPrefixes]",
@@ -1571,7 +1297,9 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "storageAccountDeployMode": "[steps('network').storageAccountDeployMode]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "VipsNumber": "[int(steps('network').Vips_Number)]",
       "VipNames": "[concat(steps('network').VIP_Names.VIP2_Name, ',', steps('network').VIP_Names.VIP3_Name, ',', steps('network').VIP_Names.VIP4_Name, ',', steps('network').VIP_Names.VIP5_Name, ',', steps('network').VIP_Names.VIP6_Name, ',', steps('network').VIP_Names.VIP7_Name, ',', steps('network').VIP_Names.VIP8_Name, ',', steps('network').VIP_Names.VIP9_Name, ',', steps('network').VIP_Names.VIP10_Name)]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",

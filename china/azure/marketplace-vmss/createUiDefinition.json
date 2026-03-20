@@ -99,7 +99,7 @@
               "regex": "^[a-z0-9A-Z_\\-]{1,30}$",
               "validationMessage": "Field cannot be empty. Only alphanumeric characters or '_'/'-' are allowed, and the name must be 1-30 characters long."
             }
-          },
+          }, 
           {
             "name": "mgmtIPaddress",
             "type": "Microsoft.Common.TextBox",
@@ -131,6 +131,10 @@
                 {
                   "label": "R82",
                   "value": "R82"
+                },
+                {
+                  "label": "R82.10",
+                  "value": "R82.10"
                 }
               ]
             }
@@ -172,27 +176,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -223,138 +220,6 @@
               "publisher": "1740992136172",
               "offer": "check-point-cg-r8110",
               "sku": "sg-byol"
-            },
-            "count": "[steps('chkp-advanced').vmCount]"
-          },
-          {
-            "name": "R8110vmSizeUiNGTP",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), contains(steps('autoprovision').R80Offer, '(NGTP)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8110",
-              "sku": "sg-ngtp"
-            },
-            "count": "[steps('chkp-advanced').vmCount]"
-          },
-          {
-            "name": "R8110vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), contains(steps('autoprovision').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8110",
-              "sku": "sg-ngtx"
             },
             "count": "[steps('chkp-advanced').vmCount]"
           },
@@ -370,27 +235,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -421,138 +279,6 @@
               "publisher": "1740992136172",
               "offer": "check-point-cg-r8120",
               "sku": "sg-byol"
-            },
-            "count": "[steps('chkp-advanced').vmCount]"
-          },
-          {
-            "name": "R8120vmSizeUiNGTP",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), contains(steps('autoprovision').R80Offer, '(NGTP)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8120",
-              "sku": "sg-ngtp"
-            },
-            "count": "[steps('chkp-advanced').vmCount]"
-          },
-          {
-            "name": "R8120vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), contains(steps('autoprovision').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r8120",
-              "sku": "sg-ngtx"
             },
             "count": "[steps('chkp-advanced').vmCount]"
           },
@@ -568,27 +294,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -623,9 +342,9 @@
             "count": "[steps('chkp-advanced').vmCount]"
           },
           {
-            "name": "R82vmSizeUiNGTP",
+            "name": "R8210vmSizeUiBYOL",
             "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R82'), contains(steps('autoprovision').R80Offer, '(NGTP)'))]",
+            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R82.10'), contains(steps('autoprovision').R80Offer, 'Bring Your Own License'))]",
             "label": "Virtual machine size",
             "toolTip": "The VM size of the Security Gateway",
             "recommendedSizes": [
@@ -634,27 +353,20 @@
             ],
             "constraints": {
               "allowedSizes": [
+                "Standard_D2_v4",
                 "Standard_D4_v4",
                 "Standard_D8_v4",
                 "Standard_D16_v4",
                 "Standard_D32_v4",
                 "Standard_D48_v4",
                 "Standard_D64_v4",
+                "Standard_D2s_v4",
                 "Standard_D4s_v4",
                 "Standard_D8s_v4",
                 "Standard_D16s_v4",
                 "Standard_D32s_v4",
                 "Standard_D48s_v4",
                 "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
                 "Standard_D2d_v4",
                 "Standard_D4d_v4",
                 "Standard_D8d_v4",
@@ -683,74 +395,8 @@
             "osPlatform": "Linux",
             "imageReference": {
               "publisher": "1740992136172",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtp"
-            },
-            "count": "[steps('chkp-advanced').vmCount]"
-          },
-          {
-            "name": "R82vmSizeUiNGTX",
-            "type": "Microsoft.Compute.SizeSelector",
-            "visible": "[and(equals(steps('autoprovision').cloudGuardVersion, 'R82'), contains(steps('autoprovision').R80Offer, '(NGTX)'))]",
-            "label": "Virtual machine size",
-            "toolTip": "The VM size of the Security Gateway",
-            "recommendedSizes": [
-              "Standard_D4ds_v4",
-              "Standard_D4d_v4"
-            ],
-            "constraints": {
-              "allowedSizes": [
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D48_v4",
-                "Standard_D64_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D32s_v4",
-                "Standard_D48s_v4",
-                "Standard_D64s_v4",
-                "Standard_D2_v4",
-                "Standard_D4_v4",
-                "Standard_D8_v4",
-                "Standard_D16_v4",
-                "Standard_D32_v4",
-                "Standard_D2s_v4",
-                "Standard_D4s_v4",
-                "Standard_D8s_v4",
-                "Standard_D16s_v4",
-                "Standard_D2d_v4",
-                "Standard_D4d_v4",
-                "Standard_D8d_v4",
-                "Standard_D16d_v4",
-                "Standard_D32d_v4",
-                "Standard_D2ds_v4",
-                "Standard_D4ds_v4",
-                "Standard_D8ds_v4",
-                "Standard_D16ds_v4",
-                "Standard_D32ds_v4",
-                "Standard_F2s",
-                "Standard_F4s",
-                "Standard_F8s",
-                "Standard_F16s",
-                "Standard_M8ms",
-                "Standard_M16ms",
-                "Standard_M32ms",
-                "Standard_M64ms",
-                "Standard_M64s",
-                "Standard_F2",
-                "Standard_F4",
-                "Standard_F8",
-                "Standard_F16"
-              ]
-            },
-            "osPlatform": "Linux",
-            "imageReference": {
-              "publisher": "1740992136172",
-              "offer": "check-point-cg-r82",
-              "sku": "sg-ngtx"
+              "offer": "check-point-cg-r8210",
+              "sku": "sg-byol"
             },
             "count": "[steps('chkp-advanced').vmCount]"
           },
@@ -771,6 +417,7 @@
               "hideConfirmation": false
             }
           }
+          
         ]
       },
       {
@@ -939,7 +586,7 @@
             "name": "floatingIP",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the Load Balancers with floating IP",
-            "defaultValue": "No",
+            "defaultValue": "Yes",
             "toolTip": "Deploy the Load Balancers with floating IP.",
             "constraints": {
               "allowedValues": [
@@ -956,7 +603,7 @@
             "visible": true
           },
           {
-            "name": "instanceLevelPublicIP",
+            "name": "instanceLevelPublicIPv4",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Deploy the VMSS with instance level Public IP address",
             "defaultValue": "No",
@@ -992,7 +639,7 @@
                 }
               ]
             },
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'yes')]"
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'yes')]"
           },
           {
             "name": "createNewIPPrefix",
@@ -1072,7 +719,7 @@
           {
             "name": "externalCommunicationInfoBox",
             "type": "Microsoft.Common.InfoBox",
-            "visible": "[and(equals(steps('chkp-advanced').instanceLevelPublicIP, 'no'), equals(steps('chkp-advanced').deploymentMode, 'ILBOnly'))]",
+            "visible": "[and(equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'no'), equals(steps('chkp-advanced').deploymentMode, 'ILBOnly'))]",
             "options": {
               "icon": "Warning",
               "text": "For outbound inspection it is mandatory to deploy an external load balancer and/or instance level public IP addresses."
@@ -1146,7 +793,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Management interface and IP address",
             "defaultValue": "Backend NIC's private IP address",
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'yes')]",
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'yes')]",
             "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC and with public or private IP.",
             "constraints": {
               "allowedValues": [
@@ -1170,7 +817,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "Management interface and IP address",
             "defaultValue": "Backend NIC's private IP address",
-            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIP, 'no')]",
+            "visible": "[equals(steps('chkp-advanced').instanceLevelPublicIPv4, 'no')]",
             "toolTip": "Manage the Gateways in the Scale Set via the instance's external (eth0) or internal (eth1) NIC's private IP address.",
             "constraints": {
               "allowedValues": [
@@ -1522,6 +1169,81 @@
             }
           },
           {
+            "name": "enableIpv6",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Enable IPv6 Support",
+            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes; for an existing Virtual Network we do not modify the Virtual Network or subnets.",
+            "defaultValue": "No (IPv4 only)",
+            "constraints": {
+              "allowedValues": [
+                { "label": "No (IPv4 only)", "value": false },
+                { "label": "Yes (IPv4 + IPv6)", "value": true }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "ipv6Section",
+            "type": "Microsoft.Common.Section",
+            "label": "IPv6 Configuration",
+            "visible": "[steps('network').enableIpv6]",
+            "elements": [
+              {
+                "name": "virtualNetworkIpv6AddressPrefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Virtual Network IPv6 Address Prefix",
+                "defaultValue": "ace:cab:deca::/48",
+                "toolTip": "IPv6 address prefix for the virtual network (e.g., ace:cab:deca::/48)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/(4[8-9]|5[0-9]|6[0-4])$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca::/48)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet1Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Frontend Subnet IPv6 Prefix",
+                "defaultValue": "ace:cab:deca:deed::/64",
+                "toolTip": "IPv6 address prefix for the frontend subnet (e.g., ace:cab:deca:deed::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca:deed::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet2Ipv6Prefix",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Backend Subnet IPv6 Prefix",
+                "defaultValue": "ace:cab:deca:deee::/64",
+                "toolTip": "IPv6 address prefix for the backend subnet (e.g., ace:cab:deca:deee::/64)",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]",
+                  "regex": "^(([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,7}:|([0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4}|([0-9A-Fa-f]{1,4}:){1,5}(:[0-9A-Fa-f]{1,4}){1,2}|([0-9A-Fa-f]{1,4}:){1,4}(:[0-9A-Fa-f]{1,4}){1,3}|([0-9A-Fa-f]{1,4}:){1,3}(:[0-9A-Fa-f]{1,4}){1,4}|([0-9A-Fa-f]{1,4}:){1,2}(:[0-9A-Fa-f]{1,4}){1,5}|[0-9A-Fa-f]{1,4}:((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){1,7}|:))/64$",
+                  "validationMessage": "Enter a valid IPv6 CIDR (e.g., ace:cab:deca:deee::/64)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new'))]"
+              },
+              {
+                "name": "subnet2Ipv6StartAddress",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Internal LB IPv6 Frontend Address (Backend Subnet)",
+                "defaultValue": "ace:cab:deca:deee::a",
+                "toolTip": "Static IPv6 address for the Internal Load Balancer frontend in the backend subnet (no CIDR). Required only when enabling IPv6 with an existing VNet; for a new VNet the template derives or defaults this value.",
+                "constraints": {
+                  "required": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing'))]",
+                  "regex": "^([0-9A-Fa-f]{0,4}:){1,7}[0-9A-Fa-f]{0,4}$",
+                  "validationMessage": "Enter a valid IPv6 address (no CIDR)"
+                },
+                "visible": "[and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing'))]"
+              }
+            ]
+          },
+          {
             "name": "NSG",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Network Security Group",
@@ -1574,6 +1296,35 @@
             "visible": "[steps('network').NSG]"
           },
           {
+            "name": "storageAccountDeployMode",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Storage Account Deployment Mode",
+            "toolTip": "Select your preferred Storage Account deployment mode, New to a new Storage Account, Existing to an existing Storage Account, Managed to managed Storage Account, None to deploy without a Storage Account",
+            "defaultValue": "New",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "New",
+                  "value": "New"
+                },
+                {
+                  "label": "Existing",
+                  "value": "Existing"
+                },
+                {
+                  "label": "Managed",
+                  "value": "Managed"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
             "name": "addStorageAccountIpRules",
             "type": "Microsoft.Common.OptionsGroup",
             "defaultValue": "Network access from all networks",
@@ -1590,9 +1341,48 @@
                   "value": true
                 }
               ],
-              "required": true
+              "required": "[equals(steps('network').storageAccountDeployMode, 'New')]"
             },
-            "visible": true
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'New')]"
+          },
+          {
+            "name": "existingStorageAccount",
+            "type": "Microsoft.Solutions.ResourceSelector",
+            "label": "Storage Account",
+            "defaultValue": "null",
+            "toolTip": "Choose an existing Storage Account",
+            "resourceType": "Microsoft.Storage/storageAccounts",
+            "constraints": {
+              "required": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+            },
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]"
+          },
+          {
+            "name": "infoExistingStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
+            "options": {
+              "icon": "Info",
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+            }
+          },
+          {
+            "name": "infoManagedStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'Managed')]",
+            "options": {
+              "icon": "Info",
+              "text": "Azure will use a managed Storage Account for the deployment, no additional configuration is required."
+            }
+          },
+          {
+            "name": "warningNoneStorageAccount",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
+            "options": {
+              "icon": "Warning",
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+            }
           }
         ]
       },
@@ -1640,7 +1430,7 @@
       "configurationTemplate": "[steps('autoprovision').configurationTemplate]",
       "adminEmail": "[steps('chkp-advanced').adminEmail]",
       "deploymentMode": "[steps('chkp-advanced').deploymentMode]",
-      "instanceLevelPublicIP": "[steps('chkp-advanced').instanceLevelPublicIP]",
+      "instanceLevelPublicIPv4": "[steps('chkp-advanced').instanceLevelPublicIPv4]",
       "lbsTargetRGName": "[steps('chkp-advanced').lbsTargetRGName]",
       "elbResourceId": "[steps('chkp-advanced').elbResourceId]",
       "elbTargetBEAddressPoolName": "[steps('chkp-advanced').elbBEAddressPoolName]",
@@ -1654,7 +1444,7 @@
       "availabilityZonesNum": "[coalesce(steps('chkp-advanced').availabilityZonesNum, int('0'))]",
       "customMetrics": "[steps('chkp-advanced').customMetrics]",
       "cloudGuardVersion": "[concat(steps('autoprovision').cloudGuardVersion, ' - ', coalesce(steps('autoprovision').R80Offer, 'Bring Your Own License'))]",
-      "vmSize": "[coalesce(steps('autoprovision').R8110vmSizeUiBYOL, steps('autoprovision').R8110vmSizeUiNGTP, steps('autoprovision').R8110vmSizeUiNGTX , steps('autoprovision').R8120vmSizeUiBYOL, steps('autoprovision').R8120vmSizeUiNGTP, steps('autoprovision').R8120vmSizeUiNGTX, steps('autoprovision').R82vmSizeUiBYOL, steps('autoprovision').R82vmSizeUiNGTP, steps('autoprovision').R82vmSizeUiNGTX)]",
+      "vmSize": "[coalesce(steps('autoprovision').R8110vmSizeUiBYOL, steps('autoprovision').R8120vmSizeUiBYOL, steps('autoprovision').R82vmSizeUiBYOL, steps('autoprovision').R8210vmSizeUiBYOL)]",
       "sicKey": "[steps('autoprovision').sicKeyUi]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
@@ -1670,6 +1460,11 @@
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+      "enableIPv6": "[steps('network').enableIpv6]",
+      "virtualNetworkAddressPrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.virtualNetworkIpv6AddressPrefix, '')]",
+      "subnet1PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet1Ipv6Prefix, '')]",
+      "subnet2PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet2Ipv6Prefix, '')]",
+      "ilbFrontendIPv6Address": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'existing')), steps('network').ipv6Section.subnet2Ipv6StartAddress, '')]",
       "floatingIP": "[steps('chkp-advanced').floatingIP]",
       "IPv4Length": "[steps('chkp-advanced').IPv4Length]",
       "publicIPPrefix": "[steps('chkp-advanced').publicIPPrefix]",
@@ -1680,7 +1475,9 @@
       "deployNewNSG": "[steps('network').NSG]",
       "ExistingNSG": "[steps('network').nsgSelector]",
       "NewNsgName": "[steps('network').NSGName]",
-      "addStorageAccountIpRules": "[steps('network').addStorageAccountIpRules]",
+      "storageAccountDeployMode": "[steps('network').storageAccountDeployMode]",
+      "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
+      "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]"
     }
