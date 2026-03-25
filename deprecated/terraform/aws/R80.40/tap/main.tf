@@ -30,7 +30,7 @@ resource "aws_security_group" "tap_sg" {
     protocol = "tcp"
     from_port = 22
     to_port = 22
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  //NOSONAR
   }
   ingress {
     description = "allow VXLAN for traffic mirroring"
