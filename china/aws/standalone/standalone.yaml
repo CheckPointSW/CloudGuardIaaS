@@ -1,0 +1,549 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
+  Security Gateway & Management (Standalone) instance into an existing VPC (04012026)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Basic Settings
+        Parameters:
+          - StandaloneVersion
+          - StandaloneInstanceType
+          - KeyName
+          - AdminCIDR
+      - Label:
+          default: VPC Network Settings
+        Parameters:
+          - VPC
+          - PublicSubnet
+          - PrivateSubnet
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - InternalRouteTable
+          - StandaloneName
+          - IPMode
+          - AllocatePublicAddress
+          - VolumeSize
+          - VolumeType
+          - VolumeEncryption
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+          - Shell
+          - StandalonePasswordHash
+          - StandaloneMaintenancePasswordHash
+          - ResourcesTagName
+          - StandaloneHostname
+          - AllowUploadDownload
+          - CloudWatch
+          - StandaloneBootstrapScript
+          - NTPPrimary
+          - NTPSecondary
+    ParameterLabels:
+      VPC:
+        default: VPC
+      PublicSubnet:
+        default: Public subnet
+      PrivateSubnet:
+        default: Private subnet
+      InternalRouteTable:
+        default: Internal route table
+      StandaloneName:
+        default: Standalone Name
+      StandaloneInstanceType:
+        default: Standalone Instance type
+      KeyName:
+        default: Key name
+      IPMode:
+        default: IP Configuration Mode
+      AllocatePublicAddress:
+        default: Allocate an Elastic IPv4 address (Irrelevant for IPv6 only mode)
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      VolumeEncryption:
+        default: Volume encryption KMS key identifier
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      StandaloneVersion:
+        default: Standalone Version & License
+      Shell:
+        default: Admin shell
+      StandalonePasswordHash:
+        default: Standalone Password hash
+      StandaloneMaintenancePasswordHash:
+        default: Standalone Maintenance Password hash
+      ResourcesTagName:
+        default: Resources prefix tag
+      StandaloneHostname:
+        default: Standalone Hostname
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      StandaloneBootstrapScript:
+        default: Bootstrap Script
+      NTPPrimary:
+        default: Primary NTP server
+      NTPSecondary:
+        default: Secondary NTP server
+      AdminCIDR:
+        default: Allow SmartConsole connections from these networks
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  PublicSubnet:
+    Description: The public subnet of the Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+  PrivateSubnet:
+    Description: The private subnet of the Security Gateway.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+  InternalRouteTable:
+    Description: The route table ID in which to set 0.0.0.0/0 route to the Security Gateway instance in this route table (e.g. rtb-12a34567). Route table cannot have an existing 0.0.0.0/0 route. If empty - traffic will not be routed through the Security Gateway, this requires manual configuration in the route table. (optional)
+    Type: String
+    Default: ''
+  StandaloneName:
+    Type: String
+    Default: Check-Point-Instance
+  StandaloneInstanceType:
+    Description: The instance type of the Security Gateway & Management (Standalone) instance.
+    Type: String
+    Default: c5.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - c7i-flex.12xlarge
+      - c7i-flex.16xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - m8i-flex.large
+      - m8i-flex.xlarge
+      - m8i-flex.2xlarge
+      - m8i-flex.4xlarge
+      - m8i-flex.8xlarge
+      - m8i-flex.12xlarge
+      - m8i-flex.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+    ConstraintDescription: Must be a valid EC2 instance type
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instance.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+  AllocatePublicAddress:
+    Default: true
+    Type: String
+    AllowedValues:
+      - true
+      - false
+  IPMode:
+    Description: Specifies the IP mode for the Standalone and AWS resources.
+    Type: String
+    AllowedValues:
+      - IPv4
+      # - DualStack
+    Default: IPv4
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 200
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  VolumeEncryption:
+    Description: KMS or CMK key Identifier - Use key ID, alias or ARN. Key alias should be prefixed with 'alias/' (e.g. for KMS default alias 'aws/ebs' - insert 'alias/aws/ebs').
+    Type: String
+    Default: alias/aws/ebs
+  EnableInstanceConnect:
+    Description: Ec2 Instance Connect is not supported with versions prior to R80.40.
+    Default: false
+    Type: String
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  StandaloneVersion:
+    Description: Standalone Version & License.
+    Type: String
+    Default: R82-BYOL
+    AllowedValues:
+      - R81.10-BYOL
+      - R81.20-BYOL
+      - R82-BYOL
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  StandalonePasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  StandaloneMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes. For R81.10 and below the Admin user's password is used also as maintenance-mode password. (To generate a password hash use the command "grub2-mkpasswd-pbkdf2" on Linux and paste it here). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  ResourcesTagName:
+    Description: The name tag of the resources. (optional)
+    Type: String
+    Default: ''
+  StandaloneHostname:
+    Description: (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^([A-Za-z]([-0-9A-Za-z]{0,61}[0-9A-Za-z])?|)$'
+    ConstraintDescription: A valid hostname label or an empty string.
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  StandaloneBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  NTPPrimary:
+    Description: (optional)
+    Type: String
+    Default: 169.254.169.123
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  NTPSecondary:
+    Description: (optional)
+    Type: String
+    Default: 0.pool.ntp.org
+    AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR).
+    Type: String
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+Conditions:
+  ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
+  EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
+  ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  IsBYOL: !Equals [!Select [1, !Split ['-', !Ref StandaloneVersion]], 'BYOL']
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+  EnableIPv4RouteTable: !Condition ProvidedRouteTable
+  EnableIPv6RouteTable:
+    !And [!Condition IsIPv6Enabled, !Condition ProvidedRouteTable]
+  AllocatePublicIPv4: !Equals [!Ref AllocatePublicAddress, true]
+Resources:
+  StandaloneIAMRole:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com.cn
+            Action: sts:AssumeRole
+      Path: /
+  StandaloneInstanceProfile:
+    Condition: EnableCloudWatch
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles: !Ref StandaloneIAMRole
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgns-china-cft.s3.us-east-1.amazonaws.com/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+        PolicyRole: !Ref StandaloneIAMRole
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgns-china-cft.s3.us-east-1.amazonaws.com/utils/amis.yaml
+      Parameters:
+        Version: !If [IsBYOL, !Join ['-', [!Ref StandaloneVersion, MGMT]], !Ref StandaloneVersion]
+  ExternalNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - ExternalNetworkInterface
+      Description: eth0
+      SourceDestCheck: false
+      GroupSet:
+        - !Ref PermissiveSecurityGroup
+      SubnetId: !Ref PublicSubnet
+      Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
+  InternalNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - InternalNetworkInterface
+      Description: eth1
+      SourceDestCheck: false
+      GroupSet:
+        - !Ref PermissiveSecurityGroup
+      SubnetId: !Ref PrivateSubnet
+      Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
+  PermissiveSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Join
+            - _
+            - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
+              - PermissiveSecurityGroup
+      GroupDescription: Permissive security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+        - !If
+          - IsIPv6Enabled
+          - IpProtocol: -1
+            CidrIpv6: ::/0
+          - !Ref "AWS::NoValue"
+  InternalDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: EnableIPv4RouteTable
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NetworkInterfaceId: !Ref InternalNetworkInterface
+      RouteTableId: !Ref InternalRouteTable
+  InternalDefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: EnableIPv6RouteTable
+    Properties:
+      DestinationIpv6CidrBlock: "::/0"
+      NetworkInterfaceId: !Ref InternalNetworkInterface
+      RouteTableId: !Ref InternalRouteTable
+  StandaloneInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      DisableApiTermination: !Ref TerminationProtection
+      Tags:
+        - Key: Name
+          Value: !Ref StandaloneName
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            NetworkInterfaceId: !Ref ExternalNetworkInterface
+          - DeviceIndex: 1
+            NetworkInterfaceId: !Ref InternalNetworkInterface
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref StandaloneInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !If [EncryptedVolume, true, false]
+              KmsKeyId: !If [EncryptedVolume, !Ref VolumeEncryption, !Ref 'AWS::NoValue']
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref StandaloneInstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; hostname=${StandaloneHostname} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; ntp1=${NTPPrimary} ; ntp2=${NTPSecondary} ; eic=${EnableInstanceConnect} ; admin_subnet=${AdminCIDR}'
+              - !If [IsIPv6Enabled, '    template_name="standalone_dual_stack"', '    template_name="standalone"']
+              - !If [AllocatePublicIPv4, !Sub '    eip=${AllocatePublicAddress}', '    eip=false']
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref StandaloneBootstrapScript, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref StandalonePasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref StandaloneMaintenancePasswordHash, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref StandaloneVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" installationType=\"standalone\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"04012026\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" adminSubnet=\"${admin_subnet}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  PublicAddress:
+    Type: AWS::EC2::EIP
+    Condition: AllocatePublicIPv4
+    Properties:
+      Domain: vpc
+  AddressAssoc:
+    Type: AWS::EC2::EIPAssociation
+    DependsOn: StandaloneInstance
+    Condition: AllocatePublicIPv4
+    Properties:
+      NetworkInterfaceId: !Ref ExternalNetworkInterface
+      AllocationId: !GetAtt PublicAddress.AllocationId
+      PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
+Outputs:
+  PublicAddress:
+    Condition: AllocatePublicIPv4
+    Description: The public IPv4 address of the Check Point instance.
+    Value: !Ref PublicAddress
+  SSH:
+    Condition: AllocatePublicIPv4
+    Description: SSH command to the Check Point instance (IPv4).
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
+  URL:
+    Condition: AllocatePublicIPv4
+    Description: URL to the portal (IPv4).
+    Value: !Join ['', ['https://', !Ref PublicAddress]]

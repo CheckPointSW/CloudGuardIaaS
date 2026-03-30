@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Returns a Check Point Amazon Machine ID (20260326)
+Parameters:
+  Version:
+    Description: Security Gateway or Management Server version
+    Type: String
+    Default: R82-BYOL-GW
+    AllowedValues:
+    - R81.10-BYOL-MGMT
+    - R81.10-BYOL-GW
+    - R81.20-BYOL-MGMT
+    - R81.20-BYOL-GW
+    - R82-BYOL-MGMT
+    - R82-BYOL-GW
+Mappings:
+  ConverterMap:
+    R81.10-BYOL-MGMT:
+      Value: R8110BYOLMGMT
+    R81.10-BYOL-GW:
+      Value: R8110BYOLGW
+    R81.20-BYOL-MGMT:
+      Value: R8120BYOLMGMT
+    R81.20-BYOL-GW:
+      Value: R8120BYOLGW
+    R82-BYOL-MGMT:
+      Value: R82BYOLMGMT
+    R82-BYOL-GW:
+      Value: R82BYOLGW
+  RegionMap:
+    cn-north-1:
+      R8110BYOLGW: ami-0dd3dbb57e9d388f6
+      R8110BYOLMGMT: ami-0218bbe2af0b3d4c7
+      R8120BYOLGW: ami-07da63ec51b0f37b2
+      R8120BYOLMGMT: ami-07c9a4547c2e48445
+      R82BYOLGW: ami-00a6af89c705379e6
+      R82BYOLMGMT: ami-0b0d6371b8bc27c7d
+    cn-northwest-1:
+      R8110BYOLGW: ami-07ea06538bbbc4f5e
+      R8110BYOLMGMT: ami-064a33bb86b69a7d3
+      R8120BYOLGW: ami-05218154b9aa45ab6
+      R8120BYOLMGMT: ami-0cf32d6b94fd87cc5
+      R82BYOLGW: ami-0aa3165569c350981
+      R82BYOLMGMT: ami-0d08805f54e5726cb
+Resources:
+  DummyHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+    Properties: {}
+Outputs:
+  ImageId:
+    Description: Check Point Security Gateway AMI
+    Value: !FindInMap [RegionMap ,!Ref 'AWS::Region', !FindInMap [ConverterMap, !Ref 'Version', Value]]
