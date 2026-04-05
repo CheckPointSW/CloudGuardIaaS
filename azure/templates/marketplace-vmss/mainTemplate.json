@@ -1534,7 +1534,7 @@
     },
     "publicIPPrefixLength": "[variables('IPv4Lengths')[parameters('IPv4Length')]]",
     "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]",
-    "upgradingForLB": "[and(variables('upgrading'), and(greater(length(parameters('elbResourceId')), 0), greater(length(parameters('ilbResourceId')), 0)))]",
+    "upgradingForLB": "[and(variables('upgrading'), or(greater(length(parameters('elbResourceId')), 0), greater(length(parameters('ilbResourceId')), 0)))]",
     "NewNsgReference": {
       "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
     },
