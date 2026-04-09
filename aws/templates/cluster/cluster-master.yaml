@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Check Point Cluster in a new VPC (20260302).
+  Deploy a Check Point Cluster in a new VPC (20260407).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -102,7 +102,7 @@ Metadata:
         default: Secondary NTP server
 Parameters:
   AvailabilityZone:
-    Description: The availability zone in which to deploy the cluster.
+    Description: The availability zone in which to deploy the cluster. Pick a regional AZ (e.g. ap-southeast-2a) or a Local Zone (e.g. ap-southeast-2-per-1a) .
     Type: AWS::EC2::AvailabilityZone::Name
     MinLength: 1
   VPCCIDR:
@@ -526,6 +526,7 @@ Resources:
         VPC: !GetAtt VPCStack.Outputs.VPCID
         PublicSubnet: !GetAtt VPCStack.Outputs.PublicSubnet1ID
         PrivateSubnet: !GetAtt VPCStack.Outputs.PrivateSubnet1ID
+        LocalZoneAz: !Ref AvailabilityZone
         InternalRouteTable: !Ref InternalRouteTable
         GatewayName: !Ref GatewayName
         GatewayInstanceType: !Ref GatewayInstanceType

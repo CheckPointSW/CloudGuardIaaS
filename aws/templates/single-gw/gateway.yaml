@@ -1,8 +1,85 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (20260216)
+  Deploys a Check Point Security Gateway into an existing VPC (20260407)
   See sk175207 for Gateway administration guide deployment and configuration steps.
+Mappings:
+  # Maps Local Zone AZ names to their NetworkBorderGroup.
+  # The NBG is the AZ name with the trailing AZ letter removed (e.g. ap-southeast-2-per-1a -> ap-southeast-2-per-1).
+  # Add new Local Zone AZs here as needed.
+  LocalZoneNetworkBorderGroups:
+    # Australia
+    ap-southeast-2-per-1a:
+      NBG: ap-southeast-2-per-1
+    # US East 1 Local Zones
+    us-east-1-atl-1a:
+      NBG: us-east-1-atl-1
+    us-east-1-bos-1a:
+      NBG: us-east-1-bos-1
+    us-east-1-chi-1a:
+      NBG: us-east-1-chi-1
+    us-east-1-dca-1a:
+      NBG: us-east-1-dca-1
+    us-east-1-dfw-1a:
+      NBG: us-east-1-dfw-1
+    us-east-1-iah-1a:
+      NBG: us-east-1-iah-1
+    us-east-1-mci-1a:
+      NBG: us-east-1-mci-1
+    us-east-1-mia-1a:
+      NBG: us-east-1-mia-1
+    us-east-1-msp-1a:
+      NBG: us-east-1-msp-1
+    us-east-1-nyc-1a:
+      NBG: us-east-1-nyc-1
+    us-east-1-phl-1a:
+      NBG: us-east-1-phl-1
+    # US West 2 Local Zones
+    us-west-2-den-1a:
+      NBG: us-west-2-den-1
+    us-west-2-las-1a:
+      NBG: us-west-2-las-1
+    us-west-2-lax-1a:
+      NBG: us-west-2-lax-1
+    us-west-2-lax-1b:
+      NBG: us-west-2-lax-1
+    us-west-2-ord-1a:
+      NBG: us-west-2-ord-1
+    us-west-2-phx-1a:
+      NBG: us-west-2-phx-1
+    us-west-2-sea-1a:
+      NBG: us-west-2-sea-1
+    # Canada Local Zones
+    ca-central-1-yul-1a:
+      NBG: ca-central-1-yul-1
+    # EU Local Zones
+    eu-central-1-ham-1a:
+      NBG: eu-central-1-ham-1
+    eu-central-1-waw-1a:
+      NBG: eu-central-1-waw-1
+    eu-north-1-hel-1a:
+      NBG: eu-north-1-hel-1
+    eu-south-1-mxp-1a:
+      NBG: eu-south-1-mxp-1
+    eu-west-2-man-1a:
+      NBG: eu-west-2-man-1
+    # AP Local Zones
+    ap-northeast-1-kix-1a:
+      NBG: ap-northeast-1-kix-1
+    ap-northeast-1-tpe-1a:
+      NBG: ap-northeast-1-tpe-1
+    ap-northeast-2-sel-1a:
+      NBG: ap-northeast-2-sel-1
+    ap-south-1-bom-1a:
+      NBG: ap-south-1-bom-1
+    ap-south-1-del-1a:
+      NBG: ap-south-1-del-1
+    ap-southeast-1-kul-1a:
+      NBG: ap-southeast-1-kul-1
+    ap-southeast-1-sin-1a:
+      NBG: ap-southeast-1-sin-1
+    ap-southeast-4-mel-1a:
+      NBG: ap-southeast-4-mel-1
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -19,6 +96,7 @@ Metadata:
           - VPC
           - PublicSubnet
           - PrivateSubnet
+          - LocalZoneAz
       - Label:
           default: Advanced Settings
         Parameters:
@@ -53,6 +131,8 @@ Metadata:
         default: Public subnet
       PrivateSubnet:
         default: Private subnet
+      LocalZoneAz:
+        default: Local Zone availability zone
       InternalRouteTable:
         default: Internal route table
       GatewayName:
@@ -373,6 +453,10 @@ Parameters:
     AllowedValues:
       - true
       - false
+  LocalZoneAz:
+    Description: Use only for Local Zone subnets. This value must match the Local Zone AZ of the selected subnets and is used only to derive the correct NetworkBorderGroup for EIP allocation. Leave empty for regional subnets. This parameter does not control resource placement.
+    Type: String
+    Default: ''
   VolumeSize:
     Type: Number
     Default: 200
@@ -530,6 +614,12 @@ Conditions:
     !And [!Condition IsIPv6Enabled, !Condition ProvidedRouteTable]
   AllocatePublicIPv4:
     !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
+  # Detect Local Zone by checking if AZ name has 4+ hyphens (e.g., us-east-1-bos-1a has 4 hyphens)
+  # Regular AZs have 2-3 hyphens (e.g., us-east-1a has 2 hyphens). Empty string also resolves to false.
+  IsLocalZone: !Not [!Equals [!Select [4, !Split ['-', !Join ['-', [!Ref LocalZoneAz, '----']]]], '']]
+  IsRegionalZone: !Not [!Condition IsLocalZone]
+  AllocateAddressLocalZone: !And [!Condition AllocatePublicIPv4, !Condition IsLocalZone]
+  AllocateAddressRegional: !And [!Condition AllocatePublicIPv4, !Condition IsRegionalZone]
 Resources:
   GatewayIAMRole:
     Condition: EnableCloudWatch
@@ -696,16 +786,23 @@ Resources:
                 - IsIPv6Enabled
                 - !If [IsIPv4Enabled, "    template_name=\"gateway_dual_stack\"", "    template_name=\"gateway_ipv6\""]
                 - "    template_name=\"gateway\""
+              - !Sub '    eip=${AllocatePublicAddress}'
               - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
               - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260302\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${token}\"" installationType=\"gateway\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260407\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" allocatePublicAddress=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
-  PublicAddress:
+  PublicAddressLocalZone:
     Type: AWS::EC2::EIP
-    Condition: AllocatePublicIPv4
+    Condition: AllocateAddressLocalZone
+    Properties:
+      Domain: vpc
+      NetworkBorderGroup: !FindInMap [LocalZoneNetworkBorderGroups, !Ref LocalZoneAz, NBG]
+  PublicAddressRegional:
+    Type: AWS::EC2::EIP
+    Condition: AllocateAddressRegional
     Properties:
       Domain: vpc
   AddressAssoc:
@@ -714,12 +811,12 @@ Resources:
     DependsOn: GatewayInstance
     Properties:
       NetworkInterfaceId: !Ref ExternalNetworkInterface
-      AllocationId: !GetAtt PublicAddress.AllocationId
+      AllocationId: !If [IsLocalZone, !GetAtt PublicAddressLocalZone.AllocationId, !GetAtt PublicAddressRegional.AllocationId]
       PrivateIpAddress: !GetAtt ExternalNetworkInterface.PrimaryPrivateIpAddress
 Outputs:
   PublicAddress:
     Description: The public address of the Check Point instance.
-    Value: !Ref PublicAddress
+    Value: !If [IsLocalZone, !Ref PublicAddressLocalZone, !Ref PublicAddressRegional]
     Condition: AllocatePublicIPv4
   PrivateExternalAddress:
     Condition: IsIPv4Enabled
@@ -731,11 +828,11 @@ Outputs:
     Value: !GetAtt InternalNetworkInterface.PrimaryPrivateIpAddress
   SSH:
     Description: SSH command to the Check Point instance.
-    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !Ref PublicAddress]]
+    Value: !Join ['', ['ssh -i ', !Ref KeyName, ' admin@', !If [IsLocalZone, !Ref PublicAddressLocalZone, !Ref PublicAddressRegional]]]
     Condition: AllocatePublicIPv4
   URL:
     Description: URL to the portal.
-    Value: !Join ['', ['https://', !Ref PublicAddress]]
+    Value: !Join ['', ['https://', !If [IsLocalZone, !Ref PublicAddressLocalZone, !Ref PublicAddressRegional]]]
     Condition: AllocatePublicIPv4
   ManagementName:
     Description: The name that represents the Security Management Server.
