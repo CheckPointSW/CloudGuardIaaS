@@ -27,6 +27,13 @@
       "type": "string",
       "defaultValue": "default-nsg"
     },
+    "extendedLocation": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Extended location for Edge Zone deployment"
+      }
+    },
     "tagsByResource": {
       "type": "object",
       "defaultValue": {}

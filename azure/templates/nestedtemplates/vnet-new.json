@@ -5,6 +5,13 @@
     "location": {
       "type": "string"
     },
+    "extendedLocation": {
+      "type": "object",
+      "defaultValue": {},
+      "metadata": {
+        "description": "Extended location for Edge Zone deployment"
+      }
+    },
     "virtualNetworkName": {
       "type": "string",
       "metadata": {
@@ -121,6 +128,7 @@
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-06-01",
       "location": "[parameters('location')]",
+      "extendedLocation": "[if(empty(parameters('extendedLocation')), null(), parameters('extendedLocation'))]",
       "name": "[parameters('virtualNetworkName')]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/routeTables', parameters('subnet1Name'))]",
