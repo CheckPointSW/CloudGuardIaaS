@@ -1,9 +1,46 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
-  "handler": "Microsoft.Compute.MultiVm",
+  "handler": "Microsoft.Azure.CreateUIDef",
   "version": "0.1.2-preview",
   "parameters": {
     "basics": [
+      {
+        "name": "zoneInfo",
+        "type": "Microsoft.Solutions.ArmApiControl",
+        "request": {
+          "method": "GET",
+          "path": "[concat('/subscriptions/', subscription().subscriptionId, '/locations/?api-version=2022-12-01')]"
+        }
+      },
+      {
+        "name": "availabilityZonesChoice",
+        "type": "Microsoft.Common.OptionsGroup",
+        "label": "Use availability zones",
+        "defaultValue": "No",
+        "toolTip": "Deploy the VMSS across availability zones for high availability and fault tolerance.",
+        "constraints": {
+          "allowedValues": [
+            { "label": "No", "value": "No" },
+            { "label": "Yes", "value": "Yes" }
+          ]
+        },
+        "visible": "[and(not(empty(basics('zoneInfo').value)), greater(int(if(greater(length(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))), 0), if(greater(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings), 0), string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)), '0'), '0')), 0))]"
+      },
+      {
+        "name": "zonesDropdown",
+        "type": "Microsoft.Common.DropDown",
+        "label": "Choose zones",
+        "toolTip": "Select availability zones for deployment.",
+        "multiselect": true,
+        "selectAll": true,
+        "filter": true,
+        "defaultValue": ["1", "2", "3"],
+        "constraints": {
+          "allowedValues": "[map(range(1, int(string(length(first(filter(basics('zoneInfo').value, (r) => equals(r.name, location()))).availabilityZoneMappings)))), (item) => parse(concat('{\"label\":\"Zone ', string(item), '\",\"value\":\"', string(item), '\"}')))]",
+          "required": false
+        },
+        "visible": "[equals(basics('availabilityZonesChoice'), 'Yes')]"
+      },
       {
         "name": "CloudGuard VMSS settings text block",
         "type": "Microsoft.Common.TextBlock",
@@ -624,9 +661,9 @@
           {
             "name": "publicIPPrefix",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Public IP prefix",
+            "label": "Public IP prefix (IPv4 only)",
             "defaultValue": "No",
-            "toolTip": "Define if deploy existsing Public IP Prefix or a new Public IP Prefix.",
+            "toolTip": "Define if deploy existing Public IP Prefix or a new Public IP Prefix. IPv4 only; IPv6 prefixes are not supported.",
             "constraints": {
               "allowedValues": [
                 {
@@ -644,8 +681,8 @@
           {
             "name": "createNewIPPrefix",
             "type": "Microsoft.Common.OptionsGroup",
-            "label": "Create new IP prefiex",
-            "toolTip": "Create new or existsing Public IP Prefix",
+            "label": "Create new IP prefix (IPv4 only)",
+            "toolTip": "Create new or existing Public IP Prefix. IPv4 only; IPv6 prefixes are not supported.",
             "defaultValue": "No",
             "constraints": {
               "allowedValues": [
@@ -666,7 +703,7 @@
             "type": "Microsoft.Common.DropDown",
             "label": "IPv4 IP prefix length",
             "defaultValue": "/31 (2 addresses)",
-            "toolTip": "Choose the length of the IP prefix for IP v4.",
+            "toolTip": "Choose the length of the IPv4 IP prefix. IPv4 only; IPv6 prefixes are not supported.",
             "multiselect": false,
             "selectAll": false,
             "filter": false,
@@ -828,34 +865,6 @@
                 {
                   "label": "Frontend NIC's private IP address",
                   "value": "eth0-private"
-                }
-              ]
-            }
-          },
-          {
-            "name": "availabilityZonesNum",
-            "type": "Microsoft.Common.DropDown",
-            "label": "Number of Availability Zones to use",
-            "defaultValue": "None",
-            "toolTip": "The number of avalability zones to use for the scale set. Note that the load balancers and their IP addresses will be zone redundant in any case.",
-            "visible": "[contains(' chinaeast chinaeast2 chinaeast3 chinanorth chinanorth2 chinanorth3 australiaeast brazilsouth canadacentral centralus eastasia eastus eastus2 francecentral germanywestcentral japaneast koreacentral northeurope norwayeast southafricanorth southcentralus southeastasia swedencentral uksouth usgovvirginia westeurope westus2 westus3 switzerlandnorth qatarcentral centralindia uaenorth italynorth ', concat(' ', location(), ' '))]",
-            "constraints": {
-              "allowedValues": [
-                {
-                  "label": "None",
-                  "value": 0
-                },
-                {
-                  "label": "One zone",
-                  "value": 1
-                },
-                {
-                  "label": "Two zones",
-                  "value": 2
-                },
-                {
-                  "label": "Three zones",
-                  "value": 3
                 }
               ]
             }
@@ -1069,7 +1078,7 @@
             "type": "Microsoft.Common.TextBox",
             "label": "Additional disk space (GB)",
             "defaultValue": "0",
-            "toolTip": "Additional disk space (in GB), initial disk size is 100 GB.",
+            "toolTip": "Additional disk space (in GB), initial disk size is 200 GB.",
             "constraints": {
               "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
               "validationMessage": "Select a number between 0 and 3995"
@@ -1441,7 +1450,6 @@
       "mgmtIPaddress": "[steps('autoprovision').mgmtIPaddress]",
       "appLoadDistribution": "[steps('chkp-advanced').appLoadDistribution]",
       "ilbLoadDistribution": "[steps('chkp-advanced').ilbLoadDistribution]",
-      "availabilityZonesNum": "[coalesce(steps('chkp-advanced').availabilityZonesNum, int('0'))]",
       "customMetrics": "[steps('chkp-advanced').customMetrics]",
       "cloudGuardVersion": "[concat(steps('autoprovision').cloudGuardVersion, ' - ', coalesce(steps('autoprovision').R80Offer, 'Bring Your Own License'))]",
       "vmSize": "[coalesce(steps('autoprovision').R8110vmSizeUiBYOL, steps('autoprovision').R8120vmSizeUiBYOL, steps('autoprovision').R82vmSizeUiBYOL, steps('autoprovision').R8210vmSizeUiBYOL)]",
@@ -1460,7 +1468,7 @@
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
-      "enableIPv6": "[steps('network').enableIpv6]",
+      "enableIpv6": "[steps('network').enableIpv6]",
       "virtualNetworkAddressPrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.virtualNetworkIpv6AddressPrefix, '')]",
       "subnet1PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet1Ipv6Prefix, '')]",
       "subnet2PrefixV6": "[if(and(steps('network').enableIpv6, equals(steps('network').virtualNetwork.newOrExisting, 'new')), steps('network').ipv6Section.subnet2Ipv6Prefix, '')]",
@@ -1479,7 +1487,9 @@
       "addStorageAccountIpRules":"[steps('network').addStorageAccountIpRules]",
       "existingStorageAccountId": "[steps('network').existingStorageAccount]",
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
-      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]"
+      "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]",
+      "availabilityZones": "[if(equals(basics('availabilityZonesChoice'), 'Yes'), if(greater(length(coalesce(basics('zonesDropdown'), parse('[]'))), 0), basics('zonesDropdown'), parse('[\"1\", \"2\", \"3\"]')), parse('[]'))]",
+      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]"
     }
   }
 }
