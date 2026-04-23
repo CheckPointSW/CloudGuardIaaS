@@ -227,7 +227,7 @@
         },
         "planVersion": {
             "type": "string",
-            "defaultValue": "1.0.27",
+            "defaultValue": "1.0.28",
             "metadata": {
                 "description": "Always deploy the latest available version of the managed application (e.g., 1.0.27) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
             }
