@@ -36,7 +36,8 @@
             "allowedValues": [
                 "R8110",
                 "R8120",
-                "R82"
+                "R82",
+                "R8210"
             ],
             "type": "String",
             "metadata": {
