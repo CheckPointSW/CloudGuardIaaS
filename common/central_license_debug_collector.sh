@@ -11,7 +11,7 @@
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
 
-# Licenses_Collector - version 7
+# Licenses_Collector - version 8
 
 usage()
 {
@@ -133,6 +133,16 @@ cpinfo -y all > $TMPPATH/cpinfo_y_all.txt 2> /dev/null
 log_msg "  Collecting cpvinfo data into $TMPPATH/cpvinfo_vsec_lic.txt"
 cpvinfo $MDS_FWDIR/cpm-server/mgmt_vsec_lic.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
 cpvinfo $MDS_FWDIR/cpm-server/vsec_lic_cli.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
+
+# Collect /var/log/CPcml logs if directory exists
+CPCML_DIR="/var/log/CPcml"
+if [ -d "$CPCML_DIR" ]; then
+        log_msg "  Compressing $CPCML_DIR into $TMPPATH/CPcml_logs.tar.gz"
+        tar -czf $TMPPATH/CPcml_logs.tar.gz $CPCML_DIR > /dev/null 2>&1
+        log_msg "  CPcml logs collected successfully"
+else
+        log_msg "  $CPCML_DIR not found, skipping"
+fi
 
 log_msg "  Compressing $TMPPATH into $OUTPUTFILE_NAME"
 tar -cvf $OUTPUTFILE_NAME $TMPPATH > /dev/null 2>&1
