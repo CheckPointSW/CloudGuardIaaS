@@ -140,7 +140,8 @@
             "visible": "true",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://support.checkpoint.com/results/sk/sk109360' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps "
+              "text": "See CloudGuard Network for Azure administration guide for detailed deployment and configuration steps.",
+              "uri": "https://support.checkpoint.com/results/sk/sk109360"
             }
           },
           {
@@ -1038,7 +1039,8 @@
             "visible": "[equals(steps('chkp').allowSmart1CloudConnection, 'yes')]",
             "options": {
               "icon": "Info",
-              "text": "Follow these instructions to quickly connect this Cluster to Smart-1 Cloud <br><a href='https://support.checkpoint.com/results/sk/sk180501' target='_blank'>sk180501-Connecting CloudGuard Network Security Public Cloud Gateway to Smart-1 Cloud</a>."
+              "text": "Follow these instructions to quickly connect this Cluster to Smart-1 Cloud sk180501-Connecting CloudGuard Network Security Public Cloud Gateway to Smart-1 Cloud.",
+              "uri": "https://support.checkpoint.com/results/sk/sk180501"
             }
           },
           {
@@ -1302,7 +1304,8 @@
             "visible": "true",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://support.checkpoint.com/results/sk/sk156552' target='_blank'>Adding disk space in CloudGuard</a> for instructions on adding additional disk space "
+              "text": "See Adding disk space in CloudGuard for instructions on adding additional disk space.",
+              "uri": "https://support.checkpoint.com/results/sk/sk156552"
             }
           },
           {
@@ -1434,14 +1437,15 @@
             "visible": "[equals(coalesce(basics('extendedZone'), 'None'), 'None')]",
             "options": {
               "icon": "Info",
-              "text": "Enable IPv6 support to add an IPv6 public load balancer frontend and IPv6 configurations on the gateway network interfaces. Existing VNets/subnets are not modified."
+              "text": "Enable IPv6 support to add an IPv6 public load balancer frontend and IPv6 configurations on the gateway network interfaces. Existing VNets/subnets are not modified. For required configuration, see sk170760.",
+              "uri": "https://support.checkpoint.com/results/sk/sk170760"
             }
           },
           {
             "name": "enableIpv6",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "Enable IPv6 Support",
-            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes and static IPv6 NIC addresses; for an existing Virtual Network we do not modify the VNet or subnets and the static IPv6 NIC addresses you enter must already be valid in those existing subnet prefixes. An IPv6 public load balancer frontend and IPv6 NIC configurations will be created when enabled. For required configuration, see <a href='https://support.checkpoint.com/results/sk/sk170760' target='_blank'>sk170760</a>.",
+            "toolTip": "Enable IPv6 support. For a new Virtual Network you must provide IPv6 prefixes and static IPv6 NIC addresses; for an existing Virtual Network we do not modify the VNet or subnets and the static IPv6 NIC addresses you enter must already be valid in those existing subnet prefixes. An IPv6 public load balancer frontend and IPv6 NIC configurations will be created when enabled. For required configuration, see https://support.checkpoint.com/results/sk/sk170760.",
             "defaultValue": "No (IPv4 only)",
             "constraints": {
               "allowedValues": [
@@ -1652,7 +1656,8 @@
             "visible": "[and(equals(coalesce(basics('extendedZone'), 'None'), 'None'), equals(steps('network').storageAccountDeployMode, 'Existing'))]",
             "options": {
               "icon": "Info",
-              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - Serial Console Security.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           },
           {
@@ -1670,7 +1675,8 @@
             "visible": "[and(equals(coalesce(basics('extendedZone'), 'None'), 'None'), equals(steps('network').storageAccountDeployMode, 'None'))]",
             "options": {
               "icon": "Warning",
-              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - Azure Serial Console.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           }
         ]
