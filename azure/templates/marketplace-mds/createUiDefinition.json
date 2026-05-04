@@ -101,7 +101,8 @@
             "visible": "true",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://support.checkpoint.com/results/sk/sk154436' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps"
+              "text": "See CloudGuard Network for Azure administration guide for detailed deployment and configuration steps.",
+              "uri": "https://support.checkpoint.com/results/sk/sk154436"
             }
           },
           {
@@ -506,7 +507,8 @@
             "visible": "true",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://support.checkpoint.com/results/sk/sk156552' target='_blank'>Adding disk space in CloudGuard</a> for instructions on adding additional disk space "
+              "text": "See Adding disk space in CloudGuard for instructions on adding additional disk space.",
+              "uri": "https://support.checkpoint.com/results/sk/sk156552"
             }
           },
           {
@@ -760,7 +762,8 @@
             "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
             "options": {
               "icon": "Info",
-              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - Serial Console Security.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           },
           {
@@ -778,7 +781,8 @@
             "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
             "options": {
               "icon": "Warning",
-              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - Azure Serial Console.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           }
         ]
