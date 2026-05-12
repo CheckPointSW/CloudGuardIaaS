@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploys a Check Point Cluster into an existing VPC (04012026)
+Description: Deploys a Check Point Cluster into an existing VPC (05072026)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -22,6 +22,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - InternalRouteTable
           - GatewayName
           - AllocatePublicAddress
@@ -45,6 +46,8 @@ Metadata:
           - NTPPrimary
           - NTPSecondary
     ParameterLabels:
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       VPC:
         default: VPC
       PublicSubnetA:
@@ -386,7 +389,14 @@ Parameters:
     Type: String
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
+  CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
@@ -421,6 +431,7 @@ Resources:
       Parameters:
         Version: !Join ['-', [!Ref GatewayVersion, GW]]
   PermissiveSecurityGroup:
+    Condition: CreateSecurityGroup
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Permissive security group.
@@ -441,7 +452,7 @@ Resources:
       Description: Member A external.
       SecondaryPrivateIpAddressCount: 1
       SourceDestCheck: false
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SubnetId: !Ref PublicSubnetA
       Tags:
         - Key: x-chkp-interface-type
@@ -452,7 +463,7 @@ Resources:
       Description: Member B external.
       SecondaryPrivateIpAddressCount: 1
       SourceDestCheck: false
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SubnetId: !Ref PublicSubnetB
       Tags:
         - Key: x-chkp-interface-type
@@ -461,7 +472,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     Properties:
       Description: Member A internal.
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SourceDestCheck: false
       SubnetId: !Ref PrivateSubnetA
       Tags:
@@ -471,7 +482,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     Properties:
       Description: Member B internal.
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SourceDestCheck: false
       SubnetId: !Ref PrivateSubnetB
       Tags:

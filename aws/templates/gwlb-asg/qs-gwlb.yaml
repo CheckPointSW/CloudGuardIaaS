@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20260302).
+  Deploy a Quick-Start Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, optionally: Security Management Server and Application Server Autoscale in an existing VPC  (20260507).
   See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -30,6 +30,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - EnableVolumeEncryption
           - VolumeSize
           - VolumeType
@@ -172,6 +173,8 @@ Metadata:
         default: Resources tag name
       AutoScaleGroupName:
         default: Auto Scale Group name
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
 Parameters:
   NumberOfAZs:
     Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
@@ -917,6 +920,12 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -1006,6 +1015,7 @@ Resources:
         CloudWatch: !Ref CloudWatch
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
         GatewayBootstrapScript: !Join
           - ';'
           - - 'echo -e "\nStarting Bootstrap script\n"'

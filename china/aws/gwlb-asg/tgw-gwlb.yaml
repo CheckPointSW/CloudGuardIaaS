@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (04012026)
+Description: Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (05072026)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -28,6 +28,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - NatGwSubnet1CIDR
           - NatGwSubnet2CIDR
           - NatGwSubnet3CIDR
@@ -68,6 +69,8 @@ Metadata:
           - GatewaysPolicy
           - GatewayManagement
     ParameterLabels:
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       VPC:
         default: VPC
       IGWID:
@@ -688,6 +691,12 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -1003,6 +1012,7 @@ Resources:
         AdminCIDR: !Ref AdminCIDR
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
   GWLBe1:
     Type: AWS::EC2::VPCEndpoint
     Properties:

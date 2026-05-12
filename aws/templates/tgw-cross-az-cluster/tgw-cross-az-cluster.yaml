@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20260302).
+  Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20260507).
   See CloudGuard Network for AWS Cross Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -26,6 +26,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - InternalRouteTable
           - GatewayName
           - AllocatePublicAddress
@@ -113,6 +114,8 @@ Metadata:
         default: Bootstrap Script
       NTPPrimary:
         default: Primary NTP server
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       NTPSecondary:
         default: Secondary NTP server
 Parameters:
@@ -529,6 +532,12 @@ Parameters:
     Type: String
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
 Resources:
@@ -567,6 +576,7 @@ Resources:
         CloudWatch: !Ref CloudWatch
         GatewayBootstrapScript: !Ref GatewayBootstrapScript
         NTPPrimary: !Ref NTPPrimary
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
         NTPSecondary: !Ref NTPSecondary
   TGWRouteTable:
     Type: AWS::EC2::RouteTable

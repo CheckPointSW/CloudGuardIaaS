@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (20260407)
+  Deploys a Check Point Security Gateway into an existing VPC (20260507)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Mappings:
   # Maps Local Zone AZ names to their NetworkBorderGroup.
@@ -100,6 +100,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - GatewayName
           - IPMode
           - AllocatePublicAddress
@@ -133,6 +134,8 @@ Metadata:
         default: Private subnet
       LocalZoneAz:
         default: Local Zone availability zone
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       InternalRouteTable:
         default: Internal route table
       GatewayName:
@@ -457,6 +460,12 @@ Parameters:
     Description: Use only for Local Zone subnets. This value must match the Local Zone AZ of the selected subnets and is used only to derive the correct NetworkBorderGroup for EIP allocation. Leave empty for regional subnets. This parameter does not control resource placement.
     Type: String
     Default: ''
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
   VolumeSize:
     Type: Number
     Default: 200
@@ -600,6 +609,7 @@ Parameters:
     Type: String
     MaxLength: 30
 Conditions:
+  CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
@@ -666,7 +676,7 @@ Resources:
       Description: eth0
       SourceDestCheck: false
       GroupSet:
-        - !Ref PermissiveSecurityGroup
+        - !If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]
       SubnetId: !Ref PublicSubnet
       Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   InternalNetworkInterface:
@@ -682,11 +692,12 @@ Resources:
       Description: eth1
       SourceDestCheck: false
       GroupSet:
-        - !Ref PermissiveSecurityGroup
+        - !If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]
       SubnetId: !Ref PrivateSubnet
       Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    Condition: CreateSecurityGroup
     Properties:
       Tags:
         - Key: Name

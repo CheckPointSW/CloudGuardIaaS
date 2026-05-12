@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance into an existing VPC (04012026)
+  Security Gateway & Management (Standalone) instance into an existing VPC (05072026)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -21,6 +21,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - InternalRouteTable
           - StandaloneName
           - IPMode
@@ -42,6 +43,8 @@ Metadata:
           - NTPPrimary
           - NTPSecondary
     ParameterLabels:
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       VPC:
         default: VPC
       PublicSubnet:
@@ -362,7 +365,14 @@ Parameters:
     Description: Allow web, SSH, and graphical clients only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR).
     Type: String
     AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
+  CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
@@ -419,7 +429,7 @@ Resources:
       Description: eth0
       SourceDestCheck: false
       GroupSet:
-        - !Ref PermissiveSecurityGroup
+        - !If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]
       SubnetId: !Ref PublicSubnet
       Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   InternalNetworkInterface:
@@ -434,10 +444,11 @@ Resources:
       Description: eth1
       SourceDestCheck: false
       GroupSet:
-        - !Ref PermissiveSecurityGroup
+        - !If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]
       SubnetId: !Ref PrivateSubnet
       Ipv6AddressCount: !If [IsIPv6Enabled, 1, !Ref "AWS::NoValue"]
   PermissiveSecurityGroup:
+    Condition: CreateSecurityGroup
     Type: AWS::EC2::SecurityGroup
     Properties:
       Tags:
