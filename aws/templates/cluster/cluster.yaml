@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Cluster into an existing VPC (20260407).
+  Deploys a Check Point Cluster into an existing VPC (20260507).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Mappings:
   # Maps Local Zone AZ names to their NetworkBorderGroup.
@@ -115,6 +115,8 @@ Metadata:
         default: Private subnet
       LocalZoneAz:
         default: Local Zone availability zone
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       InternalRouteTable:
         default: Internal route table
       GatewayName:

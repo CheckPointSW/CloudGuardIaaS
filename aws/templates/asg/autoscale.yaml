@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into an existing VPC (20260316)
+  Create an Auto Scaling group of Check Point gateways into an existing VPC (20260507)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps
 Metadata:
   AWS::CloudFormation::Interface:
@@ -508,7 +508,12 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
-
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
