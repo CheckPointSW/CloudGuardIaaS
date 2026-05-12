@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (04012026)
+Description: Deploy an Auto Scaling Group of CloudGuard Security Gateways for Transit Gateway with an optional Management Server into an existing VPC (05072026)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -19,6 +19,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - EnableVolumeEncryption
           - VolumeSize
           - VolumeType
@@ -50,6 +51,8 @@ Metadata:
           - ManagementServer
           - ConfigurationTemplate
     ParameterLabels:
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       VPC:
         default: VPC
       GatewaysSubnets:
@@ -539,6 +542,12 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   VolumeEncryption: !Equals [!Ref EnableVolumeEncryption, true]
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
@@ -642,6 +651,7 @@ Resources:
         ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
 Outputs:
   ManagementName:
     Description: The name that represents the Security Management Server.

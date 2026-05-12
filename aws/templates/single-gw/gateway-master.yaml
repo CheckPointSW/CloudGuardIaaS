@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into a new VPC (20260407)
+  Deploys a Check Point Security Gateway into a new VPC (20260507)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -17,6 +17,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - GatewayName
           - VPCCIDR
           - PublicSubnetCIDR
@@ -52,6 +53,8 @@ Metadata:
         default: Public subnet CIDR
       PrivateSubnetCIDR:
         default: Private subnet CIDR
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       GatewayName:
         default: Gateway Name
       GatewayInstanceType:
@@ -516,6 +519,12 @@ Parameters:
     Description: A name of a Security Gateway configuration template in the automatic provisioning configuration.
     Type: String
     MaxLength: 30
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
@@ -590,6 +599,7 @@ Resources:
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
         IPMode: !Ref IPMode
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
 Outputs:
   CheckPointInstancePublicAddress:
     Condition: AllocatePublicIPv4

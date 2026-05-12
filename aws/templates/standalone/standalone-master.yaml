@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20260302)
+  Security Gateway & Management (Standalone) instance in a new VPC (20260507)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -19,6 +19,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - StandaloneName
           - VPCCIDR
           - PublicSubnetCIDR
@@ -51,6 +52,8 @@ Metadata:
         default: Public subnet CIDR
       PrivateSubnetCIDR:
         default: Private subnet CIDR
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       StandaloneName:
         default: Standalone Name
       StandaloneInstanceType:
@@ -478,6 +481,12 @@ Parameters:
     Description: Allow gateways only from this network to communicate with the Standalone Server (IPv4 or IPv6 CIDR) (optional).
     Type: String
     AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   ProvidedResourcesTag: !Not [!Equals [!Ref ResourcesTagName, '']]
   IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
@@ -547,6 +556,7 @@ Resources:
         AdminCIDR: !Ref AdminCIDR
         GatewaysAddresses: !Ref GatewaysAddresses
         IPMode: !Ref IPMode
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
 Outputs:
   CheckPointInstancePublicAddress:
     Condition: AllocatePublicIPv4

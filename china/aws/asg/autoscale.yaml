@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create an Auto Scaling group of Check Point gateways into an existing VPC (04012026)
+Description: Create an Auto Scaling group of Check Point gateways into an existing VPC (05072026)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -19,6 +19,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - GatewayName
           - VolumeSize
           - VolumeType
@@ -43,6 +44,8 @@ Metadata:
           - ELBPort
           - ELBClients
     ParameterLabels:
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       VPC:
         default: VPC
       GatewaysSubnets:
@@ -373,8 +376,15 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 
 Conditions:
+  CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
   ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
   EnableCloudWatch: !Equals [!Ref CloudWatch, true]
@@ -453,6 +463,7 @@ Resources:
         - !Ref ELBSecurityGroup
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    Condition: CreateSecurityGroup
     Properties:
       Tags:
         - Key: Name
@@ -504,7 +515,7 @@ Resources:
           - DeviceIndex: 0
             AssociatePublicIpAddress: true
             Groups:
-              - !Ref PermissiveSecurityGroup
+              - !If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]
         Monitoring:
           Enabled: true
         KeyName: !Ref KeyName
@@ -601,5 +612,5 @@ Outputs:
     Value: !Join ['', ['http://', !GetAtt ElasticLoadBalancer.DNSName]]
   SecurityGroup:
     Description: The Security Group of the Auto Scaling group.
-    Value: !GetAtt PermissiveSecurityGroup.GroupId
+    Value: !If [CreateSecurityGroup, !GetAtt PermissiveSecurityGroup.GroupId, !Ref ExistingSecurityGroup]
 

@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Cluster into an existing VPC (20260407).
+  Deploys a Check Point Cluster into an existing VPC (20260507).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Mappings:
   # Maps Local Zone AZ names to their NetworkBorderGroup.
@@ -83,6 +83,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - InternalRouteTable
           - GatewayName
           - AllocatePublicAddress
@@ -114,6 +115,8 @@ Metadata:
         default: Private subnet
       LocalZoneAz:
         default: Local Zone availability zone
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
       InternalRouteTable:
         default: Internal route table
       GatewayName:
@@ -564,7 +567,14 @@ Parameters:
     Type: String
     Default: 0.pool.ntp.org
     AllowedPattern: '^[\.a-zA-Z0-9\-]*$'
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
+  CreateSecurityGroup: !Equals [!Ref ExistingSecurityGroup, '']
   ProvidedRouteTable: !Not [!Equals [!Ref InternalRouteTable, '']]
   AllocateAddress: !Equals [!Ref AllocatePublicAddress, true]
   EncryptedVolume: !Not [!Equals [!Ref VolumeEncryption, '']]
@@ -606,6 +616,7 @@ Resources:
         Version: !Join ["-", [!Ref GatewayVersion, GW]]
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    Condition: CreateSecurityGroup
     Properties:
       GroupDescription: Permissive security group.
       VpcId: !Ref VPC
@@ -625,7 +636,7 @@ Resources:
       Description: Member A external.
       SecondaryPrivateIpAddressCount: 1
       SourceDestCheck: false
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SubnetId: !Ref PublicSubnet
       Tags:
         - Key: Name
@@ -639,7 +650,7 @@ Resources:
     Properties:
       Description: Member B external.
       SourceDestCheck: false
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SubnetId: !Ref PublicSubnet
       Tags:
         - Key: Name
@@ -653,7 +664,7 @@ Resources:
     Properties:
       Description: Member A internal.
       SecondaryPrivateIpAddressCount: 1
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SourceDestCheck: false
       SubnetId: !Ref PrivateSubnet
       Tags:
@@ -667,7 +678,7 @@ Resources:
     Type: AWS::EC2::NetworkInterface
     Properties:
       Description: Member B internal.
-      GroupSet: [!Ref PermissiveSecurityGroup]
+      GroupSet: [!If [CreateSecurityGroup, !Ref PermissiveSecurityGroup, !Ref ExistingSecurityGroup]]
       SourceDestCheck: false
       SubnetId: !Ref PrivateSubnet
       Tags:

@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260302).
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260507).
   See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -23,6 +23,7 @@ Metadata:
       - Label:
           default: Advanced Settings
         Parameters:
+          - ExistingSecurityGroup
           - VPCCIDR
           - PublicSubnet1CIDR
           - PublicSubnet2CIDR
@@ -154,6 +155,8 @@ Metadata:
         default: Management Server Settings - Gateways addresses
       AutoScaleGroupName:
         default: Auto Scale Group Name
+      ExistingSecurityGroup:
+        default: Existing Security Group (optional)
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -882,6 +885,12 @@ Parameters:
     Type: String
     Default: ""
     MaxLength: 100
+  ExistingSecurityGroup:
+    Description: An optional existing Security Group ID (e.g. sg-0123456789abcdef0). If left empty, a new Security Group open to all traffic (0.0.0.0/0) will be created. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
+    ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -953,6 +962,7 @@ Resources:
         GatewayManagement: !Ref GatewayManagement
         GatewaysAddresses: !Ref GatewaysAddresses
         IPMode: !Ref IPMode
+        ExistingSecurityGroup: !Ref ExistingSecurityGroup
 Outputs:
   VPCID:
     Description: VPC ID.
