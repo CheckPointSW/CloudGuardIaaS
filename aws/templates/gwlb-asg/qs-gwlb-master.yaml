@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260507).
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, in a new VPC (20260517).
   See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -80,6 +80,8 @@ Metadata:
           - GatewaysPolicy
           - GatewaysBlades
           - GatewayManagement
+          - ServersMetaDataToken
+          - ServersEnableVolumeEncryption
     ParameterLabels:
       AvailabilityZones:
         default: Availability Zones
@@ -205,6 +207,10 @@ Metadata:
         default: Auto Scale Group name
       ExistingSecurityGroup:
         default: Existing Security Group (optional)
+      ServersMetaDataToken:
+        default: Servers - Enforce IMDSv2
+      ServersEnableVolumeEncryption:
+        default: Servers - Enable EBS volume encryption
 Parameters:
   AvailabilityZones:
     Description: List of Availability Zones (AZs) to use for the subnets in the VPC. Select at least two.
@@ -1027,6 +1033,20 @@ Parameters:
     Default: ''
     AllowedPattern: '^(sg-[0-9a-f]{8,17})?$'
     ConstraintDescription: Must be a valid Security Group ID (e.g. sg-0123456789abcdef0) or left empty.
+  ServersMetaDataToken:
+    Description: 'Enforce IMDSv2 (HttpTokens=required) on the server instances - mitigates SSRF-based IAM credential theft. Limitations when true: AWS SDKs older than 2020 and bare IMDSv1 curl scripts fail; containerized workloads using bridge networking may lose IMDS access (default hop_limit=1). SDK compatibility list: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html#use-a-supported-sdk-version-for-imdsv2'
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ServersEnableVolumeEncryption:
+    Description: 'Encrypt the root EBS volume (/dev/xvda) of the server instances with the default aws/ebs KMS key. Limitations when true: only encrypts AMIs whose root device is /dev/xvda (Windows /dev/sda1 and older paravirt Linux get a phantom volume while the actual root stays unencrypted); no CMEK support (no KmsKeyId parameter); aws/ebs-encrypted snapshots cannot be shared cross-account directly; not retroactive - only newly-launched instances are encrypted.'
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
@@ -1093,11 +1113,13 @@ Resources:
             - !If [4AZs, !GetAtt ServersVPCStack.Outputs.GWLBeSubnet4ID, !Ref 'AWS::NoValue']
         KeyName: !Ref KeyName
         EnableVolumeEncryption: !Ref EnableVolumeEncryption
+        ServersEnableVolumeEncryption: !Ref ServersEnableVolumeEncryption
         VolumeType: !Ref VolumeType
         VolumeSize: !Ref VolumeSize
         EnableInstanceConnect: !Ref EnableInstanceConnect
         TerminationProtection: !Ref TerminationProtection
         MetaDataToken: !Ref MetaDataToken
+        ServersMetaDataToken: !Ref ServersMetaDataToken
         AllowUploadDownload: !Ref AllowUploadDownload
         ManagementServer: !Ref ManagementServer
         ConfigurationTemplate: !Ref ConfigurationTemplate
