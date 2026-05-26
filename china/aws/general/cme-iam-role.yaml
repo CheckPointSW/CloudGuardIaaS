@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Creates an IAM role for selected permissions (20260316)
+Description: Creates an IAM role for selected permissions (20260526)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -13,6 +13,7 @@ Metadata:
         Parameters:
           - STSRoles
           - TrustedAccount
+          - ExternalId
     ParameterLabels:
       Permissions:
         default: IAM role
@@ -20,6 +21,8 @@ Metadata:
         default: STS roles
       TrustedAccount:
         default: Trusted Account ID
+      ExternalId:
+        default: External ID
 Parameters:
   Permissions:
     Type: String
@@ -37,6 +40,19 @@ Parameters:
     Type: String
     Default: ''
     AllowedPattern: '^([0-9]{12})|$'
+  ExternalId:
+    Description: External ID required for cross-account role assumption (confused deputy protection). Mandatory when Trusted Account ID is set; ignored when it is empty.
+    Type: String
+    Default: ''
+    NoEcho: true
+    MaxLength: 1224
+    AllowedPattern: '^[A-Za-z0-9=,.@:/\-]*$'
+Rules:
+  ExternalIdRequiredWithTrustedAccount:
+    RuleCondition: !Not [!Equals [!Ref TrustedAccount, '']]
+    Assertions:
+      - Assert: !Not [!Equals [!Ref ExternalId, '']]
+        AssertDescription: ExternalId is required when TrustedAccount is set, to prevent confused deputy attacks (CGNSPC-1756).
 Conditions:
   AllowReadPermissions: !Or
     - !Equals [!Ref Permissions, Create with read permissions]
@@ -45,6 +61,7 @@ Conditions:
   ProvidedSTSRoles: !Not [!Equals [!Ref STSRoles, '']]
   NotProvidedTrustedAccount: !Equals ['', !Ref TrustedAccount]
   ProvidedTrustedAccount: !Not [!Condition NotProvidedTrustedAccount]
+  ProvidedExternalId: !Not [!Equals ['', !Ref ExternalId]]
 Resources:
   CMEIAMRole:
     Type: AWS::IAM::Role
@@ -58,6 +75,11 @@ Resources:
               Principal:
                 AWS: [!Ref TrustedAccount]
               Action: ['sts:AssumeRole']
+              Condition: !If
+                - ProvidedExternalId
+                - StringEquals:
+                    sts:ExternalId: !Ref ExternalId
+                - !Ref 'AWS::NoValue'
             - !Ref 'AWS::NoValue'
           - !If
             - NotProvidedTrustedAccount
