@@ -51,6 +51,11 @@ log_msg()
         echo "$(date)  $1"
 }
 
+write_cmd_header()
+{
+        printf '# Command: %s\n\n' "$1" > "$2"
+}
+
 log_msg "Starting"
 log_msg "  Creating $TMPPATH"
 \rm -rf $TMPPATH
@@ -63,6 +68,13 @@ fi
 
 # checking if there's connectivity with userCenter and if TCP port 18208 is open
 log_msg "  Checking if TCP port 18208 is open and accessible"
+if [ -n "$PROXY_PORT" ]; then
+        printf '# Commands:\n#   netstat -na | grep "18208"\n#   %s\n\n' \
+                "$CURL_CLI --proxy $PROXY_PORT -v -k $USERCENTER" > $TMPPATH/Sync
+else
+        printf '# Commands:\n#   netstat -na | grep "18208"\n#   %s\n\n' \
+                "$CURL_CLI -v -k $USERCENTER" > $TMPPATH/Sync
+fi
 printf "                                                                Checking TCP port \n\n" >> $TMPPATH/Sync
 netstat -na | grep "18208" >> $TMPPATH/Sync
 printf "\n\n" >> $TMPPATH/Sync
@@ -95,42 +107,57 @@ cp $MDS_FWDIR/log/vseclic.elg* $TMPPATH
 
 # Collect licenses data from DB
 log_msg "  Collecting licenses with cprlic into $TMPPATH"
+write_cmd_header "cprlic print -all -x -a" $TMPPATH/attached_licenses
 cprlic print -all -x -a >> $TMPPATH/attached_licenses
 
 log_msg "  Collecting vsec view into $TMPPATH"
+write_cmd_header "vsec_lic_cli view" $TMPPATH/view_licenses.txt
 vsec_lic_cli view >> $TMPPATH/view_licenses.txt
 
 log_msg "  Collecting management licenses into $TMPPATH"
+write_cmd_header "cplic print -n -x" $TMPPATH/management_licenses.txt
 cplic print -n -x >> $TMPPATH/management_licenses.txt
 
 log_msg "  Collecting licensepool_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from licensePool_data;"' $TMPPATH/licensePoolData.txt
 psql_client cpm postgres -c "select * from licensePool_data;" >> $TMPPATH/licensePoolData.txt
 
 log_msg "  Collecting filtered licensepool_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from licensepool_data where not deleted and dlesession=0;"' $TMPPATH/licensePoolData_filtered.txt
 psql_client cpm postgres -c "select * from licensepool_data where not deleted and dlesession=0;" >> $TMPPATH/licensePoolData_filtered.txt
 
 log_msg "  Collecting GatewayLicenses_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from GatewayLicenses_data;"' $TMPPATH/gatewayLicensesData.txt
 psql_client cpm postgres -c "select * from GatewayLicenses_data;" >> $TMPPATH/gatewayLicensesData.txt
 
 log_msg "  Collecting filtered GatewayLicenses_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from gatewaylicenses_data where not deleted and dlesession=0;"' $TMPPATH/gatewayLicensesData_filtered.txt
 psql_client cpm postgres -c "select * from gatewaylicenses_data where not deleted and dlesession=0;" >> $TMPPATH/gatewayLicensesData_filtered.txt
 
 log_msg "  Collecting VsecLicense_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from vseclicense_data;"' $TMPPATH/vsecLicenseData.txt
 psql_client cpm postgres -c "select * from vseclicense_data;" >> $TMPPATH/vsecLicenseData.txt
 
 log_msg "  Collecting filtered vseclicense_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from vseclicense_data where not deleted and dlesession=0;"' $TMPPATH/vsecLicenseData_filtered.txt
 psql_client cpm postgres -c "select * from vseclicense_data where not deleted and dlesession=0;" >> $TMPPATH/vsecLicenseData_filtered.txt
 
 log_msg "  Collecting number of unattached licenses into $TMPPATH (Should be empty)"
+write_cmd_header "psql_client cpm postgres -c \"select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where (dod.fwset ilike '%not-installed%' or (dod.fwset ilike '%(installed)%' and dod.fwset ilike '%network_object ()%')) and dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;\"" $TMPPATH/number_of_unattached_licenses.txt
 psql_client cpm postgres -c "select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where (dod.fwset ilike '%not-installed%' or (dod.fwset ilike '%(installed)%' and dod.fwset ilike '%network_object ()%')) and dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;" >> $TMPPATH/number_of_unattached_licenses.txt
 
 log_msg "  Collecting number of all licenses into $TMPPATH (for cprlic debug)"
+write_cmd_header "psql_client cpm postgres -c \"select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;\"" $TMPPATH/number_of_all_licenses.txt
 psql_client cpm postgres -c "select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;" >> $TMPPATH/number_of_all_licenses.txt
 
 log_msg "  Collecting cpinfo data into $TMPPATH/cpinfo_y_all.txt"
-cpinfo -y all > $TMPPATH/cpinfo_y_all.txt 2> /dev/null
+write_cmd_header "cpinfo -y all" $TMPPATH/cpinfo_y_all.txt
+cpinfo -y all >> $TMPPATH/cpinfo_y_all.txt 2> /dev/null
 
 log_msg "  Collecting cpvinfo data into $TMPPATH/cpvinfo_vsec_lic.txt"
+printf '# Commands:\n#   cpvinfo %s\n#   cpvinfo %s\n\n' \
+        "$MDS_FWDIR/cpm-server/mgmt_vsec_lic.jar" \
+        "$MDS_FWDIR/cpm-server/vsec_lic_cli.jar" > $TMPPATH/cpvinfo_vsec_lic.txt
 cpvinfo $MDS_FWDIR/cpm-server/mgmt_vsec_lic.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
 cpvinfo $MDS_FWDIR/cpm-server/vsec_lic_cli.jar >> $TMPPATH/cpvinfo_vsec_lic.txt 2> /dev/null
 
