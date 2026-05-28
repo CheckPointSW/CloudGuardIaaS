@@ -1877,7 +1877,7 @@
           }
         }
       },
-      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')) ]"
+      "tags": "[union(if(contains(parameters('tagsByResource'), 'Microsoft.Compute/virtualMachines'), parameters('tagsByResource')['Microsoft.Compute/virtualMachines'], json('{}')), json('{\"LegacyVMNVA\": \"\"}'))]"
     },
     {
       "type": "Microsoft.Network/loadBalancers",
