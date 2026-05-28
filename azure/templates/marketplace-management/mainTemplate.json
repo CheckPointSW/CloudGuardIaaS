@@ -1359,6 +1359,76 @@
           "priority": "170",
           "direction": "Inbound"
         }
+      },
+      {
+        "name": "SmartViewLogs",
+        "properties": {
+          "description": "Allow Log Server communication",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "8211",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": "200",
+          "direction": "Inbound"
+        }
+      },
+      {
+        "name": "SecureInternalCommunication",
+        "properties": {
+          "description": "Allow secured internal communication",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "18209",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": "210",
+          "direction": "Inbound"
+        }
+      },
+      {
+        "name": "AMONApplicationMonitoring",
+        "properties": {
+          "description": "Allow inbound AMON application monitoring communication",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "18192",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": "220",
+          "direction": "Inbound"
+        }
+      },
+      {
+        "name": "ICA-push",
+        "properties": {
+          "description": "Allow to accept ICA SIC certificate",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "18211",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": "230",
+          "direction": "Inbound"
+        }
+      },
+      {
+        "name": "MGMTStandBySynchronization",
+        "properties": {
+          "description": "Allow inbound management HA standby synchronization communication",
+          "protocol": "TCP",
+          "sourcePortRange": "*",
+          "destinationPortRange": "18221",
+          "sourceAddressPrefix": "*",
+          "destinationAddressPrefix": "*",
+          "access": "Allow",
+          "priority": "250",
+          "direction": "Inbound"
+        }
       }
     ],
     "nsgSecurityRulesIPv6Additional": [
@@ -1372,7 +1442,7 @@
           "sourceAddressPrefix": "[variables('managementGUIClientNetworkIpv6')]",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": "200",
+          "priority": "260",
           "direction": "Inbound"
         }
       },
@@ -1386,7 +1456,7 @@
           "sourceAddressPrefix": "[variables('managementGUIClientNetworkIpv6')]",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": "210",
+          "priority": "270",
           "direction": "Inbound"
         }
       },
@@ -1400,7 +1470,7 @@
           "sourceAddressPrefix": "[variables('managementGUIClientNetworkIpv6')]",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": "220",
+          "priority": "280",
           "direction": "Inbound"
         }
       },
@@ -1414,7 +1484,7 @@
           "sourceAddressPrefix": "[variables('managementGUIClientNetworkIpv6')]",
           "destinationAddressPrefix": "*",
           "access": "Allow",
-          "priority": "230",
+          "priority": "290",
           "direction": "Inbound"
         }
       }
