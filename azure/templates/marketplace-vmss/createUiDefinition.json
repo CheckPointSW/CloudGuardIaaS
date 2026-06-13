@@ -1012,8 +1012,8 @@
             "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
             "constraints": {
               "required": true,
-              "regex": "^[a-z0-9A-Z]{12,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+              "regex": "^[a-z0-9A-Z]{8,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 8-30 characters long."
             },
             "options": {
               "hideConfirmation": false
