@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (05072026)
+  Deploys a Check Point Security Gateway into an existing VPC (06222026)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -384,11 +384,11 @@ Parameters:
       - public
   ManagementServer:
     Description: The name that represents the Security Management Server in the automatic
-      provisioning configuration.
+      provisioning configuration. (optional)
     Type: String
   ConfigurationTemplate:
     Description: A name of a Security Gateway configuration template in the automatic
-      provisioning configuration.
+      provisioning configuration. (optional)
     Type: String
     MaxLength: 30
   ExistingSecurityGroup:
