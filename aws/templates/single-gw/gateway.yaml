@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into an existing VPC (20260507)
+  Deploys a Check Point Security Gateway into an existing VPC (20260622)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Mappings:
   # Maps Local Zone AZ names to their NetworkBorderGroup.
@@ -601,11 +601,11 @@ Parameters:
       - public
   ManagementServer:
     Description: The name that represents the Security Management Server in the automatic
-      provisioning configuration.
+      provisioning configuration. (optional)
     Type: String
   ConfigurationTemplate:
     Description: A name of a Security Gateway configuration template in the automatic
-      provisioning configuration.
+      provisioning configuration. (optional)
     Type: String
     MaxLength: 30
 Conditions:
