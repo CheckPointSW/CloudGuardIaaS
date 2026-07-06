@@ -1,0 +1,1410 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy a Gateway Load Balancer with dual-arm architecture, Check Point CloudGuard Network Security Gateway Auto Scaling Group, and optionally a Security Management Server, in an existing VPC for different AZs, with Transit Gateway (TGW) attachment support (20260706)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Basic Settings
+        Parameters:
+          - DeploymentPrefix
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+          - AdminCIDR
+          - GatewaysAddresses
+      - Label:
+          default: VPC Network Settings
+        Parameters:
+          - VPC
+          - IPMode
+          - IGWID
+          - AvailabilityZones
+          - NumberOfAZs
+          - GatewaysPublicSubnets
+          - IPAMPoolId
+          - GatewaysPrivateSubnets
+          - TgwSubnet1Id
+          - TgwSubnet2Id
+          - TgwSubnet3Id
+          - TgwSubnet4Id
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - GWLBeSubnet1CIDR
+          - GWLBeSubnet2CIDR
+          - GWLBeSubnet3CIDR
+          - GWLBeSubnet4CIDR
+          - ManagementSubnetCIDR
+          - EnableVolumeEncryption
+          - VolumeSize
+          - VolumeType
+          - EnableInstanceConnect
+          - TerminationProtection
+          - MetaDataToken
+          - AllowUploadDownload
+          - ManagementServer
+          - ConfigurationTemplate
+          - AdminEmail
+          - Shell
+          - GatewaysMinSize
+          - GatewaysMaxSize
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - ControlGatewayOverPrivateOrPublicAddress
+          - CloudWatch
+          - GatewayBootstrapScript
+          - CrossZoneLoadBalancing
+          - VPCIPv6CIDR
+          - ManagementDeploy
+          - ManagementInstanceType
+          - ManagementVersion
+          - ManagementPasswordHash
+          - ManagementMaintenancePasswordHash
+          - GatewaysPolicy
+          - GatewayManagement
+          - LambdaAutoUpdate
+    ParameterLabels:
+      VPC:
+        default: VPC
+      IGWID:
+        default: Internet Gateway ID
+      AvailabilityZones:
+        default: Availability Zones
+      NumberOfAZs:
+        default: Number of AZs
+      GatewaysPublicSubnets:
+        default: Gateways Public Subnets
+      GatewaysPrivateSubnets:
+        default: Gateways Private Subnets
+      TgwSubnet1Id:
+        default: Transit Gateway Attachment subnet 1 Id
+      TgwSubnet2Id:
+        default: Transit Gateway Attachment subnet 2 Id
+      TgwSubnet3Id:
+        default: Transit Gateway Attachment subnet 3 Id
+      TgwSubnet4Id:
+        default: Transit Gateway Attachment subnet 4 Id
+      GWLBeSubnet1CIDR:
+        default: Gateway Load Balancer Endpoint subnet 1 CIDR
+      GWLBeSubnet2CIDR:
+        default: Gateway Load Balancer Endpoint subnet 2 CIDR
+      GWLBeSubnet3CIDR:
+        default: Gateway Load Balancer Endpoint subnet 3 CIDR
+      GWLBeSubnet4CIDR:
+        default: Gateway Load Balancer Endpoint subnet 4 CIDR
+      ManagementSubnetCIDR:
+        default: Management Subnet CIDR
+      KeyName:
+        default: Key name
+      EnableVolumeEncryption:
+        default: Enable environment volume encryption
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      TerminationProtection:
+        default: Termination Protection
+      MetaDataToken:
+        default: Metadata HTTP token
+      AllowUploadDownload:
+        default: Allow upload & download
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+      AdminEmail:
+        default: Email address
+      Shell:
+        default: Admin shell
+      DeploymentPrefix:
+        default: Deployment Prefix
+      GatewayInstanceType:
+        default: Gateways Instance type
+      GatewaysMinSize:
+        default: Minimum group size
+      GatewaysMaxSize:
+        default: Maximum group size
+      GatewayVersion:
+        default: Gateways Version & License
+      GatewayPasswordHash:
+        default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateways Maintenance Password hash
+      GatewaySICKey:
+        default: Gateways SIC key
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      CloudWatch:
+        default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
+      CrossZoneLoadBalancing:
+        default: Enable Cross Zone Load Balancing
+      IPMode:
+        default: IP Mode
+      VPCIPv6CIDR:
+        default: VPC IPv6 CIDR
+      ManagementDeploy:
+        default: Management Server Settings - Deploy Management Server
+      ManagementInstanceType:
+        default: Management Server Settings - Instance type
+      ManagementVersion:
+        default: Management Server Settings - Version & License
+      ManagementPasswordHash:
+        default: Management Server Settings - Password hash
+      ManagementMaintenancePasswordHash:
+        default: Management Server Settings - Maintenance Password hash
+      GatewaysPolicy:
+        default: Management Server Settings - Security Policy
+      AdminCIDR:
+        default: Management Server Settings - Allow SmartConsole connections from these networks
+      GatewayManagement:
+        default: Management Server Settings - Manage Gateways
+      GatewaysAddresses:
+        default: Management Server Settings - Gateways addresses
+      IPAMPoolId:
+        default: IPAM Pool ID
+      LambdaAutoUpdate:
+        default: Lambda Auto Update
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+    ConstraintDescription: You must select a VPC.
+  IGWID:
+    Description: VPC's Internet Gateway ID (e.g. igw-123a4567).
+    Type: String
+    MinLength: 1
+    ConstraintDescription: You must insert an Internet Gateway Id.
+  AvailabilityZones:
+    Description: The Availability Zones (AZs) to use for the subnets in the VPC. Select two (the logical order is preserved).
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    MinLength: 2
+  NumberOfAZs:
+    Description: Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.
+    Type: Number
+    Default: 2
+    MinValue: 2
+    MaxValue: 4
+  GatewaysPublicSubnets:
+    Description: Select at least 2 existing public subnets in the VPC for the Security Gateways (one per AZ).
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  GatewaysPrivateSubnets:
+    Description: Select at least 2 existing private subnets in the VPC for the Security Gateways (one per AZ).
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  TgwSubnet1Id:
+    Description: The TGW attachment subnet ID located in the 1st Availability Zone.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: You must insert Tgw Subnet ID for Availability Zone 1.
+  TgwSubnet2Id:
+    Description: The TGW attachment subnet ID located in the 2nd Availability Zone.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: 1
+    ConstraintDescription: You must insert Tgw Subnet ID for Availability Zone 2.
+  TgwSubnet3Id:
+    Description: The TGW attachment subnet ID located in the 3rd Availability Zone.
+    Type: String
+    Default: ''
+  TgwSubnet4Id:
+    Description: The TGW attachment subnet ID located in the 4th Availability Zone.
+    Type: String
+    Default: ''
+  GWLBeSubnet1CIDR:
+    Description: CIDR block for GWLBe subnet 1 located in the 1st Availability Zone.
+    Type: String
+    Default: 10.0.70.0/24
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet2CIDR:
+    Description: CIDR block for GWLBe subnet 2 located in the 2nd Availability Zone.
+    Type: String
+    Default: 10.0.80.0/24
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet3CIDR:
+    Description: CIDR block for GWLBe subnet 3 located in the 3rd Availability Zone.
+    Type: String
+    Default: 10.0.90.0/24
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  GWLBeSubnet4CIDR:
+    Description: CIDR block for GWLBe subnet 4 located in the 4th Availability Zone.
+    Type: String
+    Default: 10.0.100.0/24
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28.
+  ManagementSubnetCIDR:
+    Description: CIDR block for Management Subnet located in the first Availability Zone. This parameter is relevant only if ManagementDeploy is set to true.
+    Type: String
+    Default: 10.0.110.0/24
+    AllowedPattern: '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(3[0-2]|[12]?[0-9])|([0-9a-fA-F]{0,4}:){2,7}([0-9a-fA-F]{0,4}|((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))$'
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+  DeploymentPrefix:
+    Description: A prefix for resource names. Leave empty to use default naming.
+    Type: String
+    Default: 'CheckPoint'
+    MaxLength: 32
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances created by this stack.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  EnableVolumeEncryption:
+    Description: Encrypt Environment instances volume with default AWS KMS key.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  VolumeSize:
+    Type: Number
+    MinValue: 100
+    Default: 200
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TerminationProtection:
+    Description: Prevents an instance from accidental termination.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
+    Type: String
+    Default: gwlb-management-server
+    MinLength: 1
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
+    Type: String
+    Default: gwlb-ASG-configuration
+    MinLength: 1
+    MaxLength: 30
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+    ConstraintDescription: Must be a valid email address.
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration. Applies for Security Gateways and Security Management Server if deployed.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  IPMode:
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected.
+    Type: String
+    AllowedValues:
+      - IPv4
+      - DualStack
+    Default: IPv4
+  VPCIPv6CIDR:
+    Description: The IPv6 CIDR block of the VPC. Required when IPMode is DualStack.
+    Type: String
+    Default: ''
+  GatewayInstanceType:
+    Description: The EC2 instance type for the Security Gateways.
+    Type: String
+    Default: c6in.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - c7a.large
+      - c7a.xlarge
+      - c7a.2xlarge
+      - c7a.4xlarge
+      - c7a.8xlarge
+      - c7a.12xlarge
+      - c7a.16xlarge
+      - c7a.24xlarge
+      - c7a.32xlarge
+      - c7a.48xlarge
+      - c7a.metal-48xl
+      - c7i.large
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.48xlarge
+      - c7i.metal-24xl
+      - c7i.metal-48xl
+      - c7i-flex.large
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - c7i-flex.12xlarge
+      - c7i-flex.16xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - m6in.large
+      - m6in.xlarge
+      - m6in.2xlarge
+      - m6in.4xlarge
+      - m6in.8xlarge
+      - m6in.12xlarge
+      - m6in.16xlarge
+      - m6in.24xlarge
+      - m6in.32xlarge
+      - m6in.metal
+      - m7a.large
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - m7i.large
+      - m7i.xlarge
+      - m7i.2xlarge
+      - m7i.4xlarge
+      - m7i.8xlarge
+      - m7i.12xlarge
+      - m7i.16xlarge
+      - m7i.24xlarge
+      - m7i.48xlarge
+      - m7i.metal-24xl
+      - m7i.metal-48xl
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6gd.large
+      - r6gd.xlarge
+      - r6gd.2xlarge
+      - r6gd.4xlarge
+      - r6gd.8xlarge
+      - r6gd.12xlarge
+      - r6gd.16xlarge
+      - r6gd.metal
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - r7a.xlarge
+      - r7a.2xlarge
+      - r7a.4xlarge
+      - r7a.8xlarge
+      - r7a.12xlarge
+      - r7a.16xlarge
+      - r7a.24xlarge
+      - r7a.32xlarge
+      - r7a.48xlarge
+      - r7i.large
+      - r7i.xlarge
+      - r7i.2xlarge
+      - r7i.4xlarge
+      - r7i.8xlarge
+      - r7i.12xlarge
+      - r7i.16xlarge
+      - r7i.24xlarge
+      - r7i.48xlarge
+      - r7i.metal-24xl
+      - r7i.metal-48xl
+      - r7iz.large
+      - r7iz.xlarge
+      - r7iz.2xlarge
+      - r7iz.4xlarge
+      - r7iz.8xlarge
+      - r7iz.12xlarge
+      - r7iz.16xlarge
+      - r7iz.32xlarge
+      - r7iz.metal-16xl
+      - r7iz.metal-32xl
+    ConstraintDescription: Must be a valid EC2 instance type.
+  GatewaysMinSize:
+    Description: The minimal number of Security Gateways.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GatewaysMaxSize:
+    Description: The maximal number of Security Gateways.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  GatewayVersion:
+    Description: The version and license to install on the Security Gateways.
+    Type: String
+    Default: R82-PAYG-NGTX
+    AllowedValues:
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
+      - R82-BYOL
+      - R82-PAYG-NGTP
+      - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
+      - R82.20-BYOL
+      - R82.20-PAYG-NGTP
+      - R82.20-PAYG-NGTX
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections between Check Point components. Choose a random string consisting of at least 8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '^[a-zA-Z0-9]{8,}$'
+    ConstraintDescription: Secure Internal Communication activation key should contain only alpha numeric characters and be at least 8 characters long.
+    NoEcho: true
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  CrossZoneLoadBalancing:
+    Description: Select 'true' to enable cross-az load balancing. NOTE! this may cause a spike in cross-az charges.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  ManagementDeploy:
+    Description: Select 'false' to use an existing Security Management Server or to deploy one later and to ignore the parameters below.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ManagementInstanceType:
+    Description: The EC2 instance type of the Security Management Server.
+    Type: String
+    Default: m5.xlarge
+    AllowedValues:
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - c7a.large
+      - c7a.xlarge
+      - c7a.2xlarge
+      - c7a.4xlarge
+      - c7a.8xlarge
+      - c7a.12xlarge
+      - c7a.16xlarge
+      - c7a.24xlarge
+      - c7a.32xlarge
+      - c7a.48xlarge
+      - c7a.metal-48xl
+      - c7i.large
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.48xlarge
+      - c7i.metal-24xl
+      - c7i.metal-48xl
+      - c7i-flex.large
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - c7i-flex.12xlarge
+      - c7i-flex.16xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - m6in.large
+      - m6in.xlarge
+      - m6in.2xlarge
+      - m6in.4xlarge
+      - m6in.8xlarge
+      - m6in.12xlarge
+      - m6in.16xlarge
+      - m6in.24xlarge
+      - m6in.32xlarge
+      - m6in.metal
+      - m7a.large
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - m7i.large
+      - m7i.xlarge
+      - m7i.2xlarge
+      - m7i.4xlarge
+      - m7i.8xlarge
+      - m7i.12xlarge
+      - m7i.16xlarge
+      - m7i.24xlarge
+      - m7i.48xlarge
+      - m7i.metal-24xl
+      - m7i.metal-48xl
+      - m7i-flex.large
+      - m7i-flex.xlarge
+      - m7i-flex.2xlarge
+      - m7i-flex.4xlarge
+      - m7i-flex.8xlarge
+      - m7i-flex.12xlarge
+      - m7i-flex.16xlarge
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6gd.large
+      - r6gd.xlarge
+      - r6gd.2xlarge
+      - r6gd.4xlarge
+      - r6gd.8xlarge
+      - r6gd.12xlarge
+      - r6gd.16xlarge
+      - r6gd.metal
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - r7a.xlarge
+      - r7a.2xlarge
+      - r7a.4xlarge
+      - r7a.8xlarge
+      - r7a.12xlarge
+      - r7a.16xlarge
+      - r7a.24xlarge
+      - r7a.32xlarge
+      - r7a.48xlarge
+      - r7i.large
+      - r7i.xlarge
+      - r7i.2xlarge
+      - r7i.4xlarge
+      - r7i.8xlarge
+      - r7i.12xlarge
+      - r7i.16xlarge
+      - r7i.24xlarge
+      - r7i.48xlarge
+      - r7i.metal-24xl
+      - r7i.metal-48xl
+      - r7iz.large
+      - r7iz.xlarge
+      - r7iz.2xlarge
+      - r7iz.4xlarge
+      - r7iz.8xlarge
+      - r7iz.12xlarge
+      - r7iz.16xlarge
+      - r7iz.32xlarge
+      - r7iz.metal-16xl
+      - r7iz.metal-32xl
+    ConstraintDescription: Must be a valid EC2 instance type.
+  ManagementVersion:
+    Description: The license to install on the Security Management Server.
+    Type: String
+    Default: R82-PAYG
+    AllowedValues:
+      - R81.10-BYOL
+      - R81.10-PAYG
+      - R81.20-BYOL
+      - R81.20-PAYG
+      - R82-BYOL
+      - R82-PAYG
+      - R82.10-BYOL
+      - R82.10-PAYG
+      - R82.20-BYOL
+      - R82.20-PAYG
+  ManagementPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD" to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  ManagementMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaysPolicy:
+    Description: The name of the Security Policy package to be installed on the gateways in the Security Gateways Auto Scaling group.
+    Type: String
+    Default: Standard
+    MinLength: 1
+  AdminCIDR:
+    Description: Allow web, SSH, and graphical clients only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  GatewayManagement:
+    Description: Select 'Over the internet' if any of the gateways you wish to manage are not directly accessed via their private IP address.
+    Type: String
+    Default: Locally managed
+    AllowedValues:
+      - Locally managed
+      - Over the internet
+  GatewaysAddresses:
+    Description: Allow gateways only from this network to communicate with the Security Management Server.
+    Type: String
+    AllowedPattern: '^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$'
+  IPAMPoolId:
+    Description: (Optional) The ID of an IPAM pool to allocate Elastic IPs from. If not provided, EIPs will be allocated from Amazon's pool of public IPv4 addresses.
+    Type: String
+    Default: ''
+  LambdaAutoUpdate:
+    Description: When true, the Lambda function will always check for the newest version from S3 on each execution. When false (default), the Lambda will pin to the latest version on first run.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+Conditions:
+  3AZs: !Or
+    - !Equals [!Ref NumberOfAZs, 3]
+    - !Equals [!Ref NumberOfAZs, 4]
+  4AZs: !Equals [!Ref NumberOfAZs, 4]
+  DeploymentPrefixProvided: !Not [!Equals [!Ref DeploymentPrefix, '']]
+  ManagementDeployed: !Equals [!Ref ManagementDeploy, true]
+  IsIPv6Enabled: !Equals [!Ref IPMode, DualStack]
+  ManagementDeployedAndIPv6: !And [!Condition ManagementDeployed, !Condition IsIPv6Enabled]
+  3AZsAndIPv6: !And [!Condition 3AZs, !Condition IsIPv6Enabled]
+  4AZsAndIPv6: !And [!Condition 4AZs, !Condition IsIPv6Enabled]
+  TgwSubnet3IdProvided: !Not [!Equals [!Ref TgwSubnet3Id, '']]
+  TgwSubnet4IdProvided: !Not [!Equals [!Ref TgwSubnet4Id, '']]
+  VPCIPv6CIDRProvided: !Not [!Equals [!Ref VPCIPv6CIDR, '']]
+Resources:
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion, GW]]
+  GWLBeSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref GWLBeSubnet1CIDR
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      Ipv6CidrBlock: !If
+        - IsIPv6Enabled
+        - !Select [12, !Cidr [!If [VPCIPv6CIDRProvided, !Ref VPCIPv6CIDR, '0.0.0.0/0'], 17, 64]]
+        - !Ref 'AWS::NoValue'
+      AssignIpv6AddressOnCreation: !If [IsIPv6Enabled, true, !Ref 'AWS::NoValue']
+      Tags:
+        - Key: Name
+          Value: GWLBe subnet 1
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBeSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref GWLBeSubnet2CIDR
+      AvailabilityZone: !Select [1, !Ref AvailabilityZones]
+      Ipv6CidrBlock: !If
+        - IsIPv6Enabled
+        - !Select [13, !Cidr [!If [VPCIPv6CIDRProvided, !Ref VPCIPv6CIDR, '0.0.0.0/0'], 17, 64]]
+        - !Ref 'AWS::NoValue'
+      AssignIpv6AddressOnCreation: !If [IsIPv6Enabled, true, !Ref 'AWS::NoValue']
+      Tags:
+        - Key: Name
+          Value: GWLBe subnet 2
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBeSubnet3:
+    Type: AWS::EC2::Subnet
+    Condition: 3AZs
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref GWLBeSubnet3CIDR
+      AvailabilityZone: !Select [2, !Ref AvailabilityZones]
+      Ipv6CidrBlock: !If
+        - IsIPv6Enabled
+        - !Select [14, !Cidr [!If [VPCIPv6CIDRProvided, !Ref VPCIPv6CIDR, '0.0.0.0/0'], 17, 64]]
+        - !Ref 'AWS::NoValue'
+      AssignIpv6AddressOnCreation: !If [IsIPv6Enabled, true, !Ref 'AWS::NoValue']
+      Tags:
+        - Key: Name
+          Value: GWLBe subnet 3
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBeSubnet4:
+    Type: AWS::EC2::Subnet
+    Condition: 4AZs
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref GWLBeSubnet4CIDR
+      AvailabilityZone: !Select [3, !Ref AvailabilityZones]
+      Ipv6CidrBlock: !If
+        - IsIPv6Enabled
+        - !Select [15, !Cidr [!If [VPCIPv6CIDRProvided, !Ref VPCIPv6CIDR, '0.0.0.0/0'], 17, 64]]
+        - !Ref 'AWS::NoValue'
+      AssignIpv6AddressOnCreation: !If [IsIPv6Enabled, true, !Ref 'AWS::NoValue']
+      Tags:
+        - Key: Name
+          Value: GWLBe subnet 4
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  ManagementSubnet:
+    Type: AWS::EC2::Subnet
+    Condition: ManagementDeployed
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref ManagementSubnetCIDR
+      AvailabilityZone: !Select [0, !Ref AvailabilityZones]
+      Ipv6CidrBlock: !If
+        - IsIPv6Enabled
+        - !Select [16, !Cidr [!If [VPCIPv6CIDRProvided, !Ref VPCIPv6CIDR, '0.0.0.0/0'], 17, 64]]
+        - !Ref 'AWS::NoValue'
+      AssignIpv6AddressOnCreation: !If [IsIPv6Enabled, true, !Ref 'AWS::NoValue']
+      Tags:
+        - Key: Name
+          Value: Management subnet
+        - Key: Network
+          Value: Public
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  PrivateSubnetsRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-Private Subnets Route Table'
+            - Private Subnets Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Select [0, !Ref GatewaysPrivateSubnets]
+      RouteTableId: !Ref PrivateSubnetsRouteTable
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Select [1, !Ref GatewaysPrivateSubnets]
+      RouteTableId: !Ref PrivateSubnetsRouteTable
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 3AZs
+    Properties:
+      SubnetId: !Select [2, !Ref GatewaysPrivateSubnets]
+      RouteTableId: !Ref PrivateSubnetsRouteTable
+  PrivateSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 4AZs
+    Properties:
+      SubnetId: !Select [3, !Ref GatewaysPrivateSubnets]
+      RouteTableId: !Ref PrivateSubnetsRouteTable
+  GWLBeSubnetsRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-GWLBe Subnets Route Table'
+            - GWLBe Subnets Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBeSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref GWLBeSubnet1
+      RouteTableId: !Ref GWLBeSubnetsRouteTable
+  GWLBeSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref GWLBeSubnet2
+      RouteTableId: !Ref GWLBeSubnetsRouteTable
+  GWLBeSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 3AZs
+    Properties:
+      SubnetId: !Ref GWLBeSubnet3
+      RouteTableId: !Ref GWLBeSubnetsRouteTable
+  GWLBeSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 4AZs
+    Properties:
+      SubnetId: !Ref GWLBeSubnet4
+      RouteTableId: !Ref GWLBeSubnetsRouteTable
+  ManagementSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: ManagementDeployed
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-Management Subnet Route Table'
+            - Management Subnet Route Table
+        - Key: Network
+          Value: Public
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  ManagementSubnetDefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: ManagementDeployed
+    Properties:
+      RouteTableId: !Ref ManagementSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGWID
+  ManagementSubnetDefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: ManagementDeployedAndIPv6
+    Properties:
+      RouteTableId: !Ref ManagementSubnetRouteTable
+      DestinationIpv6CidrBlock: ::/0
+      GatewayId: !Ref IGWID
+  ManagementSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: ManagementDeployed
+    Properties:
+      SubnetId: !Ref ManagementSubnet
+      RouteTableId: !Ref ManagementSubnetRouteTable
+  GWLBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/gwlb/gwlb-dual-arm.yaml
+      Parameters:
+        VPC: !Ref VPC
+        GatewaysPublicSubnets: !Join [',', !Ref GatewaysPublicSubnets]
+        GatewaysPrivateSubnets: !Join [',', !Ref GatewaysPrivateSubnets]
+        KeyName: !Ref KeyName
+        EnableVolumeEncryption: !Ref EnableVolumeEncryption
+        VolumeType: !Ref VolumeType
+        VolumeSize: !Ref VolumeSize
+        EnableInstanceConnect: !Ref EnableInstanceConnect
+        TerminationProtection: !Ref TerminationProtection
+        MetaDataToken: !Ref MetaDataToken
+        AllowUploadDownload: !Ref AllowUploadDownload
+        ManagementServer: !Ref ManagementServer
+        ConfigurationTemplate: !Ref ConfigurationTemplate
+        AdminEmail: !Ref AdminEmail
+        Shell: !Ref Shell
+        DeploymentPrefix: !Ref DeploymentPrefix
+        AcceptConnectionRequired: false
+        CrossZoneLoadBalancing: !Ref CrossZoneLoadBalancing
+        GatewayInstanceType: !Ref GatewayInstanceType
+        GatewaysMinSize: !Ref GatewaysMinSize
+        GatewaysMaxSize: !Ref GatewaysMaxSize
+        GatewayVersion: !Ref GatewayVersion
+        GatewayPasswordHash: !Ref GatewayPasswordHash
+        GatewayMaintenancePasswordHash: !Ref GatewayMaintenancePasswordHash
+        GatewaySICKey: !Ref GatewaySICKey
+        ControlGatewayOverPrivateOrPublicAddress: !Ref ControlGatewayOverPrivateOrPublicAddress
+        CloudWatch: !Ref CloudWatch
+        GatewayBootstrapScript: !Ref GatewayBootstrapScript
+        ManagementDeploy: !Ref ManagementDeploy
+        ManagementSubnet: !If [ManagementDeployed, !Ref ManagementSubnet, !Select [0, !Ref GatewaysPublicSubnets]]
+        ManagementInstanceType: !Ref ManagementInstanceType
+        ManagementVersion: !Ref ManagementVersion
+        ManagementPasswordHash: !Ref ManagementPasswordHash
+        ManagementMaintenancePasswordHash: !Ref ManagementMaintenancePasswordHash
+        GatewaysPolicy: !Ref GatewaysPolicy
+        AdminCIDR: !Ref AdminCIDR
+        GatewayManagement: !Ref GatewayManagement
+        GatewaysAddresses: !Ref GatewaysAddresses
+        IPMode: !Ref IPMode
+        IPAMPoolId: !Ref IPAMPoolId
+        LambdaAutoUpdate: !Ref LambdaAutoUpdate
+  GWLBEndpoint1:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: GatewayLoadBalancer
+      ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      IpAddressType: !If [IsIPv6Enabled, dualstack, ipv4]
+      SubnetIds:
+        - !Ref GWLBeSubnet1
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBEndpoint2:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: GatewayLoadBalancer
+      ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      IpAddressType: !If [IsIPv6Enabled, dualstack, ipv4]
+      SubnetIds:
+        - !Ref GWLBeSubnet2
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBEndpoint3:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: 3AZs
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: GatewayLoadBalancer
+      ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      IpAddressType: !If [IsIPv6Enabled, dualstack, ipv4]
+      SubnetIds:
+        - !Ref GWLBeSubnet3
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  GWLBEndpoint4:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: 4AZs
+    Properties:
+      VpcId: !Ref VPC
+      VpcEndpointType: GatewayLoadBalancer
+      ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      IpAddressType: !If [IsIPv6Enabled, dualstack, ipv4]
+      SubnetIds:
+        - !Ref GWLBeSubnet4
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  TGWAttachmentSubnet1RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-TGW Attachment Subnet 1 Route Table'
+            - TGW Attachment Subnet 1 Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  TGWAttachmentSubnet1DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet1RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Ref GWLBEndpoint1
+  TGWAttachmentSubnet1DefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: IsIPv6Enabled
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet1RouteTable
+      DestinationIpv6CidrBlock: ::/0
+      VpcEndpointId: !Ref GWLBEndpoint1
+  TGWAttachmentSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref TgwSubnet1Id
+      RouteTableId: !Ref TGWAttachmentSubnet1RouteTable
+  TGWAttachmentSubnet2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-TGW Attachment Subnet 2 Route Table'
+            - TGW Attachment Subnet 2 Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  TGWAttachmentSubnet2DefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Ref GWLBEndpoint2
+  TGWAttachmentSubnet2DefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: IsIPv6Enabled
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet2RouteTable
+      DestinationIpv6CidrBlock: ::/0
+      VpcEndpointId: !Ref GWLBEndpoint2
+  TGWAttachmentSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref TgwSubnet2Id
+      RouteTableId: !Ref TGWAttachmentSubnet2RouteTable
+  TGWAttachmentSubnet3RouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: 3AZs
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-TGW Attachment Subnet 3 Route Table'
+            - TGW Attachment Subnet 3 Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  TGWAttachmentSubnet3DefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: 3AZs
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet3RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Ref GWLBEndpoint3
+  TGWAttachmentSubnet3DefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: 3AZsAndIPv6
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet3RouteTable
+      DestinationIpv6CidrBlock: ::/0
+      VpcEndpointId: !Ref GWLBEndpoint3
+  TGWAttachmentSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 3AZs
+    Properties:
+      SubnetId: !If [TgwSubnet3IdProvided, !Ref TgwSubnet3Id, 'subnet-00000000']
+      RouteTableId: !Ref TGWAttachmentSubnet3RouteTable
+  TGWAttachmentSubnet4RouteTable:
+    Type: AWS::EC2::RouteTable
+    Condition: 4AZs
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !If
+            - DeploymentPrefixProvided
+            - !Sub '${DeploymentPrefix}-TGW Attachment Subnet 4 Route Table'
+            - TGW Attachment Subnet 4 Route Table
+        - Key: Network
+          Value: Private
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  TGWAttachmentSubnet4DefaultRoute:
+    Type: AWS::EC2::Route
+    Condition: 4AZs
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet4RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      VpcEndpointId: !Ref GWLBEndpoint4
+  TGWAttachmentSubnet4DefaultRouteIPv6:
+    Type: AWS::EC2::Route
+    Condition: 4AZsAndIPv6
+    Properties:
+      RouteTableId: !Ref TGWAttachmentSubnet4RouteTable
+      DestinationIpv6CidrBlock: ::/0
+      VpcEndpointId: !Ref GWLBEndpoint4
+  TGWAttachmentSubnet4RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: 4AZs
+    Properties:
+      SubnetId: !If [TgwSubnet4IdProvided, !Ref TgwSubnet4Id, 'subnet-00000000']
+      RouteTableId: !Ref TGWAttachmentSubnet4RouteTable
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !Ref VPC
+  ManagementPublicAddress:
+    Description: The public address of the management server.
+    Value: !GetAtt GWLBStack.Outputs.ManagementPublicAddress
+    Condition: ManagementDeployed
+  ConfigurationTemplateName:
+    Description: The name that represents the configuration template.
+    Value: !GetAtt GWLBStack.Outputs.ConfigurationTemplateName
+  ControllerName:
+    Description: The name that represents the controller.
+    Value: !GetAtt GWLBStack.Outputs.ControllerName
+  GWLBName:
+    Description: Gateway Load Balancer Name.
+    Value: !GetAtt GWLBStack.Outputs.GWLBName
+  GWLBServiceName:
+    Description: Gateway Load Balancer Service Name.
+    Value: !GetAtt GWLBStack.Outputs.GWLBServiceName
+  GWLBeSubnet1Id:
+    Description: GWLBe Subnet 1 Id
+    Value: !Ref GWLBeSubnet1
+  GWLBeSubnet2Id:
+    Description: GWLBe Subnet 2 Id
+    Value: !Ref GWLBeSubnet2
+  GWLBeSubnet3Id:
+    Description: GWLBe Subnet 3 Id
+    Condition: 3AZs
+    Value: !Ref GWLBeSubnet3
+  GWLBeSubnet4Id:
+    Description: GWLBe Subnet 4 Id
+    Condition: 4AZs
+    Value: !Ref GWLBeSubnet4
+  GWLBEndpoint1:
+    Description: GWLBe 1 Id
+    Value: !Ref GWLBEndpoint1
+  GWLBEndpoint2:
+    Description: GWLBe 2 Id
+    Value: !Ref GWLBEndpoint2
+  GWLBEndpoint3:
+    Description: GWLBe 3 Id
+    Condition: 3AZs
+    Value: !Ref GWLBEndpoint3
+  GWLBEndpoint4:
+    Description: GWLBe 4 Id
+    Condition: 4AZs
+    Value: !Ref GWLBEndpoint4

@@ -1,0 +1,1072 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: |
+  Create an Auto Scaling group of Check Point gateways with dual-arm architecture (20260706)
+  See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group Deployment Guide administration guide for detailed deployment and configuration steps.
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Basic Settings
+        Parameters:
+          - GatewayVersion
+          - GatewayInstanceType
+          - GatewaySICKey
+          - KeyName
+          - DeploymentPrefix
+      - Label:
+          default: VPC Network Settings
+        Parameters:
+          - VPC
+          - IPMode
+          - GatewaysPublicSubnets
+          - IPAMPoolId
+          - GatewaysPrivateSubnets
+      - Label:
+          default: Advanced Settings
+        Parameters:
+          - VolumeSize
+          - VolumeType
+          - EnableVolumeEncryption
+          - EnableInstanceConnect
+          - MetaDataToken
+          - GatewaysMinSize
+          - GatewaysMaxSize
+          - AdminEmail
+          - GatewaysTargetGroups
+          - Shell
+          - GatewayPasswordHash
+          - GatewayMaintenancePasswordHash
+          - AllowUploadDownload
+          - CloudWatch
+          - GatewayBootstrapScript
+          - ControlGatewayOverPrivateOrPublicAddress
+          - ManagementServer
+          - ConfigurationTemplate
+    ParameterLabels:
+      VPC:
+        default: VPC
+      GatewaysPublicSubnets:
+        default: Gateways public subnets
+      GatewaysPrivateSubnets:
+        default: Gateways private subnets
+      DeploymentPrefix:
+        default: Deployment Prefix
+      GatewayInstanceType:
+        default: Gateways instance type
+      KeyName:
+        default: Key name
+      IPMode:
+        default: IP Configuration Mode
+      VolumeSize:
+        default: Root volume size (GB)
+      VolumeType:
+        default: Volume Type
+      EnableVolumeEncryption:
+        default: Enable volume encryption
+      EnableInstanceConnect:
+        default: Enable AWS Instance Connect
+      MetaDataToken:
+        default: Metadata HTTP token
+      GatewaysMinSize:
+        default: Minimum Gateway group size
+      GatewaysMaxSize:
+        default: Maximum Gateway group size
+      AdminEmail:
+        default: Email address
+      GatewaysTargetGroups:
+        default: Gateways target groups
+      GatewayVersion:
+        default: Gateways version & license
+      Shell:
+        default: Admin shell
+      GatewayPasswordHash:
+        default: Gateways Password hash
+      GatewayMaintenancePasswordHash:
+        default: Gateway Maintenance Password hash
+      GatewaySICKey:
+        default: Gateways SIC key
+      AllowUploadDownload:
+        default: Allow upload & download
+      CloudWatch:
+        default: CloudWatch metrics
+      GatewayBootstrapScript:
+        default: Gateways bootstrap script
+      ControlGatewayOverPrivateOrPublicAddress:
+        default: Gateways addresses
+      ManagementServer:
+        default: Management Server
+      ConfigurationTemplate:
+        default: Configuration template
+Parameters:
+  VPC:
+    Description: Select an existing VPC.
+    Type: AWS::EC2::VPC::Id
+    MinLength: 1
+  GatewaysPublicSubnets:
+    Description: Select at least 2 public subnets in the VPC for the Security Gateways external interfaces.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  GatewaysPrivateSubnets:
+    Description: Select at least 2 private subnets in the VPC for the Security Gateways internal interfaces.
+    Type: List<AWS::EC2::Subnet::Id>
+    MinLength: 2
+  DeploymentPrefix:
+    Description: A prefix for resource names (ASG, Gateway). Will have suffixes added automatically.
+    Type: String
+    Default: Check-Point
+    MaxLength: 20
+  GatewayInstanceType:
+    Description: The instance type of the Security Gateways.
+    Type: String
+    Default: c6in.xlarge
+    AllowedValues:
+      - c4.large
+      - c4.xlarge
+      - c5.large
+      - c5.xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.12xlarge
+      - c5d.18xlarge
+      - c5d.24xlarge
+      - c5n.large
+      - c5n.xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.18xlarge
+      - c6i.large
+      - c6i.xlarge
+      - c6i.2xlarge
+      - c6i.4xlarge
+      - c6i.8xlarge
+      - c6i.12xlarge
+      - c6i.16xlarge
+      - c6i.24xlarge
+      - c6i.32xlarge
+      - c6in.large
+      - c6in.xlarge
+      - c6in.2xlarge
+      - c6in.4xlarge
+      - c6in.8xlarge
+      - c6in.12xlarge
+      - c6in.16xlarge
+      - c6in.24xlarge
+      - c6in.32xlarge
+      - c7a.large
+      - c7a.xlarge
+      - c7a.2xlarge
+      - c7a.4xlarge
+      - c7a.8xlarge
+      - c7a.12xlarge
+      - c7a.16xlarge
+      - c7a.24xlarge
+      - c7a.32xlarge
+      - c7a.48xlarge
+      - c7a.metal-48xl
+      - c7i.large
+      - c7i.xlarge
+      - c7i.2xlarge
+      - c7i.4xlarge
+      - c7i.8xlarge
+      - c7i.12xlarge
+      - c7i.16xlarge
+      - c7i.24xlarge
+      - c7i.48xlarge
+      - c7i.metal-24xl
+      - c7i.metal-48xl
+      - c7i-flex.large
+      - c7i-flex.xlarge
+      - c7i-flex.2xlarge
+      - c7i-flex.4xlarge
+      - c7i-flex.8xlarge
+      - c7i-flex.12xlarge
+      - c7i-flex.16xlarge
+      - m5.large
+      - m5.xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.8xlarge
+      - m5.12xlarge
+      - m5.16xlarge
+      - m5.24xlarge
+      - m6a.large
+      - m6a.xlarge
+      - m6a.2xlarge
+      - m6a.4xlarge
+      - m6a.8xlarge
+      - m6a.12xlarge
+      - m6a.16xlarge
+      - m6a.24xlarge
+      - m6a.32xlarge
+      - m6a.48xlarge
+      - m6i.large
+      - m6i.xlarge
+      - m6i.2xlarge
+      - m6i.4xlarge
+      - m6i.8xlarge
+      - m6i.12xlarge
+      - m6i.16xlarge
+      - m6i.24xlarge
+      - m6i.32xlarge
+      - m6in.large
+      - m6in.xlarge
+      - m6in.2xlarge
+      - m6in.4xlarge
+      - m6in.8xlarge
+      - m6in.12xlarge
+      - m6in.16xlarge
+      - m6in.24xlarge
+      - m6in.32xlarge
+      - m6in.metal
+      - m7a.large
+      - m7a.xlarge
+      - m7a.2xlarge
+      - m7a.4xlarge
+      - m7a.8xlarge
+      - m7a.12xlarge
+      - m7a.16xlarge
+      - m7a.24xlarge
+      - m7a.32xlarge
+      - m7a.48xlarge
+      - m7i.large
+      - m7i.xlarge
+      - m7i.2xlarge
+      - m7i.4xlarge
+      - m7i.8xlarge
+      - m7i.12xlarge
+      - m7i.16xlarge
+      - m7i.24xlarge
+      - m7i.48xlarge
+      - m7i.metal-24xl
+      - m7i.metal-48xl
+      - r5.large
+      - r5.xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.8xlarge
+      - r5.12xlarge
+      - r5.16xlarge
+      - r5.24xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.8xlarge
+      - r5a.12xlarge
+      - r5a.16xlarge
+      - r5a.24xlarge
+      - r5b.large
+      - r5b.xlarge
+      - r5b.2xlarge
+      - r5b.4xlarge
+      - r5b.8xlarge
+      - r5b.12xlarge
+      - r5b.16xlarge
+      - r5b.24xlarge
+      - r5n.large
+      - r5n.xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r6gd.large
+      - r6gd.xlarge
+      - r6gd.2xlarge
+      - r6gd.4xlarge
+      - r6gd.8xlarge
+      - r6gd.12xlarge
+      - r6gd.16xlarge
+      - r6gd.metal
+      - r6i.large
+      - r6i.xlarge
+      - r6i.2xlarge
+      - r6i.4xlarge
+      - r6i.8xlarge
+      - r6i.12xlarge
+      - r6i.16xlarge
+      - r6i.24xlarge
+      - r6i.32xlarge
+      - r7a.xlarge
+      - r7a.2xlarge
+      - r7a.4xlarge
+      - r7a.8xlarge
+      - r7a.12xlarge
+      - r7a.16xlarge
+      - r7a.24xlarge
+      - r7a.32xlarge
+      - r7a.48xlarge
+      - r7i.large
+      - r7i.xlarge
+      - r7i.2xlarge
+      - r7i.4xlarge
+      - r7i.8xlarge
+      - r7i.12xlarge
+      - r7i.16xlarge
+      - r7i.24xlarge
+      - r7i.48xlarge
+      - r7i.metal-24xl
+      - r7i.metal-48xl
+      - r7iz.large
+      - r7iz.xlarge
+      - r7iz.2xlarge
+      - r7iz.4xlarge
+      - r7iz.8xlarge
+      - r7iz.12xlarge
+      - r7iz.16xlarge
+      - r7iz.32xlarge
+      - r7iz.metal-16xl
+      - r7iz.metal-32xl
+    ConstraintDescription: must be a valid EC2 instance type.
+  KeyName:
+    Description: The EC2 Key Pair to allow SSH access to the instances.
+    Type: AWS::EC2::KeyPair::KeyName
+    MinLength: 1
+    ConstraintDescription: Must be the name of an existing EC2 KeyPair.
+  VolumeSize:
+    Type: Number
+    Default: 100
+    MinValue: 100
+  VolumeType:
+    Description: General Purpose SSD Volume Type
+    Type: String
+    Default: gp3
+    AllowedValues:
+      - gp3
+      - gp2
+  EnableVolumeEncryption:
+    Description: Encrypt Auto Scaling instances volume with default AWS KMS key.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  EnableInstanceConnect:
+    Description: Enable SSH connection over AWS web console.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  MetaDataToken:
+    Description: Set true to deploy the instance with metadata v2 token required.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  GatewaysMinSize:
+    Description: The minimal number of gateways in the Auto Scaling group.
+    Type: Number
+    Default: 2
+    MinValue: 1
+  GatewaysMaxSize:
+    Description: The maximal number of gateways in the Auto Scaling group.
+    Type: Number
+    Default: 10
+    MinValue: 1
+  AdminEmail:
+    Description: Notifications about scaling events will be sent to this email address. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^(([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?))?$'
+    ConstraintDescription: Must be a valid email address.
+  GatewaysTargetGroups:
+    Description: A list of Target Groups to associate with the Auto Scaling
+      group (comma separated list of ARNs, without spaces). (optional)
+    Type: String
+    Default: ''
+  GatewayVersion:
+    Type: String
+    Default: R82-PAYG-NGTX
+    AllowedValues:
+      - R81.20-BYOL
+      - R81.20-PAYG-NGTP
+      - R81.20-PAYG-NGTX
+      - R82-BYOL
+      - R82-PAYG-NGTP
+      - R82-PAYG-NGTX
+      - R82.10-BYOL
+      - R82.10-PAYG-NGTP
+      - R82.10-PAYG-NGTX
+      - R82.20-BYOL
+      - R82.20-PAYG-NGTP
+      - R82.20-PAYG-NGTX
+  Shell:
+    Description: Change the admin shell to enable advanced command line configuration.
+    Type: String
+    Default: /etc/cli.sh
+    AllowedValues:
+      - /etc/cli.sh
+      - /bin/bash
+      - /bin/csh
+      - /bin/tcsh
+  GatewayPasswordHash:
+    Description: Admin user's password hash (use command "openssl passwd -6 PASSWORD"
+      to get the PASSWORD's hash). (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '^[\$\./a-zA-Z0-9]*$'
+    NoEcho: true
+  GatewayMaintenancePasswordHash:
+    Description: Check Point recommends setting Admin user's password and maintenance-mode password for recovery purposes (use command " grub2-mkpasswd-pbkdf2" to get the PASSWORD's hash). For R81.10 and below the Admin user's password is used also as maintenance-mode password. (optional)
+    Type: String
+    Default: ''
+    AllowedPattern: '[\$\./a-zA-Z0-9]*'
+    NoEcho: true
+  GatewaySICKey:
+    Description: The Secure Internal Communication key creates trusted connections
+      between Check Point components. Choose a random string consisting of at least
+      8 alphanumeric characters.
+    Type: String
+    AllowedPattern: '^[a-zA-Z0-9]{8,}$'
+    ConstraintDescription: At least 8 alpha numeric characters.
+    NoEcho: true
+  AllowUploadDownload:
+    Description: Automatically download updates and share statistical data for product improvement purpose.
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  CloudWatch:
+    Description: Report Check Point specific CloudWatch metrics.
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  IPMode:
+    Description: Specifies the IP mode for inspection of traffic encapsulation in IPv4 Geneve headers. When set to DualStack, both IPv4 and IPv6 traffic are inspected. For supported versions and Jumbo Hotfix requirements, refer to the admin guide.
+    Type: String
+    AllowedValues:
+      - IPv4
+      - DualStack
+    Default: IPv4
+  GatewayBootstrapScript:
+    Description: An optional script with semicolon (;) separated commands to run on the initial boot. (optional)
+    Type: String
+    Default: ''
+    NoEcho: true
+  ControlGatewayOverPrivateOrPublicAddress:
+    Description: Determines if the gateways are provisioned using their private or public address.
+    Type: String
+    Default: private
+    AllowedValues:
+      - private
+      - public
+  ManagementServer:
+    Description: The name that represents the Security Management Server in the automatic provisioning configuration.
+    Type: String
+    Default: management-server
+    MinLength: 1
+  ConfigurationTemplate:
+    Description: A name of a gateway configuration template in the automatic provisioning configuration.
+    Type: String
+    Default: ASG-configuration
+    MinLength: 1
+    MaxLength: 30
+  IPAMPoolId:
+    Description: (Optional) The ID of an IPAM pool to allocate Elastic IPs from. If not provided, EIPs will be allocated from Amazon's pool of public IPv4 addresses.
+    Type: String
+    Default: ''
+  LambdaAutoUpdate:
+    Description: When true, the Lambda function will always check for the newest version from S3 on each execution. When false (default), the Lambda will pin to the latest version on first run.
+    Type: String
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+Conditions:
+  ProvidedAdminEmail: !Not [!Equals [!Ref AdminEmail, '']]
+  ProvidedTargetGroups: !Not [!Equals [!Ref GatewaysTargetGroups, '']]
+  EnableCloudWatch: !Equals [!Ref CloudWatch, true]
+  EnableMetaDataToken: !Equals [!Ref MetaDataToken, true]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
+Resources:
+  ChkpGatewayRole:
+    Type: AWS::IAM::Role
+    Condition: EnableCloudWatch
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+  CloudwatchPolicy:
+    Condition: EnableCloudWatch
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/iam/cloudwatch-policy.yaml
+      Parameters:
+        PolicyName: ChkpGatewayPolicy
+        PolicyRole: !Ref ChkpGatewayRole
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Condition: EnableCloudWatch
+    Properties:
+      Path: /
+      Roles:
+        - !Ref ChkpGatewayRole
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion, GW]]
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Condition: ProvidedAdminEmail
+    Properties:
+      Subscription:
+        - Endpoint: !Ref AdminEmail
+          Protocol: email
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  PermissiveSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${DeploymentPrefix}-PermissiveSecurityGroup'
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+      GroupDescription: Permissive security group.
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+        - !If
+          - IsIPv6Enabled
+          - IpProtocol: -1
+            CidrIpv6: '::/0'
+          - !Ref 'AWS::NoValue'
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+        - !If
+          - IsIPv6Enabled
+          - IpProtocol: -1
+            CidrIpv6: '::/0'
+          - !Ref 'AWS::NoValue'
+  GatewayGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: !Sub '${DeploymentPrefix}-asg'
+      VPCZoneIdentifier: !Ref GatewaysPrivateSubnets
+      LaunchTemplate:
+        LaunchTemplateId: !Ref GatewayLaunchTemplate
+        Version: !GetAtt GatewayLaunchTemplate.LatestVersionNumber
+      # Start with MinSize 0 to prevent instances from launching before Lambda infrastructure is ready
+      # The ASGScaler custom resource will update this to the actual MinSize after all dependencies are deployed
+      MinSize: 0
+      MaxSize: !Ref GatewaysMaxSize
+      TargetGroupARNs: !If [ProvidedTargetGroups, !Split [',', !Ref GatewaysTargetGroups], !Ref 'AWS::NoValue']
+      HealthCheckGracePeriod: 3600
+      HealthCheckType: ELB
+      NotificationConfiguration: !If
+        - ProvidedAdminEmail
+        - TopicARN: !Ref NotificationTopic
+          NotificationTypes:
+            - autoscaling:EC2_INSTANCE_LAUNCH
+            - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+            - autoscaling:EC2_INSTANCE_TERMINATE
+            - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+        - !Ref 'AWS::NoValue'
+      Tags:
+        - Key: Name
+          Value: !Sub '${DeploymentPrefix}-gateway'
+          PropagateAtLaunch: true
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+          PropagateAtLaunch: true
+        - Key: x-chkp-tags
+          Value: !Join
+            - ':'
+            - - !Join ['=', [management, !Ref ManagementServer]]
+              - !Join ['=', [template, !Ref ConfigurationTemplate]]
+              - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
+          PropagateAtLaunch: true
+        - Key: x-chkp-topology
+          Value: private
+          PropagateAtLaunch: true
+        - Key: x-chkp-solution
+          Value: autoscale_gwlb_dual_arm
+          PropagateAtLaunch: true
+  GatewayLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: aws-apn-id
+              Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+      LaunchTemplateData:
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: false
+            Groups:
+              - !Ref PermissiveSecurityGroup
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+          - ResourceType: volume
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+          - ResourceType: network-interface
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+              - Key: x-chkp-anti-spoofing
+                Value: 'false'
+        Monitoring:
+          Enabled: true
+        KeyName: !Ref KeyName
+        ImageId: !GetAtt AMI.Outputs.ImageId
+        InstanceType: !Ref GatewayInstanceType
+        MetadataOptions:
+          HttpTokens: !If [EnableMetaDataToken, required, optional]
+          HttpProtocolIpv6: !If [IsIPv6Enabled, enabled, disabled]
+          InstanceMetadataTags: enabled
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              Encrypted: !Ref EnableVolumeEncryption
+              VolumeType: !Ref VolumeType
+              VolumeSize: !Ref VolumeSize
+        IamInstanceProfile:
+          Name: !If [EnableCloudWatch, !Ref InstanceProfile, !Ref 'AWS::NoValue']
+        UserData:
+          'Fn::Base64':
+            !Join
+            - |+
+
+            - - '#cloud-config'
+              - 'network:'
+              - !If [IsIPv6Enabled, '  ipv6_enabled: true', '  ipv6_enabled: false']
+              - 'kernel_parameters:'
+              - '  sim:'
+              - '    - sim_geneve_enabled=1'
+              - '    - sim_geneve_br_dev=eth0'
+              - '    - sim_geneve_dual_arm_mode=1'
+              - '  fw:'
+              - '    - fw_geneve_enabled=1'
+              - 'runcmd:'
+              - '  - |'
+              - '    set -e'
+              - !Sub '    admin_shell=${Shell} ; allow_info=${AllowUploadDownload} ; cw=${CloudWatch} ; eic=${EnableInstanceConnect}'
+              - !If
+                - IsIPv6Enabled
+                - "    template_name=\"autoscale_gwlb_dual_arm_dual_stack\""
+                - "    template_name=\"autoscale_gwlb_dual_arm\""
+              - !Join ['', ['    sic="$(echo ', 'Fn::Base64': !Ref GatewaySICKey, ')"']]
+              - !Join ['', ['    pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayPasswordHash, ')"']]
+              - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
+              - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
+              - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale-dual-arm\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260706\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+      VersionDescription: Initial template version
+  # Lambda function for attaching second ENI in public subnet
+  LambdaENIRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: LambdaENIPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${DeploymentPrefix}-dual-arm-eni-lambda:*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:AttachNetworkInterface
+                  - ec2:ModifyNetworkInterfaceAttribute
+                Resource:
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:subnet/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:security-group/*'
+              - Effect: Allow
+                Action: ec2:CreateTags
+                Resource:
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:network-interface/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*'
+              - Effect: Allow
+                Action:
+                  - ec2:AllocateAddress
+                  - ec2:ReleaseAddress
+                Resource:
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:elastic-ip/*'
+                  - !Sub 'arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:ipv4pool-ec2/*'
+                  - 'arn:aws:ec2::*:ipam-pool/*'
+              - Effect: Allow
+                Action:
+                  - ec2:AssociateAddress
+                  - ec2:DisassociateAddress
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeInstances
+                  - ec2:DescribeAddresses
+                Resource: '*'
+              - Effect: Allow
+                Action: ec2:AllocateIpamPoolCidr
+                Resource: 'arn:aws:ec2::*:ipam-pool/*'
+              - Effect: Allow
+                Action:
+                  - ec2:DescribePublicIpv4Pools
+                  - ec2:GetIpamPoolAllocations
+                  - ec2:DescribeIpamPools
+                  - ec2:GetIpamPoolCidrs
+                Resource: '*'
+              - Effect: Allow
+                Action: autoscaling:CompleteLifecycleAction
+                Resource: !Sub 'arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/${DeploymentPrefix}-asg'
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: 'arn:aws:s3:::cgi-cfts/gwlb/dual_arm_lifecycle_handler.py'
+              - Effect: Allow
+                Action: s3:ListBucket
+                Resource: 'arn:aws:s3:::cgi-cfts'
+              - Effect: Allow
+                Action:
+                  - lambda:GetFunctionConfiguration
+                  - lambda:UpdateFunctionConfiguration
+                Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${DeploymentPrefix}-dual-arm-eni-lambda'
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${DeploymentPrefix}-dual-arm-eni-lambda'
+      RetentionInDays: 7
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+  LambdaENIFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: LambdaLogGroup
+    Properties:
+      FunctionName: !Sub '${DeploymentPrefix}-dual-arm-eni-lambda'
+      Runtime: python3.11
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaENIRole.Arn
+      Timeout: 300
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+      Environment:
+        Variables:
+          PUBLIC_SUBNETS: !Sub
+            - '["${Subnets}"]'
+            - Subnets: !Join ['","', !Ref GatewaysPublicSubnets]
+          PRIVATE_SUBNETS: !Sub
+            - '["${Subnets}"]'
+            - Subnets: !Join ['","', !Ref GatewaysPrivateSubnets]
+          SECURITY_GROUP_ID: !Ref PermissiveSecurityGroup
+          S3_BUCKET: cgi-cfts
+          S3_KEY: gwlb/dual_arm_lifecycle_handler.py
+          LAMBDA_AUTO_UPDATE: !Ref LambdaAutoUpdate
+          IPAM_POOL_ID: !Ref IPAMPoolId
+          # AWS Marketplace product code for Partner Revenue Measurement,
+          # used by the handler to tag runtime-created ENIs and EIPs with
+          # aws-apn-id so their charges are attributable to Check Point.
+          PRODUCT_CODE: !GetAtt AMI.Outputs.ProductCode
+      Code:
+        ZipFile: |
+          import boto3
+          import os
+          import json
+          import urllib.request
+
+          def lambda_handler(event, context):
+              """
+              Bootstrap handler that downloads the actual Lambda code from S3 and executes it.
+              This allows the Lambda code to be updated without redeploying the CloudFormation stack.
+              """
+              print(f"Event: {json.dumps(event)}")
+
+              s3_bucket = os.environ.get('S3_BUCKET', 'cgi-cfts')
+              s3_key = os.environ.get('S3_KEY', 'gwlb/dual_arm_lifecycle_handler.py')
+
+              try:
+                  # Download the actual handler code from S3
+                  s3 = boto3.client('s3')
+                  response = s3.get_object(Bucket=s3_bucket, Key=s3_key)
+                  code = response['Body'].read().decode('utf-8')
+
+                  # Execute the downloaded code
+                  exec_globals = {'__name__': '__main__'}
+                  exec(code, exec_globals)
+
+                  # Call the actual handler
+                  if 'lambda_handler' in exec_globals:
+                      return exec_globals['lambda_handler'](event, context)
+                  else:
+                      print("No lambda_handler found in downloaded code")
+                      return {'statusCode': 500, 'body': 'No handler found'}
+
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+
+                  # Complete lifecycle action to prevent instance from being stuck
+                  try:
+                      if 'detail' in event:
+                          asg = boto3.client('autoscaling')
+                          asg.complete_lifecycle_action(
+                              LifecycleHookName=event['detail']['LifecycleHookName'],
+                              AutoScalingGroupName=event['detail']['AutoScalingGroupName'],
+                              LifecycleActionToken=event['detail']['LifecycleActionToken'],
+                              LifecycleActionResult='CONTINUE'
+                          )
+                  except Exception as inner_e:
+                      print(f"Failed to complete lifecycle action: {str(inner_e)}")
+
+                  raise e
+  # Lifecycle hooks for ASG
+  LaunchLifecycleHook:
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties:
+      LifecycleHookName: !Sub '${DeploymentPrefix}-launch-hook'
+      AutoScalingGroupName: !Ref GatewayGroup
+      DefaultResult: CONTINUE
+      HeartbeatTimeout: 120
+      LifecycleTransition: 'autoscaling:EC2_INSTANCE_LAUNCHING'
+  TerminateLifecycleHook:
+    Type: AWS::AutoScaling::LifecycleHook
+    Properties:
+      LifecycleHookName: !Sub '${DeploymentPrefix}-terminate-hook'
+      AutoScalingGroupName: !Ref GatewayGroup
+      DefaultResult: CONTINUE
+      HeartbeatTimeout: 300
+      LifecycleTransition: 'autoscaling:EC2_INSTANCE_TERMINATING'
+  # EventBridge rules to trigger Lambda
+  LaunchEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${DeploymentPrefix}-launch-rule'
+      Description: Capture ASG launch events
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type:
+          - EC2 Instance-launch Lifecycle Action
+        detail:
+          AutoScalingGroupName:
+            - !Ref GatewayGroup
+          LifecycleHookName:
+            - !Sub '${DeploymentPrefix}-launch-hook'
+      Targets:
+        - Id: LambdaTarget
+          Arn: !GetAtt LambdaENIFunction.Arn
+  TerminateEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${DeploymentPrefix}-terminate-rule'
+      Description: Capture ASG terminate lifecycle events
+      EventPattern:
+        source:
+          - aws.autoscaling
+        detail-type:
+          - EC2 Instance-terminate Lifecycle Action
+        detail:
+          AutoScalingGroupName:
+            - !Ref GatewayGroup
+          LifecycleHookName:
+            - !Sub '${DeploymentPrefix}-terminate-hook'
+      Targets:
+        - Id: LambdaTerminateTarget
+          Arn: !GetAtt LambdaENIFunction.Arn
+  LambdaLaunchPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaENIFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt LaunchEventRule.Arn
+  LambdaTerminatePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaENIFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt TerminateEventRule.Arn
+  # Custom resource to scale up ASG after Lambda infrastructure is ready
+  ASGScalerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ASGUpdatePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - autoscaling:UpdateAutoScalingGroup
+                  - autoscaling:SetDesiredCapacity
+                Resource: !Sub 'arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/${DeploymentPrefix}-asg'
+  ASGScalerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${DeploymentPrefix}-asg-scaler'
+      Runtime: python3.11
+      Handler: index.lambda_handler
+      Role: !GetAtt ASGScalerRole.Arn
+      Timeout: 60
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          import time
+
+          def lambda_handler(event, context):
+              print(f"Event: {event}")
+
+              if event['RequestType'] == 'Delete':
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+                  return
+
+              try:
+                  asg_name = event['ResourceProperties']['ASGName']
+                  min_size = int(event['ResourceProperties']['MinSize'])
+                  max_size = int(event['ResourceProperties']['MaxSize'])
+                  desired_capacity = int(event['ResourceProperties']['DesiredCapacity'])
+
+                  # Wait 30 seconds to ensure all infrastructure is ready
+                  time.sleep(30)
+
+                  autoscaling = boto3.client('autoscaling')
+                  autoscaling.update_auto_scaling_group(
+                      AutoScalingGroupName=asg_name,
+                      MinSize=min_size,
+                      MaxSize=max_size,
+                      DesiredCapacity=desired_capacity
+                  )
+
+                  print(f"Successfully scaled ASG {asg_name} to min={min_size}, max={max_size}, desired={desired_capacity}")
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as e:
+                  print(f"Error: {str(e)}")
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {}, str(e))
+  ASGScaler:
+    Type: Custom::ASGScaler
+    Properties:
+      ServiceToken: !GetAtt ASGScalerFunction.Arn
+      ASGName: !Ref GatewayGroup
+      MinSize: !Ref GatewaysMinSize
+      MaxSize: !Ref GatewaysMaxSize
+      DesiredCapacity: !Ref GatewaysMinSize
+    DependsOn:
+      - LambdaENIFunction
+      - LaunchLifecycleHook
+      - TerminateLifecycleHook
+      - LaunchEventRule
+      - TerminateEventRule
+      - LambdaLaunchPermission
+      - LambdaTerminatePermission
+  # Scaling policies
+  GatewayScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref GatewayGroup
+      Cooldown: 300
+      ScalingAdjustment: 1
+  GatewayScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref GatewayGroup
+      Cooldown: 300
+      ScalingAdjustment: -1
+  CPUAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if CPU > 80% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      AlarmActions:
+        - !Ref GatewayScaleUpPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref GatewayGroup
+      ComparisonOperator: GreaterThanThreshold
+  CPUAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if CPU < 60% for 10 minutes.
+      MetricName: CPUUtilization
+      Namespace: AWS/EC2
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 60
+      AlarmActions:
+        - !Ref GatewayScaleDownPolicy
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref GatewayGroup
+      ComparisonOperator: LessThanThreshold
+Outputs:
+  AutoScalingGroupName:
+    Description: The name of the Auto Scaling group.
+    Value: !Ref GatewayGroup
+  SecurityGroup:
+    Description: The Security Group of the Auto Scaling group.
+    Value: !GetAtt PermissiveSecurityGroup.GroupId
+  LambdaFunctionArn:
+    Description: The ARN of the Lambda function for ENI management.
+    Value: !GetAtt LambdaENIFunction.Arn
