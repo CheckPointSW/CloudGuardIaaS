@@ -1536,7 +1536,7 @@
     "useIpPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPropertiesWithPrefix'), variables('publicIPPropertiesWithoutPrefix'))]",
     "upgradingForLB": "[and(variables('upgrading'), or(greater(length(parameters('elbResourceId')), 0), greater(length(parameters('ilbResourceId')), 0)))]",
     "NewNsgReference": {
-      "id": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
+      "id": "[resourceId(variables('resourceGroupName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
     },
     "enableIpv6": "[parameters('enableIpv6')]",
     "dualstackNewVnet": "[and(variables('enableIpv6'), equals(parameters('vnetNewOrExisting'), 'new'))]",
@@ -1575,8 +1575,8 @@
     "ilbBEAddressPoolPropertiesV6": "[if(variables('enableIpv6'), if(variables('dualstackNewVnet'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbNameV4'), variables('ilbBEAddressPoolNameV6Direct')))), if(variables('deployILBv6'), createArray(createObject('id', resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('ilbV6Name'), variables('ilbV6BEAddressPoolName')))), json('null'))), json('null'))]",
     "ilbV6SubnetDependency": "[variables('vnetID')]",
     "ilbV6LbOrVnetDependency": "[if(not(variables('dualstackNewVnet')), variables('loadBalancerSetupId'), variables('vnetID'))]",
-    "nsgResourceId": "[resourceId(variables('vnetRGName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]",
-    "nsgDependency": "[if(and(variables('dualstackNewVnet'), parameters('deployNewNSG')), variables('nsgResourceId'), variables('vnetID'))]"
+    "nsgResourceId": "[resourceId(variables('resourceGroupName'),'Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]",
+    "nsgDependency": "[if(and(parameters('deployNewNSG'), or(variables('dualstackNewVnet'), equals(parameters('vnetNewOrExisting'), 'existing'))), variables('nsgResourceId'), variables('vnetID'))]"
   },
   "resources": [
     {
@@ -1599,7 +1599,7 @@
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
-      "condition": "[and(variables('dualstackNewVnet'), parameters('deployNewNSG'))]",
+      "condition": "[and(parameters('deployNewNSG'), or(variables('dualstackNewVnet'), equals(parameters('vnetNewOrExisting'), 'existing')))]",
       "apiVersion": "2020-06-01",
       "location": "[variables('location')]",
       "name": "[parameters('NewNsgName')]",
@@ -2070,10 +2070,10 @@
             "value": "[parameters('vmName')]" 
           },
           "deployNsg": {
-            "value": "[parameters('deployNewNSG')]" 
+            "value": false
           },
           "NewNsgName": {
-            "value": "[parameters('NewNsgName')]" 
+            "value": "[parameters('NewNsgName')]"
           },
           "tagsByResource": {
             "value": "[parameters('tagsByResource')]"
@@ -2110,7 +2110,7 @@
             "value": "[parameters('vmName')]"
           },
           "deployNsg": {
-            "value": "[parameters('deployNewNSG')]"
+            "value": false
           },
           "NewNsgName": {
             "value": "[parameters('NewNsgName')]"
