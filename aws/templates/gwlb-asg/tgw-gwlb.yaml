@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20260507).
+  Deploy a Gateway Load Balancer, Check Point CloudGuard IaaS Security Gateway Auto Scaling Group, and optionally a Security Management Server, Gateway Load Balancer Endpoints and NAT Gateways for each AZ, in an existing VPC for Transit Gateway (20260709).
   See CloudGuard Network for AWS Gateway Load Balancer Auto Scaling Group deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -952,6 +952,12 @@ Conditions:
   DeployManagement: !Equals [!Ref ManagementDeploy, true]
   GenerateAutoScalingName: !Equals [!Ref AutoScaleGroupName, ""]
 Resources:
+  AMI:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://cgi-cfts.s3.amazonaws.com/utils/amis.yaml
+      Parameters:
+        Version: !Join ['-', [!Ref GatewayVersion, GW]]
   GWLBeSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
@@ -961,6 +967,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe subnet 1
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet2:
@@ -972,6 +980,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe subnet 2
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet3:
@@ -984,6 +994,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe subnet 3
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet4:
@@ -996,6 +1008,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe subnet 4
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet1RouteTable:
@@ -1005,6 +1019,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe Subnet 1 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet1NatGwDefaultRoute:
@@ -1025,6 +1041,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe Subnet 2 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet2NatGwDefaultRoute:
@@ -1046,6 +1064,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe Subnet 3 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet3NatGwDefaultRoute:
@@ -1069,6 +1089,8 @@ Resources:
       Tags:
         - Key: Name
           Value: GWLBe Subnet 4 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   GWLBeSubnet4NatGwDefaultRoute:
@@ -1093,6 +1115,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT subnet 1
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   NatGwSubnet2:
@@ -1104,6 +1128,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT subnet 2
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   NatGwSubnet3:
@@ -1116,6 +1142,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT subnet 3
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   NatGwSubnet4:
@@ -1128,6 +1156,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT subnet 4
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   NatGwSubnet1RouteTable:
@@ -1137,6 +1167,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT Subnet 1 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Public
   NatGwSubnet1NatGwDefaultRoute:
@@ -1157,6 +1189,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT Subnet 2 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Public
   NatGwSubnet2NatGwDefaultRoute:
@@ -1178,6 +1212,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT Subnet 3 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Public
   NatGwSubnet3NatGwDefaultRoute:
@@ -1201,6 +1237,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NAT Subnet 4 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Public
   NatGwSubnet4NatGwDefaultRoute:
@@ -1270,6 +1308,9 @@ Resources:
       SubnetIds:
         - !Ref GWLBeSubnet1
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   GWLBe2:
     Type: AWS::EC2::VPCEndpoint
     Properties:
@@ -1278,6 +1319,9 @@ Resources:
       SubnetIds:
         - !Ref GWLBeSubnet2
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   GWLBe3:
     Type: AWS::EC2::VPCEndpoint
     Condition: 3AZs
@@ -1287,6 +1331,9 @@ Resources:
       SubnetIds:
         - !Ref GWLBeSubnet3
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   GWLBe4:
     Type: AWS::EC2::VPCEndpoint
     Condition: 4AZs
@@ -1296,6 +1343,9 @@ Resources:
       SubnetIds:
         - !Ref GWLBeSubnet4
       ServiceName: !GetAtt GWLBStack.Outputs.GWLBServiceName
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   TGWAttachmentSubnet1RouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -1303,6 +1353,8 @@ Resources:
       Tags:
         - Key: Name
           Value: TGW Attachment Subnet 1 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   TGWAttachmentSubnet1GWLBeDefaultRoute:
@@ -1323,6 +1375,8 @@ Resources:
       Tags:
         - Key: Name
           Value: TGW Attachment Subnet 2 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   TGWAttachmentSubnet2GWLBeDefaultRoute:
@@ -1344,6 +1398,8 @@ Resources:
       Tags:
         - Key: Name
           Value: TGW Attachment Subnet 3 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   TGWAttachmentSubnet3GWLBeDefaultRoute:
@@ -1367,6 +1423,8 @@ Resources:
       Tags:
         - Key: Name
           Value: TGW Attachment Subnet 4 Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         - Key: Network
           Value: Private
   TGWAttachmentSubnet4GWLBeDefaultRoute:
@@ -1386,20 +1444,32 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGwPublicAddress2:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGwPublicAddress3:
     Type: AWS::EC2::EIP
     Condition: 3AZs
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGwPublicAddress4:
     Type: AWS::EC2::EIP
     Condition: 4AZs
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -1408,6 +1478,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NatGW1
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGateway2:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -1416,6 +1488,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NatGW2
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGateway3:
     Type: AWS::EC2::NatGateway
     Condition: 3AZs
@@ -1425,6 +1499,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NatGW3
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   NatGateway4:
     Type: AWS::EC2::NatGateway
     Condition: 4AZs
@@ -1434,6 +1510,8 @@ Resources:
       Tags:
         - Key: Name
           Value: NatGW4
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
 Outputs:
   ManagementPublicAddress:
     Description: The public address of the management server.

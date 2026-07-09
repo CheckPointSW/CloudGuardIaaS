@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploys either a manually configurable or a Check Point CloudGuard IaaS
-  Security Gateway & Management (Standalone) instance in a new VPC (20260507)
+  Security Gateway & Management (Standalone) instance in a new VPC (20260709)
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -518,6 +518,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - InternalRoutingTable
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt VPCStack.Outputs.ProductCode}]
   InternalNetworkRouteAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:

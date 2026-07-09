@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Security Gateway into a new VPC (20260507)
+  Deploys a Check Point Security Gateway into a new VPC (20260709)
   See sk175207 for Gateway administration guide deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -557,6 +557,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - InternalRoutingTable
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt VPCStack.Outputs.ProductCode}]
   InternalNetworkRouteAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:

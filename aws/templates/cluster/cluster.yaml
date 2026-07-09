@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point Cluster into an existing VPC (20260507).
+  Deploys a Check Point Cluster into an existing VPC (20260709).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Mappings:
   # Maps Local Zone AZ names to their NetworkBorderGroup.
@@ -630,6 +630,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - PermissiveSecurityGroup
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberAExternalInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -645,6 +647,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - Member_A_ExternalInterface
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberBExternalInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -659,6 +663,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - Member_B_ExternalInterface
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberAInternalInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -674,6 +680,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - Member_A_InternalInterface
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberBInternalInterface:
     Type: AWS::EC2::NetworkInterface
     Properties:
@@ -688,6 +696,8 @@ Resources:
             - _
             - - !If [ProvidedResourcesTag, !Ref ResourcesTagName, !Ref 'AWS::StackName']
               - Member_B_InternalInterface
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   InternalDefaultRoute:
     Type: AWS::EC2::Route
     Condition: ProvidedRouteTable
@@ -730,6 +740,8 @@ Resources:
               - - !Join ['=', ['cluster-ip', '']]
                 - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
                 - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberBInstance:
     Type: AWS::EC2::Instance
     Properties:
@@ -759,10 +771,22 @@ Resources:
               - - !Join ['=', ['cluster-ip', '']]
                 - !Join ['=', ['cluster-eth0-private-ip', !Select [0, !GetAtt MemberAExternalInterface.SecondaryPrivateIpAddresses]]]
                 - !Join ['=', ['cluster-eth1-private-ip', !Select [0, !GetAtt MemberAInternalInterface.SecondaryPrivateIpAddresses]]]
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberAGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: aws-apn-id
+              Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
       LaunchTemplateData:
+        TagSpecifications:
+          - ResourceType: volume
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         NetworkInterfaces:
           - DeviceIndex: 0
             NetworkInterfaceId: !Ref MemberAExternalInterface
@@ -800,12 +824,22 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260407\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenA}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260709\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   MemberBGatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: aws-apn-id
+              Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
       LaunchTemplateData:
+        TagSpecifications:
+          - ResourceType: volume
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         NetworkInterfaces:
           - DeviceIndex: 0
             NetworkInterfaceId: !Ref MemberBExternalInterface
@@ -842,7 +876,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260407\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" "smart1CloudToken=\"${tokenB}\"" installationType=\"cluster\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260709\" templateName=\"cluster\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" hostName=\"${hostname}\" ntpPrimary=\"${ntp1}\" ntpSecondary=\"${ntp2}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" elasticIp=\"${eip}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   ClusterPublicAddressLocalZone:
     Type: AWS::EC2::EIP
@@ -850,33 +884,51 @@ Resources:
     Properties:
       Domain: vpc
       NetworkBorderGroup: !FindInMap [LocalZoneNetworkBorderGroups, !Ref LocalZoneAz, NBG]
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   ClusterPublicAddressRegional:
     Type: AWS::EC2::EIP
     Condition: AllocateAddressRegional
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberAPublicAddressLocalZone:
     Type: AWS::EC2::EIP
     Condition: AllocateAddressLocalZone
     Properties:
       Domain: vpc
       NetworkBorderGroup: !FindInMap [LocalZoneNetworkBorderGroups, !Ref LocalZoneAz, NBG]
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberAPublicAddressRegional:
     Type: AWS::EC2::EIP
     Condition: AllocateAddressRegional
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberBPublicAddressLocalZone:
     Type: AWS::EC2::EIP
     Condition: AllocateAddressLocalZone
     Properties:
       Domain: vpc
       NetworkBorderGroup: !FindInMap [LocalZoneNetworkBorderGroups, !Ref LocalZoneAz, NBG]
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   MemberBPublicAddressRegional:
     Type: AWS::EC2::EIP
     Condition: AllocateAddressRegional
     Properties:
       Domain: vpc
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   ClusterAddressAssoc:
     Type: AWS::EC2::EIPAssociation
     Condition: AllocateAddress

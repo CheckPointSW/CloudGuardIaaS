@@ -83,6 +83,7 @@ In order to check the template version, please refer to [sk125252](https://suppo
 
 | Template Version | Description                                                                                                   |
 |------------------|---------------------------------------------------------------------------------------------------------------|
+| 20260709         | AWS PRM resource tagging for revenue attribution                                                              |
 | 20260706         | Add GWLB two-arm (dual-arm) templates: gwlb-dual-arm, tgw-gwlb-dual-arm, tgw-gwlb-dual-arm-master             |
 | 20240704         | - R80.40 version deprecation.<br/>- R81 version  deprecation                                                  |
 | 20240519         | Add support for requiring use instance metadata service version 2 (IMDSv2) only                               |

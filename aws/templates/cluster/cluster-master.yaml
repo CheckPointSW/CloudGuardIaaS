@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Check Point Cluster in a new VPC (20260507).
+  Deploy a Check Point Cluster in a new VPC (20260709).
   See CloudGuard Network for AWS Single Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -527,6 +527,8 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Subnets Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt VPCStack.Outputs.ProductCode}]
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:

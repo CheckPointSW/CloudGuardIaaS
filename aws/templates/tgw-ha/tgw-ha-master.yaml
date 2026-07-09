@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploy a Check Point TGW HA cross AZ Cluster in a new VPC (20260302)
+  Deploy a Check Point TGW HA cross AZ Cluster in a new VPC (20260709)
   See CloudGuard Network for AWS Cross Availability Zone Cluster Deployment Guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
@@ -550,6 +550,8 @@ Resources:
       Tags:
         - Key: Name
           Value: Private Subnets Route Table
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt VPCStack.Outputs.ProductCode}]
   ClusterStack:
     Type: AWS::CloudFormation::Stack
     Properties:
