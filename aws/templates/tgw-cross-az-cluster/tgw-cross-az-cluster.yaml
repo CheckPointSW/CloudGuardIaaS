@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20260507).
+  Deploys a Check Point TGW Cross Availabilty Zone Cluster into an existing VPC (20260709).
   See CloudGuard Network for AWS Cross Availability Zone Cluster Deployment guide for detailed deployment and configuration steps.
 Metadata:
   AWS::CloudFormation::Interface:
