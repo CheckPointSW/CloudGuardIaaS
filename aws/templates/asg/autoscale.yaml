@@ -1,7 +1,7 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
 Description: |
-  Create an Auto Scaling group of Check Point gateways into an existing VPC (20260507)
+  Create an Auto Scaling group of Check Point gateways into an existing VPC (20260709)
   See CloudGuard Network for AWS Auto Scale Group deployment guide for detailed deployment and configuration steps
 Metadata:
   AWS::CloudFormation::Interface:
@@ -566,6 +566,9 @@ Resources:
       Subscription:
         - Endpoint: !Ref AdminEmail
           Protocol: email
+      Tags:
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
   PermissiveSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Condition: CreateSecurityGroup
@@ -573,6 +576,8 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ['_', [!Ref 'AWS::StackName', PermissiveSecurityGroup]]
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
       GroupDescription: Permissive security group.
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -619,10 +624,27 @@ Resources:
               - !Join ['=', [template, !Ref ConfigurationTemplate]]
               - !Join ['=', [ip-address, !Ref ControlGatewayOverPrivateOrPublicAddress]]
           PropagateAtLaunch: true
+        - Key: aws-apn-id
+          Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+          PropagateAtLaunch: true
   GatewayLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: aws-apn-id
+              Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
       LaunchTemplateData:
+        TagSpecifications:
+          - ResourceType: volume
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
+          - ResourceType: network-interface
+            Tags:
+              - Key: aws-apn-id
+                Value: !Sub ['pc:${Code}', {Code: !GetAtt AMI.Outputs.ProductCode}]
         NetworkInterfaces:
           - DeviceIndex: 0
             AssociatePublicIpAddress: !If [IsIPv4Enabled, true, false]
@@ -663,7 +685,7 @@ Resources:
               - !Join ['', ['    maintenance_pwd_hash="$(echo ', 'Fn::Base64': !Ref GatewayMaintenancePasswordHash, ')"']]
               - !Join ['', ['    bootstrap="$(echo ', 'Fn::Base64': !Ref GatewayBootstrapScript, ')"']]
               - !Sub ['    version=${Version}', {Version: !Select [0, !Split ['-', !Ref GatewayVersion]]}]
-              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260316\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
+              - '    python3 /etc/cloud_config.py enableCloudWatch=\"${cw}\" sicKey=\"${sic}\" installationType=\"autoscale\" osVersion=\"${version}\" allowUploadDownload=\"${allow_info}\" templateVersion=\"20260709\" templateName=\"${template_name}\" shell=\"${admin_shell}\" enableInstanceConnect=\"${eic}\" passwordHash=\"${pwd_hash}\" MaintenanceModePassword=\"${maintenance_pwd_hash}\" bootstrapScript64=\"${bootstrap}\"'
       VersionDescription: Initial template version
   GatewayScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
