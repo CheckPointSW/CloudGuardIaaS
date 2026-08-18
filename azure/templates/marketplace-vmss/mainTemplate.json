@@ -471,6 +471,17 @@
         "description": "The URI of the blob containing the development image"
       }
     },
+    "hyperVGeneration": {
+      "type": "string",
+      "defaultValue": "V1",
+      "allowedValues": [
+        "V1",
+        "V2"
+      ],
+      "metadata": {
+        "description": "The Hyper-V generation of the virtual machine. Select V2 for a Generation 2 VM (supported on R82.10 and above) or V1 for Generation 1."
+      }
+    },
     "availabilityZones": {
       "type": "array",
       "defaultValue": [],
@@ -1418,7 +1429,8 @@
       "sku": "sg-ngtx-v2",
       "version": "latest"
     },
-    "imageReferenceMarketplace": "[if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), if(equals(variables('offer'), 'NGTP'), variables('imageReferenceNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('imageReferenceNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('imageReferenceNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('imageReferenceNGTX-V2'), json('null'))))))]",
+    "imageReferenceMarketplaceSelected": "[if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), if(equals(variables('offer'), 'NGTP'), variables('imageReferenceNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('imageReferenceNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('imageReferenceNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('imageReferenceNGTX-V2'), json('null'))))))]",
+    "imageReferenceMarketplace": "[union(variables('imageReferenceMarketplaceSelected'), createObject('sku', concat(variables('imageReferenceMarketplaceSelected').sku, variables('gen2Suffix'))))]",
     "customImage": "customImage",
     "imageReferenceCustomUri": {
       "id": "[resourceId('Microsoft.Compute/images', variables('customImage'))]"
@@ -1464,7 +1476,9 @@
       "product": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]"
     },
-    "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
+    "planSelected": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
+    "gen2Suffix": "[if(equals(parameters('hyperVGeneration'), 'V2'), '-gen2', '')]",
+    "plan": "[union(variables('planSelected'), createObject('name', concat(variables('planSelected').name, variables('gen2Suffix'))))]",
     "vmssID": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('vmName'))]",
     "bootstrapScript64": "[base64(parameters('bootstrapScript'))]",
     "allowUploadDownload": "[parameters('allowDownloadFromUploadToCheckPoint')]",
@@ -2219,7 +2233,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-        "hyperVGeneration": "V1"
+        "hyperVGeneration": "[parameters('hyperVGeneration')]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },

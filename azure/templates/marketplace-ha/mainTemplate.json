@@ -286,6 +286,17 @@
         "description": "The URI of the blob containing the development image"
       }
     },
+    "hyperVGeneration": {
+      "type": "string",
+      "defaultValue": "V1",
+      "allowedValues": [
+        "V1",
+        "V2"
+      ],
+      "metadata": {
+        "description": "The Hyper-V generation of the virtual machine. Select V2 for a Generation 2 VM (supported on R82.10 and above) or V1 for Generation 1."
+      }
+    },
     "availabilityZones": {
       "type": "array",
       "defaultValue": [],
@@ -1256,7 +1267,8 @@
       "sku": "sg-ngtx-v2",
       "version": "latest"
     },
-    "imageReferenceMarketplace": "[if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), if(equals(variables('offer'), 'NGTP'), variables('imageReferenceNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('imageReferenceNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('imageReferenceNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('imageReferenceNGTX-V2'), json('null'))))))]",
+    "imageReferenceMarketplaceSelected": "[if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), if(equals(variables('offer'), 'NGTP'), variables('imageReferenceNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('imageReferenceNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('imageReferenceNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('imageReferenceNGTX-V2'), json('null'))))))]",
+    "imageReferenceMarketplace": "[union(variables('imageReferenceMarketplaceSelected'), createObject('sku', concat(variables('imageReferenceMarketplaceSelected').sku, variables('gen2Suffix'))))]",
     "customImage": "customImage",
     "imageReferenceCustomUri": {
       "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
@@ -1317,7 +1329,9 @@
       "product": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]"
     },
-    "plan": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
+    "planSelected": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
+    "gen2Suffix": "[if(equals(parameters('hyperVGeneration'), 'V2'), '-gen2', '')]",
+    "plan": "[union(variables('planSelected'), createObject('name', concat(variables('planSelected').name, variables('gen2Suffix'))))]",
     "roleDefinitionIds": "[createArray(subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', '9980e02c-c2be-4d73-94e8-173b1dc7cf3c'), subscriptionResourceId('Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7'))]",
     "identity": "[json('{\"type\": \"SystemAssigned\"}')]",
     "subnet2PrivateAddresses": [
@@ -1808,7 +1822,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-        "hyperVGeneration": "V1"
+        "hyperVGeneration": "[parameters('hyperVGeneration')]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}')) ]"
     },
@@ -1836,7 +1850,7 @@
         "UserData": "[base64(concat(variables('customData')[copyIndex()], 'vnet=\"', if(equals(parameters('vnetNewOrExisting'), 'new'), reference('networkNewSetup').outputs.vnetAddressPrefixes.value[0], reference('networkExistingSetup').outputs.vnetAddressPrefixes.value[0]), '\"', '\n'))]",
         "availabilitySet": "[if(and(not(variables('useAZ')), equals(parameters('extendedZone'), 'None')), variables('availabilitySetProperty'), json('null'))]",
         "diagnosticsProfile": {
-          "bootDiagnostics": "[if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2025-06-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2023-05-01').primaryEndpoints.blob))))]"
+          "bootDiagnostics": "[if(equals(parameters('extendedZone'), 'None'), if(equals(parameters('storageAccountDeployMode'), 'None'), createObject('enabled', false()), if(equals(parameters('storageAccountDeployMode'), 'Managed'), createObject('enabled', true()), createObject('enabled', true(), 'storageUri', if(equals(parameters('storageAccountDeployMode'), 'New'), reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2025-06-01').primaryEndpoints.blob, reference(parameters('existingStorageAccountId'), '2025-06-01').primaryEndpoints.blob)))), createObject('enabled', false()))]"
         },
         "hardwareProfile": {
           "vmSize": "[parameters('vmSize')]"
@@ -1939,7 +1953,7 @@
       "properties": {
         "roleDefinitionId": "[variables('roleDefinitionIds')[if(greater(copyIndex(1), 2), 1, 0)]]",
         "scope": "[resourceGroup().id]",
-        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2024-07-01', 'Full').identity.principalId]"
+        "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), if(equals(mod(copyIndex(1), 2), 1), '1', '2'))), '2025-04-01', 'Full').identity.principalId]"
       },
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Authorization/roleAssignments'), parameters('tagsByResource')['Microsoft.Authorization/roleAssignments'], json('{}')) ]"
     },
@@ -1974,10 +1988,10 @@
             "value": "[variables('roleDefinitionIds')[copyIndex()]]"
           },
           "principalId1": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2024-07-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '1')), '2025-04-01', 'Full').identity.principalId]"
           },
           "principalId2": {
-            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2024-07-01', 'Full').identity.principalId]"
+            "value": "[reference(resourceId('Microsoft.Compute/virtualMachines/', concat(parameters('vmName'), '2')), '2025-04-01', 'Full').identity.principalId]"
           },
           "index": {
             "value": "[copyIndex()]"
