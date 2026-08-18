@@ -743,6 +743,42 @@
             "count": "[steps('chkp-advanced').vmCount]"
           },
           {
+            "name": "hyperVGeneration",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Hyper-V generation",
+            "defaultValue": "V1",
+            "toolTip": "The Hyper-V generation of the virtual machine. Select V2 for a Generation 2 VM (supported on R82.10 and above) or V1 for Generation 1.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "V1",
+                  "value": "V1"
+                },
+                {
+                  "label": "V2",
+                  "value": "V2"
+                }
+              ]
+            },
+            "visible": "[not(or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82')))]"
+          },
+          {
+            "name": "hyperVGenerationLocked",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Hyper-V generation",
+            "defaultValue": "V1",
+            "toolTip": "The Hyper-V generation of the virtual machine. Generation 2 (V2) is available only on R82.10 and above; this version supports Generation 1 (V1) only.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "V1",
+                  "value": "V1"
+                }
+              ]
+            },
+            "visible": "[or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82'))]"
+          },
+          {
             "name": "sicKeyUi",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
@@ -1514,6 +1550,7 @@
       "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
       "diskType": "[if(contains('R81.10' , steps('autoprovision').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
+      "hyperVGeneration": "[if(not(or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82'))), coalesce(steps('autoprovision').hyperVGeneration, 'V1'), coalesce(steps('autoprovision').hyperVGenerationLocked, 'V1'))]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",

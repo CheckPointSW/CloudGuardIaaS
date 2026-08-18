@@ -587,7 +587,7 @@ Parameters:
 Conditions:
   4AZs: !Equals [!Ref NumberOfAZs, 4]
   3AZs: !Or [!Equals [!Ref NumberOfAZs, 3], !Condition 4AZs]
-  CreateELB: !Not [!Equals [!Ref ELBType, none]]
+  IsIPv6Enabled: !Not [!Equals [!Ref IPMode, "IPv4"]]
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack

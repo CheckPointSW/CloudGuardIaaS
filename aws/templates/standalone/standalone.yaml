@@ -497,17 +497,6 @@ Conditions:
   AllocatePublicIPv4:
     !And [!Equals [!Ref AllocatePublicAddress, true], !Condition IsIPv4Enabled]
 Resources:
-  ReadyHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-    Condition: AllocatePublicIPv4
-    Properties: {}
-  ReadyCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    Condition: AllocatePublicIPv4
-    DependsOn: StandaloneInstance
-    Properties:
-      Handle: !Ref ReadyHandle
-      Timeout: 1800
   StandaloneIAMRole:
     Condition: EnableCloudWatch
     Type: AWS::IAM::Role
