@@ -1,0 +1,86 @@
+# Auto-approve bridge for CheckPointSW/CloudGuardIaaS (DOPS-12542).
+# Self-contained (inlined) bridge — must live on the repo's DEFAULT branch; workflow_dispatch only
+# fires from there. The auto-approve Lambda dispatches this. Runs as github-actions[bot] (write
+# access -> its approval COUNTS toward branch protection): re-verifies the head sha + the pinned
+# validator-App success check, enables auto-merge (queue), then approves.
+#
+# Inlined, NOT a reusable `uses:` call — GitHub forbids a PUBLIC repo from calling a reusable
+# workflow in a PRIVATE/INTERNAL repo (CheckPointSW/.github is internal). Keep this body in sync
+# with the onboarding skill (.claude/skills/onboard-public-auto-approve) when it changes.
+name: auto-approve-bridge
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:  { description: 'PR number to approve',            required: true, type: string }
+      head_sha:   { description: 'Expected HEAD SHA (must match)',  required: true, type: string }
+      check_name: { description: 'Lambda check run name to verify', required: true, type: string }
+
+permissions:
+  checks: read
+  pull-requests: write
+  contents: read
+
+jobs:
+  bridge:
+    # Only run trusted code from the repo's own default branch (never a feature-branch copy).
+    # Generic across repos: e2e uses `main`, cgns mirror repos use `master`.
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: checkpointsw-scaleset
+    permissions:
+      checks: read
+      pull-requests: write
+      contents: read
+    steps:
+      - name: Verify, enable auto-merge, and approve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          EXPECTED_SHA: ${{ inputs.head_sha }}
+          CHECK_NAME: ${{ inputs.check_name }}
+          REPO: ${{ github.repository }}
+          # SECURITY: pin the approver App id so a caller-supplied check_name cannot be satisfied by
+          # an unrelated green check. Must match the Lambda's APPROVE_APP_ID. This is a public
+          # identifier (not a secret), so it is a plain literal — no org secret/variable needed.
+          APPROVER_APP_ID: "4287270"
+        run: |
+          set -euo pipefail
+          if ! echo "$PR_NUMBER" | grep -qE '^[0-9]+$'; then
+            echo "::error::Invalid pr_number input: $PR_NUMBER"; exit 1
+          fi
+          if ! echo "$EXPECTED_SHA" | grep -qiE '^[0-9a-f]{40}$'; then
+            echo "::error::Invalid head_sha input — expected 40-char hex"; exit 1
+          fi
+          EXPECTED_SHA=$(echo "$EXPECTED_SHA" | tr 'A-F' 'a-f')
+          if ! echo "$CHECK_NAME" | grep -qE '^[A-Za-z0-9 ._:/-]+$'; then
+            echo "::error::Invalid check_name input"; exit 1
+          fi
+          # With `set -e`, a bare `gh api` failure exits the step silently; guard each call with
+          # an explicit ::error so failures are visible in the log.
+          CURRENT_SHA=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.head.sha') || {
+            echo "::error::Failed to read PR #${PR_NUMBER} head from ${REPO}"; exit 1; }
+          if [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+            echo "::error::SHA mismatch: PR head is ${CURRENT_SHA:0:7}, expected ${EXPECTED_SHA:0:7}. Skipping approval."; exit 1
+          fi
+          echo "✓ SHA match confirmed: ${EXPECTED_SHA:0:7}"
+          PASSED=$(gh api "repos/${REPO}/commits/${EXPECTED_SHA}/check-runs?per_page=100" \
+            | jq --arg name "$CHECK_NAME" --argjson appid "$APPROVER_APP_ID" \
+                '[.check_runs[] | select(.name == $name and .conclusion == "success" and .app.id == $appid)] | length') || {
+            echo "::error::Failed to fetch/parse check-runs for ${EXPECTED_SHA:0:7}"; exit 1; }
+          if [ "$PASSED" -eq 0 ]; then
+            echo "::error::No successful '${CHECK_NAME}' check run from approver App ${APPROVER_APP_ID} on ${EXPECTED_SHA:0:7}. Cannot approve."; exit 1
+          fi
+          echo "✓ Check run '${CHECK_NAME}' passed on ${EXPECTED_SHA:0:7}"
+          # Enable native auto-merge BEFORE approving. Order matters for SoD: while our approval is
+          # still pending, `--auto` only QUEUES the merge (enablePullRequestAutoMerge, a
+          # pull-requests:write action) and GitHub merges once the approval satisfies branch
+          # protection. Enabling it AFTER approving would make the PR already-mergeable and gh
+          # would attempt a DIRECT merge (mergePullRequest), needing contents:write — which the
+          # bridge must never have. Requires "Allow auto-merge" on the repo.
+          gh pr merge "$PR_NUMBER" --repo "$REPO" --auto --squash || {
+            echo "::error::Failed to enable auto-merge on PR #${PR_NUMBER}"; exit 1; }
+          echo "✓ auto-merge queued on PR #${PR_NUMBER}"
+          gh api "repos/${REPO}/pulls/${PR_NUMBER}/reviews" \
+            --method POST --field event="APPROVE" \
+            --field body="✅ Auto-Approve: validation passed (validated commit ${EXPECTED_SHA:0:7})." || {
+            echo "::error::Failed to submit APPROVE review on PR #${PR_NUMBER}"; exit 1; }
+          echo "✓ PR #${PR_NUMBER} approved — GitHub will auto-merge once requirements are met"
