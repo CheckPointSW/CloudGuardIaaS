@@ -660,14 +660,14 @@
             }
           },
           {
-            "name": "additionalDiskSizeGB",
+            "name": "diskSizeGB",
             "type": "Microsoft.Common.TextBox",
-            "label": "Additional disk space (GB)",
-            "defaultValue": "0",
-            "toolTip": "Additional disk space (in GB), initial disk size is 200 GB.",
+            "label": "OS disk size (GB)",
+            "defaultValue": "200",
+            "toolTip": "OS disk size (in GB). Must be between 100 and 3995.",
             "constraints": {
-              "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
-              "validationMessage": "Select a number between 0 and 3995"
+              "regex": "^([1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|39[0-8][0-9]|399[0-5])$",
+              "validationMessage": "Select a number between 100 and 3995"
             }
           },
           {
@@ -1038,7 +1038,7 @@
       "installationType": "[steps('chkp-advanced').installationType]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
-      "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
+      "diskSizeGB": "[int(steps('chkp-advanced').diskSizeGB)]",
       "msi" : "[steps('chkp-advanced').identityAccessManagement]",
       "diskType": "[if(contains('R81.10' , steps('chkp').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
