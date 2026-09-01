@@ -2,7 +2,9 @@
 # Self-contained (inlined) bridge — must live on the repo's DEFAULT branch; workflow_dispatch only
 # fires from there. The auto-approve Lambda dispatches this. Runs as github-actions[bot] (write
 # access -> its approval COUNTS toward branch protection): re-verifies the head sha + the pinned
-# validator-App success check, enables auto-merge (queue), then approves.
+# validator-App success check, then approves. The mirror bot itself queues auto-merge when it
+# opens the PR (DOPS-12542) — GITHUB_TOKEN can never call enablePullRequestAutoMerge, so the
+# bridge no longer attempts it.
 #
 # Inlined, NOT a reusable `uses:` call — GitHub forbids a PUBLIC repo from calling a reusable
 # workflow in a PRIVATE/INTERNAL repo (CheckPointSW/.github is internal). Keep this body in sync
@@ -31,7 +33,7 @@ jobs:
       pull-requests: write
       contents: read
     steps:
-      - name: Verify, enable auto-merge, and approve
+      - name: Verify and approve
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
@@ -70,15 +72,8 @@ jobs:
             echo "::error::No successful '${CHECK_NAME}' check run from approver App ${APPROVER_APP_ID} on ${EXPECTED_SHA:0:7}. Cannot approve."; exit 1
           fi
           echo "✓ Check run '${CHECK_NAME}' passed on ${EXPECTED_SHA:0:7}"
-          # Enable native auto-merge BEFORE approving. Order matters for SoD: while our approval is
-          # still pending, `--auto` only QUEUES the merge (enablePullRequestAutoMerge, a
-          # pull-requests:write action) and GitHub merges once the approval satisfies branch
-          # protection. Enabling it AFTER approving would make the PR already-mergeable and gh
-          # would attempt a DIRECT merge (mergePullRequest), needing contents:write — which the
-          # bridge must never have. Requires "Allow auto-merge" on the repo.
-          gh pr merge "$PR_NUMBER" --repo "$REPO" --auto --squash || {
-            echo "::error::Failed to enable auto-merge on PR #${PR_NUMBER}"; exit 1; }
-          echo "✓ auto-merge queued on PR #${PR_NUMBER}"
+          # Auto-merge is queued by the mirror bot when it opens the PR, not here — GITHUB_TOKEN
+          # can never call enablePullRequestAutoMerge (DOPS-12542, confirmed empirically).
           gh api "repos/${REPO}/pulls/${PR_NUMBER}/reviews" \
             --method POST --field event="APPROVE" \
             --field body="✅ Auto-Approve: validation passed (validated commit ${EXPECTED_SHA:0:7})." || {
