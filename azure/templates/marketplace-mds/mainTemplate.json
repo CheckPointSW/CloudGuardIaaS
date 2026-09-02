@@ -13,9 +13,13 @@
       "type": "string",
       "allowedValues": [
         "R81.10 - Bring Your Own License",
+        "R81.10 - Pay As You Go (MDS25)",
         "R81.20 - Bring Your Own License",
+        "R81.20 - Pay As You Go (MDS25)",
         "R82 - Bring Your Own License",
-        "R82.10 - Bring Your Own License"
+        "R82 - Pay As You Go (MDS25)",
+        "R82.10 - Bring Your Own License",
+        "R82.10 - Pay As You Go (MDS25)"
       ],
       "defaultValue": "R82 - Bring Your Own License",
       "metadata": {
@@ -217,6 +221,13 @@
         "description": "The URI of the blob containing the development image"
       }
     },
+    "useBlinkImage": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "Use the Blink image for accelerated deployment. Applicable for R81.20 and above"
+      }
+    },
     "availabilityZones": {
       "type": "array",
       "defaultValue": [],
@@ -306,18 +317,27 @@
     "location": "[parameters('location')]",
     "offers": {
       "R81.10 - Bring Your Own License": "BYOL",
+      "R81.10 - Pay As You Go (MDS25)": "MDS25",
       "R81.20 - Bring Your Own License": "BYOL",
+      "R81.20 - Pay As You Go (MDS25)": "MDS25",
       "R82 - Bring Your Own License": "BYOL",
-      "R82.10 - Bring Your Own License": "BYOL"
+      "R82 - Pay As You Go (MDS25)": "MDS25",
+      "R82.10 - Bring Your Own License": "BYOL",
+      "R82.10 - Pay As You Go (MDS25)": "MDS25"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
       "R81.10 - Bring Your Own License": "R8110",
+      "R81.10 - Pay As You Go (MDS25)": "R8110",
       "R81.20 - Bring Your Own License": "R8120",
+      "R81.20 - Pay As You Go (MDS25)": "R8120",
       "R82 - Bring Your Own License": "R82",
-      "R82.10 - Bring Your Own License": "R8210"
+      "R82 - Pay As You Go (MDS25)": "R82",
+      "R82.10 - Bring Your Own License": "R8210",
+      "R82.10 - Pay As You Go (MDS25)": "R8210"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
+    "blinkVersionSupported": "[or(equals(variables('osVersion'), 'R8120'), equals(variables('osVersion'), 'R82'), equals(variables('osVersion'), 'R8210'))]",
     "serialConsoleGeographies": {
       "eastasia": [
         "4.145.74.168",
@@ -1090,8 +1110,8 @@
       ]
     },
     "serialConsoleIps": "[if(contains(variables('serialConsoleGeographies'),variables('location')),variables('serialConsoleGeographies')[variables('location')],createArray())]",
-    "storageAccountIps": "[concat(variables('SerialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
-    "isBlink": "[bool('false')]",
+    "storageAccountIps": "[concat(variables('serialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
+    "isBlink": "[and(parameters('useBlinkImage'), variables('blinkVersionSupported'))]",
     "useAZ": "[equals(parameters('availabilityZonesChoice'), 'Yes')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
@@ -1108,7 +1128,25 @@
       "sku": "mgmt-byol",
       "version": "latest"
     },
-    "imageReferenceMarketplace": "[variables('imageReferenceBYOL')]",
+    "imageReferenceMDS25": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "mgmt-25",
+      "version": "latest"
+    },
+    "imageReferenceBYOLBlink": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "mds-byol-blink",
+      "version": "latest"
+    },
+    "imageReferenceMDS25Blink": {
+      "offer": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]",
+      "sku": "mds-25-blink",
+      "version": "latest"
+    },
+    "imageReferenceMarketplace": "[if(variables('blinkVersionSupported'), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOLBlink'), variables('imageReferenceMDS25Blink')), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), variables('imageReferenceMDS25')))]",
     "customImage": "customImage",
     "imageReferenceCustomUri": {
       "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
@@ -1135,7 +1173,22 @@
       "product": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]"
     },
-    "plan": "[if(equals(variables('offer'), 'BYOL'), variables('planBYOL'), variables('planBYOL'))]",
+    "planMDS25": {
+      "name": "mgmt-25",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planBYOLBlink": {
+      "name": "mds-byol-blink",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "planMDS25Blink": {
+      "name": "mds-25-blink",
+      "product": "[variables('imageOffer')]",
+      "publisher": "[variables('imagePublisher')]"
+    },
+    "plan": "[if(variables('blinkVersionSupported'), if(equals(variables('offer'), 'BYOL'), variables('planBYOLBlink'), variables('planMDS25Blink')), if(equals(variables('offer'), 'BYOL'), variables('planBYOL'), variables('planMDS25')))]",
     "identity": "[if(parameters('msi'), json('{\"type\": \"SystemAssigned\"}'), json('null'))]",
     "publicIPAddressName": "[parameters('vmName')]",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
