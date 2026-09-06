@@ -1182,7 +1182,7 @@
             "visible": "[and(equals(steps('chkp-advanced').installationType, 'standalone'), not(equals(steps('chkp').R80Offer, 'Bring Your Own License')))]",
             "options": {
               "icon": "Error",
-              "text": "Standalone deployment is ONLY supported for CloudGuard version R81.10 and above, Bring Your Own License."
+              "text": "Standalone deployment is ONLY supported for Bring Your Own License."
             }
           },
           {
