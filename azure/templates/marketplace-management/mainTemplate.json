@@ -268,6 +268,17 @@
         "description": "Use the Blink image for accelerated deployment. Applicable for R81.20 and above"
       }
     },
+    "hyperVGeneration": {
+      "type": "string",
+      "defaultValue": "V1",
+      "allowedValues": [
+        "V1",
+        "V2"
+      ],
+      "metadata": {
+        "description": "The Hyper-V generation of the virtual machine. Select V2 for a Generation 2 VM (supported on R82.10 and above) or V1 for Generation 1."
+      }
+    },
     "availabilityZones": {
       "type": "array",
       "defaultValue": [],
@@ -1183,7 +1194,8 @@
       "sku": "mgmt-25-blink",
       "version": "latest"
     },
-    "imageReferenceMarketplace": "[if(variables('isBlink'), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOLBlink'), variables('imageReferenceMGMT25Blink')), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), variables('imageReferenceMGMT25')))]",
+    "imageReferenceMarketplaceSelected": "[if(variables('isBlink'), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOLBlink'), variables('imageReferenceMGMT25Blink')), if(equals(variables('offer'), 'BYOL'), variables('imageReferenceBYOL'), variables('imageReferenceMGMT25')))]",
+    "imageReferenceMarketplace": "[union(variables('imageReferenceMarketplaceSelected'), createObject('sku', concat(variables('imageReferenceMarketplaceSelected').sku, variables('gen2Suffix'))))]",
     "customImage": "customImage",
     "imageReferenceCustomUri": {
       "id": "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
@@ -1225,7 +1237,9 @@
       "product": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]"
     },
-    "plan": "[if(variables('isBlink'), if(equals(variables('offer'), 'BYOL'), variables('planBYOLBlink'), variables('planMGMT25Blink')), if(equals(variables('offer'), 'BYOL'), variables('planBYOL'), variables('planMGMT25')))]",
+    "planSelected": "[if(variables('isBlink'), if(equals(variables('offer'), 'BYOL'), variables('planBYOLBlink'), variables('planMGMT25Blink')), if(equals(variables('offer'), 'BYOL'), variables('planBYOL'), variables('planMGMT25')))]",
+    "gen2Suffix": "[if(equals(parameters('hyperVGeneration'), 'V2'), '-gen2', '')]",
+    "plan": "[union(variables('planSelected'), createObject('name', concat(variables('planSelected').name, variables('gen2Suffix'))))]",
     "identity": "[if(parameters('msi'), json('{\"type\": \"SystemAssigned\"}'), json('null'))]",
     "publicIPAddressName": "[parameters('vmName')]",
     "publicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
@@ -1755,7 +1769,7 @@
             "storageAccountType": "Standard_LRS"
           }
         },
-        "hyperVGeneration": "V1"
+        "hyperVGeneration": "[parameters('hyperVGeneration')]"
       },
       "tags": "[if(contains(parameters('tagsByResource'), 'Microsoft.Compute/images'), parameters('tagsByResource')['Microsoft.Compute/images'], json('{}'))]"
     },

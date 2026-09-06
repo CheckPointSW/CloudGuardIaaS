@@ -1238,7 +1238,7 @@
     "customData": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'managementGUIClientNetwork=\"', variables('managementGUIClientNetwork'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'smart1CloudToken=\"', parameters('smart1CloudToken'), '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]",
     "imageOffer": "[concat('check-point-cg-', toLower(variables('osVersion')))]",
     "imagePublisher": "checkpoint",
-    "imageSku": "[if(and(equals(parameters('installationType'), 'standalone'), or(equals(variables('osVersion'),'R8110'), equals(variables('osVersion'),'R8120'), equals(variables('osVersion'),'R82'), equals(variables('osVersion'),'R8210'))), 'mgmt-byol', 'sg-byol')]",
+    "imageSku": "[if(equals(parameters('installationType'), 'standalone'), 'mgmt-byol', 'sg-byol')]",
     "imageReferenceBYOL": {
       "offer": "[variables('imageOffer')]",
       "publisher": "[variables('imagePublisher')]",
@@ -1319,7 +1319,7 @@
       "publisher": "[variables('imagePublisher')]"
     },
     "planSelected": "[if(equals(variables('offer'), 'BYOL') , variables('planBYOL'), if(equals(variables('offer'), 'NGTP'), variables('planNGTP'), if(equals(variables('offer'), 'NGTP-V2'), variables('planNGTP-V2'), if(equals(variables('offer'), 'NGTX'), variables('planNGTX'), if(equals(variables('offer'), 'NGTX-V2'), variables('planNGTX-V2'), json('null'))))))]",
-    "gen2Suffix": "[if(and(equals(parameters('hyperVGeneration'), 'V2'), not(equals(variables('planSelected').name, 'mgmt-byol'))), '-gen2', '')]",
+    "gen2Suffix": "[if(equals(parameters('hyperVGeneration'), 'V2'), '-gen2', '')]",
     "plan": "[union(variables('planSelected'), createObject('name', concat(variables('planSelected').name, variables('gen2Suffix'))))]",
     "publicIPAddressName": "[parameters('vmName')]",
     "publicIPAddressNameV6": "lb-public-ipv6",
