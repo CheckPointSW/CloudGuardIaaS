@@ -586,18 +586,18 @@
             "name": "VMDiskType",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
-            "toolTip": "Type of CloudGuard disk.",
+            "toolTip": "The type of the OS managed disk. Premium SSD is applicable only to DS machine sizes.",
             "visible": "[not(contains('R81.10' , steps('chkp').cloudGuardVersion))]",
-            "defaultValue": "Premium",
+            "defaultValue": "Standard SSD",
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "Standard",
-                  "value": "Standard_LRS"
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
                 },
                 {
-                  "label": "Premium",
-                  "value": "Premium_LRS"
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
                 }
               ]
             }
@@ -606,18 +606,18 @@
             "name": "VMDiskTypeOldVersions",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
-            "toolTip": "Type of CloudGuard disk.",
+            "toolTip": "The type of the OS managed disk. Premium SSD is applicable only to DS machine sizes.",
             "visible": "[contains('R81.10' , steps('chkp').cloudGuardVersion)]",
-            "defaultValue": "Standard",
+            "defaultValue": "Standard SSD",
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "Standard",
-                  "value": "Standard_LRS"
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
                 },
                 {
-                  "label": "Premium",
-                  "value": "Premium_LRS"
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
                 }
               ]
             }

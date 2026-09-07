@@ -238,13 +238,14 @@
     },
     "diskType": {
       "type": "string",
-      "defaultValue": "Standard_LRS",
+      "defaultValue": "StandardSSD_LRS",
       "metadata": {
-        "description": "The type of the OS disk. Premium is applicable only to DS machine sizes"
+        "description": "The type of the OS managed disk (Premium SSD or Standard SSD). Standard_LRS (Standard HDD) is deprecated and retained only for backward compatibility"
       },
       "allowedValues": [
-        "Standard_LRS",
-        "Premium_LRS"
+        "Premium_LRS",
+        "StandardSSD_LRS",
+        "Standard_LRS"
       ]
     },
     "msi": {
