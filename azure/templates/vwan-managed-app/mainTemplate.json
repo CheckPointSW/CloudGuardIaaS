@@ -143,26 +143,6 @@
                 "description": "An array of IP addresses obtained from the Hub object. To get the Hub Peers, go to your hub, click the JSON view on the right and copy the virtualRouterIps field. for example:[\"10.10.32.5\",\"10.10.32.4\"]"
             }
         },
-        "smart1CloudTokenA": {
-            "defaultValue": "",
-            "type": "SecureString"
-        },
-        "smart1CloudTokenB": {
-            "defaultValue": "",
-            "type": "SecureString"
-        },
-        "smart1CloudTokenC": {
-            "defaultValue": "",
-            "type": "SecureString"
-        },
-        "smart1CloudTokenD": {
-            "defaultValue": "",
-            "type": "SecureString"
-        },
-        "smart1CloudTokenE": {
-            "defaultValue": "",
-            "type": "SecureString"
-        },
         "applicationResourceName": {
             "type": "String"
         },
@@ -410,21 +390,6 @@
                     },
                     "hubPeers": {
                         "value": "[parameters('hubPeers')]"
-                    },
-                    "smart1CloudTokenA": {
-                        "value": "[parameters('smart1CloudTokenA')]"
-                    },
-                    "smart1CloudTokenB": {
-                        "value": "[parameters('smart1CloudTokenB')]"
-                    },
-                    "smart1CloudTokenC": {
-                        "value": "[parameters('smart1CloudTokenC')]"
-                    },
-                    "smart1CloudTokenD": {
-                        "value": "[parameters('smart1CloudTokenD')]"
-                    },
-                    "smart1CloudTokenE": {
-                        "value": "[parameters('smart1CloudTokenE')]"
                     },
                     "publicIPIngress": {
                         "value": "[parameters('publicIPIngress')]"
