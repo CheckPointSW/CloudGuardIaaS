@@ -226,7 +226,7 @@
       "type": "bool",
       "defaultValue": true,
       "metadata": {
-        "description": "Use the Blink image for accelerated deployment. Applicable for R81.20 and above"
+        "description": "Use the Blink image for accelerated deployment. Applicable for R81.20 and above, primary Multi-Domain Server only"
       }
     },
     "hyperVGeneration": {
@@ -1123,7 +1123,7 @@
     },
     "serialConsoleIps": "[if(contains(variables('serialConsoleGeographies'),variables('location')),variables('serialConsoleGeographies')[variables('location')],createArray())]",
     "storageAccountIps": "[concat(variables('serialConsoleIps'),parameters('storageAccountAdditionalIps'))]",
-    "isBlink": "[and(parameters('useBlinkImage'), variables('blinkVersionSupported'))]",
+    "isBlink": "[and(parameters('useBlinkImage'), variables('blinkVersionSupported'), variables('primary'))]",
     "useAZ": "[equals(parameters('availabilityZonesChoice'), 'Yes')]",
     "primary": "[equals(parameters('installationType'), 'mds-primary')]",
     "secondary": "[equals(parameters('installationType'), 'mds-secondary')]",
