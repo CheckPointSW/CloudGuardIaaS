@@ -1,0 +1,1307 @@
+{
+	"info": {
+		"_postman_id": "f0e0ca41-ec67-4f50-9c4d-930a7f3fcaab",
+		"name": "Azure Virtual WAN - REST APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20296973"
+	},
+	"item": [
+		{
+			"name": "Virtual WANs",
+			"item": [
+				{
+					"name": "All Virtual Wans in resourceGroup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Virtual Wans in subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/providers/Microsoft.Network/virtualWans?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Virtual Wan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans/{{virtualWan}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans",
+								"{{virtualWan}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Virtual Wan",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans/{{virtualWan}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans",
+								"{{virtualWan}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tags for vWAN",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tags\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans/{{virtualWan}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans",
+								"{{virtualWan}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Virtual Wan",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"West US\",\r\n  \"tags\": {\r\n    \"key1\": \"value1\"\r\n  },\r\n  \"properties\": {\r\n    \"disableVpnEncryption\": false,\r\n    \"type\": \"Basic\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans/{{virtualWan}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualWans",
+								"{{virtualWan}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Virtual Hubs",
+			"item": [
+				{
+					"name": "Hub Route Tables",
+					"item": [
+						{
+							"name": "Route Table",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables/{{hubRouteTable}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubRouteTables",
+										"{{hubRouteTable}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Route Table - Create Or Update",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"properties\": {\r\n    \"routes\": [\r\n      {\r\n        \"name\": \"route1\",\r\n        \"destinationType\": \"CIDR\",\r\n        \"destinations\": [\r\n          \"10.0.0.0/8\",\r\n          \"20.0.0.0/8\",\r\n          \"30.0.0.0/8\"\r\n        ],\r\n        \"nextHopType\": \"ResourceId\",\r\n        \"nextHop\": \"/subscriptions/{{subscriptionId}}/resourcegroups/{{managedAppRG}}/providers/Microsoft.Network/networkVirtualAppliances/{{nvaName}}\"\r\n      }\r\n    ],\r\n    \"labels\": [\r\n      \"label1\",\r\n      \"label2\"\r\n    ]\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables/{{hubRouteTable}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubRouteTables",
+										"{{hubRouteTable}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Route Table",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables/{{hubRouteTable}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubRouteTables",
+										"{{hubRouteTable}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "All Route Tables",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubRouteTables"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Hub Virtual Network Connections",
+					"item": [
+						{
+							"name": "Virtual Network Connections",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubVirtualNetworkConnections/{{hubVirtualNetworkConnection}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubVirtualNetworkConnections",
+										"{{hubVirtualNetworkConnection}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Virtual Network Connections - Create Or Update",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"properties\": {\r\n    \"remoteVirtualNetwork\": {\r\n      \"id\": \"/subscriptions/{{remoteVnetSub}}/resourceGroups/{{remoteVnetRG}}/providers/Microsoft.Network/virtualNetworks/{{remoteVnetID}}\"\r\n    },\r\n    \"enableInternetSecurity\": false,\r\n    \"routingConfiguration\": {\r\n      \"associatedRouteTable\": {\r\n        \"id\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}//providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables/{{hubRouteTable}}\"\r\n      },\r\n      \"propagatedRouteTables\": {\r\n        \"labels\": [\r\n          \"label1\",\r\n          \"label2\"\r\n        ],\r\n        \"ids\": [\r\n          {\r\n            \"id\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}//providers/Microsoft.Network/virtualHubs/{{hubName}}/hubRouteTables/{{hubRouteTable}}\"\r\n          }\r\n        ]\r\n      },\r\n      \"vnetRoutes\": {\r\n        \"staticRoutesConfig\": {\r\n          \"vnetLocalRouteOverrideCriteria\": \"Equal\"\r\n        },\r\n        \"staticRoutes\": [\r\n          {\r\n            \"name\": \"route1\",\r\n            \"addressPrefixes\": [\r\n              \"10.1.0.0/16\",\r\n              \"10.2.0.0/16\"\r\n            ],\r\n            \"nextHopIpAddress\": \"10.0.0.68\"\r\n          },\r\n          {\r\n            \"name\": \"route2\",\r\n            \"addressPrefixes\": [\r\n              \"10.3.0.0/16\",\r\n              \"10.4.0.0/16\"\r\n            ],\r\n            \"nextHopIpAddress\": \"10.0.0.65\"\r\n          }\r\n        ]\r\n      },\r\n      \"inboundRouteMap\": {\r\n        \"id\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}//providers/Microsoft.Network/virtualHubs/{{hubName}}/routeMaps/{{routeMap}}\"\r\n      },\r\n      \"outboundRouteMap\": {\r\n        \"id\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}//providers/Microsoft.Network/virtualHubs/{{hubName}}/routeMaps/{{routeMap}}\"\r\n      }\r\n    }\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubVirtualNetworkConnections/{{hubVirtualNetworkConnection}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubVirtualNetworkConnections",
+										"{{hubVirtualNetworkConnection}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Virtual Network Connections",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubVirtualNetworkConnections/{{hubVirtualNetworkConnection}}?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubVirtualNetworkConnections",
+										"{{hubVirtualNetworkConnection}}"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "All Virtual Network Connections",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/hubVirtualNetworkConnections?api-version={{apiVersion}}",
+									"protocol": "https",
+									"host": [
+										"management",
+										"azure",
+										"com"
+									],
+									"path": [
+										"subscriptions",
+										"{{subscriptionId}}",
+										"resourceGroups",
+										"{{resourceGroupID}}",
+										"providers",
+										"Microsoft.Network",
+										"virtualHubs",
+										"{{hubName}}",
+										"hubVirtualNetworkConnections"
+									],
+									"query": [
+										{
+											"key": "api-version",
+											"value": "{{apiVersion}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Virtual Hub",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Virtual Hub - Create Or Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"location\": \"West US\",\r\n  \"tags\": {\r\n    \"key1\": \"value1\"\r\n  },\r\n  \"properties\": {\r\n    \"virtualWan\": {\r\n      \"id\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualWans/{{virtualWan}}\"\r\n    },\r\n    \"addressPrefix\": \"10.168.0.0/24\",\r\n    \"sku\": \"Basic\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Effective Routes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"resourceId\": \"/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}//providers/Microsoft.Network/expressRouteGateways/{{expressRouteGatewayName}}/expressRouteConnections/{{expressRouteConnections}}>\",\r\n  \"virtualWanResourceType\": \"ExpressRouteConnection\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/effectiveRoutes?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}",
+								"effectiveRoutes"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Virtual Hubs in resourceGroup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All Virtual Hubs in subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/providers/Microsoft.Network/virtualHubs?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tags for vHub",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tags\": {\r\n    \"key1\": \"value1\",\r\n    \"key2\": \"value2\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Routing Intent",
+			"item": [
+				{
+					"name": "Routing Intent",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {\r\n    \"routingPolicies\": [\r\n      {\r\n        \"name\": \"InternetTraffic\",\r\n        \"destinations\": [\r\n          \"Internet\"\r\n        ],\r\n        \"nextHop\": \"/subscriptions/{{subscriptionId}}/resourcegroups/{{managedAppRG}}/providers/Microsoft.Network/networkVirtualAppliances/{{nvaName}}\"\r\n      },\r\n      {\r\n        \"name\": \"PrivateTrafficPolicy\",\r\n        \"destinations\": [\r\n          \"PrivateTraffic\"\r\n        ],\r\n        \"nextHop\": \"/subscriptions/{{subscriptionId}}/resourcegroups/{{managedAppRG}}/providers/Microsoft.Network/networkVirtualAppliances/{{nvaName}}\"\r\n      }\r\n    ]\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/routingIntent/{{routingIntent}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}",
+								"routingIntent",
+								"{{routingIntent}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Routing Intent",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/routingIntent/{{routingIntent}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}",
+								"routingIntent",
+								"{{routingIntent}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Routing Intent",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/virtualHubs/{{hubName}}/routingIntent/{{routingIntent}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"virtualHubs",
+								"{{hubName}}",
+								"routingIntent",
+								"{{routingIntent}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "VPN Sites",
+			"item": [
+				{
+					"name": "VPN Site",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/vpnSites/{{vpnSiteName}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"vpnSites",
+								"{{vpnSiteName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All VPN Sites in resourceGroup",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{resourceGroupID}}/providers/Microsoft.Network/vpnSites?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{resourceGroupID}}",
+								"providers",
+								"Microsoft.Network",
+								"vpnSites"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All VPN Sites in subscription",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/providers/Microsoft.Network/vpnSites?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"providers",
+								"Microsoft.Network",
+								"vpnSites"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Network Virtual Appliance (NVA)",
+			"item": [
+				{
+					"name": "NVA",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{managedAppRG}}/providers/Microsoft.Network/NetworkVirtualAppliances/{{nvaName}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{managedAppRG}}",
+								"providers",
+								"Microsoft.Network",
+								"NetworkVirtualAppliances",
+								"{{nvaName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "NVA",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{managedAppRG}}/providers/Microsoft.Network/networkVirtualAppliances/{{nvaName}}?api-version=2022-11-01",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{managedAppRG}}",
+								"providers",
+								"Microsoft.Network",
+								"networkVirtualAppliances",
+								"{{nvaName}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "2022-11-01"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "All NVAs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{managedAppRG}}/providers/Microsoft.Network/NetworkVirtualAppliances?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{managedAppRG}}",
+								"providers",
+								"Microsoft.Network",
+								"NetworkVirtualAppliances"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Security Rule",
+			"item": [
+				{
+					"name": "Inbound Security Rule - Create Or Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"properties\": {\r\n      \"rules\": [\r\n      {\r\n        \"protocol\": \"TCP\",\r\n        \"sourceAddressPrefix\": \"172.172.172.172/32\",\r\n        \"destinationPortRange\": 22\r\n      }\r\n    ]\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://management.azure.com/subscriptions/{{subscriptionId}}/resourceGroups/{{managedAppRG}}/providers/Microsoft.Network/networkVirtualAppliances/{{nvaName}}inboundSecurityRules/{{inboundSecurityRule}}?api-version={{apiVersion}}",
+							"protocol": "https",
+							"host": [
+								"management",
+								"azure",
+								"com"
+							],
+							"path": [
+								"subscriptions",
+								"{{subscriptionId}}",
+								"resourceGroups",
+								"{{managedAppRG}}",
+								"providers",
+								"Microsoft.Network",
+								"networkVirtualAppliances",
+								"{{nvaName}}inboundSecurityRules",
+								"{{inboundSecurityRule}}"
+							],
+							"query": [
+								{
+									"key": "api-version",
+									"value": "{{apiVersion}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{bearerToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Check for collectionVariables\", function () {",
+					"    let vars = ['clientId', 'clientSecret', 'tenantId', 'subscriptionId'];",
+					"    vars.forEach(function (item, index, array) {",
+					"        console.log(item, index);",
+					"        pm.expect(pm.collectionVariables.get(item), item + \" variable not set\").to.not.be.undefined;",
+					"        pm.expect(pm.collectionVariables.get(item), item + \" variable not set\").to.not.be.empty; ",
+					"    });",
+					"",
+					"    if (!pm.collectionVariables.get(\"bearerToken\") || Date.now() > new Date(pm.collectionVariables.get(\"bearerTokenExpiresOn\") * 1000)) {",
+					"        pm.sendRequest({",
+					"            url: 'https://login.microsoftonline.com/' + pm.collectionVariables.get(\"tenantId\") + '/oauth2/token',",
+					"            method: 'POST',",
+					"            header: 'Content-Type: application/x-www-form-urlencoded',",
+					"            body: {",
+					"                mode: 'urlencoded',",
+					"                urlencoded: [",
+					"                    { key: \"grant_type\", value: \"client_credentials\", disabled: false },",
+					"                    { key: \"client_id\", value: pm.collectionVariables.get(\"clientId\"), disabled: false },",
+					"                    { key: \"client_secret\", value: pm.collectionVariables.get(\"clientSecret\"), disabled: false },",
+					"                    { key: \"resource\", value: pm.collectionVariables.get(\"resource\") || \"https://management.azure.com/\", disabled: false }",
+					"                ]",
+					"            }",
+					"        }, function (err, res) {",
+					"            if (err) {",
+					"                console.log(err);",
+					"            } else {",
+					"                let resJson = res.json();",
+					"                pm.collectionVariables.set(\"bearerTokenExpiresOn\", resJson.expires_on);",
+					"                pm.collectionVariables.set(\"bearerToken\", resJson.access_token);",
+					"            }",
+					"        });",
+					"    }",
+					"});"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "tenantId",
+			"value": ""
+		},
+		{
+			"key": "clientSecret",
+			"value": ""
+		},
+		{
+			"key": "clientId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "subscriptionId",
+			"value": ""
+		},
+		{
+			"key": "nvaName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "managedAppRG",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "resourceGroupID",
+			"value": ""
+		},
+		{
+			"key": "virtualWan",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "hubName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "hubRouteTable",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "hubVirtualNetworkConnection",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "routingIntent",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "vpnSiteName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "inboundSecurityRule",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "remoteVnetSub",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "remoteVnetRG",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "remoteVnetID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "routeMap",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expressRouteGatewayName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "expressRouteConnections",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "apiVersion",
+			"value": "2022-09-01",
+			"type": "string"
+		},
+		{
+			"key": "bearerToken",
+			"value": ""
+		},
+		{
+			"key": "resource",
+			"value": "https://management.azure.com/"
+		},
+		{
+			"key": "bearerTokenExpiresOn",
+			"value": ""
+		}
+	]
+}

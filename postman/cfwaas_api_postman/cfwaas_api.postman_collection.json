@@ -1,0 +1,565 @@
+{
+  "info": {
+    "_postman_id": "bd54afea-79cb-5d86-91cf-8e42d34d61a9",
+    "name": "Cloud Firewall as a Service API (v1.5.3)",
+    "description": "Check Point **Cloud Firewall as a Service** (CFWaaS), as a self-contained Postman collection. List your managed firewall deployments, read their gateways and traffic metrics, and create new ones on AWS, Azure or GCP.\n\n## Setup\n\n1. In the Infinity Portal, go to **Global Settings → API Keys** and create a **User** API key. Note the Client ID and the Secret Key - the secret is shown once.\n2. In Postman, open the **Vault** (bottom-left) and add two entries:\n   - `cfwaas-client-id` - your Client ID\n   - `cfwaas-access-key` - your Secret Key\n3. Open the **Variables** tab of this collection and set `region` to the region your tenant is in. It must be the same region you created the key in.\n4. Send any request.\n\nNothing else needs configuring. The collection signs in, mints the token the API expects, caches it until it expires, and builds every URL for you.\n\n## About the credentials\n\n### API key\n\nYour API key is read from the Postman Vault, which stays on your own machine and is never synced or exported. There is deliberately no collection variable to paste it into, so an exported copy of this collection can never carry it.\n\n### SIC key\n\nThe SIC key in the deployment-creation requests is a placeholder. Type your own value into the request body just before you send it, and treat it as one-time input rather than something the collection stores for you.\n\nTwo things to do, in this order:\n\n1. **Do not click Save** on the request after typing the key in. Saving writes the key into the collection itself, and it then travels with every export and share.\n2. **Close the request tab** once the deployment is created. An unsaved body lives only in the open tab, so closing it is what actually clears the key.\n\n## Reading the docs\n\nEvery request carries its own documentation: the roles it needs, the fields it accepts, and what each response status means. Open the request and expand the documentation pane on the right.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.5.3"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const TARGETS = {\"basePath\":\"/app/cloud-firewall/prod/api/v1\",\"appId\":\"db15a3a9-afcf-4d7f-9ab6-77f7ffb9019e\",\"regions\":{\"EU\":{\"apiUrl\":\"https://cloudinfra-gw.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"},\"US\":{\"apiUrl\":\"https://cloudinfra-gw-us.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"},\"GB\":{\"apiUrl\":\"https://cloudinfra-gw.uk.portal.checkpoint.com\",\"portalUrl\":\"https://uk.portal.checkpoint.com/\"},\"CA\":{\"apiUrl\":\"https://cloudinfra-gw.ca.portal.checkpoint.com\",\"portalUrl\":\"https://ca.portal.checkpoint.com/\"},\"AU\":{\"apiUrl\":\"https://cloudinfra-gw.ap.portal.checkpoint.com\",\"portalUrl\":\"https://ap.portal.checkpoint.com/\"},\"IN\":{\"apiUrl\":\"https://cloudinfra-gw.in.portal.checkpoint.com\",\"portalUrl\":\"https://in.portal.checkpoint.com/\"},\"AE\":{\"apiUrl\":\"https://cloudinfra-gw.ae.portal.checkpoint.com\",\"portalUrl\":\"https://ae.portal.checkpoint.com/\"}}};",
+          "",
+          "const regionId = String(pm.variables.get('region') ?? '').trim();",
+          "const region = TARGETS.regions[regionId];",
+          "",
+          "if (!region) {",
+          "    throw new Error(",
+          "        `Unknown region \"${regionId}\". Open the collection's Variables tab and set region to one of: ` +",
+          "        Object.keys(TARGETS.regions).join(', ')",
+          "    );",
+          "}",
+          "",
+          "const baseUrl = `${region.apiUrl}${TARGETS.basePath}`;",
+          "",
+          "if (pm.variables.get('baseUrl') !== baseUrl) console.log(`Target resolved -> ${baseUrl}`);",
+          "",
+          "pm.variables.set('baseUrl', baseUrl);",
+          "pm.variables.set('cloudinfraUrl', region.apiUrl);",
+          "pm.variables.set('portalUrl', region.portalUrl);",
+          "pm.variables.set('appId', TARGETS.appId);",
+          "",
+          "function send(options) {",
+          "    return new Promise((resolve, reject) => {",
+          "        pm.sendRequest(options, (error, response) => error ? reject(error) : resolve(response));",
+          "    });",
+          "}",
+          "",
+          "async function credential(vaultKey, variableName) {",
+          "    const keys = [vaultKey];",
+          "",
+          "    for (const key of keys) {",
+          "        try {",
+          "            const fromVault = await pm.vault.get(key);",
+          "            if (fromVault) {",
+          "                console.log(`Using Vault entry ${key}`);",
+          "                return String(fromVault).trim();",
+          "            }",
+          "        } catch (error) {",
+          "        }",
+          "    }",
+          "",
+          "    return String(pm.variables.get(variableName) ?? '').trim();",
+          "}",
+          "",
+          "function decodeBase64Url(value) {",
+          "    const normalised = String(value).replace(/-/g, '+').replace(/_/g, '/');",
+          "",
+          "    if (typeof atob === 'function') return atob(normalised);",
+          "",
+          "    return require('buffer').Buffer.from(normalised, 'base64').toString('utf8');",
+          "}",
+          "",
+          "function readExpiry(token) {",
+          "    const payload = String(token).split('.')[1];",
+          "    if (!payload) return null;",
+          "",
+          "    try {",
+          "        const decoded = JSON.parse(decodeBase64Url(payload));",
+          "        const expiry = Number(decoded.exp);",
+          "",
+          "        return Number.isFinite(expiry) ? expiry : null;",
+          "    } catch (error) {",
+          "        console.warn('Expiry claim unreadable; using the configured lifetime instead.');",
+          "        return null;",
+          "    }",
+          "}",
+          "",
+          "function asJson(response, label) {",
+          "    try {",
+          "        return response.json();",
+          "    } catch (error) {",
+          "        throw new Error(`${label} returned ${response.code} with a non-JSON body: ${String(response.text()).slice(0, 300)}`);",
+          "    }",
+          "}",
+          "",
+          "function isFresh(value, expiry, skewSeconds) {",
+          "    return Boolean(value) && Number.isFinite(expiry) && expiry > 0 && Math.floor(Date.now() / 1000) < expiry - skewSeconds;",
+          "}",
+          "",
+          "async function readVaultToken(name, skewSeconds) {",
+          "    try {",
+          "        const storedTarget = String((await pm.vault.get(`cfwaas-${name}-target`)) ?? '').replace(/\\/+$/, '');",
+          "        const currentTarget = String(pm.variables.get('baseUrl') ?? '').replace(/\\/+$/, '');",
+          "",
+          "        if (storedTarget !== currentTarget) return '';",
+          "",
+          "        const value = String((await pm.vault.get(`cfwaas-${name}`)) ?? '');",
+          "        return isFresh(value, readExpiry(value) ?? 0, skewSeconds) ? value : '';",
+          "    } catch (error) {",
+          "        return '';",
+          "    }",
+          "}",
+          "",
+          "async function writeVaultToken(name, value) {",
+          "    try {",
+          "        await pm.vault.set(`cfwaas-${name}-target`, String(pm.variables.get('baseUrl') ?? ''));",
+          "        await pm.vault.set(`cfwaas-${name}`, value);",
+          "    } catch (error) {",
+          "        console.warn(`Could not cache ${name} in the Vault, so every send will re-authenticate. Grant the collection Vault access to avoid that.`);",
+          "    }",
+          "}",
+          "",
+          "function useToken(name, value) {",
+          "    pm.variables.set(name, value);",
+          "}",
+          "",
+          "const FALLBACK_TTL_SECONDS = Number(pm.variables.get('jwtTtlSeconds') ?? 900);",
+          "const SKEW_SECONDS = Number(pm.variables.get('jwtSkewSeconds') ?? 30);",
+          "",
+          "const apiUrl = String(pm.variables.get('cloudinfraUrl') ?? '').replace(/\\/+$/, '');",
+          "const applicationId = String(pm.variables.get('appId') ?? '').trim();",
+          "const now = Math.floor(Date.now() / 1000);",
+          "",
+          "const cachedJwt = await readVaultToken('jwt', SKEW_SECONDS);",
+          "",
+          "if (cachedJwt) {",
+          "    useToken('jwt', cachedJwt);",
+          "} else {",
+          "    const accessKey = await credential('cfwaas-access-key', 'accessKey');",
+          "    const clientId = await credential('cfwaas-client-id', 'clientId');",
+          "",
+          "    if (!apiUrl) throw new Error('cloudinfraUrl is empty - check that `region` is set to a supported value.');",
+          "    if (!applicationId) throw new Error('appId is empty - restore it in the collection variables or re-import.');",
+          "    if (!clientId || !accessKey) {",
+          "        throw new Error(",
+          "            'No API key configured. Create a user API key in the Infinity Portal ' +",
+          "            `(${pm.variables.get('portalUrl') || 'your region portal'} -> Global Settings -> API Keys), then add it to ` +",
+          "            'the Postman Vault as cfwaas-client-id and cfwaas-access-key.'",
+          "        );",
+          "    }",
+          "",
+          "    const sessionResponse = await send({",
+          "        url: `${apiUrl}/auth/external/user`,",
+          "        method: 'POST',",
+          "        header: {'Content-Type': 'application/x-www-form-urlencoded'},",
+          "        body: {mode: 'urlencoded', urlencoded: [{key: 'clientId', value: clientId}, {key: 'accessKey', value: accessKey}]}",
+          "    });",
+          "",
+          "    const sessionBody = asJson(sessionResponse, 'POST /auth/external/user');",
+          "    const session = sessionBody?.data?.token;",
+          "    const csrf = sessionBody?.data?.csrf;",
+          "",
+          "    if (!session || !csrf) throw new Error(`POST /auth/external/user returned no session (HTTP ${sessionResponse.code}). Check the API key belongs to this region.`);",
+          "",
+          "    const signedResponse = await send({",
+          "        url: `${apiUrl}/api/v1/devTools/userAppSignedJwt`,",
+          "        method: 'POST',",
+          "        header: {'Content-Type': 'application/x-www-form-urlencoded', 'csrf': csrf, 'Authorization': `Bearer ${session}`},",
+          "        body: {mode: 'urlencoded', urlencoded: [{key: 'appId', value: applicationId}]}",
+          "    });",
+          "",
+          "    const signedBody = asJson(signedResponse, 'POST /api/v1/devTools/userAppSignedJwt');",
+          "    if (!signedBody?.jwt) throw new Error(`userAppSignedJwt returned no jwt field (HTTP ${signedResponse.code}).`);",
+          "",
+          "    const jwtExpiresAt = readExpiry(signedBody.jwt) ?? now + FALLBACK_TTL_SECONDS;",
+          "",
+          "    await writeVaultToken('jwt', signedBody.jwt);",
+          "    useToken('jwt', signedBody.jwt);",
+          "",
+          "    console.log(`User session established, expires in ${jwtExpiresAt - now}s.`);",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const HINTS = {",
+          "    403: 'Authenticated but not authorised - this endpoint needs a higher role. Creating a deployment requires Admin.',",
+          "    400: 'Body failed validation. The API strips unlisted fields, so check required fields and enum values in this request\\'s docs.',",
+          "    401: 'No valid session. Delete cfwaas-jwt from the Postman Vault and resend, or re-check the API key.',",
+          "    404: 'Not found. Usually a stale id variable or the wrong `stage` for the resource.',",
+          "    409: 'Conflict - the resource already exists or is mid-transition.',",
+          "    429: 'Rate limited by the gateway. Back off and retry.'",
+          "};",
+          "",
+          "pm.test('Server did not error', () => pm.expect(pm.response.code).to.be.below(500));",
+          "",
+          "if (String(pm.response.headers.get('content-type') ?? '').includes('json')) {",
+          "    pm.test('Response body is valid JSON', () => pm.response.json());",
+          "}",
+          "",
+          "if (pm.response.code >= 400) {",
+          "    const hint = HINTS[pm.response.code];",
+          "    if (hint) console.warn(`${pm.response.code} on \"${pm.info.requestName}\" - ${hint}`);",
+          "    console.warn(`Response: ${String(pm.response.text()).slice(0, 500)}`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "region",
+      "value": "EU",
+      "type": "default",
+      "description": "The Infinity Portal region your tenant lives in. It must match the region you created the API key in - a key issued in one region is rejected by every other. One of: EU (Ireland), US (Virginia), GB (London), CA (Montreal), AU (Sydney), IN (Mumbai), AE (UAE)"
+    }
+  ],
+  "item": [
+    {
+      "id": "35f6fb1d-6d73-58c9-b45e-d1c37b9d130c",
+      "name": "Deployments",
+      "description": "CFWaaS managed deployments - the firewall estate the service runs on your behalf.\n\nReading a deployment is provider-agnostic, so **list**, **get** and **monitoring** live here at the top level. Creating one is not, because each provider needs a different shape, so creation sits under the provider subfolder.\n\nEvery request here captures `{{deploymentId}}` on success, so you can list once and then run the rest without copying ids.",
+      "item": [
+        {
+          "id": "cf962147-4724-50f6-b3c8-164e8246a1d9",
+          "name": "List deployments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code < 400) {",
+                  "    const body = pm.response.json();",
+                  "",
+                  "    const pick = path => path.replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean)",
+                  "        .reduce((node, key) => node === null || node === undefined ? undefined : node[key], body);",
+                  "",
+                  "    const deploymentidValue = pick('[0].id');",
+                  "    const deploymentidValueExisting = pm.collectionVariables.get('deploymentId');",
+                  "    if (deploymentidValue && !deploymentidValueExisting) {",
+                  "        pm.collectionVariables.set('deploymentId', deploymentidValue);",
+                  "        console.log('deploymentId -> ' + deploymentidValue);",
+                  "    } else if (deploymentidValue && deploymentidValueExisting !== deploymentidValue) {",
+                  "        console.log('deploymentId kept as ' + deploymentidValueExisting + ' (not overwritten). Clear it to pick this up.');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deployments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deployments"
+              ]
+            },
+            "description": "Every deployment belonging to the tenant, as full objects.\n\n`GET {{baseUrl}}/deployments`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Readonly |\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `200` | Array of deployments. Empty array when the tenant has none - not a 404. |\n\n</details>\n\nThe tenant comes from your credentials, never from a parameter, so this only ever returns your own estate.\n\nStart here: if `{{deploymentId}}` has no value yet, this sets it from the first result, which the other requests in this folder use as their default. It will **not** overwrite an id you set yourself - clear the variable if you want it repopulated. Creating a deployment does repoint it, since that is the one you just made.\n\nEach object carries a `vendor` discriminator (`aws`, `azure` or `gcp`) and its `vendorSettings` shape follows from it - an AWS deployment reports `vpcCidr` and `protectedAccountId`, an Azure one reports `customerSubscriptionIds`, `vnetAddressSpace` and `customerVnetCidrs`. Read `vendor` first, then the settings. `vendorSettings` is absent entirely for a provider that does not report one."
+          },
+          "response": []
+        },
+        {
+          "id": "913cd7fd-06c2-5725-a94c-c56ad18f508f",
+          "name": "Get deployment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deployments/{{deploymentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deployments",
+                "{{deploymentId}}"
+              ],
+              "variable": [
+                {
+                  "key": "deploymentId",
+                  "value": "{{deploymentId}}",
+                  "description": "Deployment UUID. Set for you by *List deployments*."
+                }
+              ]
+            },
+            "description": "A single deployment by id.\n\n`GET {{baseUrl}}/deployments/{{deploymentId}}`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Readonly |\n\n<details>\n<summary><b>Path parameters</b></summary>\n\n| Name | Default | Notes |\n| --- | --- | --- |\n| `deploymentId` | `{{deploymentId}}` | Deployment UUID. Set for you by *List deployments*. |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `200` | The deployment. |\n| `400` | The id is not a well-formed UUID. |\n| `404` | No such deployment for this tenant. A deployment in another tenant reads as 404, not 403. |\n\n</details>\n\nA malformed id and a missing id are deliberately different: `400` means the string is not a UUID, `404` means it is a UUID that you cannot see.\n\nSame shape as a *List deployments* element - discriminate on `vendor` before reading `vendorSettings`.\n\nTwo fields read as absent rather than false when they were never recorded: `managementSettings.enableCme` is AWS-only and absent on older deployments, and `managementSettings.managementName` is missing where the deployment does not record one. Absent means *not recorded*, not *off*. `vpcEndpointService` appears once an AWS deployment is provisioned."
+          },
+          "response": []
+        },
+        {
+          "id": "97b7dd30-bdde-5e81-a0f1-fce18e564de6",
+          "name": "List deployment gateways",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deployments/{{deploymentId}}/gateways",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deployments",
+                "{{deploymentId}}",
+                "gateways"
+              ],
+              "variable": [
+                {
+                  "key": "deploymentId",
+                  "value": "{{deploymentId}}",
+                  "description": "Deployment UUID."
+                }
+              ]
+            },
+            "description": "The deployment's gateway instances, read live from the provider.\n\n`GET {{baseUrl}}/deployments/{{deploymentId}}/gateways`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Readonly |\n\n<details>\n<summary><b>Path parameters</b></summary>\n\n| Name | Default | Notes |\n| --- | --- | --- |\n| `deploymentId` | `{{deploymentId}}` | Deployment UUID. |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `200` | Array of gateways: `id`, `name`, `description`, `publicIp`, `createdAt` (epoch ms) and `status` (`initializing`, `running` or `error`). Empty array for a provider that does not report a live gateway view. |\n| `400` | The id is not a well-formed UUID. |\n| `404` | No such deployment for this tenant. |\n\n</details>\n\nNothing here is persisted - the gateway list is fetched from the cloud provider on every call, so it reflects the estate as it is now and costs a provider round-trip. Do not poll it tightly.\n\nAn empty array is a normal answer twice over: while a deployment is still provisioning, and for a provider that does not report a live gateway view. Neither is an error, and neither is distinguishable from a genuinely empty estate."
+          },
+          "response": []
+        },
+        {
+          "id": "13b56df0-3fc8-5856-92b0-a85892ab8358",
+          "name": "Get deployment metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/deployments/{{deploymentId}}/monitoring",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "deployments",
+                "{{deploymentId}}",
+                "monitoring"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "",
+                  "description": "Window start, UTC epoch seconds. Send together with `to`, or omit both for the default last-24h window.",
+                  "disabled": true
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "description": "Window end, UTC epoch seconds. A value up to 60s ahead of server time is accepted and clamped to now, so a fast browser clock does not 400.",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "deploymentId",
+                  "value": "{{deploymentId}}",
+                  "description": "Deployment UUID."
+                }
+              ]
+            },
+            "description": "Traffic panels over a chosen window, plus window and rolling 30-day consumption totals.\n\n`GET {{baseUrl}}/deployments/{{deploymentId}}/monitoring`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Readonly |\n\n<details>\n<summary><b>Path parameters</b></summary>\n\n| Name | Default | Notes |\n| --- | --- | --- |\n| `deploymentId` | `{{deploymentId}}` | Deployment UUID. |\n\n</details>\n\n<details>\n<summary><b>Query parameters</b></summary>\n\n| Name | Default | Required | Notes |\n| --- | --- | --- | --- |\n| `from` | `` | Optional | Window start, UTC epoch seconds. Send together with `to`, or omit both for the default last-24h window. |\n| `to` | `` | Optional | Window end, UTC epoch seconds. A value up to 60s ahead of server time is accepted and clamped to now, so a fast browser clock does not 400. |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `200` | Metrics payload: `rangeSeconds`, `stepSeconds`, `series` and `consumption`. Empty body when the deployment has not reported any metrics yet - default window only. |\n| `400` | Only one of `from`/`to` was sent, either is not an integer, `from` is not earlier than `to`, `to` is in the future, or the span is outside 1h-30d. |\n| `404` | No such deployment for this tenant. |\n\n</details>\n\n**An empty body is a normal answer** for a freshly provisioned deployment - it means no series exist yet, not that the call failed.\n\n`from`/`to` are both-or-neither. Omit both and you get the default window: last 24 hours at `stepSeconds` 1200. Send both and the span must be at least 1 hour and at most 30 days.\n\nYou do not choose the resolution; the server derives it as `max(300, ceil(rangeSeconds / 72))` and echoes it as `stepSeconds`. That is 12 points an hour up to a 6-hour span, then up to 72 points per panel however wide the window. Every point is the **average over the `stepSeconds` interval ending at its timestamp**, so a short traffic spike reads lower the wider the window - it is being averaged, not lost. Label your chart with `stepSeconds`, e.g. \"20-minute averages\".\n\n`rangeSeconds` echoes the effective window, which can be up to 60s shorter than requested when a clock-skew-tolerated `to` was clamped to server time.\n\nThe two consumption pairs answer different questions: `gwWindowGb`/`lbWindowGb` follow the selected window, while `gwMonthlyGb`/`lbMonthlyGb` are always the rolling last 30 days and ignore it. `since` marks the first date the metrics store covers - the monthly figures under-count before a full 30 days exist, and `since` is absent when no recorded timestamps exist at all."
+          },
+          "response": []
+        },
+        {
+          "id": "d2d55bbe-40fc-56b5-8978-9fc12b053f9e",
+          "name": "AWS",
+          "description": "Creating a managed deployment on AWS. Reading it back is provider-agnostic - use the requests one level up.",
+          "item": [
+            {
+              "id": "a0728175-3a5c-5871-92db-54fb6f67c063",
+              "name": "Create AWS deployment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 400) {",
+                      "    const body = pm.response.json();",
+                      "",
+                      "    const pick = path => path.replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean)",
+                      "        .reduce((node, key) => node === null || node === undefined ? undefined : node[key], body);",
+                      "",
+                      "    const deploymentidValue = pick('id');",
+                      "    if (deploymentidValue) {",
+                      "        pm.collectionVariables.set('deploymentId', deploymentidValue);",
+                      "        console.log('deploymentId -> ' + deploymentidValue);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"postman-aws-demo\",\n  \"description\": \"Created from the CFWaaS Postman collection\",\n  \"throughput\": 25,\n  \"plan\": \"NGTX\",\n  \"gatewayVersion\": \"R82\",\n  \"managementSettings\": {\n    \"type\": \"self-hosted\",\n    \"managementName\": \"MGMT\",\n    \"enableCme\": true,\n    \"sicPassword\": \"<your-sic-password>\",\n    \"managementServerIps\": [\n      \"10.0.1.10\"\n    ],\n    \"logServerIps\": [\n      \"10.0.2.20\"\n    ]\n  },\n  \"vendorSettings\": {\n    \"region\": \"eu-central-1\",\n    \"protectedAccountId\": \"210987654321\",\n    \"availabilityZones\": [\n      \"euc1-az1\",\n      \"euc1-az2\"\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/deployments/aws",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "deployments",
+                    "aws"
+                  ]
+                },
+                "description": "Provisions a managed CFWaaS deployment in an AWS account.\n\n`POST {{baseUrl}}/deployments/aws`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Admin |\n| **Changes state** | Yes |\n\n<details>\n<summary><b>Request body</b></summary>\n\n| Field | Type | Required | Rules |\n| --- | --- | --- | --- |\n| `name` | string | Yes | Lowercase letters, digits and hyphens; no leading or trailing hyphen; max 63 chars |\n| `description` | string | No | Max 255 chars |\n| `throughput` | integer | Yes | Gbps, greater than 0 and at most 100 |\n| `plan` | enum | Yes | `NGFW`, `NGTP` or `NGTX` |\n| `gatewayVersion` | enum | No | `R81.20`, `R82` or `R82.10`; defaults to `R82` |\n| `managementSettings.type` | enum | Yes | `self-hosted` or `smart-1-cloud` |\n| `managementSettings.sicPassword` | string | Yes | 12-64 chars, alphanumeric only. Never stored, logged or returned |\n| `managementSettings.managementName` | string | No | SMS name CME matches on. No `:` and no leading or trailing whitespace; max 64 chars. Defaults to `MGMT` |\n| `managementSettings.enableCme` | boolean | No | Tag the gateways for CME auto-provisioning and create the CME cross-account role. Defaults to `true` |\n| `managementSettings.managementServerIps` | string[] | Yes | Required for `self-hosted`. Up to 10 plain IPv4 addresses - CIDR is rejected |\n| `managementSettings.logServerIps` | string[] | No | Up to 10 plain IPv4 addresses |\n| `vendorSettings.region` | enum | Yes | Any AWS commercial region, opt-in regions included. GovCloud and China are not supported |\n| `vendorSettings.protectedAccountId` | string | Yes | The 12-digit AWS account id of the workload account being protected |\n| `vendorSettings.availabilityZones` | string[] | No | 1-6 distinct AZ **IDs** in short-code form (`euc1-az1`), each belonging to `region`. Omit to let the service choose |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `201` | `{ id }` of the new deployment. Returned as soon as it is persisted and provisioning is triggered. |\n| `400` | Validation failed. The response names the offending field. |\n| `403` | Requires the Admin role. |\n\n</details>\n\n<details>\n<summary><b>Chained variables</b></summary>\n\n| Variable | Read from |\n| --- | --- |\n| `{{deploymentId}}` | `id` |\n\n</details>\n\nSet automatically on success, so downstream requests work without copying ids by hand.\n\n**`201` does not mean the firewall is up.** It means the record exists and provisioning has started. Poll *Get deployment* to watch it progress.\n\nThe tenant is taken from your credentials, so there is no tenant field to set - and no way to create into someone else's tenant.\n\nUnlisted fields are stripped rather than rejected, so a stray field will not fail the call but will not take effect either. Anything server-controlled, such as the VPC CIDR, is set for you.\n\n`availabilityZones` takes AZ **IDs** (`euc1-az1`), not AZ names (`eu-central-1a`) - the two look alike and map differently per account, and a name is rejected. Every id must belong to the region you asked for. Omit the field and the service selects the zones for you.\n\n`managementName` and `enableCme` drive CME auto-provisioning. Leave both alone and you get `MGMT` with CME on; set `enableCme` to `false` and the gateways are neither tagged for CME nor given the cross-account role, which makes `managementName` moot.\n\n`sicPassword` is a placeholder. Replace it in the body when you send - it is a per-deployment input, used once at creation and never again, so there is deliberately nowhere in the collection to store it.\n\nDo not **Save** the request afterwards: an unsaved body lives only in the open tab, while a saved one persists in the collection and travels with an export."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "id": "5890c353-195f-5c91-991b-9894e6053473",
+          "name": "Azure",
+          "description": "Creating a managed deployment on Azure. Reading it back is provider-agnostic - use the requests one level up.",
+          "item": [
+            {
+              "id": "c39872d7-9683-50be-860a-3745fc7bd94e",
+              "name": "Create Azure deployment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 400) {",
+                      "    const body = pm.response.json();",
+                      "",
+                      "    const pick = path => path.replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean)",
+                      "        .reduce((node, key) => node === null || node === undefined ? undefined : node[key], body);",
+                      "",
+                      "    const deploymentidValue = pick('id');",
+                      "    if (deploymentidValue) {",
+                      "        pm.collectionVariables.set('deploymentId', deploymentidValue);",
+                      "        console.log('deploymentId -> ' + deploymentidValue);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"postman-azure-demo\",\n  \"description\": \"Created from the CFWaaS Postman collection\",\n  \"throughput\": 25,\n  \"plan\": \"NGTX\",\n  \"gatewayVersion\": \"R82\",\n  \"managementSettings\": {\n    \"type\": \"self-hosted\",\n    \"managementName\": \"MGMT\",\n    \"sicPassword\": \"<your-sic-password>\",\n    \"managementServerIps\": [\n      \"10.0.1.10\"\n    ],\n    \"logServerIps\": [\n      \"10.0.2.20\"\n    ]\n  },\n  \"vendorSettings\": {\n    \"region\": \"westeurope\",\n    \"customerAzureTenantId\": \"00000000-0000-0000-0000-000000000000\",\n    \"customerSubscriptionIds\": [\n      \"11111111-1111-1111-1111-111111111111\"\n    ],\n    \"vnetAddressSpace\": \"10.20.0.0/16\",\n    \"customerVnetCidrs\": [\n      \"10.30.0.0/16\"\n    ]\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/deployments/azure",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "deployments",
+                    "azure"
+                  ]
+                },
+                "description": "Provisions a managed CFWaaS deployment in an Azure subscription.\n\n`POST {{baseUrl}}/deployments/azure`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Admin |\n| **Changes state** | Yes |\n\n<details>\n<summary><b>Request body</b></summary>\n\n| Field | Type | Required | Rules |\n| --- | --- | --- | --- |\n| `name` | string | Yes | Lowercase letters, digits and hyphens; no leading or trailing hyphen; max 63 chars |\n| `description` | string | No | Max 255 chars |\n| `throughput` | integer | Yes | Gbps, greater than 0 and at most 100 |\n| `plan` | enum | Yes | `NGFW`, `NGTP` or `NGTX` |\n| `gatewayVersion` | enum | No | `R81.20`, `R82` or `R82.10`; defaults to `R82` |\n| `managementSettings.type` | enum | Yes | `self-hosted` or `smart-1-cloud` |\n| `managementSettings.sicPassword` | string | Yes | 12-64 chars, alphanumeric only. Never stored, logged or returned |\n| `managementSettings.managementName` | string | No | SMS/CME object name on your management server. No `:`, no edge whitespace, no control characters; max 64 chars |\n| `managementSettings.managementServerIps` | string[] | Yes | Required for `self-hosted`. Up to 10 plain IPv4 addresses - CIDR is rejected |\n| `managementSettings.logServerIps` | string[] | No | Up to 10 plain IPv4 addresses |\n| `vendorSettings.region` | enum | Yes | An Azure region CFWaaS supports, e.g. `westeurope`, `eastus`, `australiaeast`. Sovereign clouds are not supported |\n| `vendorSettings.customerSubscriptionIds` | string[] | Yes | 1-20 distinct subscription UUIDs protected by this deployment |\n| `vendorSettings.customerAzureTenantId` | string | No | Customer Entra ID (Azure AD) tenant UUID. Omit and the app-registration step is skipped |\n| `vendorSettings.vnetAddressSpace` | string | Yes | IPv4 CIDR for the security VNet; prefix `/8` to `/24`, network address only |\n| `vendorSettings.customerVnetCidrs` | string[] | No | Up to 20 distinct IPv4 CIDRs allowed through the deployment's NSGs; prefix `/8` to `/32`, network address only |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `201` | `{ id }` of the new deployment. Returned as soon as it is persisted and provisioning is triggered. |\n| `400` | Validation failed. A CIDR that is not a network address, a wildcard route, or a duplicate subscription id are the usual causes. |\n| `403` | Requires the Admin role. |\n\n</details>\n\n<details>\n<summary><b>Chained variables</b></summary>\n\n| Variable | Read from |\n| --- | --- |\n| `{{deploymentId}}` | `id` |\n\n</details>\n\nSet automatically on success, so downstream requests work without copying ids by hand.\n\n**`201` does not mean the firewall is up.** It means the record exists and provisioning has started. Poll *Get deployment* to watch it progress.\n\nAzure sits between the other two providers in shape: it takes `throughput`, `plan` and `gatewayVersion` like AWS, but describes its network with explicit CIDRs rather than picking zones. Gateway sizing (`vmSize`, `vmCount`) and the subnet CIDRs are server-controlled and stripped if you send them.\n\nEvery CIDR must be the **network address** for its prefix - `10.20.0.0/16` is accepted, `10.20.1.0/16` is not, because a CIDR with host bits set is rejected. A prefix wider than `/8` is refused whatever the address, so `0.0.0.0/0` and `10.0.0.0/0` are both out. `vnetAddressSpace` is additionally capped at `/24`, so the security VNet is never smaller than a /24.\n\n`customerAzureTenantId` is optional and changes what runs: supply it and the deployment creates an app registration in that Entra ID tenant; omit it and that step is skipped entirely. The placeholder UUIDs in the body are not real - replace both it and `customerSubscriptionIds` with yours.\n\n`sicPassword` is a placeholder too. It is a per-deployment input, used once at creation and never again, so there is deliberately nowhere in the collection to store it. Replace it in the body when you send, and do not **Save** the request afterwards."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "id": "e40dbc5e-bd6a-5182-acfd-a2b929b7cb32",
+          "name": "GCP",
+          "description": "Creating a managed deployment on GCP, and the GCP-specific wiring read. The provider-agnostic reads are one level up.",
+          "item": [
+            {
+              "id": "3e877f85-a31b-5af1-b006-5af76f692d0a",
+              "name": "Create GCP deployment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code < 400) {",
+                      "    const body = pm.response.json();",
+                      "",
+                      "    const pick = path => path.replace(/\\[(\\d+)\\]/g, '.$1').split('.').filter(Boolean)",
+                      "        .reduce((node, key) => node === null || node === undefined ? undefined : node[key], body);",
+                      "",
+                      "    const deploymentidValue = pick('id');",
+                      "    if (deploymentidValue) {",
+                      "        pm.collectionVariables.set('deploymentId', deploymentidValue);",
+                      "        console.log('deploymentId -> ' + deploymentidValue);",
+                      "    }",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"postman-gcp-demo\",\n  \"description\": \"Created from the CFWaaS Postman collection\",\n  \"managementSettings\": {\n    \"managementName\": \"my-sms\",\n    \"managementSourceCidrs\": \"10.0.0.0/8,192.168.10.0/24\",\n    \"sicKey\": \"<your-sic-key>\"\n  },\n  \"vendorSettings\": {\n    \"serviceAccountEmail\": \"<name>@<project>.iam.gserviceaccount.com\",\n    \"region\": \"europe-west1\",\n    \"machineType\": \"n2-standard-4\",\n    \"osVersion\": \"R82\",\n    \"ipStackType\": \"IPV4_ONLY\",\n    \"instancesMinGroupSize\": 2,\n    \"instancesMaxGroupSize\": 10,\n    \"cpuUsage\": 60,\n    \"diskType\": \"SSD Persistent Disk\",\n    \"diskSize\": 200\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/deployments/gcp",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "deployments",
+                    "gcp"
+                  ]
+                },
+                "description": "Provisions a managed CFWaaS deployment in a GCP project.\n\n`POST {{baseUrl}}/deployments/gcp`\n\n|  |  |\n| --- | --- |\n| **API version** | `v1` and later |\n| **Auth** | Infinity Portal user session or Infinity Portal user API key |\n| **Role** | Admin |\n| **Changes state** | Yes |\n\n<details>\n<summary><b>Request body</b></summary>\n\n| Field | Type | Required | Rules |\n| --- | --- | --- | --- |\n| `name` | string | Yes | Lowercase letters, digits and hyphens; no leading or trailing hyphen; max 63 chars |\n| `description` | string | No | Max 255 chars |\n| `managementSettings.managementName` | string | Yes | SMS name on your external management server |\n| `managementSettings.managementSourceCidrs` | string | Yes | Comma-separated IPv4 CIDRs. `0.0.0.0/0` and `::/0` are rejected |\n| `managementSettings.sicKey` | string | Yes | 8-30 chars, alphanumeric only. Never stored, logged or returned |\n| `vendorSettings.serviceAccountEmail` | string | Yes | The service account the gateway MIG runs as, for NSI interception. `name@project.iam.gserviceaccount.com`; each part 6-30 chars, lowercase letters, digits and hyphens, starting with a letter and not ending with a hyphen |\n| `vendorSettings.region` | enum | Yes | A supported GCP region, e.g. `europe-west1`, `us-central1`, `asia-southeast1` |\n| `vendorSettings.machineType` | string | No | Defaults to `n2-standard-4` |\n| `vendorSettings.osVersion` | enum | No | `R8120`, `R82` or `R8210`; defaults to `R82` |\n| `vendorSettings.ipStackType` | enum | No | `IPV4_ONLY` or `IPV4_IPV6`; defaults to `IPV4_ONLY` |\n| `vendorSettings.instancesMinGroupSize` | integer | No | At least 1; defaults to 2 |\n| `vendorSettings.instancesMaxGroupSize` | integer | No | At least the minimum; defaults to 10 |\n| `vendorSettings.cpuUsage` | integer | No | Target CPU utilisation the autoscaler holds, 10-90; defaults to 60 |\n| `vendorSettings.diskType` | enum | No | `SSD Persistent Disk` or `Standard Persistent Disk` |\n| `vendorSettings.diskSize` | integer | No | GB, positive; defaults to 200 |\n\n</details>\n\n<details>\n<summary><b>Responses</b></summary>\n\n| Status | Meaning |\n| --- | --- |\n| `201` | `{ id }` of the new deployment, once persisted and provisioning is triggered. |\n| `400` | Validation failed. `managementSourceCidrs` and `serviceAccountEmail` are the usual culprits - the first must be CIDRs, comma-separated, and not a default route; the second must match `name@project.iam.gserviceaccount.com`. |\n| `403` | Requires the Admin role. |\n\n</details>\n\n<details>\n<summary><b>Chained variables</b></summary>\n\n| Variable | Read from |\n| --- | --- |\n| `{{deploymentId}}` | `id` |\n\n</details>\n\nSet automatically on success, so downstream requests work without copying ids by hand.\n\n**`201` does not mean the firewall is up.** It means the record exists and provisioning has started. Poll *Get deployment* to watch it progress.\n\nNote the shape difference from AWS: GCP takes no `throughput` or `plan`, and sizes the estate through the autoscaler fields instead.\n\n`serviceAccountEmail` is the service account the gateway MIG runs as, and it must already exist in the target project - the API validates the format, not that the account is there. Replace the placeholder with a real one.\n\n`sicKey` is a placeholder too - replace it in the body when you send. It is a per-deployment input, so there is deliberately nowhere in the collection to store it. Do not **Save** the request afterwards."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
