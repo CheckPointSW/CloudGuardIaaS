@@ -1,12 +1,3 @@
-> ## ⚠️ This location is deprecated
->
-> Postman collections now live in the repository's top-level [`postman/`](../../postman/)
-> directory. Use
-> **[`../../postman/cme_api_postman/CME_API.postman_collection`](../../postman/cme_api_postman/CME_API.postman_collection)**.
->
-> The copy here is kept only so existing regression jobs that reference this path keep working.
-> It will not be updated - new versions of the collection land at the new path only.
-
 # CME API Postman
 Postman is a popular API client that makes it easy for developers to create, share, test and document APIs.
 </br>Postman can import and export Postman data, including collections, environments, data dumps, and globals.

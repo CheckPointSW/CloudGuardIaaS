@@ -1,12 +1,3 @@
-> ## ⚠️ This location is deprecated
->
-> Postman collections now live in the repository's top-level [`postman/`](../../postman/)
-> directory. Use
-> **[`../../postman/vwan_postman/vwan.postman_collection.json`](../../postman/vwan_postman/vwan.postman_collection.json)**.
->
-> The copy here is kept only so existing regression jobs that reference this path keep working.
-> It will not be updated - new versions of the collection land at the new path only.
-
 # Postman Collection for Azure Virtual Network Management
 
 This Postman collection provides a set of APIs for managing Azure Virtual Network resources. The collection includes the following categories:
