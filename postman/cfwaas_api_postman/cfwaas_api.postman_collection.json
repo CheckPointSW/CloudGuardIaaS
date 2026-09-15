@@ -1,10 +1,10 @@
 {
   "info": {
     "_postman_id": "bd54afea-79cb-5d86-91cf-8e42d34d61a9",
-    "name": "Cloud Firewall as a Service API (v1.5.3)",
-    "description": "Check Point **Cloud Firewall as a Service** (CFWaaS), as a self-contained Postman collection. List your managed firewall deployments, read their gateways and traffic metrics, and create new ones on AWS, Azure or GCP.\n\n## Setup\n\n1. In the Infinity Portal, go to **Global Settings → API Keys** and create a **User** API key. Note the Client ID and the Secret Key - the secret is shown once.\n2. In Postman, open the **Vault** (bottom-left) and add two entries:\n   - `cfwaas-client-id` - your Client ID\n   - `cfwaas-access-key` - your Secret Key\n3. Open the **Variables** tab of this collection and set `region` to the region your tenant is in. It must be the same region you created the key in.\n4. Send any request.\n\nNothing else needs configuring. The collection signs in, mints the token the API expects, caches it until it expires, and builds every URL for you.\n\n## About the credentials\n\n### API key\n\nYour API key is read from the Postman Vault, which stays on your own machine and is never synced or exported. There is deliberately no collection variable to paste it into, so an exported copy of this collection can never carry it.\n\n### SIC key\n\nThe SIC key in the deployment-creation requests is a placeholder. Type your own value into the request body just before you send it, and treat it as one-time input rather than something the collection stores for you.\n\nTwo things to do, in this order:\n\n1. **Do not click Save** on the request after typing the key in. Saving writes the key into the collection itself, and it then travels with every export and share.\n2. **Close the request tab** once the deployment is created. An unsaved body lives only in the open tab, so closing it is what actually clears the key.\n\n## Reading the docs\n\nEvery request carries its own documentation: the roles it needs, the fields it accepts, and what each response status means. Open the request and expand the documentation pane on the right.",
+    "name": "Cloud Firewall as a Service API (v1.5.4)",
+    "description": "Check Point **Cloud Firewall as a Service** (CFWaaS), as a self-contained Postman collection. List your managed firewall deployments, read their gateways and traffic metrics, and create new ones on AWS, Azure or GCP.\n\n## Setup\n\n1. In the Infinity Portal, go to **Global Settings → API Keys** and create a **User** API key. Note the Client ID and the Secret Key - the secret is shown once.\n2. In Postman, open the **Vault** (bottom-left) and add two entries:\n   - `cfwaas-client-id` - your Client ID\n   - `cfwaas-access-key` - your Secret Key\n3. Open the **Variables** tab of this collection and set `region` to the region your tenant is in. Cloud Firewall as a Service is available in EU (Ireland), US (Virginia) only, and the value is case-sensitive. It must be the same region you created the key in.\n4. Send any request.\n\nNothing else needs configuring. The collection signs in, mints the token the API expects, caches it until it expires, and builds every URL for you.\n\n## About the credentials\n\n### API key\n\nYour API key is read from the Postman Vault, which stays on your own machine and is never synced or exported. There is deliberately no collection variable to paste it into, so an exported copy of this collection can never carry it.\n\n### SIC key\n\nThe SIC key in the deployment-creation requests is a placeholder. Type your own value into the request body just before you send it, and treat it as one-time input rather than something the collection stores for you.\n\nTwo things to do, in this order:\n\n1. **Do not click Save** on the request after typing the key in. Saving writes the key into the collection itself, and it then travels with every export and share.\n2. **Close the request tab** once the deployment is created. An unsaved body lives only in the open tab, so closing it is what actually clears the key.\n\n## Reading the docs\n\nEvery request carries its own documentation: the roles it needs, the fields it accepts, and what each response status means. Open the request and expand the documentation pane on the right.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.5.3"
+    "version": "1.5.4"
   },
   "auth": {
     "type": "bearer",
@@ -22,15 +22,17 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "const TARGETS = {\"basePath\":\"/app/cloud-firewall/prod/api/v1\",\"appId\":\"db15a3a9-afcf-4d7f-9ab6-77f7ffb9019e\",\"regions\":{\"EU\":{\"apiUrl\":\"https://cloudinfra-gw.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"},\"US\":{\"apiUrl\":\"https://cloudinfra-gw-us.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"},\"GB\":{\"apiUrl\":\"https://cloudinfra-gw.uk.portal.checkpoint.com\",\"portalUrl\":\"https://uk.portal.checkpoint.com/\"},\"CA\":{\"apiUrl\":\"https://cloudinfra-gw.ca.portal.checkpoint.com\",\"portalUrl\":\"https://ca.portal.checkpoint.com/\"},\"AU\":{\"apiUrl\":\"https://cloudinfra-gw.ap.portal.checkpoint.com\",\"portalUrl\":\"https://ap.portal.checkpoint.com/\"},\"IN\":{\"apiUrl\":\"https://cloudinfra-gw.in.portal.checkpoint.com\",\"portalUrl\":\"https://in.portal.checkpoint.com/\"},\"AE\":{\"apiUrl\":\"https://cloudinfra-gw.ae.portal.checkpoint.com\",\"portalUrl\":\"https://ae.portal.checkpoint.com/\"}}};",
+          "const TARGETS = {\"basePath\":\"/app/cloud-firewall/prod/api/v1\",\"appId\":\"db15a3a9-afcf-4d7f-9ab6-77f7ffb9019e\",\"regions\":{\"EU\":{\"apiUrl\":\"https://cloudinfra-gw.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"},\"US\":{\"apiUrl\":\"https://cloudinfra-gw-us.portal.checkpoint.com\",\"portalUrl\":\"https://portal.checkpoint.com/\"}}};",
           "",
           "const regionId = String(pm.variables.get('region') ?? '').trim();",
           "const region = TARGETS.regions[regionId];",
           "",
           "if (!region) {",
+          "    const supported = Object.keys(TARGETS.regions).join(', ');",
+          "",
           "    throw new Error(",
-          "        `Unknown region \"${regionId}\". Open the collection's Variables tab and set region to one of: ` +",
-          "        Object.keys(TARGETS.regions).join(', ')",
+          "        `Region \"${regionId}\" is not supported. Cloud Firewall as a Service is available in ${supported}. ` +",
+          "        `Open the collection's Variables tab and set region to one of those - the value is case-sensitive.`",
           "    );",
           "}",
           "",
@@ -220,7 +222,7 @@
       "key": "region",
       "value": "EU",
       "type": "default",
-      "description": "The Infinity Portal region your tenant lives in. It must match the region you created the API key in - a key issued in one region is rejected by every other. One of: EU (Ireland), US (Virginia), GB (London), CA (Montreal), AU (Sydney), IN (Mumbai), AE (UAE)"
+      "description": "The Infinity Portal region your tenant lives in. Cloud Firewall as a Service runs in these regions only, and the value is case-sensitive: EU (Ireland), US (Virginia). It must also match the region you created the API key in - a key issued in one region is rejected by every other."
     }
   ],
   "item": [
