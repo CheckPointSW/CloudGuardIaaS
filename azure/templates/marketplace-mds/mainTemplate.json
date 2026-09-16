@@ -19,7 +19,9 @@
         "R82 - Bring Your Own License",
         "R82 - Pay As You Go (MDS25)",
         "R82.10 - Bring Your Own License",
-        "R82.10 - Pay As You Go (MDS25)"
+        "R82.10 - Pay As You Go (MDS25)",
+        "R82.20 - Bring Your Own License",
+        "R82.20 - Pay As You Go (MDS25)"
       ],
       "defaultValue": "R82 - Bring Your Own License",
       "metadata": {
@@ -335,7 +337,9 @@
       "R82 - Bring Your Own License": "BYOL",
       "R82 - Pay As You Go (MDS25)": "MDS25",
       "R82.10 - Bring Your Own License": "BYOL",
-      "R82.10 - Pay As You Go (MDS25)": "MDS25"
+      "R82.10 - Pay As You Go (MDS25)": "MDS25",
+      "R82.20 - Bring Your Own License": "BYOL",
+      "R82.20 - Pay As You Go (MDS25)": "MDS25"
     },
     "offer": "[variables('offers')[parameters('cloudGuardVersion')]]",
     "osVersions": {
@@ -346,7 +350,9 @@
       "R82 - Bring Your Own License": "R82",
       "R82 - Pay As You Go (MDS25)": "R82",
       "R82.10 - Bring Your Own License": "R8210",
-      "R82.10 - Pay As You Go (MDS25)": "R8210"
+      "R82.10 - Pay As You Go (MDS25)": "R8210",
+      "R82.20 - Bring Your Own License": "R8220",
+      "R82.20 - Pay As You Go (MDS25)": "R8220"
     },
     "osVersion": "[variables('osVersions')[parameters('cloudGuardVersion')]]",
     "blinkVersionSupported": "[not(equals(variables('osVersion'), 'R8110'))]",
