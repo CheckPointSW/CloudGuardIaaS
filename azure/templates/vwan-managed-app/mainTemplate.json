@@ -37,7 +37,8 @@
                 "R8110",
                 "R8120",
                 "R82",
-                "R8210"
+                "R8210",
+                "R8220"
             ],
             "type": "String",
             "metadata": {
@@ -207,9 +208,9 @@
         },
         "planVersion": {
             "type": "string",
-            "defaultValue": "1.0.29",
+            "defaultValue": "1.0.30",
             "metadata": {
-                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.29) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
+                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.30) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
             }
         }
     },
