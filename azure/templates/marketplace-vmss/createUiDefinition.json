@@ -1340,6 +1340,35 @@
             }
           },
           {
+            "name": "orchestrationMode",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "VMSS orchestration mode",
+            "defaultValue": "Uniform",
+            "toolTip": "Orchestration mode for the scale set. Uniform manages the instances as one identical group; Flexible manages them as individual standard VMs, allowing per-instance control and explicit fault-domain/zone placement. The mode is set at creation and cannot be changed after deployment. See https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-orchestration-modes.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "Uniform", "value": "Uniform" },
+                { "label": "Flexible", "value": "Flexible" }
+              ]
+            }
+          },
+          {
+            "name": "platformFaultDomainCount",
+            "type": "Microsoft.Common.DropDown",
+            "label": "Fault domain count",
+            "defaultValue": "1",
+            "toolTip": "Number of fault domains for the Flexible scale set. Not available when availability zones are selected, zonal Flexible deployments are locked to a fault domain count of 1. See https://learn.microsoft.com/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-manage-fault-domains.",
+            "constraints": {
+              "allowedValues": [
+                { "label": "1", "value": "1" },
+                { "label": "2", "value": "2" },
+                { "label": "3", "value": "3" }
+              ],
+              "required": false
+            },
+            "visible": "[and(equals(steps('chkp-advanced').orchestrationMode, 'Flexible'), not(equals(basics('availabilityZonesChoice'), 'Yes')))]"
+          },
+          {
             "name": "adminEmail",
             "type": "Microsoft.Common.TextBox",
             "label": "Administrator email address",
@@ -2296,7 +2325,9 @@
       "SerialConsolePasswordHash": "[steps('chkp-advanced').AdditionalPassword]",
       "MaintenanceModePasswordHash": "[steps('chkp-advanced').MaintenanceModePassword]",
       "availabilityZones": "[if(equals(basics('availabilityZonesChoice'), 'Yes'), if(greater(length(coalesce(basics('zonesDropdown'), parse('[]'))), 0), basics('zonesDropdown'), parse('[\"1\", \"2\", \"3\"]')), parse('[]'))]",
-      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]"
+      "availabilityZonesChoice": "[basics('availabilityZonesChoice')]",
+      "orchestrationMode": "[steps('chkp-advanced').orchestrationMode]",
+      "platformFaultDomainCount": "[int(coalesce(steps('chkp-advanced').platformFaultDomainCount, '1'))]"
     }
   }
 }
