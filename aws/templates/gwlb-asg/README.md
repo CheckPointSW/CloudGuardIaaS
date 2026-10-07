@@ -78,6 +78,35 @@
 <br/>
 <br/>
 
+## Dual-arm lifecycle Lambda code
+
+The two-arm (dual-arm) deployments create a small bootstrap Lambda that attaches the second ENI and its Elastic IP
+on every scale-out, and releases them on every scale-in. The bootstrap does not carry the logic itself: on each
+invocation it downloads [dual_arm_lifecycle_handler.py](dual_arm_lifecycle_handler.py) from a Check Point S3 bucket
+and runs it. That is what lets a handler fix reach new deployments without a template or module release. The copy in
+this directory is the same file that is published to that bucket.
+
+You can host the handler in your own bucket instead. Do this when your account blocks S3 access outside the
+deployment region, or when you want to decide yourself when the code changes:
+
+1. Copy `dual_arm_lifecycle_handler.py` to a bucket in the region you deploy into.
+2. Optionally enable versioning on that bucket. With versioning, the Lambda pins the version it reads on its first
+   run and keeps using it. Without versioning, it reads the current object on every run.
+3. Point the deployment at your copy:
+   - CloudFormation: set the **Lambda code S3 bucket** and **Lambda code S3 key** parameters.
+   - Terraform: set `lambda_code_s3_bucket` and `lambda_code_s3_key`.
+
+Leave both empty to keep the default, the Check Point bucket.
+
+Permissions. The deployment grants the Lambda role `s3:GetObject` and `s3:GetObjectVersion` on exactly the one object
+you point it at, and nothing wider. Both actions are needed: once a version is pinned the Lambda reads that specific
+version, which is a `GetObjectVersion` call. A private bucket in your own account needs nothing beyond that. Two cases
+do need more:
+
+- The bucket encrypts objects with a customer managed KMS key. The Lambda role also needs `kms:Decrypt`, and the key
+  policy has to allow that role.
+- The bucket lives in another account. Add a bucket policy granting the Lambda role both S3 actions on the object.
+
 ## Revision History
 In order to check the template version, please refer to [sk125252](https://support.checkpoint.com/results/sk/sk125252#ToggleR8120gateway)
 
