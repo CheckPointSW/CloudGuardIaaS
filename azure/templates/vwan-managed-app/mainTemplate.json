@@ -16,8 +16,8 @@
             "defaultValue": "Security Enforcement (NGTP)",
             "allowedValues": [
                 "Security Enforcement (NGTP)",
-                "Full Package (NGTX and Smart1-Cloud)",
-                "Full Package Premium (NGTX and Smart1-Cloud Premium)"
+                "Full Package (NGTX and Smart-1 Cloud)",
+                "Full Package Premium (NGTX and Smart-1 Cloud Premium)"
             ],
             "type": "String",
             "metadata": {
@@ -208,9 +208,9 @@
         },
         "planVersion": {
             "type": "string",
-            "defaultValue": "1.0.30",
+            "defaultValue": "1.0.31",
             "metadata": {
-                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.30) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
+                "description": "Always deploy the latest available version of the managed application (e.g., 1.0.31) to ensure optimal performance and compatibility. For a complete list of available versions, refer to: https://support.checkpoint.com/results/sk/sk132192"
             }
         }
     },
