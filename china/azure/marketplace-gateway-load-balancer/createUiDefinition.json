@@ -66,7 +66,8 @@
             "visible": "true",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_Azure_VMSS_GWLB/Content/Topics-Azure-VMSS-GWLB/Introduction.htm' target='_blank'>CloudGuard Network for Azure administration guide</a> for detailed deployment and configuration steps "
+              "text": "See CloudGuard Network for Azure administration guide for detailed deployment and configuration steps.",
+              "uri": "https://sc1.checkpoint.com/documents/IaaS/WebAdminGuides/EN/CP_Azure_VMSS_GWLB/Content/Topics-Azure-VMSS-GWLB/Introduction.htm"
             }
           },
           {
@@ -317,6 +318,42 @@
             "count": "[steps('chkp-advanced').vmCount]"
           },
           {
+            "name": "hyperVGeneration",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Hyper-V generation",
+            "defaultValue": "V1",
+            "toolTip": "The Hyper-V generation of the virtual machine. Select V2 for a Generation 2 VM (supported on R82.10 and above) or V1 for Generation 1.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "V1",
+                  "value": "V1"
+                },
+                {
+                  "label": "V2",
+                  "value": "V2"
+                }
+              ]
+            },
+            "visible": "[not(or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82')))]"
+          },
+          {
+            "name": "hyperVGenerationLocked",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Hyper-V generation",
+            "defaultValue": "V1",
+            "toolTip": "The Hyper-V generation of the virtual machine. Generation 2 (V2) is available only on R82.10 and above; this version supports Generation 1 (V1) only.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "V1",
+                  "value": "V1"
+                }
+              ]
+            },
+            "visible": "[or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82'))]"
+          },
+          {
             "name": "sicKeyUi",
             "type": "Microsoft.Common.PasswordBox",
             "label": {
@@ -326,8 +363,8 @@
             "toolTip": "Set the Secure Internal Communication one time secret used to set up trust between the gateway and the management server.",
             "constraints": {
               "required": true,
-              "regex": "^[a-z0-9A-Z]{12,30}$",
-              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 12-30 characters long."
+              "regex": "^[a-z0-9A-Z]{8,30}$",
+              "validationMessage": "Only alphanumeric characters are allowed, and the value must be 8-30 characters long."
             },
             "options": {
               "hideConfirmation": false
@@ -746,18 +783,18 @@
             "name": "VMDiskType",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
-            "toolTip": "Type of CloudGuard disk.",
+            "toolTip": "The type of the OS managed disk. Premium SSD requires a VM size that supports premium storage.",
             "visible": "[not(contains('R81.10' , steps('autoprovision').cloudGuardVersion))]",
-            "defaultValue": "Premium",
+            "defaultValue": "Standard SSD",
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "Standard",
-                  "value": "Standard_LRS"
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
                 },
                 {
-                  "label": "Premium",
-                  "value": "Premium_LRS"
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
                 }
               ]
             }
@@ -766,18 +803,18 @@
             "name": "VMDiskTypeOldVersions",
             "type": "Microsoft.Common.OptionsGroup",
             "label": "VM disk type",
-            "toolTip": "Type of CloudGuard disk.",
+            "toolTip": "The type of the OS managed disk. Premium SSD requires a VM size that supports premium storage.",
             "visible": "[contains('R81.10' , steps('autoprovision').cloudGuardVersion)]",
-            "defaultValue": "Standard",
+            "defaultValue": "Standard SSD",
             "constraints": {
               "allowedValues": [
                 {
-                  "label": "Standard",
-                  "value": "Standard_LRS"
+                  "label": "Premium SSD",
+                  "value": "Premium_LRS"
                 },
                 {
-                  "label": "Premium",
-                  "value": "Premium_LRS"
+                  "label": "Standard SSD",
+                  "value": "StandardSSD_LRS"
                 }
               ]
             }
@@ -788,18 +825,19 @@
             "visible": "[not(contains('R81.10 R81.20', steps('autoprovision').cloudGuardVersion))]",
             "options": {
               "icon": "Info",
-              "text": "See <a href='https://support.checkpoint.com/results/sk/sk156552' target='_blank'>Adding disk space in CloudGuard</a> for instructions on adding additional disk space "
+              "text": "See Adding disk space in CloudGuard for instructions on adding additional disk space.",
+              "uri": "https://support.checkpoint.com/results/sk/sk156552"
             }
           },
           {
-            "name": "additionalDiskSizeGB",
+            "name": "diskSizeGB",
             "type": "Microsoft.Common.TextBox",
-            "label": "Additional disk space (GB)",
-            "defaultValue": "0",
-            "toolTip": "Additional disk space (in GB), initial disk size is 200 GB.",
+            "label": "OS disk size (GB)",
+            "defaultValue": "200",
+            "toolTip": "OS disk size (in GB). Must be between 100 and 3995. Not relevant for R81.10 and R81.20.",
             "constraints": {
-              "regex": "^([0-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|399[0-5])$",
-              "validationMessage": "Select a number between 0 and 3995"
+              "regex": "^([1-9][0-9][0-9]|[1-2][0-9][0-9][0-9]|3[0-8][0-9][0-9]|39[0-8][0-9]|399[0-5])$",
+              "validationMessage": "Select a number between 100 and 3995"
             },
             "visible": "[not(contains('R81.10 R81.20', steps('autoprovision').cloudGuardVersion))]"
           },
@@ -1004,7 +1042,8 @@
             "visible": "[equals(steps('network').storageAccountDeployMode, 'Existing')]",
             "options": {
               "icon": "Info",
-              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Serial Console Security</a>."
+              "text": "The Storage Account must allow network access from the Serial Console feature, for more information - Serial Console Security.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           },
           {
@@ -1022,7 +1061,8 @@
             "visible": "[equals(steps('network').storageAccountDeployMode, 'None')]",
             "options": {
               "icon": "Warning",
-              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - <a href='https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef' target='_blank'>Azure Serial Console</a>."
+              "text": "Please note that deploying without a Storage Account will not allow you to use the Serial Console feature. For more information - Azure Serial Console.",
+              "uri": "https://learn.microsoft.com/en-us/troubleshoot/azure/virtual-machines/linux/serial-console-linux?WT.mc_id=Portal-Microsoft_Azure_CreateUIDef"
             }
           }
         ]
@@ -1082,9 +1122,10 @@
       "sicKey": "[steps('autoprovision').sicKeyUi]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",
       "allowDownloadFromUploadToCheckPoint": "[coalesce(steps('chkp-advanced').allowUploadDownload, 'true')]",
-      "additionalDiskSizeGB": "[int(steps('chkp-advanced').additionalDiskSizeGB)]",
+      "diskSizeGB": "[int(steps('chkp-advanced').diskSizeGB)]",
       "diskType": "[if(contains('R81.10' , steps('autoprovision').cloudGuardVersion) , steps('chkp-advanced').VMDiskTypeOldVersions , steps('chkp-advanced').VMDiskType)]",
       "sourceImageVhdUri": "[coalesce(steps('chkp-advanced').sourceImageVhdUri, 'noCustomUri')]",
+      "hyperVGeneration": "[if(not(or(equals(steps('autoprovision').cloudGuardVersion, 'R81.10'), equals(steps('autoprovision').cloudGuardVersion, 'R81.20'), equals(steps('autoprovision').cloudGuardVersion, 'R82'))), coalesce(steps('autoprovision').hyperVGeneration, 'V1'), coalesce(steps('autoprovision').hyperVGenerationLocked, 'V1'))]",
       "virtualNetworkName": "[steps('network').virtualNetwork.name]",
       "virtualNetworkAddressPrefix": "[steps('network').virtualNetwork.addressPrefix]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
