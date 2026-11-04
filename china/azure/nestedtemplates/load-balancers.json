@@ -240,11 +240,11 @@
       "type": "string"
     },
     "ilbBEAddressPoolProperties": {
-      "value": "[variables('ilbBEAddressPoolProperties')]",
+      "value": "[if(parameters('upgrading'), createArray(createObject('id', concat(parameters('ilbResourceId'), '/backendAddressPools/', parameters('ilbTargetBEAddressPoolName')))), variables('ilbBEAddressPoolProperties'))]",
       "type": "array"
     },
     "elbBEAddressPoolProperties": {
-      "value": "[variables('elbBEAddressPoolProperties')]",
+      "value": "[if(parameters('upgrading'), createArray(createObject('id', concat(parameters('elbResourceId'), '/backendAddressPools/', parameters('elbTargetBEAddressPoolName')))), variables('elbBEAddressPoolProperties'))]",
       "type": "array"
     },
     "ApplicationAddress": {
