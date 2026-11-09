@@ -11,7 +11,7 @@
 # For additional information please refer to CloudGuard Network Central License Tool Administration Guide.
 
 
-# Licenses_Collector - version 8
+# Licenses_Collector - version 9
 
 usage()
 {
@@ -141,6 +141,14 @@ psql_client cpm postgres -c "select * from vseclicense_data;" >> $TMPPATH/vsecLi
 log_msg "  Collecting filtered vseclicense_data DB into $TMPPATH"
 write_cmd_header 'psql_client cpm postgres -c "select * from vseclicense_data where not deleted and dlesession=0;"' $TMPPATH/vsecLicenseData_filtered.txt
 psql_client cpm postgres -c "select * from vseclicense_data where not deleted and dlesession=0;" >> $TMPPATH/vsecLicenseData_filtered.txt
+
+log_msg "  Collecting contracts_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from contracts_data;"' $TMPPATH/contractsData.txt
+psql_client cpm postgres -c "select * from contracts_data;" >> $TMPPATH/contractsData.txt
+
+log_msg "  Collecting filtered contracts_data DB into $TMPPATH"
+write_cmd_header 'psql_client cpm postgres -c "select * from contracts_data where not deleted and dlesession=0;"' $TMPPATH/contractsData_filtered.txt
+psql_client cpm postgres -c "select * from contracts_data where not deleted and dlesession=0;" >> $TMPPATH/contractsData_filtered.txt
 
 log_msg "  Collecting number of unattached licenses into $TMPPATH (Should be empty)"
 write_cmd_header "psql_client cpm postgres -c \"select domb.name, dod.domainid, count(1) from domainbase_data as domb join dleobjectderef_data as dod on dod.domainid=domb.objid where (dod.fwset ilike '%not-installed%' or (dod.fwset ilike '%(installed)%' and dod.fwset ilike '%network_object ()%')) and dod.cpmitype='license' and not dod.deleted and dod.dlesession=0 group by domb.name, dod.domainid order by count(1) desc;\"" $TMPPATH/number_of_unattached_licenses.txt
