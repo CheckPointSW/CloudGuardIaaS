@@ -1885,6 +1885,36 @@
         "bladeTitle": "Network settings",
         "elements": [
           {
+            "name": "deployAdditionalNic",
+            "type": "Microsoft.Common.OptionsGroup",
+            "label": "Deploy an additional NIC",
+            "defaultValue": "no",
+            "toolTip": "Adds a third NIC (eth2) on each cluster member, in its own subnet with its own cluster VIP.",
+            "constraints": {
+              "allowedValues": [
+                {
+                  "label": "No",
+                  "value": "no"
+                },
+                {
+                  "label": "Yes",
+                  "value": "yes"
+                }
+              ],
+              "required": true
+            },
+            "visible": true
+          },
+          {
+            "name": "additionalNicInfoBox",
+            "type": "Microsoft.Common.InfoBox",
+            "visible": "[equals(steps('network').deployAdditionalNic, 'yes')]",
+            "options": {
+              "icon": "Warning",
+              "text": "An additional NIC (eth2) will be added to each cluster member. The selected VM size must support at least 3 NICs - Azure allows only 2 on 2- and 4-vCPU sizes such as Standard_D4ds_v5. Use an 8-vCPU size (for example Standard_D8ds_v5) or larger, otherwise the deployment will fail."
+            }
+          },
+          {
             "name": "virtualNetwork",
             "type": "Microsoft.Network.VirtualNetworkCombo",
             "label": {
@@ -1929,6 +1959,19 @@
                   "minAddressCount": 2,
                   "requireContiguousAddresses": true
                 }
+              },
+              "additionalSubnet": {
+                "label": "Additional subnet",
+                "defaultValue": {
+                  "name": "Additional",
+                  "addressPrefixSize": "/24"
+                },
+                "constraints": {
+                  "minAddressPrefixSize": "/29",
+                  "minAddressCount": 3,
+                  "requireContiguousAddresses": true
+                },
+                "visible": "[equals(steps('network').deployAdditionalNic, 'yes')]"
               }
             }
           },
@@ -2323,6 +2366,10 @@
       "subnet2Name": "[steps('network').virtualNetwork.subnets.subnet2.name]",
       "subnet2Prefix": "[steps('network').virtualNetwork.subnets.subnet2.addressPrefix]",
       "subnet2StartAddress": "[steps('network').virtualNetwork.subnets.subnet2.startAddress]",
+      "deployAdditionalNic": "[steps('network').deployAdditionalNic]",
+      "additionalSubnetName": "[if(equals(steps('network').deployAdditionalNic, 'yes'), steps('network').virtualNetwork.subnets.additionalSubnet.name, 'additional')]",
+      "additionalSubnetPrefix": "[if(equals(steps('network').deployAdditionalNic, 'yes'), steps('network').virtualNetwork.subnets.additionalSubnet.addressPrefix, '10.0.3.0/24')]",
+      "additionalSubnetStartAddress": "[if(equals(steps('network').deployAdditionalNic, 'yes'), steps('network').virtualNetwork.subnets.additionalSubnet.startAddress, '10.0.3.10')]",
       "vnetNewOrExisting": "[steps('network').virtualNetwork.newOrExisting]",
       "virtualNetworkExistingRGName": "[steps('network').virtualNetwork.resourceGroup]",
       "bootstrapScript": "[steps('chkp-advanced').bootstrapScript]",

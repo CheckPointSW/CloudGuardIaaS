@@ -215,6 +215,38 @@
       },
       "defaultValue": "10.0.2.10"
     },
+    "deployAdditionalNic": {
+      "type": "string",
+      "defaultValue": "no",
+      "allowedValues": [
+        "no",
+        "yes"
+      ],
+      "metadata": {
+        "description": "Deploy an additional NIC (eth2) on each cluster member. Requires a VM size supporting 3+ NICs"
+      }
+    },
+    "additionalSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the additional subnet"
+      },
+      "defaultValue": "Additional"
+    },
+    "additionalSubnetPrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "The address prefix of the additional subnet"
+      },
+      "defaultValue": "10.0.3.0/24"
+    },
+    "additionalSubnetStartAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "The first available address on the additional subnet"
+      },
+      "defaultValue": "10.0.3.10"
+    },
     "vnetNewOrExisting": {
       "type": "string",
       "defaultValue": "new",
@@ -407,6 +439,7 @@
   },
   "variables": {
     "VIPs_Number": "[int(parameters('VipsNumber'))]",
+    "publicIpCount": "[add(add(variables('VIPs_Number'), 3), length(variables('additionalNics')))]",
     "Vip_Names": "[split(parameters('VipNames'), ',')]",
     "templateName": "ha",
     "templateVersion": "20240904",
@@ -1371,6 +1404,36 @@
     "prefixDependsOn": "[if(equals(parameters('publicIPPrefix'), 'yes'), if(equals(parameters('createNewIPPrefix'), 'yes'), variables('publicIPNewPrefixId'), variables('ipNewPrefixId')), variables('ipNewPrefixId'))]",
     "deployNewVnet": "[equals(parameters('vnetNewOrExisting'), 'new')]",
     "vnetRGName": "[if(variables('deployNewVnet'), resourceGroup().name, parameters('virtualNetworkExistingRGName'))]",
+    "additionalNics": "[if(equals(parameters('deployAdditionalNic'), 'yes'), range(0, 1), createArray())]",
+    "additionalSubnetStartAddressValue": "[if(empty(parameters('additionalSubnetStartAddress')), '10.0.3.10', parameters('additionalSubnetStartAddress'))]",
+    "additionalSubnetId": "[resourceId(variables('vnetRGName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('additionalSubnetName'))]",
+    "additionalNicPublicIpName": "[concat(parameters('vmName'), '-eth2')]",
+    "additionalNicPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('additionalNicPublicIpName'))]",
+    "eth2VipIpConfig": {
+      "name": "cluster-vip-eth2",
+      "properties": {
+        "primary": false,
+        "privateIPAddress": "[variables('additionalSubnetPrivateAddresses')[2]]",
+        "privateIPAllocationMethod": "Static",
+        "PublicIpAddress": {
+          "Id": "[variables('additionalNicPublicIpId')]"
+        },
+        "subnet": {
+          "id": "[variables('additionalSubnetId')]"
+        }
+      }
+    },
+    "eth2VipIpConfigArray": "[createArray(variables('eth2VipIpConfig'))]",
+    "additionalClusterVipsInformation": {
+      "eth2": [
+        {
+          "name": "cluster-vip-eth2",
+          "privateIPAddress": "[variables('additionalSubnetPrivateAddresses')[2]]",
+          "publicIPAddress": "[variables('additionalNicPublicIpName')]"
+        }
+      ]
+    },
+    "additionalVmNics": "[createArray(variables('additionalNicsMember1'), variables('additionalNicsMember2'))]",
     "NewNsgReference": {
       "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('NewNsgName'))]"
     },
@@ -1443,9 +1506,34 @@
         }
       },
       {
+        "name": "additionalSubnetPrivateAddresses",
+        "count": 3,
+        "input": "[concat(split(variables('additionalSubnetStartAddressValue'), '.')[0],'.', split(variables('additionalSubnetStartAddressValue'), '.')[1],'.', split(variables('additionalSubnetStartAddressValue'), '.')[2],'.', string(add(int(split(variables('additionalSubnetStartAddressValue'), '.')[3]), copyIndex('additionalSubnetPrivateAddresses'))))]"
+      },
+      {
+        "name": "additionalNicsMember1",
+        "count": "[length(variables('additionalNics'))]",
+        "input": {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '1-eth', add(copyIndex('additionalNicsMember1'), 2)))]",
+          "properties": {
+            "primary": false
+          }
+        }
+      },
+      {
+        "name": "additionalNicsMember2",
+        "count": "[length(variables('additionalNics'))]",
+        "input": {
+          "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), '2-eth', add(copyIndex('additionalNicsMember2'), 2)))]",
+          "properties": {
+            "primary": false
+          }
+        }
+      },
+      {
         "name": "customData",
         "count": "[variables('count')]",
-        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n')]"
+        "input": "[concat('#!/usr/bin/python3 /etc/cloud_config.py\n', '\n', 'installationType=\"', variables('installationType'), '\"', '\n', 'allowUploadDownload=\"', variables('allowUploadDownload'), '\"', '\n', 'osVersion=\"', variables('osVersion'), '\"', '\n', 'templateName=\"', variables('templateName'), '\"', '\n', 'isBlink=\"', variables('isBlink'), '\"', '\n', 'templateVersion=\"', variables('templateVersion'), '\"', '\n', 'bootstrapScript64=\"', variables('bootstrapScript64'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'sicKey=\"', variables('sicKey'), '\"', '\n', 'location=\"', variables('location'), '\"', '\n', 'tenantId=\"', subscription().tenantId, '\"', '\n', 'virtualNetwork=\"', parameters('virtualNetworkName'), '\"', '\n', 'clusterName=\"', parameters('vmName'), '\"', '\n', 'customMetrics=\"', variables('customMetrics'), '\"', '\n', 'adminShell=\"', parameters('adminShell'), '\"', '\n', 'Vips=\"', string(variables('VipsInformationForCloudConfig')), '\"', '\n','externalPrivateAddresses=\"', variables('externalPrivateAddresses')[2], '\"', '\n', 'MaintenanceModePassword=\"', parameters('MaintenanceModePasswordHash'), '\"', '\n', 'passwordHash=\"', parameters('SerialConsolePasswordHash'), '\"', '\n', if(greater(length(variables('additionalNics')), 0), concat('additionalClusterVips=\"', string(variables('additionalClusterVipsInformation')), '\"', '\n'), ''))]"
       }
     ],
     "DefaultVipInformation": [
@@ -1465,7 +1553,7 @@
       "name": "[variables('ipPrefixNewName')]",
       "location": "[variables('location')]",
       "properties": {
-        "prefixLength": "[if(greater(variables('VIPs_Number'), 5), '28', if(greater(variables('VIPs_Number'), 1), '29', '30'))]",
+        "prefixLength": "[if(greater(variables('publicIpCount'), 8), '28', if(greater(variables('publicIpCount'), 4), '29', '30'))]",
         "publicIPAddressVersion": "IPv4"
       },
       "sku": {
@@ -1594,6 +1682,18 @@
       }
     },
     {
+      "condition": "[and(variables('deployNewVnet'), greater(length(variables('additionalNics')), 0))]",
+      "type": "Microsoft.Network/virtualNetworks/subnets",
+      "apiVersion": "2020-06-01",
+      "name": "[concat(parameters('virtualNetworkName'), '/', parameters('additionalSubnetName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'networkNewSetup')]"
+      ],
+      "properties": {
+        "addressPrefix": "[parameters('additionalSubnetPrefix')]"
+      }
+    },
+    {
       "type": "Microsoft.Compute/availabilitySets",
       "condition": "[and(not(variables('useAZ')), equals(parameters('extendedZone'), 'None'))]",
       "apiVersion": "2020-06-01",
@@ -1704,6 +1804,29 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
     },
     {
+      "condition": "[greater(length(variables('additionalNics')), 0)]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[variables('prefixDependsOn')]"
+      ],
+      "location": "[variables('location')]",
+      "extendedLocation": "[if(empty(variables('extendedLocation')), null(), variables('extendedLocation'))]",
+      "name": "[variables('additionalNicPublicIpName')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "idleTimeoutInMinutes": 30,
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(toLower(parameters('vmName')), '-eth2-', uniquestring(resourceGroup().id, deployment().name))]"
+        },
+        "publicIPPrefix": "[if(equals(parameters('publicIPPrefix'), 'yes'), variables('publicIPPrefixProperty'), json('null'))]"
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/publicIPAddresses'), parameters('tagsByResource')['Microsoft.Network/publicIPAddresses'], json('{}')) ]"
+    },
+    {
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2020-06-01",
       "dependsOn": [
@@ -1804,6 +1927,30 @@
       "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
     },
     {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-06-01",
+      "copy": {
+        "name": "additionalNicCopy",
+        "count": "[mul(length(variables('additionalNics')), variables('count'))]"
+      },
+      "dependsOn": [
+        "[coalesce(resourceId('Microsoft.Resources/deployments', 'networkNewSetup'), resourceId('Microsoft.Resources/deployments', 'networkExistingSetup'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('additionalSubnetName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('additionalNicPublicIpName'))]"
+      ],
+      "location": "[variables('location')]",
+      "extendedLocation": "[if(empty(variables('extendedLocation')), null(), variables('extendedLocation'))]",
+      "name": "[concat(parameters('vmName'), add(mod(copyIndex(), variables('count')), 1), '-eth', add(div(copyIndex(), variables('count')), 2))]",
+      "properties": {
+        "primary": false,
+        "enableIPForwarding": true,
+        "enableAcceleratedNetworking": true,
+        "networkSecurityGroup": "[if(parameters('deployNewNSG'), variables('NewNsgReference'), parameters('ExistingNSG'))]",        
+        "ipConfigurations": "[union(createArray(createObject('name', 'member-ip', 'properties', createObject('primary', true(), 'privateIPAddress', variables('additionalSubnetPrivateAddresses')[mod(copyIndex(), variables('count'))], 'privateIPAllocationMethod', 'Static', 'subnet', createObject('id', variables('additionalSubnetId'))))), if(equals(mod(copyIndex(), variables('count')), 0), variables('eth2VipIpConfigArray'), createArray()))]"
+      },
+      "tags": "[ if(contains(parameters('tagsByResource'), 'Microsoft.Network/networkInterfaces'), parameters('tagsByResource')['Microsoft.Network/networkInterfaces'], json('{}')) ]"
+    },
+    {
       "condition": "[not(equals(parameters('sourceImageVhdUri'), 'noCustomUri'))]",
       "type": "Microsoft.Compute/images",
       "apiVersion": "2020-06-01",
@@ -1830,7 +1977,8 @@
         "[resourceId('Microsoft.Compute/availabilitySets', variables('availabilitySetName'))]",
         "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic1Name')))]",
         "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name')))]",
-        "[resourceId('Microsoft.Compute/images/', variables('customImage'))]"
+        "[resourceId('Microsoft.Compute/images/', variables('customImage'))]",
+        "additionalNicCopy"
       ],
       "location": "[variables('location')]",
       "extendedLocation": "[if(empty(variables('extendedLocation')), null(), variables('extendedLocation'))]",
@@ -1852,20 +2000,7 @@
           "vmSize": "[parameters('vmSize')]"
         },
         "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic1Name')))]",
-              "properties": {
-                "primary": true
-              }
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name')))]",
-              "properties": {
-                "primary": false
-              }
-            }
-          ]
+          "networkInterfaces": "[concat(createArray(createObject('id', resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic1Name'))), 'properties', createObject('primary', true())), createObject('id', resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'), copyIndex(1), '-', variables('nic2Name'))), 'properties', createObject('primary', false()))), variables('additionalVmNics')[copyIndex()])]"
         },
         "osProfile": {
           "adminPassword": "[parameters('adminPassword')]",
